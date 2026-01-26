@@ -1,5 +1,5 @@
 variables:
-  MAVEN_OPTS: "-Dhttps.proxyHost=194.254.199.96 -Dhttps.proxyPort=3128"
+  MAVEN_OPTS: "-Dhttp.proxyHost=194.254.199.96 -Dhttp.proxyPort=3128 -Dhttps.proxyHost=194.254.199.96 -Dhttps.proxyPort=3128"
   
   MAVEN_CONFIG: "/root/.m2"
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
@@ -9,7 +9,14 @@ before_script:
   - echo '<settings>
       <proxies>
         <proxy>
-          <id>proxy</id>
+          <id>http-proxy</id>
+          <active>true</active>
+          <protocol>http</protocol>
+          <host>194.254.199.96</host>
+          <port>3128</port>
+        </proxy>
+        <proxy>
+          <id>https-proxy</id>
           <active>true</active>
           <protocol>https</protocol>
           <host>194.254.199.96</host>
