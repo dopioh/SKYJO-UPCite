@@ -58,8 +58,6 @@ test:
   image: maven:${MAVEN_VERSION}-eclipse-temurin-${JAVA_VERSION}
   variables:
     DOCKER_DEFAULT_PLATFORM: linux/${ARCH}
-  before_script:
-    - echo "Testing on ${ARCH} architecture"
   script: 
     - cd skyjo
     - mvn $MAVEN_CLI_OPTS test

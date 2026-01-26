@@ -13,5 +13,3 @@
 
 
 - ## [DESROQUES Ian](https://moule.informatique.u-paris.fr/desroque)
-
-    - Création de la base du projet Maven et configuration
