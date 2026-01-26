@@ -1,0 +1,107 @@
+variables:
+  MAVEN_OPTS: "-Dhttps.proxyHost=194.254.199.96 -Dhttps.proxyPort=3128"
+  
+  MAVEN_CONFIG: "/root/.m2"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
+
+before_script:
+  - mkdir -p /root/.m2
+  - echo '<settings>
+      <proxies>
+        <proxy>
+          <id>proxy</id>
+          <active>true</active>
+          <protocol>https</protocol>
+          <host>194.254.199.96</host>
+          <port>3128</port>
+        </proxy>
+      </proxies>
+    </settings>' > /root/.m2/settings.xml
+
+
+stages:
+  - build
+  - test
+  - deploy
+  - release_job
+
+# ETAPE 1 : BUILD - Teste sur plusieurs versions de Java et maven
+# Pas besoin de tester les architectures ici (Le bytecode Java peut fonctionner sur differents systemes sans etre modifie)
+
+build:
+  stage: build
+  parallel:
+    matrix:
+      - JAVA_VERSION: ["21", "23"]
+        MAVEN_VERSION: ["3.9"]
+  image: maven:${MAVEN_VERSION}-eclipse-temurin-${JAVA_VERSION}
+  script: 
+    - cd skyjo
+    - mvn $MAVEN_CLI_OPTS -U clean compile
+    #  cache:
+    #    key: "$CI_COMMIT_REF_NAME"
+    #    policy: push
+
+  artifacts:
+    paths:
+      - skyjo/target/classes
+    expire_in: 2 days
+
+# ETAPE 2 : TEST - Teste sur plusieurs versions de Java, maven et architectures
+
+test:
+  stage: test
+  parallel:
+    matrix:
+      - JAVA_VERSION: ["21", "23"]
+        MAVEN_VERSION: ["3.9"]
+        ARCH: ["arm64", "amd64"]
+  image: maven:${MAVEN_VERSION}-eclipse-temurin-${JAVA_VERSION}
+  variables:
+    DOCKER_DEFAULT_PLATFORM: linux/${ARCH}
+  before_script:
+    - echo "Testing on ${ARCH} architecture"
+  script: 
+    - cd skyjo
+    - mvn $MAVEN_CLI_OPTS test
+  
+  dependencies :
+    - build
+
+# ETAPE 3 : DEPLOIEMENT - Utilise Java 21 pour le deploiement
+
+deploy:
+  stage: deploy
+  image: maven:3.9-eclipse-temurin-21
+  script:
+    - cd skyjo
+    - mvn $MAVEN_CLI_OPTS clean package
+  artifacts:
+    paths:
+      - skyjo/target/skyjo-app.jar
+    expire_in: 30 days
+  only:
+   - main 
+   - dev
+   - deploiement
+   - tags
+   - fixRelease
+
+release_job:
+  stage: release_job
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  needs:
+    - job: deploy
+      artifacts: true
+  rules:
+    - if: $CI_COMMIT_TAG 
+  script:
+    - echo "Création de la release pour le tag $CI_COMMIT_TAG"
+  release:
+    name: 'Release $CI_COMMIT_TAG'
+    description: 'Release automatique générée par le CI'
+    tag_name: '$CI_COMMIT_TAG'
+    assets:
+      links:
+        - name: 'skyjo-app.jar'
+          url: '$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/skyjo/target/skyjo-app.jar?job=deploy'
