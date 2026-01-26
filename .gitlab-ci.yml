@@ -9,7 +9,14 @@ before_script:
   - echo '<settings>
       <proxies>
         <proxy>
-          <id>proxy</id>
+          <id>proxy-http</id>
+          <active>true</active>
+          <protocol>http</protocol>
+          <host>194.254.199.96</host>
+          <port>3128</port>
+        </proxy>
+        <proxy>
+          <id>proxy-https</id>
           <active>true</active>
           <protocol>https</protocol>
           <host>194.254.199.96</host>
