@@ -63,7 +63,7 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>fr.upc.cr1a.GameLauncher</mainClass>
+                                    <mainClass>fr.upc.cr1a.model.GameLauncher</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
