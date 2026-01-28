@@ -1,13 +1,17 @@
 package fr.upc.cr1a.interfaces;
-import fr.upc.cr1a.model.NumberCardModel;
 
+/**
+ * @author Nassim
+ * l'interface de NumberCardModel
+ * contenant classes a implémenter obligatoirement
+ */
 public interface NumberCardInterface {
-    public void CardReveal(NumberCardModel carte);
-    public void setCardColor(NumberCardModel carte);
-    public void setCardValue(NumberCardModel carte);
+    public void revealCard(boolean value);
+    public void setCardColor(String color);
+    public void setCardValue(int x);
 
-    public boolean isFaceDown(NumberCardModel carte);
-    public int getCardValue(NumberCardModel carte);
-    public String getCardColor(NumberCardModel carte);
+    public boolean isFaceDown();
+    public int getCardValue();
+    public String getCardColor();
 
 }
