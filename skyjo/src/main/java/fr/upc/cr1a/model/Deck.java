@@ -1,6 +1,5 @@
 package fr.upc.cr1a.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /*

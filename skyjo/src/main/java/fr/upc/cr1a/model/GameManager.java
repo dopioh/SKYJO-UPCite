@@ -15,4 +15,21 @@ public class GameManager {
     public GameManager(){
 
     }
+
+//classe local enum pour gérer les états du jeu
+    public enum GameState {
+        WAITING_FOR_PLAYERS,    // attende des joueurs
+        IS_PLAYING,             // en train de jouer
+        LAST_ROUND,             // dernier tour (un joueur a révélé toutes ses cartes)
+        ROUND_ENDED,            // manche terminée
+        GAME_ENDED              // jeu terminé (un joueur atteint 100 points)
+    }
+
+    public enum TurnPhase {
+        DRAW_DECISION,              // joueur doit choisir ; pioche ou défausse
+        CARD_DRAW_FROM_DECK,        // carte piochée du deck ; peut échanger ou défausser
+        CARD_TAKE_FROM_DISCARD,     // carte prise de la défausse ; doit échanger
+        TURN_ENDED                  // tour terminé
+}
+
 }

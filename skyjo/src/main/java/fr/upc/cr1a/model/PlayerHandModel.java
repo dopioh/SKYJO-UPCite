@@ -1,9 +1,6 @@
 package fr.upc.cr1a.model;
 import java.util.Scanner;
 
-import java.sql.RowId;
-import java.util.ArrayList;
-
 /*
 * Modèle de la main d'un joueur dans le jeu Skyjo
 * Gère une grille de cartes 4x3 avec des fonctionnalités des règles du jeu
@@ -76,7 +73,7 @@ public class PlayerHandModel {
         //boucle qui regarde si les cartes sont révélées et ont les meme valeurs
         for (int j = 0; j< COLUMNS;j++){
             if (grid[i][j].isRevealed() && grid[i+1][j].isRevealed() && grid[i+2][j].isRevealed()){
-                if (grid[i][j].getValue() == grid[i+1][j].getValue() && grid[i+1][j].getValue() == grid[i+2][j].getValue()){
+                if (grid[i][j] == grid[i+1][j] && grid[i+1][j] == grid[i+2][j]) {
                     res = j;
                     return res;
                 }
@@ -107,7 +104,7 @@ public class PlayerHandModel {
         //boucle qui regarde si les cartes sont révélées et ont les meme valeurs
         for (int j = 0; j< ROWS;j++){
             if (grid[j][i].isRevealed() && grid[j][i+1].isRevealed() && grid[j][i+2].isRevealed() && grid[j][i+3].isRevealed()){
-                if (grid[j][i].getValue() == grid[j][i+1].getValue() && grid[j][i+1].getValue() == grid[j][i+2].getValue() && grid[j][i+2].getValue() == grid[j][i+3].getValue()){
+                if (grid[j][i] == grid[j][i+1] && grid[j][i+1] == grid[j][i+2] && grid[j][i+2] == grid[j][i+3]){
                     res = j;
                     return res;
                 }
@@ -161,6 +158,8 @@ public class PlayerHandModel {
                 i--; 
             }
         }
+        scanner.close();
 
     }
+
 }

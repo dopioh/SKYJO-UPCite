@@ -5,6 +5,14 @@ package fr.upc.cr1a.model;
  */
 
 public class Card {
+    private int value;
+    private boolean revealed;
+
+    public Card(int value) {
+        this.value = value;
+        this.revealed = false;
+    }
+
     public int getValue(){
         return 0;
     }
