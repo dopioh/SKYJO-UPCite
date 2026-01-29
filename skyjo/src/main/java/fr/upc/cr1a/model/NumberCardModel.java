@@ -1,30 +1,33 @@
 package fr.upc.cr1a.model;
-import fr.upc.cr1a.interfaces.NumberCardInterface;
 
 /**
  * @author Nassim
- * @implements l'interface NumberCardInterface
+ * @extends la classe CardModel
  * Classe permettant de créer des cartes numérotés
  */
-public class NumberCardModel implements NumberCardInterface  {
+public class NumberCardModel extends CardModel  {
     private int cardValue;
     private String cardColor; // a changé quand on aura l'ui
-    private boolean faceDown; // true : face cachée
 
-    public NumberCardModel(int cardValue, String cardColor, boolean faceDown) {
+    public NumberCardModel(boolean faceDown, String pathImage, int cardValue, String cardColor) {
+        super(faceDown, pathImage);
         this.cardValue = cardValue;
         this.cardColor = cardColor;
-        this.faceDown = faceDown;
     }
 
+    // constructeur NumberCardModel sans image
+    public NumberCardModel(boolean faceDown, int cardValue, String cardColor) {
+        super(faceDown, null);
+        this.cardValue = cardValue;
+        this.cardColor = cardColor;
+    }
+
+
     // Getters & Setters
-    public boolean isFaceDown() { return faceDown; }
     public int getCardValue() { return cardValue; }
     public String getCardColor() { return cardColor; }
 
-    public void revealCard(boolean value) { faceDown = value; }
     public void setCardColor(String color) { cardColor = color ;}
     public void setCardValue(int x) { cardValue = x ;} 
-
 }
 
