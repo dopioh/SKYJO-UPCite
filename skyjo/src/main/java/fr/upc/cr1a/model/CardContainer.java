@@ -1,7 +1,7 @@
 package fr.upc.cr1a.model;
 
-/**
- * Interface représentant un conteneur de cartes.
+/*
+*Temporaire
  */
 
 public interface CardContainer {

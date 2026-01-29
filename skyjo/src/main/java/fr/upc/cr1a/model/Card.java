@@ -1,5 +1,9 @@
 package fr.upc.cr1a.model;
 
+/*
+*Temporaire
+ */
+
 public class Card {
     public int getValue(){
         return 0;

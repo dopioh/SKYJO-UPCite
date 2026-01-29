@@ -3,6 +3,10 @@ package fr.upc.cr1a.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+*Temporaire
+ */
+
 public class Deck implements CardContainer {
     private List<Card> cards;
 
