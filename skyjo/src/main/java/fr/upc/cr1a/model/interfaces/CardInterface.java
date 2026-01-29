@@ -1,4 +1,4 @@
-package fr.upc.cr1a.interfaces;
+package fr.upc.cr1a.model.interfaces;
 
 /**
  * @author Nassim
