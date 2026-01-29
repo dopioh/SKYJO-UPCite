@@ -5,7 +5,7 @@ package fr.upc.cr1a.model;
  * Et relier toutes vos features in game au jeu 
  * 
  * Faites vos propres fichiers pour vos features !!
- * Qu'on se retrouve pas encore avec 2k lignes !!
+ * Qu'on se retrouve pas encore avec 2k lignes !! // oui patronne 
  */
 public class GameManager {
 
