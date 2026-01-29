@@ -10,12 +10,12 @@ import java.util.Scanner;
 public class PlayerHandModel {
 
     private Card[][] grid; // Grille 3 lignes × 4 colonnes
-    private static final int ROWS = 3; //lignes
-    private static final int COLUMNS = 4; //colonnes
+    private final int rows = 3; //lignes
+    private final int columns = 4; //colonnes
     
     //constructeur
     public PlayerHandModel(){
-        grid = new Card[ROWS][COLUMNS];
+        grid = new Card[rows][columns];
     }
     
     public void placeCard(int row, int col, Card card){
@@ -26,6 +26,12 @@ public class PlayerHandModel {
 
     public Card getCard(int row, int col){
         return grid[row][col];
+    }
+    public int getRows(){
+        return rows;
+    }
+    public int getColumns(){
+        return columns;
     }
 
     public void replaceCard(int row, int col, Card newCard){
@@ -71,7 +77,7 @@ public class PlayerHandModel {
         int res = -1;
         int i = 0;
         //boucle qui regarde si les cartes sont révélées et ont les meme valeurs
-        for (int j = 0; j< COLUMNS;j++){
+        for (int j = 0; j< columns;j++){
             if (grid[i][j].isRevealed() && grid[i+1][j].isRevealed() && grid[i+2][j].isRevealed()){
                 if (grid[i][j] == grid[i+1][j] && grid[i+1][j] == grid[i+2][j]) {
                     res = j;
@@ -102,7 +108,7 @@ public class PlayerHandModel {
         int res = -1;
         int i = 0;
         //boucle qui regarde si les cartes sont révélées et ont les meme valeurs
-        for (int j = 0; j< ROWS;j++){
+        for (int j = 0; j< rows;j++){
             if (grid[j][i].isRevealed() && grid[j][i+1].isRevealed() && grid[j][i+2].isRevealed() && grid[j][i+3].isRevealed()){
                 if (grid[j][i] == grid[j][i+1] && grid[j][i+1] == grid[j][i+2] && grid[j][i+2] == grid[j][i+3]){
                     res = j;
@@ -118,8 +124,8 @@ public class PlayerHandModel {
         if (rowIndex == -1){
             return;
         }
-        if (rowIndex < 3 && rowIndex > 0) {
-            for (int i = 0; i <4 ;i++){
+        if (rowIndex < rows && rowIndex > 0) {
+            for (int i = 0; i <columns ;i++){
                 grid[rowIndex][i] = null;
             }    
         }   
