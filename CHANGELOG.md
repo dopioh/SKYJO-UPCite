@@ -25,3 +25,7 @@
 - Template de Merge Request avec checklist
 
 - Base de Main menu
+
+- Systeme de carte numéro & carte spéciales
+
+- Systeme de pile de carte (Pioche & Defausse)
