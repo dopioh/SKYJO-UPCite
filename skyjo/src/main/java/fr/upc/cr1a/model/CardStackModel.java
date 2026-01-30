@@ -10,12 +10,16 @@ import fr.upc.cr1a.model.interfaces.CardStackInterface;
  * Classe permettant de créer des piles de cartes (pour la pioche & defausse)
  */
 public class CardStackModel implements CardStackInterface{
-    ArrayList<CardModel> Stack = new ArrayList<CardModel>();
+    private ArrayList<CardModel> Stack = new ArrayList<CardModel>();
 
     // constructeur de la classe
     // 150 cartes numero
     // 36 cartes actions
     public CardStackModel() {
+    }
+
+    public ArrayList<CardModel> getStack() {
+        return this.Stack;
     }
 
     /**
@@ -77,7 +81,13 @@ public class CardStackModel implements CardStackInterface{
 
     public void afficheStack() {
         for (int i = 0; i < this.stackSize(); i++) {
-            System.out.println(i + " : " + getCardAt(i).getCardValue() + " | " + getCardAt(i).getCardColor() );
+            CardModel card = getCardAt(i);
+            if (card instanceof NumberCardModel) {
+                NumberCardModel numCard = (NumberCardModel) card;
+                System.out.println(i + " : " + numCard.getCardValue() + " | " + numCard.getCardColor());
+            } else {
+                System.out.println(i + " : Carte Action");
+            }
         }
     }
 
@@ -87,5 +97,7 @@ public class CardStackModel implements CardStackInterface{
     public boolean isEmpty() {
         return this.stackSize() == 0;
     }
+
+
 
 }
