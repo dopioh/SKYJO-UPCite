@@ -20,9 +20,9 @@ public class ScoreCalculator {
         int score = 0;
         for (int i = 0; i < hand.getRows(); i++) {
             for (int j = 0; j < hand.getColumns(); j++) {
-                Card card = hand.getCard(i, j);
-                if (card != null && card.isRevealed()) {
-                    score += card.getValue();
+                CardModel card = hand.getCard(i, j);
+                if (card != null && card.isFaceDown()) {
+                    score += card.getCardValue();
                 }
             }
         }

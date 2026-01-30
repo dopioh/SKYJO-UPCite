@@ -1,17 +1,31 @@
 # Changelog
 
-## v.0.0 Configuration
+## v.0.1 : SPRINT 1
 ---
 
 ### Added
 
 - Création de la base Maven
-- CONTRIBUTING.md
+
+- Structure MVC
+
+- Pipeline CI/CD
+
 - .gitignore
-- LICENSE (MIT)
-- gitlab-ci.yml
 
-## v.0.1 : SPRINT 1
----
+- Documentations
+    - contact.csv
+    - CONTRIBUTING
+    - LICENSE (MIT)
+    - README
+    - AUTHORS
+    - DESIGN
+    - CHANGELOG
 
-### Added
+- Template de Merge Request avec checklist
+
+- Base de Main menu
+
+- Systeme de carte numéro & carte spéciales
+
+- Systeme de pile de carte (Pioche & Defausse)

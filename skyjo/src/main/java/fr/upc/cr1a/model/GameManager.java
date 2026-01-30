@@ -1,5 +1,7 @@
 package fr.upc.cr1a.model;
 
+import java.util.List;
+
 /**
  * Classe principal pour initialiser une partie (et pas le menu !)
  * Et relier toutes vos features in game au jeu 
@@ -9,6 +11,13 @@ package fr.upc.cr1a.model;
  */
 public class GameManager {
 
+
+    private List<PlayerModel> players;
+    private PiocheModel deck;
+    private DefausseModel discardPile;
+    private int currentPlayerIndex;
+    private CardModel currentDrawnCard;
+    
     /**
      * Constructeur qui doit etre appeler pour lancer une partie
      */
@@ -16,7 +25,21 @@ public class GameManager {
 
     }
 
-//classe local enum pour gérer les états du jeu
+    public GameManager(List<String> playersNames){
+        //initialiser les joueurs
+        for (String name : playersNames) {
+            players.add(new PlayerModel(name));
+        }
+
+        currentPlayerIndex = 0;
+        deck = new PiocheModel();
+        discardPile = new DefausseModel();
+        currentDrawnCard = null;
+    }
+
+    /*
+    *classe local enum pour gérer les états du jeu
+    */
     public enum GameState {
         WAITING_FOR_PLAYERS,    // attende des joueurs
         IS_PLAYING,             // en train de jouer

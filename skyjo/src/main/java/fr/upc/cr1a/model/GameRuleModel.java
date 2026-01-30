@@ -15,12 +15,12 @@ public class GameRuleModel {
     public static final int ROWNS_SIZE = 3;
     
 //Regarde si la pile de défausse est vide
-    public static boolean canTakeFromDiscard(DiscardPile discard){
+    public static boolean canTakeFromDiscard(DefausseModel discard){
         return (!discard.isEmpty());
     }
 
     //regarde si le joueur peut piocher une carte
-    public static boolean canDrawFromDeck(Deck deck){
+    public static boolean canDrawFromDeck(PiocheModel deck){
         return (!deck.isEmpty());
     }
 
