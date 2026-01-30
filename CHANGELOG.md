@@ -29,3 +29,6 @@
 - Systeme de carte numéro & carte spéciales
 
 - Systeme de pile de carte (Pioche & Defausse)
+
+- Système de lecture des sons (Background et SFX)
+
