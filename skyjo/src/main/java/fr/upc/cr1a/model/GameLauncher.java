@@ -17,5 +17,6 @@ public class GameLauncher {
         new GameLauncher();
         AudioManager audio = new AudioManager();
         audio.playBgm("/music/calmbgm.wav");
+        audio.playSfx("/sfx/UIclick.wav");
     }
 }
