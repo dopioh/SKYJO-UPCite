@@ -3,6 +3,7 @@ package fr.upc.cr1a.view;
 import javax.swing.JFrame;
 
 import fr.upc.cr1a.controller.MainMenuController;
+import fr.upc.cr1a.controller.SettingsOverlayController;
 
 import java.awt.CardLayout;
 
@@ -15,6 +16,7 @@ public class Frame extends JFrame{
     
     private CardLayout cardLayout;
     private MainMenuPanel mainMenuPanel;
+    private SettingsOverlay settingsOverlay;
 
     public Frame() {
         setTitle("SKYJO");
@@ -28,7 +30,12 @@ public class Frame extends JFrame{
         mainMenuPanel = new MainMenuPanel();
         add(mainMenuPanel, "MENU");
 
-        //Controller du menu principal
+        //Overlay paramètre
+        settingsOverlay = new SettingsOverlay();
+        setGlassPane(settingsOverlay);
+
+        //Contrôleurs
+        new SettingsOverlayController(settingsOverlay);
         new MainMenuController(this, mainMenuPanel);
 
         setVisible(true);
@@ -40,5 +47,20 @@ public class Frame extends JFrame{
     
     public void showPanel(String panelName) {
         cardLayout.show(getContentPane(), panelName);
+    }
+
+    public void showSettingsOverlay() {
+        settingsOverlay.setVisible(true);
+        settingsOverlay.requestFocusInWindow();
+        repaint();
+    }
+
+    public void hideSettingsOverlay() {
+        settingsOverlay.setVisible(false);
+        repaint();
+    }
+
+    public boolean isSettingsOverlayVisible() {
+        return settingsOverlay.isVisible();
     }
 }

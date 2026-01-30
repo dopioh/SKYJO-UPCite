@@ -3,6 +3,11 @@ package fr.upc.cr1a.controller;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.MainMenuPanel;
 
+/**
+ * Controller du menu principal avec les bouttons existants (jouer, boutique, paramètres)
+ * 
+ * @author Hugo
+ */
 public class MainMenuController {
 
     private final Frame frame;
@@ -14,10 +19,9 @@ public class MainMenuController {
 
         //Bouton paramètres
         view.getSettingsButton().addActionListener(e -> {
-            
+            frame.showSettingsOverlay();
         });
 
-        
         // view.getPlayButton().addActionListener(e -> {
             
         // });
