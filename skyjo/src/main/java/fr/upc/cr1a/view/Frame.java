@@ -1,6 +1,9 @@
 package fr.upc.cr1a.view;
 
 import javax.swing.JFrame;
+
+import fr.upc.cr1a.controller.MainMenuController;
+
 import java.awt.CardLayout;
 
 /**
@@ -12,7 +15,7 @@ public class Frame extends JFrame{
     
     private CardLayout cardLayout;
     private MainMenuPanel mainMenuPanel;
-    
+
     public Frame() {
         setTitle("SKYJO");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -24,7 +27,10 @@ public class Frame extends JFrame{
         
         mainMenuPanel = new MainMenuPanel();
         add(mainMenuPanel, "MENU");
-        
+
+        //Controller du menu principal
+        new MainMenuController(this, mainMenuPanel);
+
         setVisible(true);
     }
     

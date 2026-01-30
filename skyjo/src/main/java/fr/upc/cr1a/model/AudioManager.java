@@ -16,7 +16,6 @@ import java.net.URL;
  */
 public class AudioManager {
     private Clip bgmClip;
-    private Clip sfxClip;
 
     /**
      * Joue une musique de fond en boucle 
@@ -57,6 +56,7 @@ public class AudioManager {
      * @param resourcePath 
      */
     public void playSfx(String resourcePath) {
+        Clip sfxClip;
         try {
             URL url = AudioManager.class.getResource(resourcePath);
             if (url == null) throw new RuntimeException("Fichier introuvable");
