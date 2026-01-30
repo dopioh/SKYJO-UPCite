@@ -1,6 +1,5 @@
 package fr.upc.cr1a.model;
 
-import fr.upc.cr1a.audio.AudioManager;
 import fr.upc.cr1a.view.Frame;
 
 /**

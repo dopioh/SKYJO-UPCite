@@ -1,4 +1,4 @@
-package fr.upc.cr1a.audio;
+package fr.upc.cr1a.model;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
