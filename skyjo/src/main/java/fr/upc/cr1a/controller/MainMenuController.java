@@ -13,11 +13,12 @@ public class MainMenuController {
 
     private final Frame frame;
     private final MainMenuPanel view;
-    AudioManager audio = new AudioManager();
+    private final AudioManager audio;
 
     public MainMenuController(Frame frame, MainMenuPanel view) {
         this.frame = frame;
         this.view = view;
+        this.audio = frame.getAudioManager();
 
         //Bouton paramètres
         view.getSettingsButton().addActionListener(e -> {

@@ -4,6 +4,7 @@ import javax.swing.JFrame;
 
 import fr.upc.cr1a.controller.MainMenuController;
 import fr.upc.cr1a.controller.SettingsOverlayController;
+import fr.upc.cr1a.model.AudioManager;
 
 import java.awt.CardLayout;
 import java.awt.Rectangle;
@@ -20,9 +21,12 @@ public class Frame extends JFrame{
     private SettingsOverlay settingsOverlay;
     private boolean fullscreen = false;
     private Rectangle windowedBounds;
+    private final AudioManager audioManager;
 
 
     public Frame() {
+        audioManager = new AudioManager();
+
         setTitle("SKYJO");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1280, 720);
@@ -39,7 +43,7 @@ public class Frame extends JFrame{
         setGlassPane(settingsOverlay);
 
         //Contrôleurs
-        new SettingsOverlayController(settingsOverlay,this);
+        new SettingsOverlayController(settingsOverlay, this, audioManager);
         new MainMenuController(this, mainMenuPanel);
 
         setVisible(true);
@@ -51,6 +55,10 @@ public class Frame extends JFrame{
     
     public void showPanel(String panelName) {
         cardLayout.show(getContentPane(), panelName);
+    }
+
+    public AudioManager getAudioManager() {
+        return audioManager;
     }
 
     public void showSettingsOverlay() {

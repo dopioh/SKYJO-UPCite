@@ -2,6 +2,7 @@ package fr.upc.cr1a.controller;
 
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.SettingsOverlay;
+import fr.upc.cr1a.model.AudioManager;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -14,8 +15,11 @@ import javax.swing.event.MouseInputAdapter;
  */
 public class SettingsOverlayController {
     private final Frame frame;
-    public SettingsOverlayController(SettingsOverlay overlay, Frame frame) {
+    private final AudioManager audioManager;
+
+    public SettingsOverlayController(SettingsOverlay overlay, Frame frame, AudioManager audioManager) {
         this.frame = frame;
+        this.audioManager = audioManager;
         //Les clics n'étaient pas bloqués sur la couche principale
         MouseInputAdapter block = new MouseInputAdapter() {     
             @Override public void mousePressed(MouseEvent e) { e.consume(); }
@@ -93,5 +97,31 @@ public class SettingsOverlayController {
             frame.toggleFullscreen();
             overlay.getFullscreenButton().setText(frame.isFullscreen() ? "ON" : "OFF");
         });
+
+        //ON OFF Son
+        overlay.getSoundButton().addActionListener(e -> {
+            boolean newEnabled = !audioManager.isEnabled();
+            audioManager.setEnabled(newEnabled);
+            overlay.getSoundButton().setText(newEnabled ? "ON" : "OFF");
+        });
+
+        // Fleche gauche
+        overlay.getVolumeLeftButton().addActionListener(e -> {
+            int step = Math.max(1, audioManager.getVolume() / 10);
+            step = Math.max(1, step - 1);
+            audioManager.setVolume(step * 10);
+            overlay.getVolumeValueButton().setText(String.valueOf(step));
+        });
+
+        // Fleche droite
+        overlay.getVolumeRightButton().addActionListener(e -> {
+            int step = Math.max(1, audioManager.getVolume() / 10);
+            step = Math.min(10, step + 1);
+            audioManager.setVolume(step * 10);
+            overlay.getVolumeValueButton().setText(String.valueOf(step));
+        }); 
+
+        overlay.getSoundButton().setText(audioManager.isEnabled() ? "ON" : "OFF");
+        overlay.getVolumeValueButton().setText(String.valueOf(Math.max(1, audioManager.getVolume() / 10)));
     }
 }

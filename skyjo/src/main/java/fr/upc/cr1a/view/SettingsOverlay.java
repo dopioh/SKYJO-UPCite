@@ -33,6 +33,10 @@ public class SettingsOverlay extends JComponent {
 
     //Param Audio
     private JPanel tabAudioPanel;
+    private JButton soundButton;
+    private JButton volumeLeftButton;
+    private JButton volumeValueButton;
+    private JButton volumeRightButton;
 
     //Param autres
     private JPanel tabAutresPanel;
@@ -69,9 +73,7 @@ public class SettingsOverlay extends JComponent {
         JPanel jeuPanel = createJeuPanel();
 
         //Parametres Audio
-        JPanel audioPanel = new JPanel(new GridBagLayout());  
-        audioPanel.setOpaque(false);
-        audioPanel.add(new JLabel("Paramètres du audil"));
+        JPanel audioPanel = createAudioPanel();
 
         //parametres Autres
         JPanel autresPanel = createAutresPanel();
@@ -254,6 +256,168 @@ public class SettingsOverlay extends JComponent {
         return jeuPanel;
     }
 
+    private JPanel createAudioPanel() {
+        JPanel audioPanel = new JPanel(new GridBagLayout());  
+        audioPanel.setOpaque(false);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        //On / Off
+        JLabel soundLabel = new JLabel("Son", SwingConstants.CENTER);
+        soundLabel.setForeground(Color.WHITE);
+        soundLabel.setFont(soundLabel.getFont().deriveFont(Font.BOLD, 18f));
+
+        gbc.gridy = 0;
+        gbc.insets = new Insets(20, 0, 12, 0);
+        audioPanel.add(soundLabel, gbc);
+
+        final Color sNormal = new Color(200, 60, 60);
+        final Color sHover  = new Color(225, 85, 85);
+
+        JPanel soundPanel = createHoverRoundedPanel(sNormal, sHover, 18, 44);
+        soundButton = createTextButton("ON", 16f);
+        soundPanel.add(soundButton);
+
+        soundPanel.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                soundButton.doClick();
+                e.consume();
+            }
+        });
+
+        soundButton.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) {
+                soundPanel.dispatchEvent(new MouseEvent(
+                    soundPanel, MouseEvent.MOUSE_ENTERED,
+                    e.getWhen(), e.getModifiersEx(),
+                    0, 0, 0, false
+                ));
+            }
+            @Override public void mouseExited(MouseEvent e) {
+                soundPanel.dispatchEvent(new MouseEvent(
+                    soundPanel, MouseEvent.MOUSE_EXITED,
+                    e.getWhen(), e.getModifiersEx(),
+                    0, 0, 0, false
+                ));
+            }
+        });
+
+        gbc.gridy = 1;
+        gbc.insets = new Insets(0, 60, 0, 60);
+        audioPanel.add(soundPanel, gbc);
+
+        //Contrôle volume
+        JLabel volLabel = new JLabel("Volume", SwingConstants.CENTER);
+        volLabel.setForeground(Color.WHITE);
+        volLabel.setFont(volLabel.getFont().deriveFont(Font.BOLD, 18f));
+
+        gbc.gridy = 2;
+        gbc.insets = new Insets(28, 0, 12, 0);
+        audioPanel.add(volLabel, gbc);
+
+        JPanel volumeRow = new JPanel(new GridBagLayout());
+        volumeRow.setOpaque(false);
+
+        GridBagConstraints g2 = new GridBagConstraints();
+        g2.gridy = 0;
+        g2.fill = GridBagConstraints.HORIZONTAL;
+
+        final Color aNormal = new Color(200, 60, 60);
+        final Color aHover  = new Color(225, 85, 85);
+
+        //Fleche gauche (hover)
+        JPanel leftPanel = createHoverRoundedPanel(aNormal, aHover, 18, 44);
+        leftPanel.setPreferredSize(new Dimension(60, 44));
+        volumeLeftButton = createTextButton("<", 18f);
+        leftPanel.add(volumeLeftButton);
+
+        leftPanel.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                volumeLeftButton.doClick();
+                e.consume();
+            }
+        });
+
+        volumeLeftButton.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) {
+                leftPanel.dispatchEvent(new MouseEvent(
+                    leftPanel, MouseEvent.MOUSE_ENTERED,
+                    e.getWhen(), e.getModifiersEx(),
+                    0, 0, 0, false
+                ));
+            }
+            @Override public void mouseExited(MouseEvent e) {
+                leftPanel.dispatchEvent(new MouseEvent(
+                    leftPanel, MouseEvent.MOUSE_EXITED,
+                    e.getWhen(), e.getModifiersEx(),
+                    0, 0, 0, false
+                ));
+            }
+        });
+
+        g2.gridx = 0;
+        g2.weightx = 0;
+        g2.insets = new Insets(0, 0, 0, 12);
+        volumeRow.add(leftPanel, g2);
+
+        //Valeur volume (sans hover)
+        JPanel valuePanel = new JPanel(new GridBagLayout());
+        valuePanel.setOpaque(false);
+        valuePanel.setPreferredSize(new Dimension(120, 44));
+
+        volumeValueButton = createTextButton("10", 16f);
+        valuePanel.add(volumeValueButton);
+
+        g2.gridx = 1;
+        g2.weightx = 1;
+        g2.insets = new Insets(0, 0, 0, 0);
+        volumeRow.add(valuePanel, g2);
+
+        //Fleche droite (hover)
+        JPanel rightPanel = createHoverRoundedPanel(aNormal, aHover, 18, 44);
+        rightPanel.setPreferredSize(new Dimension(60, 44));
+        volumeRightButton = createTextButton(">", 18f);
+        rightPanel.add(volumeRightButton);
+
+        rightPanel.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                volumeRightButton.doClick();
+                e.consume();
+            }
+        });
+
+        volumeRightButton.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) {
+                rightPanel.dispatchEvent(new MouseEvent(
+                    rightPanel, MouseEvent.MOUSE_ENTERED,
+                    e.getWhen(), e.getModifiersEx(),
+                    0, 0, 0, false
+                ));
+            }
+            @Override public void mouseExited(MouseEvent e) {
+                rightPanel.dispatchEvent(new MouseEvent(
+                    rightPanel, MouseEvent.MOUSE_EXITED,
+                    e.getWhen(), e.getModifiersEx(),
+                    0, 0, 0, false
+                ));
+            }
+        });
+
+        g2.gridx = 2;
+        g2.weightx = 0;
+        g2.insets = new Insets(0, 12, 0, 0);
+        volumeRow.add(rightPanel, g2);
+
+        gbc.gridy = 3;
+        gbc.insets = new Insets(0, 60, 0, 60);
+        audioPanel.add(volumeRow, gbc);
+
+        return audioPanel;
+    }
+
     private JPanel createAutresPanel() {
         JPanel autresPanel = new JPanel(new GridBagLayout());
         autresPanel.setOpaque(false);
@@ -413,7 +577,11 @@ public class SettingsOverlay extends JComponent {
     public JPanel getTabAudioPanel() { return tabAudioPanel;}
     public JPanel getTabAutresPanel() { return tabAutresPanel;}
     public JButton getBotDifficultyButton() { return botDifficultyButton;}
-    public JButton getFullscreenButton() { return fullscreenButton; }
+    public JButton getFullscreenButton() { return fullscreenButton;}
+    public JButton getSoundButton() { return soundButton;}
+    public JButton getVolumeLeftButton() { return volumeLeftButton;}
+    public JButton getVolumeValueButton() { return volumeValueButton;}
+    public JButton getVolumeRightButton() { return volumeRightButton;}
 
     public void setSelectedTabPanel(JComponent tabPanel) {
         this.selectedTabPanel = tabPanel;
