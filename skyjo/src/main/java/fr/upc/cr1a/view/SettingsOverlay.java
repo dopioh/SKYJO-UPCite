@@ -107,15 +107,20 @@ public class SettingsOverlay extends JComponent {
         tabsBar.add(tabAutresPanel);
         tabsBar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        //Parametres par catégorie
+        //Parametres jeu
         JPanel jeuPanel = new JPanel();   
         jeuPanel.setOpaque(false);
+        jeuPanel.add(new JLabel("Paramètres du jeu"));
 
+        //Parametres Audio
         JPanel audioPanel = new JPanel();  
         audioPanel.setOpaque(false);
+        audioPanel.add(new JLabel("Paramètres du audil"));
 
+        //parametres Autres
         JPanel autresPanel = new JPanel(); 
         autresPanel.setOpaque(false);
+        autresPanel.add(new JLabel("Paramètres du autres"));
 
         contentPanel.setOpaque(false);
         contentPanel.add(jeuPanel, "JEU");
@@ -226,7 +231,6 @@ public class SettingsOverlay extends JComponent {
                 ));
             }
         });
-
         return tabPanel;
     }
 }
