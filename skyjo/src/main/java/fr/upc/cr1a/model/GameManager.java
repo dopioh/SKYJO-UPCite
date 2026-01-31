@@ -25,10 +25,10 @@ public class GameManager {
 
     }
 
-    public GameManager(List<String> playersNames){
+    public GameManager(List<PlayerData> playersData){
         //initialiser les joueurs
-        for (String name : playersNames) {
-            players.add(new PlayerModel(name));
+        for (PlayerData player : playersData) {
+            players.add(new PlayerModel(player));
         }
 
         currentPlayerIndex = 0;

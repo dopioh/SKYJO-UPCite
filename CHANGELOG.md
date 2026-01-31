@@ -29,3 +29,13 @@
 - Systeme de carte numéro & carte spéciales
 
 - Systeme de pile de carte (Pioche & Defausse)
+
+
+
+
+
+
+
+- Observateur/facade données joueur
+
+- Systeme de Rank

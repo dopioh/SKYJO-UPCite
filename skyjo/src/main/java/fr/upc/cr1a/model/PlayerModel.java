@@ -6,14 +6,14 @@ package fr.upc.cr1a.model;
 
 public class PlayerModel {
 
-    private String name;
+    private String name; // id unique qui permettra de retrouver le player dans la db
     private PlayerHandModel hand;
     private int totalScore;
     
     
     //constructeur
-    public PlayerModel(String name){
-        this.name = name;
+    public PlayerModel(PlayerData playerData){
+        this.name = playerData.getID();
         this.hand = new PlayerHandModel();
         this.totalScore = 0;
     }

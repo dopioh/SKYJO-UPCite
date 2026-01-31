@@ -1,11 +1,12 @@
 package fr.upc.cr1a.model;
 import java.util.Scanner;
 
-/*
+/**
 * Modèle de la main d'un joueur dans le jeu Skyjo
 * Gère une grille de cartes 4x3 avec des fonctionnalités des règles du jeu
+
 * @author Billy
- */
+*/
 
 public class PlayerHandModel {
 
