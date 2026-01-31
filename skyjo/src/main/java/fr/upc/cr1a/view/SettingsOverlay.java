@@ -52,13 +52,28 @@ public class SettingsOverlay extends JComponent {
         final Color hover  = new Color(115, 145, 165); // (245, 195, 85) 
 
         JPanel backPanel = createHoverRoundedPanel(normal, hover, 20, 55);
-        backButton = createTextButton("Retour", 18f);
+        backButton = createTextButton("Fermer", 18f);
         backPanel.add(backButton);
         
-        //Pour toute la bande
+        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)); // Change le curseur 
+        backButton.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) {
+                backPanel.dispatchEvent(new MouseEvent(
+                        backPanel, MouseEvent.MOUSE_ENTERED, e.getWhen(), e.getModifiersEx(),0, 0, e.getClickCount(), e.isPopupTrigger(), e.getButton()
+                ));
+            }
+            @Override public void mouseExited(MouseEvent e) {
+                backPanel.dispatchEvent(new MouseEvent(
+                        backPanel, MouseEvent.MOUSE_EXITED, e.getWhen(), e.getModifiersEx(),0, 0, e.getClickCount(), e.isPopupTrigger(), e.getButton()
+                ));
+            }
+        });
+        
+        //Actionne l'actionListener lié au cointroller pour la bande
         backPanel.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) {
                 backButton.doClick();
+                e.consume(); //Pour éviter le relachement du clic sur le panel principal
             }
         });
 
@@ -83,6 +98,7 @@ public class SettingsOverlay extends JComponent {
     
     public JButton getBackButton() { return backButton; }
     
+    // JButton avec texte
     private JButton createTextButton(String text, float fontSize) {
         JButton b = new JButton(text);
         //Attribut basique du Jbutton supprmé
@@ -95,6 +111,7 @@ public class SettingsOverlay extends JComponent {
         return b;
     }
 
+    // Panneau rond avec hover
     private JPanel createHoverRoundedPanel(Color normal, Color hover, int arc, int height) {
         final Color[] current = { normal };
         JPanel p = new JPanel(new GridBagLayout()) {
@@ -111,11 +128,17 @@ public class SettingsOverlay extends JComponent {
         p.setOpaque(false);
         p.setPreferredSize(new Dimension(0, height));
         p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        p.addMouseListener(new MouseAdapter() {
-            @Override public void mouseEntered(MouseEvent e) { current[0] = hover;  p.repaint(); }
-            @Override public void mouseExited(MouseEvent e)  { current[0] = normal; p.repaint(); }
-        });
-
+        MouseAdapter hoverListener = new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e){
+                current[0] = hover;
+                p.repaint();
+            }
+            @Override public void mouseExited(MouseEvent e){
+                current[0] = normal;
+                p.repaint(); 
+            }
+        };
+        p.addMouseListener(hoverListener);
         return p;
     }
 }
