@@ -35,7 +35,7 @@ public class Frame extends JFrame{
         setGlassPane(settingsOverlay);
 
         //Contrôleurs
-        new SettingsOverlayController(settingsOverlay);
+        new SettingsOverlayController(settingsOverlay,this);
         new MainMenuController(this, mainMenuPanel);
 
         setVisible(true);

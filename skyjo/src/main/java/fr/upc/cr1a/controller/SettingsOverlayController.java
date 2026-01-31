@@ -1,5 +1,6 @@
 package fr.upc.cr1a.controller;
 
+import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.SettingsOverlay;
 
 import java.awt.event.MouseAdapter;
@@ -11,7 +12,9 @@ import java.awt.event.MouseEvent;
  * @author Hugo
  */
 public class SettingsOverlayController {
-    public SettingsOverlayController(SettingsOverlay overlay) {
+    private final Frame frame;
+    public SettingsOverlayController(SettingsOverlay overlay, Frame frame) {
+        this.frame = frame;
         //Les clics n'étaient pas bloqués sur la couche principale
         //Temporaire
         MouseAdapter block = new MouseAdapter() {       
@@ -25,5 +28,7 @@ public class SettingsOverlayController {
         overlay.addMouseListener(block);
         overlay.addMouseMotionListener(block);
         overlay.addMouseWheelListener(e -> e.consume());
+
+        overlay.getBackButton().addActionListener(e -> frame.hideSettingsOverlay());
     }
 }
