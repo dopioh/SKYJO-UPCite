@@ -56,7 +56,8 @@ public class Frame extends JFrame{
     public void showSettingsOverlay() {
         settingsOverlay.setVisible(true);
         settingsOverlay.requestFocusInWindow();
-        repaint();
+        settingsOverlay.revalidate();
+        settingsOverlay.repaint();
     }
 
     public void hideSettingsOverlay() {
@@ -91,5 +92,9 @@ public class Frame extends JFrame{
     public void toggleFullscreen() {
         if (fullscreen) exitFullscreen();
         else enterFullscreen();
+    }
+
+    public boolean isFullscreen(){
+        return fullscreen;
     }
 }

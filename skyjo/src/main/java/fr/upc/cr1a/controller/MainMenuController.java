@@ -22,7 +22,6 @@ public class MainMenuController {
         //Bouton paramètres
         view.getSettingsButton().addActionListener(e -> {
             frame.showSettingsOverlay();
-            frame.toggleFullscreen();
         });
 
         //Bouton jouer

@@ -57,6 +57,7 @@ public class SettingsOverlayController {
             }
         });
 
+        //Changer la page selon la catégorie
         var cl = overlay.getCardLayout();
         var content = overlay.getContentPanel();
         overlay.getTabJeu().addActionListener(e -> {
@@ -76,5 +77,21 @@ public class SettingsOverlayController {
         
         cl.show(content, "JEU");
         overlay.setSelectedTabPanel(overlay.getTabJeuPanel());
+        
+        //Changer le label du bot //A modifier plus tard 
+        overlay.getBotDifficultyButton().addActionListener(e -> { 
+            String current = overlay.getBotDifficultyButton().getText();
+            switch (current) {
+                case "Facile" -> overlay.getBotDifficultyButton().setText("Moyen");
+                case "Moyen"  -> overlay.getBotDifficultyButton().setText("Goat");
+                default       -> overlay.getBotDifficultyButton().setText("Facile");
+            }
+        });
+
+        //Activer/OFF le plein ecran
+        overlay.getFullscreenButton().addActionListener(e -> {
+            frame.toggleFullscreen();
+            overlay.getFullscreenButton().setText(frame.isFullscreen() ? "ON" : "OFF");
+        });
     }
 }

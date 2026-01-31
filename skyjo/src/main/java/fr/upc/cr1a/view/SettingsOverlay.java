@@ -26,19 +26,92 @@ public class SettingsOverlay extends JComponent {
 
     private JPanel tabsBar;
     private JComponent selectedTabPanel;
+
+    //Param Jeu
     private JPanel tabJeuPanel;
+    private JButton botDifficultyButton;
+
+    //Param Audio
     private JPanel tabAudioPanel;
+
+    //Param autres
     private JPanel tabAutresPanel;
+    private JButton fullscreenButton;
 
     public SettingsOverlay() {
         setOpaque(false);
         setVisible(false);
         setLayout(new GridBagLayout()); //pour centrer
 
-        card = new JPanel() {
+        card = createCardPanel();
+        card.setPreferredSize(new Dimension(700, 520));
+        card.setBackground(new Color(150, 150, 150));
+        card.setOpaque(false);
+
+        //Bouton Fermer le paramtètre
+        final Color normal = new Color(90, 120, 140);  //(220, 170, 60) Jaune Balatro si besoin de changer
+        final Color hover  = new Color(115, 145, 165); // (245, 195, 85) 
+
+        JPanel backPanel = createBackPanel(normal, hover);
+        backButton = (JButton) backPanel.getClientProperty("backButton");
+
+        card.setLayout(new BorderLayout());
+        card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        card.add(backPanel, BorderLayout.SOUTH);
+
+        //Catégories paramètres
+        final Color tabNormal = new Color(200, 60, 60);
+        final Color tabHover  = new Color(225, 85, 85);
+
+        tabsBar = createTabsBar(tabNormal, tabHover);
+
+        //Parametres jeu
+        JPanel jeuPanel = createJeuPanel();
+
+        //Parametres Audio
+        JPanel audioPanel = new JPanel(new GridBagLayout());  
+        audioPanel.setOpaque(false);
+        audioPanel.add(new JLabel("Paramètres du audil"));
+
+        //parametres Autres
+        JPanel autresPanel = createAutresPanel();
+
+        contentPanel.setOpaque(false);
+        contentPanel.add(jeuPanel, "JEU");
+        contentPanel.add(audioPanel, "AUDIO");
+        contentPanel.add(autresPanel, "AUTRES");
+
+        card.add(tabsBar, BorderLayout.NORTH);
+        card.add(contentPanel, BorderLayout.CENTER);
+
+        add(card);
+
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent e) {
+                updateCardBounds();
+            }
+        });
+        updateCardBounds();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g.create();
+        
+        //Fond semi-transparent
+        g2.setColor(new Color(0, 0, 0, 140));
+        g2.fillRect(0, 0, getWidth(), getHeight());
+        g2.dispose();
+    }
+
+    private JPanel createCardPanel() {
+        return new JPanel() {
             //Rectangle arrondi
             @Override
             protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(getBackground());
@@ -58,20 +131,15 @@ public class SettingsOverlay extends JComponent {
                 g2.dispose();
             }
         };
-        card.setPreferredSize(new Dimension(700, 520));
-        card.setBackground(new Color(150, 150, 150));
-        card.setOpaque(false);
+    }
 
-        //Bouton Fermer le paramtètre
-        final Color normal = new Color(90, 120, 140);  //(220, 170, 60) Jaune Balatro si besoin de changer
-        final Color hover  = new Color(115, 145, 165); // (245, 195, 85) 
-
+    private JPanel createBackPanel(Color normal, Color hover) {
         JPanel backPanel = createHoverRoundedPanel(normal, hover, 20, 55);
-        backButton = createTextButton("Fermer", 18f);
-        backPanel.add(backButton);
+        JButton b = createTextButton("Fermer", 18f);
+        backPanel.add(b);
         
-        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)); // Change le curseur 
-        backButton.addMouseListener(new MouseAdapter() {
+        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)); // Change le curseur 
+        b.addMouseListener(new MouseAdapter() {
             @Override public void mouseEntered(MouseEvent e) {
                 backPanel.dispatchEvent(new MouseEvent(
                         backPanel, MouseEvent.MOUSE_ENTERED, e.getWhen(), e.getModifiersEx(),0, 0, e.getClickCount(), e.isPopupTrigger(), e.getButton()
@@ -87,24 +155,23 @@ public class SettingsOverlay extends JComponent {
         //Actionne l'actionListener lié au cointroller pour la bande
         backPanel.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) {
-                backButton.doClick();
+                b.doClick();
                 e.consume(); //Pour éviter le relachement du clic sur le panel principal
             }
         });
 
-        card.setLayout(new BorderLayout());
-        card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        card.add(backPanel, BorderLayout.SOUTH);
+        backPanel.putClientProperty("backButton", b);
+        return backPanel;
+    }
 
-        //Catégories paramètres
-        final Color tabNormal = new Color(200, 60, 60);
-        final Color tabHover  = new Color(225, 85, 85);
-
+    private JPanel createTabsBar(Color tabNormal, Color tabHover) {
         tabJeuPanel = createTab(tabJeu, tabNormal, tabHover, 18, 40);
         tabAudioPanel = createTab(tabAudio, tabNormal, tabHover, 18, 40);
         tabAutresPanel = createTab(tabAutres, tabNormal, tabHover, 18, 40);
+
         selectedTabPanel = tabJeuPanel;
-        tabsBar = new JPanel(new GridLayout(1, 3, 12, 0)) {
+
+        JPanel bar = new JPanel(new GridLayout(1, 3, 12, 0)) {
             @Override
             protected void paintChildren(Graphics g) {
                 super.paintChildren(g);
@@ -124,47 +191,122 @@ public class SettingsOverlay extends JComponent {
                 g2.dispose();
             }
         };
-        tabsBar.setOpaque(false);
-        tabsBar.add(tabJeuPanel);
-        tabsBar.add(tabAudioPanel);
-        tabsBar.add(tabAutresPanel);
-        tabsBar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        //Parametres jeu
-        JPanel jeuPanel = new JPanel(new GridBagLayout());   
-        jeuPanel.setOpaque(false);
-        jeuPanel.add(new JLabel("Paramètres du jeu"));
+        bar.setOpaque(false);
+        bar.add(tabJeuPanel);
+        bar.add(tabAudioPanel);
+        bar.add(tabAutresPanel);
 
-        //Parametres Audio
-        JPanel audioPanel = new JPanel(new GridBagLayout());  
-        audioPanel.setOpaque(false);
-        audioPanel.add(new JLabel("Paramètres du audil"));
-
-        //parametres Autres
-        JPanel autresPanel = new JPanel(new GridBagLayout()); 
-        autresPanel.setOpaque(false);
-        autresPanel.add(new JLabel("Paramètres du autres"));
-
-        contentPanel.setOpaque(false);
-        contentPanel.add(jeuPanel, "JEU");
-        contentPanel.add(audioPanel, "AUDIO");
-        contentPanel.add(autresPanel, "AUTRES");
-
-        card.add(tabsBar, BorderLayout.NORTH);
-        card.add(contentPanel, BorderLayout.CENTER);
-
-        add(card);
+        return bar;
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D) g.create();
-        
-        //Fond semi-transparent
-        g2.setColor(new Color(0, 0, 0, 140));
-        g2.fillRect(0, 0, getWidth(), getHeight());
-        g2.dispose();
+    private JPanel createJeuPanel() {
+        JPanel jeuPanel = new JPanel(new GridBagLayout());
+        jeuPanel.setOpaque(false);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        JLabel botLabel = new JLabel("Difficulté du bot", SwingConstants.CENTER);
+        botLabel.setForeground(Color.WHITE);
+        botLabel.setFont(botLabel.getFont().deriveFont(Font.BOLD, 18f));
+
+        gbc.gridy = 0;
+        gbc.insets = new Insets(20, 0, 12, 0);
+        jeuPanel.add(botLabel, gbc);
+
+        final Color diffNormal = new Color(200, 60, 60);
+        final Color diffHover  = new Color(225, 85, 85);
+
+        JPanel diffPanel = createHoverRoundedPanel(diffNormal, diffHover, 18, 44);
+        botDifficultyButton = createTextButton("Facile", 16f);
+        diffPanel.add(botDifficultyButton);
+
+        diffPanel.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                botDifficultyButton.doClick();
+                e.consume();
+            }
+        });
+        botDifficultyButton.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) {
+                diffPanel.dispatchEvent(new MouseEvent(
+                    diffPanel, MouseEvent.MOUSE_ENTERED,
+                    e.getWhen(), e.getModifiersEx(),
+                    0, 0, 0, false
+                ));
+            }
+            @Override public void mouseExited(MouseEvent e) {
+                diffPanel.dispatchEvent(new MouseEvent(
+                    diffPanel, MouseEvent.MOUSE_EXITED,
+                    e.getWhen(), e.getModifiersEx(),
+                    0, 0, 0, false
+                ));
+            }
+        });
+
+        gbc.gridy = 1;
+        gbc.insets = new Insets(0, 60, 0, 60); 
+        jeuPanel.add(diffPanel, gbc);
+
+        return jeuPanel;
+    }
+
+    private JPanel createAutresPanel() {
+        JPanel autresPanel = new JPanel(new GridBagLayout());
+        autresPanel.setOpaque(false);
+
+        GridBagConstraints gbcA = new GridBagConstraints();
+        gbcA.gridx = 0;
+        gbcA.weightx = 1;
+        gbcA.fill = GridBagConstraints.HORIZONTAL;
+
+        JLabel fsLabel = new JLabel("Plein écran", SwingConstants.CENTER);
+        fsLabel.setForeground(Color.WHITE);
+        fsLabel.setFont(fsLabel.getFont().deriveFont(Font.BOLD, 18f));
+
+        gbcA.gridy = 0;
+        gbcA.insets = new Insets(20, 0, 12, 0);
+        autresPanel.add(fsLabel, gbcA);
+
+        final Color fsNormal = new Color(200, 60, 60);
+        final Color fsHover  = new Color(225, 85, 85);
+
+        JPanel fullScreenPanel = createHoverRoundedPanel(fsNormal, fsHover, 18, 44);
+        fullscreenButton = createTextButton("OFF", 16f);
+        fullScreenPanel.add(fullscreenButton);
+
+        fullScreenPanel.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                fullscreenButton.doClick();
+                e.consume();
+            }
+        });
+
+        fullscreenButton.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) {
+                fullScreenPanel.dispatchEvent(new MouseEvent(
+                    fullScreenPanel, MouseEvent.MOUSE_ENTERED,
+                    e.getWhen(), e.getModifiersEx(),
+                    0, 0, 0, false
+                ));
+            }
+            @Override public void mouseExited(MouseEvent e) {
+                fullScreenPanel.dispatchEvent(new MouseEvent(
+                    fullScreenPanel, MouseEvent.MOUSE_EXITED,
+                    e.getWhen(), e.getModifiersEx(),
+                    0, 0, 0, false
+                ));
+            }
+        });
+
+        gbcA.gridy = 1;
+        gbcA.insets = new Insets(0, 60, 0, 60);
+        autresPanel.add(fullScreenPanel, gbcA);
+
+        return autresPanel;
     }
 
     // JButton avec texte
@@ -248,16 +390,30 @@ public class SettingsOverlay extends JComponent {
         return tabPanel;
     }
 
+    private void updateCardBounds() {
+        int w = getWidth();
+        int h = getHeight();
+        int cardW = (int) (w * 0.55);
+        int cardH = (int) (h * 0.70);
+        cardW = Math.max(700, Math.min(cardW, 1100));
+        cardH = Math.max(520, Math.min(cardH, 800));
+        card.setPreferredSize(new Dimension(cardW, cardH));
+        card.revalidate();
+        card.repaint();
+    }
+
     //Pour les controllers
     public JButton getBackButton(){return backButton;}
     public JPanel getContentPanel(){return contentPanel;}
     public CardLayout getCardLayout(){return (CardLayout) contentPanel.getLayout();}
-    public JButton getTabJeu(){ return tabJeu; }
-    public JButton getTabAudio(){ return tabAudio; }
-    public JButton getTabAutres(){ return tabAutres; }
-    public JPanel getTabJeuPanel() { return tabJeuPanel; }
-    public JPanel getTabAudioPanel() { return tabAudioPanel; }
-    public JPanel getTabAutresPanel() { return tabAutresPanel; }
+    public JButton getTabJeu(){ return tabJeu;}
+    public JButton getTabAudio(){ return tabAudio;}
+    public JButton getTabAutres(){ return tabAutres;}
+    public JPanel getTabJeuPanel() { return tabJeuPanel;}
+    public JPanel getTabAudioPanel() { return tabAudioPanel;}
+    public JPanel getTabAutresPanel() { return tabAutresPanel;}
+    public JButton getBotDifficultyButton() { return botDifficultyButton;}
+    public JButton getFullscreenButton() { return fullscreenButton; }
 
     public void setSelectedTabPanel(JComponent tabPanel) {
         this.selectedTabPanel = tabPanel;
