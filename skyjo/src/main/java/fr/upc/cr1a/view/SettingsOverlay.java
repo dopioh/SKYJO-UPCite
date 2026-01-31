@@ -12,8 +12,17 @@ import java.awt.event.MouseEvent;
  * @author Hugo
  */
 public class SettingsOverlay extends JComponent {
+    //Fenetre de l'overlay
     private final JPanel card;
+
+    //Bouton Fermer
     private final JButton backButton;
+
+    //Catégories paramètres
+    private final JPanel contentPanel = new JPanel(new CardLayout());
+    private final JButton tabJeu = createTabButton("Jeu");
+    private final JButton tabAudio = createTabButton("Audio");
+    private final JButton tabAutres = createTabButton("Autres");
 
     public SettingsOverlay() {
         setOpaque(false);
@@ -81,6 +90,42 @@ public class SettingsOverlay extends JComponent {
         card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         card.add(backPanel, BorderLayout.SOUTH);
 
+        //Catégories paramètres
+        final Color tabNormal = new Color(200, 60, 60);
+        final Color tabHover  = new Color(225, 85, 85);
+
+        CardLayout cl = (CardLayout) contentPanel.getLayout();
+
+        JPanel tabJeuPanel = createTab(tabJeu, tabNormal, tabHover, 18, 40);
+        JPanel tabAudioPanel = createTab(tabAudio, tabNormal, tabHover, 18, 40);
+        JPanel tabAutresPanel = createTab(tabAutres, tabNormal, tabHover, 18, 40);
+        JPanel tabsBar = new JPanel(new GridLayout(1, 3, 12, 0));
+
+        tabsBar.setOpaque(false);
+        tabsBar.add(tabJeuPanel);
+        tabsBar.add(tabAudioPanel);
+        tabsBar.add(tabAutresPanel);
+        tabsBar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        //Parametres par catégorie
+        JPanel jeuPanel = new JPanel();   
+        jeuPanel.setOpaque(false);
+
+        JPanel audioPanel = new JPanel();  
+        audioPanel.setOpaque(false);
+
+        JPanel autresPanel = new JPanel(); 
+        autresPanel.setOpaque(false);
+
+        contentPanel.setOpaque(false);
+        contentPanel.add(jeuPanel, "JEU");
+        contentPanel.add(audioPanel, "AUDIO");
+        contentPanel.add(autresPanel, "AUTRES");
+
+        card.add(tabsBar, BorderLayout.NORTH);
+        card.add(contentPanel, BorderLayout.CENTER);
+
+        cl.show(contentPanel, "JEU");
         add(card);
     }
 
@@ -95,8 +140,13 @@ public class SettingsOverlay extends JComponent {
         g2.dispose();
     }
 
-    
-    public JButton getBackButton() { return backButton; }
+    //Pour les controllers
+    public JButton getBackButton(){return backButton;}
+    public JPanel getContentPanel(){return contentPanel;}
+    public CardLayout getCardLayout(){return (CardLayout) contentPanel.getLayout();}
+    public JButton getTabJeu(){ return tabJeu; }
+    public JButton getTabAudio(){ return tabAudio; }
+    public JButton getTabAutres(){ return tabAutres; }
     
     // JButton avec texte
     private JButton createTextButton(String text, float fontSize) {
@@ -140,5 +190,43 @@ public class SettingsOverlay extends JComponent {
         };
         p.addMouseListener(hoverListener);
         return p;
+    }
+
+    //Comme le texte button
+    private JButton createTabButton(String text) {
+        JButton b = new JButton(text);
+        b.setFocusPainted(false);
+        b.setBorderPainted(false);
+        b.setContentAreaFilled(false);
+        b.setOpaque(false);
+        b.setForeground(Color.WHITE);
+        b.setFont(b.getFont().deriveFont(Font.BOLD, 16f));
+        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return b;
+    }
+
+    //Fait des "tabs" (zone extendue des jbutton) cliquable 
+    private JPanel createTab(JButton tabButton,Color normal,Color hover,int arc,int height) {
+        JPanel tabPanel = createHoverRoundedPanel(normal, hover, arc, height);
+        tabPanel.add(tabButton);
+        // Hover quand la souris est sur le texte
+        tabButton.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) {
+                tabPanel.dispatchEvent(new MouseEvent(
+                    tabPanel, MouseEvent.MOUSE_ENTERED,
+                    e.getWhen(), e.getModifiersEx(),
+                    0, 0, 0, false
+                ));
+            }
+            @Override public void mouseExited(MouseEvent e) {
+                tabPanel.dispatchEvent(new MouseEvent(
+                    tabPanel, MouseEvent.MOUSE_EXITED,
+                    e.getWhen(), e.getModifiersEx(),
+                    0, 0, 0, false
+                ));
+            }
+        });
+
+        return tabPanel;
     }
 }

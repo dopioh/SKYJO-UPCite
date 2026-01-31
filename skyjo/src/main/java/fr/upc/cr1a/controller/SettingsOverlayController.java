@@ -31,5 +31,12 @@ public class SettingsOverlayController {
 
         //Bouton Fermer
         overlay.getBackButton().addActionListener(e -> frame.hideSettingsOverlay());
+
+        var cl = overlay.getCardLayout();
+        var content = overlay.getContentPanel();
+        cl.show(content, "JEU");
+        overlay.getTabJeu().addActionListener(e -> cl.show(content, "JEU"));
+        overlay.getTabAudio().addActionListener(e -> cl.show(content, "AUDIO"));
+        overlay.getTabAutres().addActionListener(e -> cl.show(content, "AUTRES"));
     }
 }
