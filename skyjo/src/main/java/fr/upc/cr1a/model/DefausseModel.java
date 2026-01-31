@@ -8,9 +8,7 @@ package fr.upc.cr1a.model;
 public class DefausseModel extends CardStackModel {
 
     public DefausseModel() {
-        for (int i = 0; i < 151; i++) {
-                this.Stack.add(new NumberCardModel(false, -99, "vide"));
-        }
+        // vide a l'initialisation du jeu
     }
     
 }

@@ -34,3 +34,6 @@
 
 - Page de paramètres (Plein Ecran et Gestion de son)
 
+- Systeme d'image dans le cache
+
+ 
