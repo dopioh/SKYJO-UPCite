@@ -6,6 +6,7 @@ import fr.upc.cr1a.controller.MainMenuController;
 import fr.upc.cr1a.controller.SettingsOverlayController;
 
 import java.awt.CardLayout;
+import java.awt.Rectangle;
 
 /**
  * Classe qui sert a instancier la fenetre de jeu (JFrame)
@@ -17,6 +18,9 @@ public class Frame extends JFrame{
     private CardLayout cardLayout;
     private MainMenuPanel mainMenuPanel;
     private SettingsOverlay settingsOverlay;
+    private boolean fullscreen = false;
+    private Rectangle windowedBounds;
+
 
     public Frame() {
         setTitle("SKYJO");
@@ -62,5 +66,30 @@ public class Frame extends JFrame{
 
     public boolean isSettingsOverlayVisible() {
         return settingsOverlay.isVisible();
+    }
+
+    public void enterFullscreen() {
+        if (fullscreen) return;
+        windowedBounds = getBounds();  
+        dispose(); 
+        setUndecorated(true);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setVisible(true);
+        fullscreen = true;
+    }
+
+    public void exitFullscreen() {
+        if (!fullscreen) return;
+        dispose();
+        setUndecorated(false);
+        setExtendedState(JFrame.NORMAL);
+        setBounds(windowedBounds);
+        setVisible(true);
+        fullscreen = false;
+    }
+
+    public void toggleFullscreen() {
+        if (fullscreen) exitFullscreen();
+        else enterFullscreen();
     }
 }

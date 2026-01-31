@@ -14,8 +14,5 @@ public class GameLauncher {
 
     public static void main(String[] args) throws Exception {
         new GameLauncher();
-        // AudioManager audio = new AudioManager();
-        // audio.playBgm("/music/calmbgm.wav");
-        // audio.playSfx("/sfx/UIclick.wav");
     }
 }

@@ -24,6 +24,12 @@ public class SettingsOverlay extends JComponent {
     private final JButton tabAudio = createTabButton("Audio");
     private final JButton tabAutres = createTabButton("Autres");
 
+    private JPanel tabsBar;
+    private JComponent selectedTabPanel;
+    private JPanel tabJeuPanel;
+    private JPanel tabAudioPanel;
+    private JPanel tabAutresPanel;
+
     public SettingsOverlay() {
         setOpaque(false);
         setVisible(false);
@@ -94,11 +100,30 @@ public class SettingsOverlay extends JComponent {
         final Color tabNormal = new Color(200, 60, 60);
         final Color tabHover  = new Color(225, 85, 85);
 
-        JPanel tabJeuPanel = createTab(tabJeu, tabNormal, tabHover, 18, 40);
-        JPanel tabAudioPanel = createTab(tabAudio, tabNormal, tabHover, 18, 40);
-        JPanel tabAutresPanel = createTab(tabAutres, tabNormal, tabHover, 18, 40);
-        JPanel tabsBar = new JPanel(new GridLayout(1, 3, 12, 0));
+        tabJeuPanel = createTab(tabJeu, tabNormal, tabHover, 18, 40);
+        tabAudioPanel = createTab(tabAudio, tabNormal, tabHover, 18, 40);
+        tabAutresPanel = createTab(tabAutres, tabNormal, tabHover, 18, 40);
+        selectedTabPanel = tabJeuPanel;
+        tabsBar = new JPanel(new GridLayout(1, 3, 12, 0)) {
+            @Override
+            protected void paintChildren(Graphics g) {
+                super.paintChildren(g);
+                if (selectedTabPanel == null) return;
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                Rectangle r = SwingUtilities.convertRectangle(selectedTabPanel.getParent(), selectedTabPanel.getBounds(), this);
 
+                int cx = r.x + r.width / 2; //centre x
+                int top = 2; 
+                int h = 10;
+                int w = 14; 
+
+                Polygon tri = new Polygon(new int[]{cx, cx - w / 2, cx + w / 2},new int[]{top+h, top, top},3);
+                g2.setColor(Color.BLACK);
+                g2.fillPolygon(tri);
+                g2.dispose();
+            }
+        };
         tabsBar.setOpaque(false);
         tabsBar.add(tabJeuPanel);
         tabsBar.add(tabAudioPanel);
@@ -142,14 +167,6 @@ public class SettingsOverlay extends JComponent {
         g2.dispose();
     }
 
-    //Pour les controllers
-    public JButton getBackButton(){return backButton;}
-    public JPanel getContentPanel(){return contentPanel;}
-    public CardLayout getCardLayout(){return (CardLayout) contentPanel.getLayout();}
-    public JButton getTabJeu(){ return tabJeu; }
-    public JButton getTabAudio(){ return tabAudio; }
-    public JButton getTabAutres(){ return tabAutres; }
-    
     // JButton avec texte
     private JButton createTextButton(String text, float fontSize) {
         JButton b = new JButton(text);
@@ -229,5 +246,21 @@ public class SettingsOverlay extends JComponent {
             }
         });
         return tabPanel;
+    }
+
+    //Pour les controllers
+    public JButton getBackButton(){return backButton;}
+    public JPanel getContentPanel(){return contentPanel;}
+    public CardLayout getCardLayout(){return (CardLayout) contentPanel.getLayout();}
+    public JButton getTabJeu(){ return tabJeu; }
+    public JButton getTabAudio(){ return tabAudio; }
+    public JButton getTabAutres(){ return tabAutres; }
+    public JPanel getTabJeuPanel() { return tabJeuPanel; }
+    public JPanel getTabAudioPanel() { return tabAudioPanel; }
+    public JPanel getTabAutresPanel() { return tabAutresPanel; }
+
+    public void setSelectedTabPanel(JComponent tabPanel) {
+        this.selectedTabPanel = tabPanel;
+        if (tabsBar != null) tabsBar.repaint();
     }
 }

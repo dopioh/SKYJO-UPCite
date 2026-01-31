@@ -30,13 +30,51 @@ public class SettingsOverlayController {
         overlay.addMouseWheelListener(e -> e.consume());
 
         //Bouton Fermer
-        overlay.getBackButton().addActionListener(e -> frame.hideSettingsOverlay());
+        overlay.getBackButton().addActionListener(e -> {
+            frame.hideSettingsOverlay();
+        });
+
+        //Actionne l'actionListener lié au cointroller pour la bande
+
+        overlay.getTabJeuPanel().addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                overlay.getTabJeu().doClick(); 
+                e.consume();
+            }
+        });
+
+        overlay.getTabAudioPanel().addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                overlay.getTabAudio().doClick();
+                e.consume();
+            }
+        });
+
+        overlay.getTabAutresPanel().addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                overlay.getTabAutres().doClick();
+                e.consume();
+            }
+        });
 
         var cl = overlay.getCardLayout();
         var content = overlay.getContentPanel();
+        overlay.getTabJeu().addActionListener(e -> {
+            cl.show(content, "JEU");
+            overlay.setSelectedTabPanel(overlay.getTabJeuPanel());
+        });
+
+        overlay.getTabAudio().addActionListener(e -> {
+            cl.show(content, "AUDIO");
+            overlay.setSelectedTabPanel(overlay.getTabAudioPanel());
+        });
+
+        overlay.getTabAutres().addActionListener(e -> {
+            cl.show(content, "AUTRES");
+            overlay.setSelectedTabPanel(overlay.getTabAutresPanel());
+        });
+        
         cl.show(content, "JEU");
-        overlay.getTabJeu().addActionListener(e -> cl.show(content, "JEU"));
-        overlay.getTabAudio().addActionListener(e -> cl.show(content, "AUDIO"));
-        overlay.getTabAutres().addActionListener(e -> cl.show(content, "AUTRES"));
+        overlay.setSelectedTabPanel(overlay.getTabJeuPanel());
     }
 }
