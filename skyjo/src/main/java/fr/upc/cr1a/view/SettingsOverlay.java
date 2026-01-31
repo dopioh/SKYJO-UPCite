@@ -72,6 +72,7 @@ public class SettingsOverlay extends JComponent {
     
     private JButton createTextButton(String text, float fontSize) {
         JButton b = new JButton(text);
+        //Attribut basique du Jbutton supprmé
         b.setFocusPainted(false);
         b.setBorderPainted(false);
         b.setContentAreaFilled(false);
