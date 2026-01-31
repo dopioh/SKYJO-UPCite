@@ -3,6 +3,8 @@ package fr.upc.cr1a.view;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  * Overlay des paramètres
@@ -46,9 +48,20 @@ public class SettingsOverlay extends JComponent {
         card.setOpaque(false);
 
         //Bouton Fermer le paramtètre
+        final Color normal = new Color(90, 120, 140);  //(220, 170, 60) Jaune Balatro si besoin de changer
+        final Color hover  = new Color(115, 145, 165); // (245, 195, 85) 
+
+        JPanel backPanel = createHoverRoundedPanel(normal, hover, 20, 55);
         backButton = createTextButton("Retour", 18f);
-        JPanel backPanel = createRoundedPanel(new Color(245, 170, 20),20,55);
         backPanel.add(backButton);
+        
+        //Pour toute la bande
+        backPanel.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                backButton.doClick();
+            }
+        });
+
         card.setLayout(new BorderLayout());
         card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         card.add(backPanel, BorderLayout.SOUTH);
@@ -82,19 +95,27 @@ public class SettingsOverlay extends JComponent {
         return b;
     }
 
-    private JPanel createRoundedPanel(Color color, int arc, int height) {
+    private JPanel createHoverRoundedPanel(Color normal, Color hover, int arc, int height) {
+        final Color[] current = { normal };
         JPanel p = new JPanel(new GridBagLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(color);
+                g2.setColor(current[0]);
                 g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), arc, arc));
                 g2.dispose();
             }
         };
+
         p.setOpaque(false);
         p.setPreferredSize(new Dimension(0, height));
+        p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        p.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) { current[0] = hover;  p.repaint(); }
+            @Override public void mouseExited(MouseEvent e)  { current[0] = normal; p.repaint(); }
+        });
+
         return p;
     }
 }

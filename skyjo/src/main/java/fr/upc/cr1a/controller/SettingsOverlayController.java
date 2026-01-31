@@ -29,6 +29,7 @@ public class SettingsOverlayController {
         overlay.addMouseMotionListener(block);
         overlay.addMouseWheelListener(e -> e.consume());
 
+        //Bouton Fermer
         overlay.getBackButton().addActionListener(e -> frame.hideSettingsOverlay());
     }
 }
