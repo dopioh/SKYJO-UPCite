@@ -5,6 +5,7 @@ import fr.upc.cr1a.view.SettingsOverlay;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import javax.swing.event.MouseInputAdapter;
 
 /**
  * Controller de l'overlay des paramètres
@@ -16,8 +17,7 @@ public class SettingsOverlayController {
     public SettingsOverlayController(SettingsOverlay overlay, Frame frame) {
         this.frame = frame;
         //Les clics n'étaient pas bloqués sur la couche principale
-        //Temporaire
-        MouseAdapter block = new MouseAdapter() {       
+        MouseInputAdapter block = new MouseInputAdapter() {     
             @Override public void mousePressed(MouseEvent e) { e.consume(); }
             @Override public void mouseReleased(MouseEvent e) { e.consume(); }
             @Override public void mouseClicked(MouseEvent e) { e.consume(); }

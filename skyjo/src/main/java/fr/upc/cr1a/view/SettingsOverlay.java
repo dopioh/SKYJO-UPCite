@@ -94,8 +94,6 @@ public class SettingsOverlay extends JComponent {
         final Color tabNormal = new Color(200, 60, 60);
         final Color tabHover  = new Color(225, 85, 85);
 
-        CardLayout cl = (CardLayout) contentPanel.getLayout();
-
         JPanel tabJeuPanel = createTab(tabJeu, tabNormal, tabHover, 18, 40);
         JPanel tabAudioPanel = createTab(tabAudio, tabNormal, tabHover, 18, 40);
         JPanel tabAutresPanel = createTab(tabAutres, tabNormal, tabHover, 18, 40);
@@ -108,17 +106,17 @@ public class SettingsOverlay extends JComponent {
         tabsBar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         //Parametres jeu
-        JPanel jeuPanel = new JPanel();   
+        JPanel jeuPanel = new JPanel(new GridBagLayout());   
         jeuPanel.setOpaque(false);
         jeuPanel.add(new JLabel("Paramètres du jeu"));
 
         //Parametres Audio
-        JPanel audioPanel = new JPanel();  
+        JPanel audioPanel = new JPanel(new GridBagLayout());  
         audioPanel.setOpaque(false);
         audioPanel.add(new JLabel("Paramètres du audil"));
 
         //parametres Autres
-        JPanel autresPanel = new JPanel(); 
+        JPanel autresPanel = new JPanel(new GridBagLayout()); 
         autresPanel.setOpaque(false);
         autresPanel.add(new JLabel("Paramètres du autres"));
 
@@ -130,7 +128,6 @@ public class SettingsOverlay extends JComponent {
         card.add(tabsBar, BorderLayout.NORTH);
         card.add(contentPanel, BorderLayout.CENTER);
 
-        cl.show(contentPanel, "JEU");
         add(card);
     }
 
