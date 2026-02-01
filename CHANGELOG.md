@@ -30,6 +30,10 @@
 
 - Systeme de pile de carte (Pioche & Defausse)
 
+- Observateur/facade données joueur
+
+- Systeme de Rank
+
 - Système de lecture des sons (Background et SFX)
 
 - Page de paramètres (Plein Ecran et Gestion de son)

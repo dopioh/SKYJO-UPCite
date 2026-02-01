@@ -49,11 +49,11 @@ public class GameManager {
 *constructeur avec les noms des joueurs
 *permet de d'initialiser les joueurs avec leurs noms
 */
-    public GameManager(List<String> playersNames){
+    public GameManager(List<PlayerData> playersData){
         //initialiser les joueurs
         this.players = new ArrayList<>();
-        for (String name : playersNames) {
-            players.add(new PlayerModel(name));
+        for (PlayerData player : playersData) {
+            players.add(new PlayerModel(player));
         }
         
         currentPlayerIndex = 0;

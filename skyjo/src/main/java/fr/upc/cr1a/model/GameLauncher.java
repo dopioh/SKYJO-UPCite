@@ -29,7 +29,7 @@ public class GameLauncher {
      * Démarre le jeu et gère le menu principal
      */
     private void startGame() {
-        List<String> playerNames = new ArrayList<>();
+        List<PlayerData> playerNames = new ArrayList<>();
         //demande le nombre de joueurs
         int nbJoueurs;
         do {
@@ -45,7 +45,8 @@ public class GameLauncher {
         //Donnez le nom des joueurs
         for (int i = 1; i <= nbJoueurs; i++) {
             System.out.print("Nom du joueur " + i + " : ");
-            playerNames.add(scanner.nextLine());
+            PlayerData tmp = new PlayerData(scanner.nextLine());
+            playerNames.add(tmp);
         }
         System.out.println("------------------------------------------------------------------");
         
