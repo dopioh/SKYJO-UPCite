@@ -1,8 +1,7 @@
 package fr.upc.cr1a.model;
 
 import java.util.List;
-
-import javax.smartcardio.Card;
+import java.util.ArrayList;
 
 /**
  * Classe principal pour initialiser une partie (et pas le menu !)
@@ -52,6 +51,7 @@ public class GameManager {
 */
     public GameManager(List<String> playersNames){
         //initialiser les joueurs
+        this.players = new ArrayList<>();
         for (String name : playersNames) {
             players.add(new PlayerModel(name));
         }
@@ -60,6 +60,8 @@ public class GameManager {
         deck = new PiocheModel();
         discardPile = new DefausseModel();
         currentDrawCard = null;
+        gameState = GameState.WAITING_FOR_PLAYERS;
+        turnPhase = TurnPhase.DRAW_DECISION;
     }
     
     //getters
@@ -87,18 +89,28 @@ public class GameManager {
     *Initialisation de la game 
     */
    public void initializeGame(){
+        //creer un deck deja melange
+        deck = new PiocheModel();
+        
         for (PlayerModel player : players) {
             player.resetHand();
             //distribue les cartes
-            for (int i =0; i < 3; i++){
-                for (int j = 0; j<4; j++ ){
-                    player.getHand().placeCard(i,j,deck.getTopCard());
+            for (int i = 0; i < 3; i++){
+                for (int j = 0; j < 4; j++){
+                    CardModel card = deck.getTopCard();
+                    deck.removeCardAtTop();
+                    player.getHand().placeCard(i, j, card);
                 }
             }
-        //retroune 2 cartes
-        player.getHand().revealCardsTemp(2);
-        discardPile.addCardAtTop(deck.getTopCard());
         }
+        
+        //mettre une carte dans la défausse
+        CardModel firstDiscard = deck.getTopCard();
+        deck.removeCardAtTop();
+        discardPile.addCardAtTop(firstDiscard);
+        
+        // Changer l'état du jeu
+        gameState = GameState.IS_PLAYING;
     }
     
     /*
@@ -141,6 +153,7 @@ public class GameManager {
     public CardModel drawDeck(){
         currentDrawCard = deck.getTopCard();
         deck.removeCardAtTop();
+        turnPhase = TurnPhase.CARD_DRAW_FROM_DECK;
         return currentDrawCard;
     }
     
@@ -151,6 +164,7 @@ public class GameManager {
     public CardModel takeDiscard(){
         currentDrawCard = discardPile.getTopCard();
         discardPile.removeCardAtTop();
+        turnPhase = TurnPhase.CARD_TAKE_FROM_DISCARD;
         return currentDrawCard;
     }
     
@@ -163,9 +177,19 @@ public class GameManager {
         CardModel cardInHand = hand.getCard(row, col);
         
         //echange de cartes
-        hand.placeCard(row, col, currentDrawCard);
+        hand.replaceCard(row, col, currentDrawCard);
         discardPile.addCardAtTop(cardInHand);
-        currentDrawCard = null;}
+        //montrer la nouvelle carte
+        currentDrawCard.revealCard(false);
+        currentDrawCard = null;
+        
+        //vérifier les colonnes/lignes identiques
+        RemoveIdenticalColumns();
+        RemoveIdenticalRows();
+        //vérifier si fin de manche
+        checkEndOfRound();
+        turnPhase = TurnPhase.TURN_ENDED;
+    }
     
     /*
     *défausser la carte piochée
@@ -173,6 +197,7 @@ public class GameManager {
     public void discardDrawCard(){
         discardPile.addCardAtTop(currentDrawCard);
         currentDrawCard = null;
+        turnPhase = TurnPhase.TURN_ENDED;
     }
     
     /*
