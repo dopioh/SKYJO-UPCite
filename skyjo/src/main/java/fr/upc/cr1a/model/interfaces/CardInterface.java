@@ -7,7 +7,7 @@ package fr.upc.cr1a.model.interfaces;
  */
 public interface CardInterface {
 
-    public void revealCard(boolean value);
+    public void returnCard();
     public void setPathImage(String path);
 
     public boolean isFaceDown();

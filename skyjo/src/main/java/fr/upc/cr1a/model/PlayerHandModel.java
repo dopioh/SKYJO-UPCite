@@ -40,7 +40,7 @@ public class PlayerHandModel {
 
     public void revealCard(int row, int col){
         if (grid[row][col] != null){
-            grid[row][col].revealCard(false);
+            grid[row][col].returnCard();
         }
     }
     

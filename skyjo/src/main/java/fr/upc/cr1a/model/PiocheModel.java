@@ -39,11 +39,26 @@ public class PiocheModel extends CardStackModel {
             else color = "rouge";
 
             for (int k = 0; k < counts[i]; k++) {
-                this.Stack.add(new NumberCardModel(true, value, color));
+                this.getStack().add(new NumberCardModel(true, value, color));
             }
 
-            Collections.shuffle(this.Stack);
         }
+        Collections.shuffle(this.getStack());
+    }
+
+    /**
+     * Quand la pioche est vide et la reconstruit avec les cartes de la defausse
+     * @param defausse
+     */
+    public void DefausseInPioche(DefausseModel defausse) {
+        if (this.stackSize() == 0) {
+            while (defausse.stackSize() > 1) {
+                CardModel carte = defausse.getCardAt(0);
+                this.addCardAtTop(carte);
+                defausse.getStack().remove(0);
+            }
+        }
+        Collections.shuffle(this.getStack());
     }
 
 }

@@ -148,9 +148,14 @@ public class GameManager {
 
     /*
     *pioche une carte
-    * @return la carte piochée
+    *@return la carte piochée
     */
     public CardModel drawDeck(){
+        //regarde si la pioche est vide
+        if (deck.stackSize() == 0) {
+            deck.DefausseInPioche(discardPile);
+        }
+        
         currentDrawCard = deck.getTopCard();
         deck.removeCardAtTop();
         turnPhase = TurnPhase.CARD_DRAW_FROM_DECK;
@@ -180,7 +185,7 @@ public class GameManager {
         hand.replaceCard(row, col, currentDrawCard);
         discardPile.addCardAtTop(cardInHand);
         //montrer la nouvelle carte
-        currentDrawCard.revealCard(false);
+        currentDrawCard.returnCard();
         currentDrawCard = null;
         
         //vérifier les colonnes/lignes identiques
@@ -204,14 +209,14 @@ public class GameManager {
     *montre la carte après avoir défaussé
     */
     public void revealCardInHand(int col, int row){
-        currentDrawCard.revealCard(false);
+        currentDrawCard.returnCard();
         getCurrentPlayer().getHand().revealCard(row, col);
     }
 
     /*
     *retire les colonnes avec 3 cartes identiques
-    *@curentPlayer le joueur actuelle
-    *@hand la main du joueur
+    *@param curentPlayer le joueur actuelle
+    *@param hand la main du joueur
     */
     private void RemoveIdenticalColumns(){
         PlayerModel currentPlayer = getCurrentPlayer();
@@ -242,8 +247,8 @@ public class GameManager {
 
     /*
     *retire les lignes avec 3 cartes identiques
-    *@curentPlayer le joueur actuelle
-    *@hand la main du joueur
+    *@param curentPlayer le joueur actuelle
+    *@param hand la main du joueur
     */
     private void RemoveIdenticalRows(){
         PlayerModel currentPlayer = getCurrentPlayer();
@@ -298,7 +303,7 @@ public class GameManager {
                 for (int col = 0; col < hand.getColumns(); col++) {
                     CardModel card = hand.getCard(row, col);
                     if (card != null && card.isFaceDown()) {
-                        card.revealCard(false);
+                        card.returnCard();
                     }
                 }
             }

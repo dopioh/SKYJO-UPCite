@@ -32,6 +32,11 @@ public class MainMenuPanel extends JPanel {
         shopButton = new JButton("Boutique");
         playButton = new JButton("Jouer");
         settingsButton = new JButton("Réglages");
+
+        //suppression du rectangle bleu bizarre
+        shopButton.setFocusPainted(false);
+        playButton.setFocusPainted(false);
+        settingsButton.setFocusPainted(false);
         
         buttonPanel.add(shopButton);
         buttonPanel.add(playButton);
