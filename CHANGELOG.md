@@ -30,5 +30,10 @@
 
 - Systeme de pile de carte (Pioche & Defausse)
 
+- Système de lecture des sons (Background et SFX)
+
+- Page de paramètres (Plein Ecran et Gestion de son)
+
 - Systeme d'image dans le cache
 
+ 
