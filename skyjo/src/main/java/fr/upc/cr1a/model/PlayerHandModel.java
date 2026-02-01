@@ -41,7 +41,7 @@ public class PlayerHandModel {
 
     public void revealCard(int row, int col){
         if (grid[row][col] != null){
-            grid[row][col].revealCard(true);
+            grid[row][col].returnCard();
         }
     }
     
@@ -49,7 +49,7 @@ public class PlayerHandModel {
     public boolean allCardsRevealed(){
         for (CardModel[] x : grid){
             for(CardModel y : x){
-                if (!y.isFaceDown()){
+                if (y != null && y.isFaceDown()){
                     return false;
                 }
             }
@@ -62,7 +62,7 @@ public class PlayerHandModel {
         int count = 0;
         for (CardModel[] x : grid){
             for(CardModel y : x){
-                if (y.isFaceDown()){
+                if (y != null && !y.isFaceDown()){
                     count++;
                 }
             }
@@ -79,8 +79,10 @@ public class PlayerHandModel {
         int i = 0;
         //boucle qui regarde si les cartes sont révélées et ont les meme valeurs
         for (int j = 0; j< columns;j++){
-            if (grid[i][j].isFaceDown() && grid[i+1][j].isFaceDown() && grid[i+2][j].isFaceDown()){
-                if (grid[i][j] == grid[i+1][j] && grid[i+1][j] == grid[i+2][j]) {
+            if (grid[i][j] != null && grid[i+1][j] != null && grid[i+2][j] != null &&
+                !grid[i][j].isFaceDown() && !grid[i+1][j].isFaceDown() && !grid[i+2][j].isFaceDown()){
+                if (grid[i][j].getCardValue() == grid[i+1][j].getCardValue() && 
+                    grid[i+1][j].getCardValue() == grid[i+2][j].getCardValue()) {
                     res = j;
                     return res;
                 }
@@ -110,8 +112,11 @@ public class PlayerHandModel {
         int i = 0;
         //boucle qui regarde si les cartes sont révélées et ont les meme valeurs
         for (int j = 0; j< rows;j++){
-            if (grid[j][i].isFaceDown() && grid[j][i+1].isFaceDown() && grid[j][i+2].isFaceDown() && grid[j][i+3].isFaceDown()){
-                if (grid[j][i] == grid[j][i+1] && grid[j][i+1] == grid[j][i+2] && grid[j][i+2] == grid[j][i+3]){
+            if (grid[j][i] != null && grid[j][i+1] != null && grid[j][i+2] != null && grid[j][i+3] != null &&
+                !grid[j][i].isFaceDown() && !grid[j][i+1].isFaceDown() && !grid[j][i+2].isFaceDown() && !grid[j][i+3].isFaceDown()){
+                if (grid[j][i].getCardValue() == grid[j][i+1].getCardValue() && 
+                    grid[j][i+1].getCardValue() == grid[j][i+2].getCardValue() && 
+                    grid[j][i+2].getCardValue() == grid[j][i+3].getCardValue()){
                     res = j;
                     return res;
                 }

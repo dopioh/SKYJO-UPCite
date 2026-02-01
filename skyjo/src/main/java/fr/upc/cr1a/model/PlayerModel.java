@@ -6,7 +6,7 @@ package fr.upc.cr1a.model;
 
 public class PlayerModel {
 
-    private String name; // id unique qui permettra de retrouver le player dans la db
+    private final String name; // id unique qui permettra de retrouver le player dans la db
     private PlayerHandModel hand;
     private int totalScore;
     
