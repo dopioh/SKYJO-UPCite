@@ -36,4 +36,12 @@
 
 - Systeme d'image dans le cache
 
+- Système pour la main du joueur avec toutes ses fonctions et les regles du jeu
+
+- Ajout de fonctions dans le gameManager 
+
+- Jouabilité dans le terminal 
+
+
+
  
