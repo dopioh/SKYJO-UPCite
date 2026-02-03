@@ -10,19 +10,17 @@ import java.util.Scanner;
  * Elle doit servir que pour ca et pas pour autre chose
  */
 public class GameLauncher {
-    /*
-    public GameLauncher(){
-        // on lance la frame ici 
-        new Frame();
-    }
-     */
     
     private GameManager gameManager;
     private Scanner scanner;
     
     public GameLauncher() {
-        scanner = new Scanner(System.in);
-        startGame();
+        // fenetre du jeu 
+        new Frame();
+
+        // Jeu Partie console 
+        //scanner = new Scanner(System.in);
+        //startGame();
     }
     
     /**
