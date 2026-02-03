@@ -43,7 +43,7 @@ public class GameLauncher {
                     valid = true;
                 }
             } catch (Exception e) {
-                System.out.println("Il te manque une case a toi, on t'as dis un chiffre");
+                System.out.println("Il te manque une case a toi, on t'as dis un chiffre\n");
                 scanner.nextLine();
             }
         } while (!valid);
@@ -93,7 +93,7 @@ public class GameLauncher {
                             break;
                         }
                     } catch (Exception e) {
-                        System.out.println("t'as pas compris quoi? t'as besoin d'un cerveau?");
+                        System.out.println("t'as pas compris quoi? t'as besoin d'un cerveau?\n");
                         scanner.nextLine();
                     }
                 } while (true);
@@ -153,10 +153,10 @@ public class GameLauncher {
                 if (choice == 1 || choice == 2) {
                     validChoice = true;
                 } else {
-                    System.out.print("T'es pas allé à l'école toi?");
+                    System.out.print("T'es pas allé à l'école toi?\n");
                 }
             } catch (Exception e) {
-                System.out.print("2 choix possible et t'en donnes une troisième a quoi tu joues");
+                System.out.print("2 choix possible et t'en donnes une troisième a quoi tu joues\n");
                 scanner.nextLine();
             }
         } while (!validChoice);
@@ -197,10 +197,10 @@ public class GameLauncher {
                     if (action == 1 || action == 2) {
                         validAction = true;
                     } else {
-                        System.out.print("Tu te crois drole? 1 ou 2 pas autre chose");
+                        System.out.print("Tu te crois drole? 1 ou 2 pas autre chose\n");
                     }
                 } catch (Exception e) {
-                    System.out.print("T'es un rigolo toi, il te manque la touche 1 et 2 ou quoi?");
+                    System.out.print("T'es un rigolo toi, il te manque la touche 1 et 2 ou quoi?\n");
                     scanner.nextLine();
                 }
             } while (!validAction);
@@ -235,7 +235,7 @@ public class GameLauncher {
                             break;
                         }
                     } catch (Exception e) {
-                        System.out.println("Les chiffres et toi ça fait 2 apparemment");
+                        System.out.println("Les chiffres et toi ça fait 2 apparemment\n");
                         scanner.nextLine();
                     }
                 } while (true);
@@ -274,9 +274,9 @@ public class GameLauncher {
                 scanner.nextLine();
                 
                 if (row < 0 || row >= 3 || col < 0 || col >= 4) {
-                    System.out.println("\nPosition invalide !\n");
+                    System.out.println("\nPosition invalide\n");
                 } else if (player.getHand().getCard(row, col) == null) {
-                    System.out.println("\nPas de carte à cette position !\n");
+                    System.out.println("\nPas de carte à cette position\n");
                 } else {
                     break;
                 }
@@ -317,6 +317,7 @@ public class GameLauncher {
         }
     
     }
+
 
     public static void main(String[] args) throws Exception {
         new GameLauncher();

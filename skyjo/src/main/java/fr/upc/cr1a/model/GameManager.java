@@ -370,7 +370,7 @@ public class GameManager {
         }
         else {
             gameState = GameState.ROUND_ENDED;
-            System.out.println("\nNouvelle manche...");
+            System.out.println("\n");
         }
     }
 }
