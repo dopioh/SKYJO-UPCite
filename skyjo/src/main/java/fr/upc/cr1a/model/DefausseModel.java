@@ -8,7 +8,7 @@ package fr.upc.cr1a.model;
 public class DefausseModel extends CardStackModel {
 
     public DefausseModel() {
-        // vide a l'initialisation du jeu
+        // vide a l'initialisation du jeu // pas vraiment
     }
     
 }
