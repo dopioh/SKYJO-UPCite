@@ -1,6 +1,11 @@
 package fr.upc.cr1a.model;
 
 import java.util.List;
+
+import fr.upc.cr1a.controller.GameBoardController;
+import fr.upc.cr1a.view.Frame;
+import fr.upc.cr1a.view.GameBoardView;
+
 import java.util.ArrayList;
 
 /**
@@ -19,6 +24,8 @@ public class GameManager {
     private GameState gameState;
     private TurnPhase turnPhase;
     private CardModel currentDrawCard;
+
+    private GameBoardModel gameBoardModel;
     
     /*
     *classe local enum pour gérer les états du jeu
@@ -40,10 +47,17 @@ public class GameManager {
 
     /**
      * Constructeur qui doit etre appeler pour lancer une partie
+     * Dans la version swing
     */
-   public GameManager(){
-       
-}
+    public GameManager(Frame frame){
+        System.out.println("GameManager Called");
+        this.gameBoardModel = new GameBoardModel();
+
+        GameBoardView view = this.gameBoardModel.getGameBoardView();
+
+        frame.add(view, "GAME");
+        frame.showPanel("GAME");
+    }
 
 /*
 *constructeur avec les noms des joueurs
