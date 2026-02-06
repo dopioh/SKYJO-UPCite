@@ -17,7 +17,7 @@ import java.util.ArrayList;
  */
 public class GameManager {
 
-    private List<PlayerModel> players;
+    private ArrayList<PlayerModel> players;
     private PiocheModel deck;
     private DefausseModel discardPile;
     private int currentPlayerIndex;
@@ -51,8 +51,13 @@ public class GameManager {
     */
     public GameManager(Frame frame){
         System.out.println("GameManager Called");
-        this.gameBoardModel = new GameBoardModel();
 
+        this.players = new ArrayList<>(); // il faudra initialiser les joueurs a un moment
+        for (int i = 1 ; i <= 8 ; i++){   // juste pour les tests avec tous les joueurs
+            players.add(new PlayerModel(new PlayerData("J" + i)));
+        }
+
+        this.gameBoardModel = new GameBoardModel(players);
         GameBoardView view = this.gameBoardModel.getGameBoardView();
 
         frame.add(view, "GAME");
