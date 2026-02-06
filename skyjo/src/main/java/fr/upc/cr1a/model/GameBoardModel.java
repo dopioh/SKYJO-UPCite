@@ -19,5 +19,14 @@ public class GameBoardModel {
     public GameBoardView getGameBoardView() {
         return gameBoardView;
     }
+
+    /**
+     * @param
+     */
+    public void buttonPlayerCalled(int nbr){
+        System.out.println("Button Called " + nbr );
+        // va appeler une fonction dans la view selon le numero de bouton appuyé
+        // pour print la futurre main du joueur
+    }
     
 }

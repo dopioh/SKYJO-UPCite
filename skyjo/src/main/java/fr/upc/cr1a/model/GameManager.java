@@ -53,8 +53,8 @@ public class GameManager {
         System.out.println("GameManager Called");
 
         this.players = new ArrayList<>(); // il faudra initialiser les joueurs a un moment
-        for (int i = 1 ; i <= 8 ; i++){   // juste pour les tests avec tous les joueurs
-            players.add(new PlayerModel(new PlayerData("J" + i)));
+        for (int i = 1 ; i <= 7 ; i++){   // juste pour les tests avec tous les joueurs
+            players.add(new PlayerModel(new PlayerData("Joueur " + i)));
         }
 
         this.gameBoardModel = new GameBoardModel(players);
