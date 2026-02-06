@@ -1,6 +1,7 @@
 package fr.upc.cr1a.controller;
 
 import fr.upc.cr1a.model.AudioManager;
+import fr.upc.cr1a.model.GameManager;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.MainMenuPanel;
 
@@ -28,7 +29,9 @@ public class MainMenuController {
         //Bouton jouer
         view.getPlayButton().addActionListener(e -> {
             audio.playBgm("/music/calmbgm.wav");
-        // audio.playSfx("/sfx/UIclick.wav");
+            // audio.playSfx("/sfx/UIclick.wav");
+
+            new GameManager(this.frame); // GameManager de Swing
         });
 
         // view.getShopButton().addActionListener(e -> {
