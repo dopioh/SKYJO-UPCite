@@ -46,7 +46,6 @@
 
 - Jouabilité dans le terminal 
 
-
 ## v.0.2: SPRINT 2
 ---
 
@@ -57,5 +56,9 @@
     - Animation scribble au survol
     - Support d'icônes à côté du texte
     - 3 couleurs prédéfinies (TURQUOISE, GREEN, RED)
+    
+- Cartes Basique pour la vue graphique
+
+- Plateau de jeu avec joueurs cliquable
 
  
