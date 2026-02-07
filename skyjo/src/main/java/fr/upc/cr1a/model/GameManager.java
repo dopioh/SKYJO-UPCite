@@ -104,9 +104,9 @@ public class GameManager {
         return deck;
     }
     
-    /*
-    *Initialisation de la game 
-    */
+    /** 
+     *Initialisation de la game 
+     */
    public void initializeGame(){
         //creer un deck deja melange
         deck = new PiocheModel();
@@ -362,6 +362,7 @@ public class GameManager {
         }
         
         //affiche les scores totaux
+        System.out.println("Fin de la manche");
         for (PlayerModel player : players) {
             System.out.println(player.getName() + " : " + player.getTotalScore() + " points au total");
         }
@@ -391,5 +392,15 @@ public class GameManager {
             gameState = GameState.ROUND_ENDED;
             System.out.println("\n");
         }
+    }
+
+    /**
+     * Si un joueur n'a pas atteint les 100 points, on peut recommencer une nouvelle manche
+     */
+    public void startNewGame() {
+        currentPlayerIndex = 0; // Faudra changer ici pour le premier joueur du jeu
+        currentDrawCard = null;
+        discardPile = new DefausseModel();
+        initializeGame();
     }
 }
