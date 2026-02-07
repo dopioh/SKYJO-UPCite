@@ -61,7 +61,7 @@ public class GameManager {
         for (PlayerModel player : players) {
             for (int row = 0; row < 3; row++) {
                 for (int col = 0; col < 4; col++) {
-                    CardModel card = new NumberCardModel(false, 0, "blue");
+                    CardModel card = new NumberCardModel(true, 0, "blue");
                     player.getHand().placeCard(row, col, card);
                 }
             }
