@@ -10,15 +10,17 @@ import java.util.Scanner;
  * Elle doit servir que pour ca et pas pour autre chose
  */
 public class GameLauncher {
+    /*
+    public GameLauncher(){
+        // on lance la frame ici 
+        new Frame();
+    }
+     */
     
     private GameManager gameManager;
     private Scanner scanner;
     
     public GameLauncher() {
-        // fenetre du jeu 
-        //new Frame();
-
-        // Jeu Partie console 
         scanner = new Scanner(System.in);
         startGame();
     }
@@ -43,7 +45,7 @@ public class GameLauncher {
                     valid = true;
                 }
             } catch (Exception e) {
-                System.out.println("Il te manque une case a toi, on t'as dis un chiffre\n");
+                System.out.println("Il te manque une case a toi, on t'as dis un chiffre");
                 scanner.nextLine();
             }
         } while (!valid);
@@ -71,27 +73,53 @@ public class GameLauncher {
         gameManager.initializeGame();
         
         //choisir 2 cartes pour chaque joueur au début
-        initializeHand();
-    
-        //Boucle de JEU 
-        while (gameManager.getGameState() != GameManager.GameState.GAME_ENDED) {
+        for (PlayerModel player : gameManager.getPlayers()) {
+            System.out.println(player.getName() + " choisissez 2 cartes à révéler \n");
+            showHand(player, false);
             
-            //boucle de la partie (A bouger plus tard dans la gameLoop peut etre jsp faut ce concerté les amis)
-            while (gameManager.getGameState() == GameManager.GameState.IS_PLAYING || gameManager.getGameState() == GameManager.GameState.LAST_ROUND) {
-                playTurn();
+            for (int i = 0; i < 2; i++) {
+                int row = -1, col = -1;
+                //choisir la carte jusuqu'a donner une carte valide
+                do {
+                    try {
+                        System.out.print("Carte " + (i + 1) + " - Ligne (0-2) : ");
+                        row = scanner.nextInt();
+                        System.out.print("Carte " + (i + 1) + " - Colonne (0-3) : ");
+                        col = scanner.nextInt();
+                        
+                        if (row < 0 || row >= 3 || col < 0 || col >= 4) {
+                            System.out.println("\nPosition invalide ! Réessayez.\n");
+                        } else if (player.getHand().getCard(row, col).isFaceDown() == false) {
+                            System.out.println("\nCette carte est déjà révélée !\n");
+                        } else {
+                            break;
+                        }
+                    } catch (Exception e) {
+                        System.out.println("t'as pas compris quoi? t'as besoin d'un cerveau?");
+                        scanner.nextLine();
+                    }
+                } while (true);
+                
+                player.getHand().revealCard(row, col);
+                System.out.println("\nCarte révélée : " + player.getHand().getCard(row, col).getCardValue());
+                showHand(player, false);
+                System.out.println("------------------------------------------------------------------");
             }
-
-            //Manche prochaine
-            if (gameManager.getGameState() == GameManager.GameState.ROUND_ENDED) {
-                System.out.println("----------------------------------------------------------------");
-                System.out.println("\nNouvelle Manche\n");
-                gameManager.startNewGame();
-                initializeHand();
-            }
+            scanner.nextLine(); 
         }
         
+        System.out.println("\nCarte sur la défausse : " + gameManager.getDiscardPile().getTopCard().getCardValue() + "\n");
         
-        System.out.println("\nPartie terminée ");
+        //boucle de la partie (A bouger plus tard dans la gameLoop peut etre jsp faut ce concerté les amis)
+        while (gameManager.getGameState() == GameManager.GameState.IS_PLAYING || gameManager.getGameState() == GameManager.GameState.LAST_ROUND) {
+            playTurn();
+        }
+        
+        //fin de partie
+        if (gameManager.getGameState() == GameManager.GameState.GAME_ENDED) {
+            System.out.println("\nPartie terminée ");
+        }
+        
         scanner.close();
     }
     
@@ -127,10 +155,10 @@ public class GameLauncher {
                 if (choice == 1 || choice == 2) {
                     validChoice = true;
                 } else {
-                    System.out.print("T'es pas allé à l'école toi?\n");
+                    System.out.print("T'es pas allé à l'école toi?");
                 }
             } catch (Exception e) {
-                System.out.print("2 choix possible et t'en donnes une troisième a quoi tu joues\n");
+                System.out.print("2 choix possible et t'en donnes une troisième a quoi tu joues");
                 scanner.nextLine();
             }
         } while (!validChoice);
@@ -171,10 +199,10 @@ public class GameLauncher {
                     if (action == 1 || action == 2) {
                         validAction = true;
                     } else {
-                        System.out.print("Tu te crois drole? 1 ou 2 pas autre chose\n");
+                        System.out.print("Tu te crois drole? 1 ou 2 pas autre chose");
                     }
                 } catch (Exception e) {
-                    System.out.print("T'es un rigolo toi, il te manque la touche 1 et 2 ou quoi?\n");
+                    System.out.print("T'es un rigolo toi, il te manque la touche 1 et 2 ou quoi?");
                     scanner.nextLine();
                 }
             } while (!validAction);
@@ -209,7 +237,7 @@ public class GameLauncher {
                             break;
                         }
                     } catch (Exception e) {
-                        System.out.println("Les chiffres et toi ça fait 2 apparemment\n");
+                        System.out.println("Les chiffres et toi ça fait 2 apparemment");
                         scanner.nextLine();
                     }
                 } while (true);
@@ -248,9 +276,9 @@ public class GameLauncher {
                 scanner.nextLine();
                 
                 if (row < 0 || row >= 3 || col < 0 || col >= 4) {
-                    System.out.println("\nPosition invalide\n");
+                    System.out.println("\nPosition invalide !\n");
                 } else if (player.getHand().getCard(row, col) == null) {
-                    System.out.println("\nPas de carte à cette position\n");
+                    System.out.println("\nPas de carte à cette position !\n");
                 } else {
                     break;
                 }
@@ -289,50 +317,7 @@ public class GameLauncher {
             }
             System.out.println();
         }
-        System.out.println("\n" + "Score de la manche: "+ player.getHand().getVisibleCardScore());
-        System.out.println("Score de la partie: "+ (player.getTotalScore() + player.getHand().getVisibleCardScore()) + "\n");
-    }
-
-    /**
-     * Sert à initialiser les mains des joueurs en début de partie
-     */
-    private void initializeHand(){
-        for (PlayerModel player : gameManager.getPlayers()) {
-            System.out.println(player.getName() + " choisissez 2 cartes à révéler \n");
-            showHand(player, false);
-            
-            for (int i = 0; i < 2; i++) {
-                int row = -1, col = -1;
-                //choisir la carte jusuqu'a donner une carte valide
-                do {
-                    try {
-                        System.out.print("Carte " + (i + 1) + " - Ligne (0-2) : ");
-                        row = scanner.nextInt();
-                        System.out.print("Carte " + (i + 1) + " - Colonne (0-3) : ");
-                        col = scanner.nextInt();
-                        
-                        if (row < 0 || row >= 3 || col < 0 || col >= 4) {
-                            System.out.println("\nPosition invalide ! Réessayez.\n");
-                        } else if (player.getHand().getCard(row, col).isFaceDown() == false) {
-                            System.out.println("\nCette carte est déjà révélée !\n");
-                        } else {
-                            break;
-                        }
-                    } catch (Exception e) {
-                        System.out.println("t'as pas compris quoi? t'as besoin d'un cerveau?\n");
-                        scanner.nextLine();
-                    }
-                } while (true);
-                
-                player.getHand().revealCard(row, col);
-                System.out.println("\nCarte révélée : " + player.getHand().getCard(row, col).getCardValue());
-                showHand(player, false);
-                System.out.println("------------------------------------------------------------------");
-            }
-            scanner.nextLine(); 
-        }
-        
-        System.out.println("\nCarte sur la défausse : " + gameManager.getDiscardPile().getTopCard().getCardValue() + "\n");
+    
     }
 
     public static void main(String[] args) throws Exception {
