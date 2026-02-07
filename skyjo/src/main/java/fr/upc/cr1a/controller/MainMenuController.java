@@ -31,7 +31,7 @@ public class MainMenuController {
             audio.playBgm("/music/calmbgm.wav");
             // audio.playSfx("/sfx/UIclick.wav");
 
-            new GameManager(this.frame); // lamce GameManager de Swing
+            new GameManager(this.frame); // GameManager de Swing
         });
 
         // view.getShopButton().addActionListener(e -> {

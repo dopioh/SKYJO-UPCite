@@ -46,10 +46,6 @@
 
 - Jouabilité dans le terminal 
 
-- Cartes Basique pour la vue graphique
-
-- Plateau de jeu avec joueurs cliquable
-
 
 
  
