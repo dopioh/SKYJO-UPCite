@@ -249,7 +249,7 @@ public class GameManager {
             boolean sameCard = true;
             for (int row = 1; row < hand.getRows(); row++) {
                 CardModel card = hand.getCard(row, col);
-                if (card == null || card.getCardValue() != firstCard.getCardValue()) {
+                if (card == null || card.isFaceDown() || card.getCardValue() != firstCard.getCardValue()) {
                     sameCard = false;
                     break;
                 }
@@ -281,7 +281,7 @@ public class GameManager {
             boolean sameCard = true;
             for (int col = 1; col < hand.getColumns(); col++) {
                 CardModel card = hand.getCard(row, col);
-                if (card == null || card.getCardValue() != firstCard.getCardValue()) {
+                if (card == null || card.isFaceDown() || card.getCardValue() != firstCard.getCardValue()) {
                     sameCard = false;
                     break;
                 }
