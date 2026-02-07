@@ -58,4 +58,11 @@
     - Support d'icônes à côté du texte
     - 3 couleurs prédéfinies (TURQUOISE, GREEN, RED)
 
+- Affichage des cartes sur le plateau
+    - CardButton : JButton custom pour afficher les cartes
+    - Crop les images et met dans imageCache
+    - Rendu d'image en haut qualité
+    - Système de switching entre les mains des différents joueurs
+    - affiche "Joueur X - Carte [row][col]" en terminal
+    - boutton retour
  

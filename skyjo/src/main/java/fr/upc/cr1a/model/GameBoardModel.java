@@ -26,8 +26,8 @@ public class GameBoardModel {
     }
 
     /**
-     * Quand on appuie sur un bouton joueur, on affiche ses cartes
-     * @param nbr le numero du joueur (commence a 1)
+     * Quand on appuie sur le bouton joueur, on affiche ses cartes
+     * @param nbr le numero du joueur
      */
     public void buttonPlayerCalled(int nbr){
         System.out.println("Button Called " + nbr );
