@@ -350,18 +350,29 @@ public class GameManager {
                 break;
             }
         }
-        //permet donc t'appliquer la regle si le joueur n'a pas le score le plus bas
+        // //permet donc t'appliquer la regle si le joueur n'a pas le score le plus bas
+        // if (roundEndPlayer != null && roundEndPlayer != lowestPlayer) {
+        //     int roundEndPlayerScore = roundEndPlayer.getHand().calculateScore();
+        //     roundEndPlayer.addScore(roundEndPlayerScore * 2); // double le score
+        // } else {
+        //     //donner les scores normalment sinon
+        //     for (PlayerModel player : players) {
+        //         int score = player.getHand().calculateScore();
+        //         player.addScore(score);
+        //     }
+        // }
+        
+        //Nouvelle version du code d'en haut, applique le score a tout le monde
+        for (PlayerModel player : players) {
+            int score = player.getHand().calculateScore();
+            player.addScore(score);
+        }
+        // Puis ici double le score du joueur qui a lancé la fin de la manche
         if (roundEndPlayer != null && roundEndPlayer != lowestPlayer) {
             int roundEndPlayerScore = roundEndPlayer.getHand().calculateScore();
-            roundEndPlayer.addScore(roundEndPlayerScore * 2); // double le score
-        } else {
-            //donner les scores normalment sinon
-            for (PlayerModel player : players) {
-                int score = player.getHand().calculateScore();
-                player.addScore(score);
-            }
+            roundEndPlayer.addScore(roundEndPlayerScore); 
         }
-        
+
         //affiche les scores totaux
         System.out.println("Fin de la manche");
         for (PlayerModel player : players) {

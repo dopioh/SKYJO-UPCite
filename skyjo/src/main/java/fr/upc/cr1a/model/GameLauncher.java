@@ -290,7 +290,7 @@ public class GameLauncher {
             System.out.println();
         }
         System.out.println("\n" + "Score de la manche: "+ player.getHand().getVisibleCardScore());
-        System.out.println("Score de la partie: "+ player.getTotalScore() + "\n");
+        System.out.println("Score de la partie: "+ (player.getTotalScore() + player.getHand().getVisibleCardScore()) + "\n");
     }
 
     /**
