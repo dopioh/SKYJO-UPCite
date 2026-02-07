@@ -83,7 +83,8 @@ public class GameLauncher {
 
             //Manche prochaine
             if (gameManager.getGameState() == GameManager.GameState.ROUND_ENDED) {
-                System.out.println("\nNouvelle Manche \n\n");
+                System.out.println("----------------------------------------------------------------");
+                System.out.println("\nNouvelle Manche\n");
                 gameManager.startNewGame();
                 initializeHand();
             }
@@ -288,7 +289,8 @@ public class GameLauncher {
             }
             System.out.println();
         }
-        System.out.println("\n" + "Score : "+ player.getHand().getVisibleCardScore() + "\n");
+        System.out.println("\n" + "Score de la manche: "+ player.getHand().getVisibleCardScore());
+        System.out.println("Score de la partie: "+ player.getTotalScore() + "\n");
     }
 
     /**

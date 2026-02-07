@@ -429,6 +429,6 @@ public class GameManager {
             }
             System.out.println();
         }
-        System.out.println("\n" + "Score : "+ player.getHand().getVisibleCardScore() + "\n");
+        System.out.println("\n" + "Score de la manche: "+ player.getHand().getVisibleCardScore() + "\n");
     }
 }
