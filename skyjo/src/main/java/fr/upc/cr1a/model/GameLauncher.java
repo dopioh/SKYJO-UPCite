@@ -16,11 +16,11 @@ public class GameLauncher {
     
     public GameLauncher() {
         // fenetre du jeu 
-        new Frame();
+        //new Frame();
 
         // Jeu Partie console 
-        //scanner = new Scanner(System.in);
-        //startGame();
+        scanner = new Scanner(System.in);
+        startGame();
     }
     
     /**

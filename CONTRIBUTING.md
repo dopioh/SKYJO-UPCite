@@ -1,4 +1,4 @@
-# Guide de contribution
+****************# Guide de contribution
 
 Merci de votre intérêt pour contribuer au projet Skyjo ! Toute contribution est la bienvenue, que ce soit pour corriger des bugs, ajouter de nouvelles fonctionnalités, améliorer la documentation ou optimiser le code existant.
 
