@@ -365,6 +365,7 @@ public class GameManager {
         System.out.println("Fin de la manche");
         for (PlayerModel player : players) {
             System.out.println(player.getName() + " : " + player.getTotalScore() + " points au total");
+            showHand(player, true);
         }
 
         //regarde si quelqu'un a 100 pts
@@ -402,5 +403,31 @@ public class GameManager {
         currentDrawCard = null;
         discardPile = new DefausseModel();
         initializeGame();
+    }
+
+    /**
+     *affiche la main d'un joueur
+     *si la carte est null = X; face cachée = ?; face visible = valeur
+     */
+    private void showHand(PlayerModel player, boolean showValues) {
+        System.out.println("Main de " + player.getName() + "\n");
+        System.out.println("         Col 0   Col 1   Col 2   Col 3");
+        //boucle qui affiche la main
+        for (int row = 0; row < 3; row++) {
+            System.out.print("Ligne " + row + " ");
+            for (int col = 0; col < 4; col++) {
+                CardModel card = player.getHand().getCard(row, col);
+                if (card == null) {
+                    System.out.print("[  X  ]");
+                } else if (!showValues && card.isFaceDown()) {
+                    System.out.print("[  ?  ]");
+                } else {
+                    System.out.printf("[ %3d ]", card.getCardValue());
+                }
+                System.out.print(" ");
+            }
+            System.out.println();
+        }
+        System.out.println("\n" + "Score : "+ player.getHand().getVisibleCardScore() + "\n");
     }
 }
