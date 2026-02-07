@@ -189,6 +189,7 @@ public class GameManager {
         currentDrawCard = discardPile.getTopCard();
         discardPile.removeCardAtTop();
         turnPhase = TurnPhase.CARD_TAKE_FROM_DISCARD;
+        if (currentDrawCard.isFaceDown()) currentDrawCard.returnCard();
         return currentDrawCard;
     }
     
@@ -204,7 +205,7 @@ public class GameManager {
         hand.replaceCard(row, col, currentDrawCard);
         discardPile.addCardAtTop(cardInHand);
         //montrer la nouvelle carte
-        currentDrawCard.returnCard();
+        if(currentDrawCard.isFaceDown()) currentDrawCard.returnCard();
         currentDrawCard = null;
         
         //vérifier les colonnes/lignes identiques
