@@ -2,13 +2,17 @@ package fr.upc.cr1a.controller;
 
 import fr.upc.cr1a.model.AudioManager;
 import fr.upc.cr1a.model.GameManager;
+import fr.upc.cr1a.view.DoodleButton;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.MainMenuPanel;
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  * Controller du menu principal avec les bouttons existants (jouer, boutique, paramètres)
  * 
- * @author Hugo
+ * @author Hugo, Ian
  */
 public class MainMenuController {
 
@@ -21,21 +25,31 @@ public class MainMenuController {
         this.view = view;
         this.audio = frame.getAudioManager();
 
-        //Bouton paramètres
-        view.getSettingsButton().addActionListener(e -> {
-            frame.showSettingsOverlay();
+        // listeners
+        ajouterListeners(view.getShopButton(), () -> clicShop());
+        ajouterListeners(view.getPlayButton(), () -> clicPlay());
+        ajouterListeners(view.getSettingsButton(), () -> clicSettings());
+    }
+
+    // ajoute hover + clic
+    private void ajouterListeners(DoodleButton btn, Runnable action) {
+        btn.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) { btn.onMouseEnter(); }
+            public void mouseExited(MouseEvent e) { btn.onMouseExit(); }
+            public void mouseClicked(MouseEvent e) { action.run(); }
         });
+    }
 
-        //Bouton jouer
-        view.getPlayButton().addActionListener(e -> {
-            audio.playBgm("/music/calmbgm.wav");
-            // audio.playSfx("/sfx/UIclick.wav");
+    private void clicShop() {
+        // ici mettreeeee
+    }
 
-            new GameManager(this.frame); // GameManager de Swing
-        });
+    private void clicPlay() {
+        audio.playBgm("/music/calmbgm.wav");
+        new GameManager(frame);
+    }
 
-        // view.getShopButton().addActionListener(e -> {
-        //     
-        // });
+    private void clicSettings() {
+        frame.showSettingsOverlay();
     }
 }

@@ -47,5 +47,15 @@
 - Jouabilité dans le terminal 
 
 
+## v.0.2: SPRINT 2
+---
+
+### Added
+
+- Boutons doodle
+    - box wiggle
+    - Animation scribble au survol
+    - Support d'icônes à côté du texte
+    - 3 couleurs prédéfinies (TURQUOISE, GREEN, RED)
 
  
