@@ -3,6 +3,7 @@ package fr.upc.cr1a.model;
 import java.util.ArrayList;
 
 import fr.upc.cr1a.controller.GameBoardController;
+import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
 
 /**
@@ -12,13 +13,18 @@ import fr.upc.cr1a.view.GameBoardView;
  * @see GameBoardController pour la gestion des cliques/actions
  * 
  * @author Mei
+ * @author Ian
  */
 public class GameBoardModel {
 
     private GameBoardController gameBoardController;
     private GameBoardView gameBoardView;
+    private ArrayList<PlayerModel> listPlayer;
+    private Frame frame; // pour revenir au menu
     
-    public GameBoardModel(ArrayList<PlayerModel> listPlayerModels ){
+    public GameBoardModel(ArrayList<PlayerModel> listPlayerModels, Frame frame){
+        this.listPlayer = listPlayerModels;
+        this.frame = frame;
         this.gameBoardView = new GameBoardView(listPlayerModels);
         this.gameBoardController = new GameBoardController(this, gameBoardView);
     }
@@ -33,10 +39,18 @@ public class GameBoardModel {
      */
     public void buttonPlayerCalled(int nbr){
         System.out.println("Button Called " + nbr );
-        // va appeler une fonction dans la view selon le numero de bouton appuyé
-        // pour print la future main du joueur
+        // desactivé pour l'instant pour pas changer de main (à droite) au clic
+        // if (nbr >= 1 && nbr <= listPlayer.size()) {
+        //     PlayerModel player = listPlayer.get(nbr - 1);
+        //     gameBoardView.showPlayerCards(player);
+        // }
+    }
 
-
+    public void retourMenuCalled(){
+        System.out.println("Retour au menu");
+        if (frame != null) {
+            frame.showPanel("MENU");
+        }
     }
     
 }

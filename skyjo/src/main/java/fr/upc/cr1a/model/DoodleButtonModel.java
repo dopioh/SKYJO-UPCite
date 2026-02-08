@@ -4,6 +4,8 @@ import java.awt.Color;
 
 /**
  * modele pour le bouton style doodle
+ * 
+ * @author Ian
  */
 public class DoodleButtonModel {
 

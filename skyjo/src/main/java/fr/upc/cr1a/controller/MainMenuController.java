@@ -12,7 +12,8 @@ import java.awt.event.MouseEvent;
 /**
  * Controller du menu principal avec les bouttons existants (jouer, boutique, paramètres)
  * 
- * @author Hugo, Ian
+ * @author Hugo
+ * @author Ian
  */
 public class MainMenuController {
 

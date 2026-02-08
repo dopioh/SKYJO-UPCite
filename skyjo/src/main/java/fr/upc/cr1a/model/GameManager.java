@@ -57,7 +57,17 @@ public class GameManager {
             players.add(new PlayerModel(new PlayerData("Joueur " + i)));
         }
 
-        this.gameBoardModel = new GameBoardModel(players);
+        // TEMPORAIRE : toutes les cartes face cachée pour tester - Ian
+        for (PlayerModel player : players) {
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 4; col++) {
+                    CardModel card = new NumberCardModel(true, 0, "blue");
+                    player.getHand().placeCard(row, col, card);
+                }
+            }
+        }
+
+        this.gameBoardModel = new GameBoardModel(players, frame);
         GameBoardView view = this.gameBoardModel.getGameBoardView();
 
         frame.add(view, "GAME");

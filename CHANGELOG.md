@@ -46,6 +46,7 @@
 
 - Jouabilité dans le terminal 
 
+
 ## v.0.2: SPRINT 2
 ---
 
@@ -67,9 +68,16 @@
 
 - Possibilité d'enchainer 2 manches
 
+- Affichage des cartes sur le plateau
+    - CardButton : JButton custom pour afficher les cartes
+    - Crop les images et met dans imageCache
+    - Rendu d'image en haut qualité
+    - Système de switching entre les mains des différents joueurs
+    - affichage du main actuelle en haut
+    - affiche "Joueur X - Carte [row][col]" en terminal
+    - boutton retour
 
 - Ajout du bot dans le Terminal
-
 
 
 ### Fixed
@@ -79,3 +87,4 @@
 - Carte de la défausse faceDown dans la main du joueur
 
 - Tout les joueurs jouent pendant la derniere manche
+

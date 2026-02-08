@@ -1,7 +1,5 @@
 package fr.upc.cr1a.controller;
 
-import java.awt.event.*;
-
 import javax.swing.JButton;
 
 import fr.upc.cr1a.model.GameBoardModel;
@@ -15,6 +13,7 @@ import fr.upc.cr1a.view.GameBoardView;
  * @see GameBoardModel logique du plateau
  * 
  * @author Mei
+ * @author Ian
  */
 public class GameBoardController {
 
@@ -32,26 +31,30 @@ public class GameBoardController {
     }
     
     /**
-     * listener qui lance un appel lorsque :
-     * On clique sur un joueur
-     * On survole un joueur
+     * les listeners du plateau :
+     * - bouton retour vers le menu
+     * - clic sur les cartes affichées
+     * 
+     * Les boutons joueur a gauche ne changent plus la main affichée mais
+     * la fonction buttonPlayerCalled existe toujours dans le model si
+     * on a besoin de changer la main affichée a droite
      */
     public void listener(){
-        int s = 1;
-        for (JButton jb : gameBoardView.getListPlayerButton()){
-            int tmp = s;
-            jb.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseEntered(MouseEvent e){
-                    gameBoardModel.buttonPlayerCalled(tmp);
-                }
 
-                @Override
-                public void mouseClicked(MouseEvent e){
-                    gameBoardModel.buttonPlayerCalled(tmp);
-                }
-            });
-            s++;
+        JButton retour = gameBoardView.getBtnRetour();
+        retour.addActionListener(e -> gameBoardModel.retourMenuCalled());
+
+        // listeners pour les cartes
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 4; col++) {
+                final int r = row;
+                final int c = col;
+                gameBoardView.getCardButtons()[row][col].addActionListener(e -> {
+                    if (gameBoardView.getCurrentPlayer() != null) {
+                        System.out.println(gameBoardView.getCurrentPlayer().getName() + " - Carte [" + r + "][" + c + "]");
+                    }
+                });
+            }
         }
     }
 }

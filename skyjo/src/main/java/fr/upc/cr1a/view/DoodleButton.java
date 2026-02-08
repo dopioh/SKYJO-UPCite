@@ -13,6 +13,8 @@ import java.util.Random;
 
 /**
  * bouton stylé doodle avec scribble au hover
+ * 
+ * @author Ian
  */
 public class DoodleButton extends JComponent {
 

@@ -5,11 +5,20 @@ import java.awt.event.*;
 import java.util.ArrayList;
 
 import javax.swing.*;
-//import javax.swing.border.Border;
 
+import fr.upc.cr1a.model.CardModel;
+import fr.upc.cr1a.model.PlayerHandModel;
 import fr.upc.cr1a.model.PlayerModel;
 
+/**
+ * Vue graphique du plateau de jeu avec affichage des cartes et boutons joueurs
+ * 
+ * @author Mei
+ * @author Ian
+ */
 public class GameBoardView extends JPanel{
+
+    private static final int cardSpacing = 2; // <----------------
 
     // elements important : 
     private ArrayList<PlayerModel> listPlayer; // jusqu'a 8 normalement
@@ -21,6 +30,16 @@ public class GameBoardView extends JPanel{
     private JPanel zonePlayer;
     private JPanel zonePlateau;
 
+    // grille de boutons cartes
+    private CardButton[][] cardButtons;
+    private JLabel playerNameLabel;
+
+    // bouton retour vers le menu
+    private JButton btnRetour;
+
+    // joueur actuellement affiche
+    private PlayerModel currentPlayer;
+
     private PlayerPreviewPanel previewPanel; // Le nouveau panel
     private JLayeredPane layeredPane; // gestion des couches
 
@@ -30,6 +49,7 @@ public class GameBoardView extends JPanel{
     public GameBoardView(ArrayList<PlayerModel> listPlayerModels){
         this.listPlayer = listPlayerModels;
         this.buttonlistPlayer = new ArrayList<JButton>();
+        this.cardButtons = new CardButton[3][4];
         setLayout(new BorderLayout());
         setOpaque(true);
         setVisible(true);
@@ -46,6 +66,11 @@ public class GameBoardView extends JPanel{
         });
 
         initComponents();
+
+        // afficher les cartes du premier joueur par defaut
+        if (!listPlayer.isEmpty()) {
+            showPlayerCards(listPlayer.get(0));
+        }
 
         revalidate();
         repaint();
@@ -81,7 +106,7 @@ public class GameBoardView extends JPanel{
 
         // ZONE PLATEAU ( 3/4 de l'ecran a partir de la droite, les cartes,pioches,defausses et score seront ici)
         this.zonePlateau = new JPanel();
-        zonePlateau.setLayout(new GridBagLayout());
+        zonePlateau.setLayout(new BorderLayout());
         zonePlateau.setBackground(Color.WHITE);
 
         GridBagConstraints gbcZonePlateau = new GridBagConstraints();
@@ -96,7 +121,40 @@ public class GameBoardView extends JPanel{
 
         plateauPanel.add(zonePlateau, gbcZonePlateau);
 
-    
+        // label pour le nom du joueur affiché en haut
+        playerNameLabel = new JLabel("Selectionnez un joueur", SwingConstants.CENTER);
+        playerNameLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        playerNameLabel.setForeground(Color.BLACK);
+        zonePlateau.add(playerNameLabel, BorderLayout.NORTH);
+
+        // panel grille pour les cartes
+        JPanel cardsGrid = new JPanel(new GridBagLayout());
+        cardsGrid.setOpaque(false);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(cardSpacing, cardSpacing, cardSpacing, cardSpacing);
+
+        // creer les 12 CardButton
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 4; col++) {
+                gbc.gridx = col;
+                gbc.gridy = row;
+                CardButton btn = new CardButton();
+                cardButtons[row][col] = btn;
+                cardsGrid.add(btn, gbc);
+            }
+        }
+
+        zonePlateau.add(cardsGrid, BorderLayout.CENTER);
+
+        // bouton retour en bas temporaire
+        btnRetour = new JButton("Retour");
+        btnRetour.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        bottomPanel.setOpaque(false);
+        bottomPanel.add(btnRetour);
+        zonePlateau.add(bottomPanel, BorderLayout.SOUTH);
+
         // ZONE PREVIEW OTHER PLAYERS ( apparait au dessus de tous les autres panels quand on hover ou clique sur un button)
         previewPanel = new PlayerPreviewPanel();
         previewPanel.setVisible(false);
@@ -108,6 +166,47 @@ public class GameBoardView extends JPanel{
         playerButton();
 
         SwingUtilities.invokeLater(() -> resizeLayers()); // doit s'executer apres que tous les components soit creer
+    }
+
+    /**
+     * Affiche les cartes d'un joueur qu'on veut à droite
+     */
+    public void showPlayerCards(PlayerModel player) {
+        this.currentPlayer = player;
+        playerNameLabel.setText("Main de " + player.getName());
+        PlayerHandModel hand = player.getHand();
+
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 4; col++) {
+                CardButton btn = cardButtons[row][col];
+                CardModel card = hand.getCard(row, col);
+
+                if (card == null) {
+                    btn.clearImage();
+                    btn.setText("vide");
+                } else {
+                    btn.setText("");
+                    String imgPath = getCardImagePath(card);
+                    btn.setCardImage(imgPath);
+                }
+            }
+        }
+
+        zonePlateau.revalidate();
+        zonePlateau.repaint();
+    }
+
+    /**
+     * Retourne le chemin de l'image pour une carte
+     */
+    private String getCardImagePath(CardModel card) {
+        if (card.isFaceDown()) {
+            return "/cartes/carteDos.png";
+        }
+        int val = card.getCardValue();
+        if (val == -2) return "/cartes/carteMoins2.png";
+        if (val == -1) return "/cartes/carteMoins1.png";
+        return "/cartes/carte" + val + ".png";
     }
     
     /**
@@ -128,10 +227,11 @@ public class GameBoardView extends JPanel{
             p.setBackground(Color.WHITE);
             p.setForeground(Color.BLACK);
             p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            //////////// un listner dans viewwwwwwwwww
             p.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered( MouseEvent e) {
-                    p.setBackground(new Color(242, 242, 242)); // ne marche pas sur MacOS sans modifier la nature du bouton
+                    p.setBackground(new Color(242, 242, 242)); // ne marche pas sur MacOS sans modifier la nature du bouton     ah bon
                     //p.setForeground(new Color(73, 134, 196));
                     showOtherPlayerMain(true);
                     isPinned = false;
@@ -181,5 +281,17 @@ public class GameBoardView extends JPanel{
     // getter 
     public ArrayList<JButton> getListPlayerButton(){
         return this.buttonlistPlayer;
+    }
+
+    public JButton getBtnRetour(){
+        return this.btnRetour;
+    }
+
+    public CardButton[][] getCardButtons(){
+        return this.cardButtons;
+    }
+
+    public PlayerModel getCurrentPlayer(){
+        return this.currentPlayer;
     }
 }
