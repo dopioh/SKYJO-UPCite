@@ -75,3 +75,4 @@
 
 - Carte de la défausse faceDown dans la main du joueur
 
+- Tout les joueurs jouent pendant la derniere manche
