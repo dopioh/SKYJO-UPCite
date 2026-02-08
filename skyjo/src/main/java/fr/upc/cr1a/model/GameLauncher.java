@@ -83,6 +83,40 @@ public class GameLauncher {
         gameManager.initializeGame();
         
         //choisir 2 cartes pour chaque joueur au début
+        initializeHand();
+
+        //Joueur avec la plus grande carte
+        gameManager.firstPlayer();
+
+        //Boucle de JEU 
+        while (gameManager.getGameState() != GameManager.GameState.GAME_ENDED) {
+            
+            //boucle de la partie
+            while (gameManager.getGameState() == GameManager.GameState.IS_PLAYING || gameManager.getGameState() == GameManager.GameState.LAST_ROUND) {
+                playTurn();
+            }
+
+            //Manche prochaine
+            if (gameManager.getGameState() == GameManager.GameState.ROUND_ENDED) {
+                System.out.println("----------------------------------------------------------------");
+                System.out.println("\nNouvelle Manche\n");
+                gameManager.startNewGame();
+                initializeHand();
+            }
+        }
+        
+        //fin de partie
+        if (gameManager.getGameState() == GameManager.GameState.GAME_ENDED) {
+            System.out.println("\nPartie terminée ");
+        }
+        
+        scanner.close();
+    }
+    
+    /**
+     * Initialise la main de chaque joueur en révélant 2 cartes
+     */
+    private void initializeHand() {
         for (PlayerModel player : gameManager.getPlayers()) {
             if (player instanceof BotModel) {
                 BotHandModel hand = ((BotModel) player).getHand();
@@ -127,20 +161,6 @@ public class GameLauncher {
                 scanner.nextLine();
             }
         }
-        
-        System.out.println("\nCarte sur la défausse : " + gameManager.getDiscardPile().getTopCard().getCardValue() + "\n");
-        
-        //boucle de la partie (A bouger plus tard dans la gameLoop peut etre jsp faut ce concerté les amis)
-        while (gameManager.getGameState() == GameManager.GameState.IS_PLAYING || gameManager.getGameState() == GameManager.GameState.LAST_ROUND) {
-            playTurn();
-        }
-        
-        //fin de partie
-        if (gameManager.getGameState() == GameManager.GameState.GAME_ENDED) {
-            System.out.println("\nPartie terminée ");
-        }
-        
-        scanner.close();
     }
     
     /**
@@ -348,6 +368,9 @@ public class GameLauncher {
             }
             System.out.println();
         }
+        System.out.println("\n" + "Score de la manche: "+ player.getHand().getVisibleCardScore());
+        System.out.println("Score de la partie: "+ (player.getTotalScore() + player.getHand().getVisibleCardScore()) + "\n");
+
     
     }
     
