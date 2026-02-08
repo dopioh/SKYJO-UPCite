@@ -190,7 +190,9 @@ public class GameManager {
         hand.replaceCard(row, col, currentDrawCard);
         discardPile.addCardAtTop(cardInHand);
         //montrer la nouvelle carte
-        currentDrawCard.returnCard();
+        if (currentDrawCard.isFaceDown()) {
+            currentDrawCard.returnCard();
+        }
         currentDrawCard = null;
         
         //vérifier les colonnes/lignes identiques

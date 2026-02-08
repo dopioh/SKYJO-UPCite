@@ -40,17 +40,25 @@ public class BotHandModel extends PlayerHandModel {
      */
     public int[] sameCardInHandPostition(CardModel carte) {
         int [] coord = new int[2];
+        //obligé de mettre ici psq ce que je veux pas c'est un retour d'un tab et pas un break useless
+        coord[0] = -1; // si on trouve rien les coordonnées sont -1 -1
+        coord[1] = -1;
+    
+        if (carte == null) {
+            return coord;
+        }
+        
         for (int i = 0; i < getColumns(); i++) {
             for (int j = 0; j < getRows(); j++) {
-                if (getCard(i, j) == carte) {
+                CardModel cardInHand = getCard(j, i);
+                if (cardInHand != null && !cardInHand.isFaceDown() && 
+                    cardInHand.getCardValue() == carte.getCardValue()) {
                     coord[0] = i;
                     coord[1] = j;
                     return coord;
                 }
             }
         }
-        coord[0] = -1; // si on trouve rien les coordonnées sont -1 -1
-        coord[1] = -1;
         return coord;
     }
 
@@ -67,6 +75,10 @@ public class BotHandModel extends PlayerHandModel {
             //meme carte, on échange dans la meme colonne
             for (int i = 0; i < getRows(); i++) {
                 CardModel cardInCol = getCard(i, actualCol);
+                //empeche de remplacer la carte semblable
+                if (cardInCol == getCard(sameCardPostition[1], actualCol)) {
+                    continue;
+                }
                 if (cardInCol != null && cardInCol.isFaceDown()) {
                     replaceCard(i, actualCol, carte);
                     return;
@@ -76,6 +88,10 @@ public class BotHandModel extends PlayerHandModel {
             //si toutes les cartes sont révéles alors faut échanger une carte diff de la carte en main
             for (int i = 0; i < getRows(); i++) {
                 CardModel cardInCol = getCard(i, actualCol);
+                //empeche de remplacer la carte semblable
+                if (cardInCol == getCard(sameCardPostition[1], actualCol)) {
+                    continue;
+                }
                 if (cardInCol != null && cardInCol.getCardValue() != carte.getCardValue()) {
                     replaceCard(i, actualCol, carte);
                     return;
@@ -83,8 +99,14 @@ public class BotHandModel extends PlayerHandModel {
             }
         }
         
-        //rien alors, alors on choisit une carte aléatoire a retourner
-        revealRandomCard(1);
+        //rien alors choisit une carte aléatoire
+        int randomRow, randomCol;
+        do {
+            randomRow = (int) (Math.random() * getRows());
+            randomCol = (int) (Math.random() * getColumns());
+        } while (getCard(randomRow, randomCol) == null);
+        
+        replaceCard(randomRow, randomCol, carte);
     }
 
     /**

@@ -7,7 +7,7 @@ package fr.upc.cr1a.model;
  */
 public class BotTerminalModel {
     
-    private static int n; // seuil pour accepter une carte
+    private static int n = 5; // seuil pour accepter une carte
     
     /**
      * regarede si le bot doit prendre la carte de la défausse
@@ -31,7 +31,7 @@ public class BotTerminalModel {
      * @param drawCard la carte piochée
      * @return true si échange, false si défausse
      */
-    public static boolean shouldExchangeDrawnCard(BotHandModel hand, CardModel drawCard) {
+    public static boolean exchangeDrawCard(BotHandModel hand, CardModel drawCard) {
         if (drawCard == null) return false;
         //échanger si la carte est en dessus de n
         boolean isAcceptable = hand.isAcceptableCard(n, drawCard);
@@ -47,9 +47,47 @@ public class BotTerminalModel {
      * @return tab[row][col]
      */
     public static int[] cardToExchange(BotHandModel hand, CardModel card) {
-        //échanger la carte dans la main
-        hand.tradeInHand(card);
-        int[] sameCard = hand.sameCardInHandPostition(card);
-        return sameCard;
+        //regarde si la carte est dans la main
+        int[] sameCardPosition = hand.sameCardInHandPostition(card);
+        
+        if (sameCardPosition[0] != -1) {
+            //meme carte en main
+            int actualCol = sameCardPosition[0];
+            int sameCardRow = sameCardPosition[1];
+            
+            //d'abord réveler les cartes caches de la colonne
+            for (int i = 0; i < hand.getRows(); i++) {
+                CardModel cardInCol = hand.getCard(i, actualCol);
+                if (cardInCol == null) continue;
+                //ne pas suppriemr le carte qu'o nvient de trouver
+                if (i == sameCardRow) continue;
+                if (cardInCol.isFaceDown()) {
+                    return new int[]{actualCol, i};
+                }
+            }
+            
+            //si toutes les cartes sont découverts, échanger une carte retoruné différente de la carte
+            for (int i = 0; i < hand.getRows(); i++) {
+                CardModel cardInCol = hand.getCard(i, actualCol);
+                if (cardInCol == null) continue;
+                //ne pas suppriemr le carte qu'o nvient de trouver 
+                if (i == sameCardRow) continue;
+                if (!cardInCol.isFaceDown() && cardInCol.getCardValue() != card.getCardValue()) {
+                    return new int[]{actualCol, i};
+                }
+            }
+        }
+        
+        //sinon, échanger une carte aléatoire face caché
+        for (int col = 0; col < hand.getColumns(); col++) {
+            for (int row = 0; row < hand.getRows(); row++) {
+                CardModel cardAt = hand.getCard(row, col);
+                if (cardAt == null) continue;
+                if (cardAt.isFaceDown()) {
+                    return new int[]{col, row};
+                }
+            }
+        }
+        return new int[]{-1, -1};
     }
 }

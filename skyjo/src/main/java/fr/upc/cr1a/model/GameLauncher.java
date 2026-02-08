@@ -19,6 +19,7 @@ public class GameLauncher {
     
     private GameManager gameManager;
     private Scanner scanner;
+    private int botCounter = 0; // compteur bot
     
     public GameLauncher() {
         scanner = new Scanner(System.in);
@@ -52,8 +53,17 @@ public class GameLauncher {
         
         //Donnez le nom des joueurs
         for (int i = 1; i <= nbJoueurs; i++) {
-            System.out.print("Nom du joueur " + i + " : ");
-            PlayerData tmp = new PlayerData(scanner.nextLine());
+            System.out.print("Nom du joueur " + i + " ou 'bot' : ");
+            String inputName = scanner.nextLine();
+            
+            PlayerData tmp;
+            if (inputName.equalsIgnoreCase("bot")) {
+                botCounter++;
+                String botName = "Bot" + botCounter;
+                tmp = new PlayerData(botName, true);
+            } else {
+                tmp = new PlayerData(inputName);
+            }
             playerNames.add(tmp);
         }
         System.out.println("------------------------------------------------------------------");
@@ -74,38 +84,48 @@ public class GameLauncher {
         
         //choisir 2 cartes pour chaque joueur au début
         for (PlayerModel player : gameManager.getPlayers()) {
-            System.out.println(player.getName() + " choisissez 2 cartes à révéler \n");
-            showHand(player, false);
-            
-            for (int i = 0; i < 2; i++) {
-                int row = -1, col = -1;
-                //choisir la carte jusuqu'a donner une carte valide
-                do {
-                    try {
-                        System.out.print("Carte " + (i + 1) + " - Ligne (0-2) : ");
-                        row = scanner.nextInt();
-                        System.out.print("Carte " + (i + 1) + " - Colonne (0-3) : ");
-                        col = scanner.nextInt();
-                        
-                        if (row < 0 || row >= 3 || col < 0 || col >= 4) {
-                            System.out.println("\nPosition invalide ! Réessayez.\n");
-                        } else if (player.getHand().getCard(row, col).isFaceDown() == false) {
-                            System.out.println("\nCette carte est déjà révélée !\n");
-                        } else {
-                            break;
-                        }
-                    } catch (Exception e) {
-                        System.out.println("t'as pas compris quoi? t'as besoin d'un cerveau?");
-                        scanner.nextLine();
-                    }
-                } while (true);
-                
-                player.getHand().revealCard(row, col);
-                System.out.println("\nCarte révélée : " + player.getHand().getCard(row, col).getCardValue());
+            if (player instanceof BotModel) {
+                BotHandModel hand = ((BotModel) player).getHand();
+                hand.revealRandomCard(2);
+                System.out.println("\n" + player.getName() + " a révelé 2 cartes\n");
                 showHand(player, false);
                 System.out.println("------------------------------------------------------------------");
+            } else {
+                PlayerHandModel hand = player.getHand();
+                System.out.println("\n" + player.getName() + ", choisissez 2 cartes à révéler");
+                showHand(player, false);
+                
+                for (int i = 0; i < 2; i++) {
+                    int row = -1, col = -1;
+                    
+                    do {
+                        try {
+                            System.out.print("Carte " + (i + 1) + " - Ligne (0-2) : ");
+                            row = scanner.nextInt();
+                            System.out.print("Carte " + (i + 1) + " - Colonne (0-3) : ");
+                            col = scanner.nextInt();
+                            
+                            if (row < 0 || row >= 3 || col < 0 || col >= 4) {
+                                System.out.println("\nPosition invalide ! Réessayez.\n");
+                            } else if (!hand.getCard(row, col).isFaceDown()) {
+                                System.out.println("\nCette carte est déjà révélée !\n");
+                            } else {
+                                break;
+                            }
+                        } catch (Exception e) {
+                            System.out.println("t'as pas compris quoi? t'as besoin d'un cerveau?");
+                            scanner.nextLine();
+                        }
+                    } while (true);
+                    
+                    hand.revealCard(row, col);
+                    System.out.println("\nCarte révélée : " + hand.getCard(row, col).getCardValue());
+                    showHand(player, false);
+                }
+                
+                System.out.println("------------------------------------------------------------------");
+                scanner.nextLine();
             }
-            scanner.nextLine(); 
         }
         
         System.out.println("\nCarte sur la défausse : " + gameManager.getDiscardPile().getTopCard().getCardValue() + "\n");
@@ -130,11 +150,22 @@ public class GameLauncher {
         //début du tour
         gameManager.startTurn();
         PlayerModel currentPlayer = gameManager.getCurrentPlayer();
-        
+        //regarde si c'est un bot
+        if (currentPlayer instanceof BotModel) {
+            botTurn((BotModel) currentPlayer);
+        } else {
+            playerTurn(currentPlayer);
+        }
+    }
+    
+    /**
+     *Tour d'un joueur 
+     */
+    private void playerTurn(PlayerModel player) {
         System.out.println("----------------------------------------------------------------");
         
         //affiche la main du joueur
-        showHand(currentPlayer, false);
+        showHand(player, false);
         
         //montre la carte sur la défausse
         System.out.println("\nCarte sur la défausse : " + gameManager.getDiscardPile().getTopCard().getCardValue());
@@ -171,18 +202,18 @@ public class GameLauncher {
             //échanger une carte
             drawnCard = gameManager.takeDiscard();
             mustExchange = true;
-            System.out.println("----------------------------------------------------");
+            System.out.println("--------------------jehaislebot--------------------------------");
             System.out.println("Vous avez pris : " + drawnCard.getCardValue());
         } else { //piocher une carte
             drawnCard = gameManager.drawDeck();
-            System.out.println("----------------------------------------------------");
+            System.out.println("-----------------------ilestnulenplus-----------------------------");
             System.out.println("Vous avez pioché : " + drawnCard.getCardValue());
         }
     
         //échanger
         if (mustExchange) {
             System.out.println("\nEchanger la carte avec une carte de votre main");
-            exchangeCard(currentPlayer);
+            exchangeCard(player);
         //quand le jouer pioche 2 actions possibles
         } else {
             System.out.println("\n Action possible :\n");
@@ -208,7 +239,7 @@ public class GameLauncher {
             } while (!validAction);
             //échanger
             if (action == 1) {
-                exchangeCard(currentPlayer);
+                exchangeCard(player);
             } else { //défausser puis révéler une carte
                 //défausser
                 gameManager.discardDrawCard();
@@ -216,8 +247,8 @@ public class GameLauncher {
                 //reveler une carte de la main
                 System.out.println("Revéler une carte de votre main\n");
                 System.out.println("----------------------------------------------------------------");
-                showHand(currentPlayer, false);
-                //choisit la carte à reveler
+                showHand(player, false);
+                //choest videisit la carte à reveler
                 int row = -1, col = -1;
                 do {
                     try {
@@ -229,10 +260,10 @@ public class GameLauncher {
                         
                         if (row < 0 || row >= 3 || col < 0 || col >= 4) {
                             System.out.println("\nPosition invalide !\n");
-                        } else if (currentPlayer.getHand().getCard(row, col) == null) {
+                        } else if (player.getHand().getCard(row, col) == null) {
                             System.out.println("\nPas de carte à cette position !\n");
-                        } else if (!currentPlayer.getHand().getCard(row, col).isFaceDown()) {
-                            System.out.println("\nCette carte est déjà révélée !\n");
+                        } else if (!player.getHand().getCard(row, col).isFaceDown()) {
+                            System.out.println("\nCette carte est t déjà révélée !\n");
                         } else {
                             break;
                         }
@@ -242,14 +273,14 @@ public class GameLauncher {
                     }
                 } while (true);
                 //revéler la carte
-                currentPlayer.getHand().revealCard(row, col);
-                System.out.println("--------------------------------------------------------------");
-                System.out.println("\nCarte révélée : " + currentPlayer.getHand().getCard(row, col).getCardValue());
+                player.getHand().revealCard(row, col);
+                System.out.println("----------------------------------------------------------");
+                System.out.println("\nCarte révélée : " + player.getHand().getCard(row, col).getCardValue());
             }
         }
         
         //afficher la main
-        showHand(currentPlayer, false);
+        showHand(player, false);
         
         //passe au joueur
         System.out.println("\nAppuyez sur Entrée pour continuer :)");
@@ -318,6 +349,79 @@ public class GameLauncher {
             System.out.println();
         }
     
+    }
+    
+    /**
+     * tour d'un bot
+     */
+    private void botTurn(BotModel bot) {
+        showHand(bot, false);
+        BotHandModel botHand = bot.getHand();
+        CardModel discardCard = gameManager.getDiscardPile().getTopCard();
+        System.out.println("\nCarte sur la défausse : " + discardCard.getCardValue());
+        //regarde si il doit la prendre ou non
+        boolean takeDiscard = BotTerminalModel.takeFromDiscard(botHand, discardCard);
+        CardModel drawCard;
+        boolean mustExchange = false; // si il prendre de la défausse obliger d'échanger
+        
+        if (takeDiscard) {
+            //prend de la défausse
+            drawCard = gameManager.takeDiscard();
+            mustExchange = true;
+            System.out.println(bot.getName() + " prend la carte de la défausse : " + drawCard.getCardValue());
+        } else {
+            //pioche
+            drawCard = gameManager.drawDeck();
+            System.out.println(bot.getName() + " pioche une carte : " + drawCard.getCardValue());
+        }
+        
+        //quand il pioche soit il défausse soit il échange
+        if (mustExchange) {
+            // obliger d'échanger
+            int[] position = BotTerminalModel.cardToExchange(botHand, drawCard);
+            if (position[0] != -1 && position[1] != -1) {
+                CardModel oldCard = botHand.getCard(position[1], position[0]);
+                gameManager.exchangeCardInHand(position[0], position[1]);
+                System.out.println(bot.getName() + " échange à [Ligne " + position[1] + ", Col " + position[0] + "]");
+                System.out.println("Carte défaussée : " + oldCard.getCardValue());
+            }
+        } else {
+            //choisit d'échanger ou de défausser
+            boolean exchange = BotTerminalModel.exchangeDrawCard(botHand, drawCard);
+            
+            if (exchange) {
+                //écahnger la carte piochée avec une carte de la main
+                int[] position = BotTerminalModel.cardToExchange(botHand, drawCard);
+                if (position[0] != -1 && position[1] != -1) {
+                    CardModel oldCard = botHand.getCard(position[1], position[0]);
+                    gameManager.exchangeCardInHand(position[0], position[1]);
+                    System.out.println(bot.getName() + " échange à [Ligne " + position[1] + ", Col " + position[0] + "]");
+                    System.out.println("Carte défaussée : " + oldCard.getCardValue());
+                }
+            } else {
+                //défausser une carte
+                gameManager.discardDrawCard();
+                System.out.println(bot.getName() + " défausse la carte");
+                
+                //révéler une carte aléatoire
+                botHand.revealRandomCard(1);
+                System.out.println(bot.getName() + " révèle une carte");
+            }
+        }
+        //permet que ça soit pas instantané, donne un aspect moins robotique
+        try {
+            Thread.sleep(1200);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
+        System.out.println("\n-------------------------------------------------------");
+        showHand(bot, false);
+        System.out.println("------------------------------------------------------------");
+        System.out.println("\nAppuyez sur Entrée pour continuer <3");
+        scanner.nextLine();
+        
+        gameManager.nextPlayer();
     }
 
     public static void main(String[] args) throws Exception {
