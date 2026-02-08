@@ -61,4 +61,7 @@
 
 - Plateau de jeu avec joueurs cliquable
 
+### Fixed
+
+- Tout les joueurs jouent pendant le dernier round
  

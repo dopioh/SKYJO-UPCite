@@ -21,6 +21,7 @@ public class GameManager {
     private PiocheModel deck;
     private DefausseModel discardPile;
     private int currentPlayerIndex;
+    private int firstPlayerToPlayIndex;  // joueur qui a commencé la manche
     private GameState gameState;
     private TurnPhase turnPhase;
     private CardModel currentDrawCard;
@@ -76,6 +77,7 @@ public class GameManager {
         }
         
         currentPlayerIndex = 0;
+        firstPlayerToPlayIndex = 0; // le joueur qui commence la manche
         deck = new PiocheModel();
         discardPile = new DefausseModel();
         currentDrawCard = null;
@@ -110,6 +112,8 @@ public class GameManager {
    public void initializeGame(){
         //creer un deck deja melange
         deck = new PiocheModel();
+        
+        firstPlayerToPlayIndex = currentPlayerIndex; // faut changer ici si le premier joueur n'est pas le joueur 0
         
         for (PlayerModel player : players) {
             player.resetHand();
@@ -159,8 +163,8 @@ public class GameManager {
         if (currentPlayerIndex >= players.size()) {
             currentPlayerIndex = 0;
         }
-        //regarde si on est sur le dernier tour
-        if (gameState == GameState.LAST_ROUND && currentPlayerIndex == 0) {
+        //regarde si on est sur le dernier tour et si on est revenu au premier joueur
+        if (gameState == GameState.LAST_ROUND && currentPlayerIndex == firstPlayerToPlayIndex) {
             endRound();
         }
     }
@@ -411,7 +415,7 @@ public class GameManager {
      * Si un joueur n'a pas atteint les 100 points, on peut recommencer une nouvelle manche
      */
     public void startNewGame() {
-        currentPlayerIndex = 0; // Faudra changer ici pour le premier joueur du jeu
+        currentPlayerIndex = firstPlayerToPlayIndex;
         currentDrawCard = null;
         discardPile = new DefausseModel();
         initializeGame();
