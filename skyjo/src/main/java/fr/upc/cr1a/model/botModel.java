@@ -2,6 +2,9 @@ package fr.upc.cr1a.model;
 
 /**
  * Modèle qui représente un bot
+ * 
+ * @author Billy
+ * 
  */
 
 public class BotModel extends PlayerModel  {

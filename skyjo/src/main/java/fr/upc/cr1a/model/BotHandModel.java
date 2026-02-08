@@ -15,12 +15,21 @@ public class BotHandModel extends PlayerHandModel {
 
     /**
      * revele n cartes de la main du bot
+     * ne pas retourner de carte déjà retournée pour éviter que la game soit interminable
      * @param n le nombre de carte a reveler
      */
     public void revealRandomCard(int n) {
         for (int i = 0; i < n; i++) {
-            int randomRow = (int) (Math.random() * getRows()); // cast pour convertir le double en integer
-            int randomCol = (int) (Math.random() * getColumns());
+            int randomRow, randomCol;
+            CardModel card;
+            //cherche une carte qui n'est pas retournée et la retourne
+            do {
+                randomRow = (int) (Math.random() * getRows());
+                randomCol = (int) (Math.random() * getColumns());
+                card = getCard(randomRow, randomCol);
+            } while (card == null || !card.isFaceDown());
+            
+            // Révéler la carte trouvée
             revealCard(randomRow, randomCol);
         }
     }
@@ -29,14 +38,14 @@ public class BotHandModel extends PlayerHandModel {
      * @param carte la carte qu'on cherche dans la main
      * @return un tableau [x,y] des coordonées d'une carte similaire dans la main 
      */
-    public int[] sameCardInHand(CardModel carte) {
+    public int[] sameCardInHandPostition(CardModel carte) {
         int [] coord = new int[2];
         for (int i = 0; i < getColumns(); i++) {
             for (int j = 0; j < getRows(); j++) {
                 if (getCard(i, j) == carte) {
                     coord[0] = i;
                     coord[1] = j;
-                    break;
+                    return coord;
                 }
             }
         }
@@ -51,18 +60,31 @@ public class BotHandModel extends PlayerHandModel {
      * actuellement : remplace uniquement sur les colonnes
      */
     public void tradeInHand(CardModel carte) {
-        int[] sameCardInHandPostition = sameCardInHand(carte);
-        int actualCol = sameCardInHandPostition[0];
+        int[] sameCardPostition = sameCardInHandPostition(carte);
+        int actualCol = sameCardPostition[0];
 
-        if (sameCardInHandPostition[0] != -1 && sameCardInHandPostition[1] != -1) {
+        if (sameCardPostition[0] != -1 && sameCardPostition[1] != -1) {
+            //meme carte, on échange dans la meme colonne
             for (int i = 0; i < getRows(); i++) {
-                if (isAvailable(actualCol, i) && getCard(actualCol, i) != carte) {
-                    replaceCard(actualCol, i, carte);
-                    break;
-
+                CardModel cardInCol = getCard(i, actualCol);
+                if (cardInCol != null && cardInCol.isFaceDown()) {
+                    replaceCard(i, actualCol, carte);
+                    return;
+                }
+            }
+            
+            //si toutes les cartes sont révéles alors faut échanger une carte diff de la carte en main
+            for (int i = 0; i < getRows(); i++) {
+                CardModel cardInCol = getCard(i, actualCol);
+                if (cardInCol != null && cardInCol.getCardValue() != carte.getCardValue()) {
+                    replaceCard(i, actualCol, carte);
+                    return;
                 }
             }
         }
+        
+        //rien alors, alors on choisit une carte aléatoire a retourner
+        revealRandomCard(1);
     }
 
     /**

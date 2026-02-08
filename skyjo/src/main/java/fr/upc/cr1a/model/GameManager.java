@@ -53,7 +53,12 @@ public class GameManager {
         //initialiser les joueurs
         this.players = new ArrayList<>();
         for (PlayerData player : playersData) {
-            players.add(new PlayerModel(player));
+            //créer un BotModel si c'est un bot, sinon créer un player
+            if (player.isBot()) {
+                players.add(new BotModel(player));
+            } else {
+                players.add(new PlayerModel(player));
+            }
         }
         
         currentPlayerIndex = 0;
