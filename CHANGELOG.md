@@ -61,7 +61,18 @@
 
 - Plateau de jeu avec joueurs cliquable
 
+- Score et main récapitulatif fin de partie
+
+- Premier joueur de manche
+
+- Possibilité d'enchainer 2 manches
+
+
+
 ### Fixed
 
-- Tout les joueurs jouent pendant le dernier round
- 
+- Colonnes et lignes supprimées uniquement si elles sont retournées
+
+- Carte de la défausse faceDown dans la main du joueur
+
+- Tout les joueurs jouent pendant la derniere manche

@@ -72,7 +72,10 @@ public class GameLauncher {
         
         //choisir 2 cartes pour chaque joueur au début
         initializeHand();
-    
+
+        //Joueur avec la plus grande carte
+        gameManager.firstPlayer();
+
         //Boucle de JEU 
         while (gameManager.getGameState() != GameManager.GameState.GAME_ENDED) {
             

@@ -416,6 +416,9 @@ public class GameManager {
      */
     public void startNewGame() {
         currentPlayerIndex = firstPlayerToPlayIndex;
+        
+        biggestScorePlayer(); //Le joueur avec le score le plus grand commence
+        System.out.println("Tour de " + getCurrentPlayer().getName());
         currentDrawCard = null;
         discardPile = new DefausseModel();
         initializeGame();
@@ -445,5 +448,38 @@ public class GameManager {
             System.out.println();
         }
         System.out.println("\n" + "Score de la manche: "+ player.getHand().getVisibleCardScore() + "\n");
+    }
+
+    /**
+     * Joueur avec le plus grand score commence la partie suivante
+     */
+    private void biggestScorePlayer() {
+        int maxScore = Integer.MIN_VALUE;
+        int index = 0;
+        for (int i = 0; i < players.size(); i++) {
+            int score = players.get(i).getTotalScore();
+            if (score > maxScore) {
+                maxScore = score;
+                index = i;
+            }
+        }
+        currentPlayerIndex = index;
+    }
+
+    /**
+     * Détermine le joueur qui commence la partie en regardant ses cartes visibles
+     */
+    public void firstPlayer() {
+        int maxScore = Integer.MIN_VALUE;
+        int index = 0;
+        for (int i = 0; i < players.size(); i++) {
+            int visibleScore = players.get(i).getHand().getVisibleCardScore();
+            if (visibleScore > maxScore) {
+                maxScore = visibleScore;
+                index = i;
+            }
+        }
+        currentPlayerIndex = index;
+        System.out.println("Le joueur " + players.get(currentPlayerIndex).getName() + " commence la partie.");
     }
 }
