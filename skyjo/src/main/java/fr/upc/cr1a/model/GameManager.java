@@ -160,7 +160,7 @@ public class GameManager {
             currentPlayerIndex = 0;
         }
         //regarde si on est sur le dernier tour
-        if (gameState == GameState.LAST_ROUND) {
+        if (gameState == GameState.LAST_ROUND && currentPlayerIndex == 0) {
             endRound();
         }
     }
