@@ -16,7 +16,7 @@ import java.util.ArrayList;
  */
 public class GameManager {
 
-    private List<PlayerModel> players;
+    private ArrayList<PlayerModel> players;
     private PiocheModel deck;
     private DefausseModel discardPile;
     private int currentPlayerIndex;
@@ -57,25 +57,26 @@ public class GameManager {
             players.add(new PlayerModel(new PlayerData("Joueur " + i)));
         }
 
-        //this.gameBoardModel = new GameBoardModel(players);
+        this.gameBoardModel = new GameBoardModel(players);
         GameBoardView view = this.gameBoardModel.getGameBoardView();
 
         frame.add(view, "GAME");
         frame.showPanel("GAME");
     }
-   public GameManager(){
-       
-}
 
-/*
-*constructeur avec les noms des joueurs
-*permet de d'initialiser les joueurs avec leurs noms
-*/
+    public GameManager(){
+       
+    }
+
+    /**
+     * constructeur avec les noms des joueurs
+     * permet de d'initialiser les joueurs avec leurs noms
+     * @param playersData
+     */
     public GameManager(List<PlayerData> playersData){
         //initialiser les joueurs
         this.players = new ArrayList<>();
         for (PlayerData player : playersData) {
-            players.add(new PlayerModel(player));
             //créer un BotModel si c'est un bot, sinon créer un player
             if (player.isBot()) {
                 players.add(new BotModel(player));

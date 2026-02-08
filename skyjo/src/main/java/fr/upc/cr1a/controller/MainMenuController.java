@@ -46,7 +46,7 @@ public class MainMenuController {
 
     private void clicPlay() {
         audio.playBgm("/music/calmbgm.wav");
-        //new GameManager(frame);
+        new GameManager(frame);
     }
 
     private void clicSettings() {

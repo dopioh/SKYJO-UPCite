@@ -16,8 +16,10 @@ public class GameLauncher {
     private int botCounter = 0; // compteur bot
     
     public GameLauncher() {
-        //fenetre du jeu
+        // Fenetre du jeu
         //new Frame();
+
+        // Jeu dams le Terminal 
         scanner = new Scanner(System.in);
         startGame();
     }
