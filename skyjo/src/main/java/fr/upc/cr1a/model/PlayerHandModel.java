@@ -171,6 +171,7 @@ public class PlayerHandModel {
             }
         }
         scanner.close();
+        
     }
 
     /**

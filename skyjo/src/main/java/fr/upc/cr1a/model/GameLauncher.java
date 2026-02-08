@@ -10,18 +10,14 @@ import java.util.Scanner;
  * Elle doit servir que pour ca et pas pour autre chose
  */
 public class GameLauncher {
-    /*
-    public GameLauncher(){
-        // on lance la frame ici 
-        new Frame();
-    }
-     */
-    
+
     private GameManager gameManager;
     private Scanner scanner;
     private int botCounter = 0; // compteur bot
     
     public GameLauncher() {
+        //fenetre du jeu
+        //new Frame();
         scanner = new Scanner(System.in);
         startGame();
     }
@@ -91,7 +87,7 @@ public class GameLauncher {
         //Boucle de JEU 
         while (gameManager.getGameState() != GameManager.GameState.GAME_ENDED) {
             
-            //boucle de la partie
+            //boucle de la partie (A bouger plus tard dans la gameLoop peut etre jsp faut ce concerté les amis)
             while (gameManager.getGameState() == GameManager.GameState.IS_PLAYING || gameManager.getGameState() == GameManager.GameState.LAST_ROUND) {
                 playTurn();
             }
