@@ -46,6 +46,18 @@
 
 - Jouabilité dans le terminal 
 
+- Score et main récapitulatif fin de partie
 
+- Premier joueur de manche
+
+- Possibilité d'enchainer 2 manches
+
+
+
+### Fixed
+
+- Colonnes et lignes supprimées uniquement si elles sont retournées
+
+- Carte de la défausse faceDown dans la main du joueur
 
  
