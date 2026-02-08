@@ -19,6 +19,7 @@ public class PlayerData {
     private int elo; // c'est quoi exactement ? les rr sur valo ?
     private int xp;
     private int money;
+    private boolean isBot; // indique si c'est un bot
     // les skins sont dans une list de String mais ils auront leur propre classes plus tard
     private ArrayList<String> skins; // tous les skins du jeu et si le joueur l'a, alors l'attribue unlocked du skin est true
 
@@ -33,14 +34,35 @@ public class PlayerData {
         this.elo = 0;
         this.xp = 0;
         this.money = 0;
+        this.isBot = false;
         this.skins = null; // a modif plus tard
 
+    }
+    
+    /**
+     * Constructeur pour un bot
+     * 
+     * @param id le nom du bot
+     * @param isBot true si c'est un bot
+     */
+    public PlayerData(String id, boolean isBot){
+        this.id = id;
+        this.rank = Rank.IRON;
+        this.elo = 0;
+        this.xp = 0;
+        this.money = 0;
+        this.isBot = isBot;
+        this.skins = null;
     }
 
     // Getter
 
     public String getID(){
         return this.id;
+    }
+    
+    public boolean isBot(){
+        return this.isBot;
     }
 
     public Rank getPlayerRank(){

@@ -68,6 +68,9 @@
 - Possibilité d'enchainer 2 manches
 
 
+- Ajout du bot dans le Terminal
+
+
 
 ### Fixed
 

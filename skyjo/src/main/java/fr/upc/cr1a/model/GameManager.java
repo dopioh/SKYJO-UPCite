@@ -2,7 +2,6 @@ package fr.upc.cr1a.model;
 
 import java.util.List;
 
-import fr.upc.cr1a.controller.GameBoardController;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
 
@@ -17,7 +16,7 @@ import java.util.ArrayList;
  */
 public class GameManager {
 
-    private ArrayList<PlayerModel> players;
+    private List<PlayerModel> players;
     private PiocheModel deck;
     private DefausseModel discardPile;
     private int currentPlayerIndex;
@@ -58,12 +57,15 @@ public class GameManager {
             players.add(new PlayerModel(new PlayerData("Joueur " + i)));
         }
 
-        this.gameBoardModel = new GameBoardModel(players);
+        //this.gameBoardModel = new GameBoardModel(players);
         GameBoardView view = this.gameBoardModel.getGameBoardView();
 
         frame.add(view, "GAME");
         frame.showPanel("GAME");
     }
+   public GameManager(){
+       
+}
 
 /*
 *constructeur avec les noms des joueurs
@@ -74,6 +76,12 @@ public class GameManager {
         this.players = new ArrayList<>();
         for (PlayerData player : playersData) {
             players.add(new PlayerModel(player));
+            //créer un BotModel si c'est un bot, sinon créer un player
+            if (player.isBot()) {
+                players.add(new BotModel(player));
+            } else {
+                players.add(new PlayerModel(player));
+            }
         }
         
         currentPlayerIndex = 0;
@@ -106,9 +114,9 @@ public class GameManager {
         return deck;
     }
     
-    /** 
-     *Initialisation de la game 
-     */
+    /**
+    *Initialisation de la game 
+    */
    public void initializeGame(){
         //creer un deck deja melange
         deck = new PiocheModel();
@@ -210,6 +218,9 @@ public class GameManager {
         discardPile.addCardAtTop(cardInHand);
         //montrer la nouvelle carte
         if(currentDrawCard.isFaceDown()) currentDrawCard.returnCard();
+        if (currentDrawCard.isFaceDown()) {
+            currentDrawCard.returnCard();
+        }
         currentDrawCard = null;
         
         //vérifier les colonnes/lignes identiques
@@ -254,7 +265,7 @@ public class GameManager {
             boolean sameCard = true;
             for (int row = 1; row < hand.getRows(); row++) {
                 CardModel card = hand.getCard(row, col);
-                if (card == null || card.isFaceDown() || card.getCardValue() != firstCard.getCardValue()) {
+                 if (card == null || card.isFaceDown() || card.getCardValue() != firstCard.getCardValue()) {
                     sameCard = false;
                     break;
                 }
@@ -286,7 +297,7 @@ public class GameManager {
             boolean sameCard = true;
             for (int col = 1; col < hand.getColumns(); col++) {
                 CardModel card = hand.getCard(row, col);
-                if (card == null || card.isFaceDown() || card.getCardValue() != firstCard.getCardValue()) {
+                 if (card == null || card.isFaceDown() || card.getCardValue() != firstCard.getCardValue()) {
                     sameCard = false;
                     break;
                 }
@@ -354,18 +365,9 @@ public class GameManager {
                 break;
             }
         }
-        // //permet donc t'appliquer la regle si le joueur n'a pas le score le plus bas
-        // if (roundEndPlayer != null && roundEndPlayer != lowestPlayer) {
-        //     int roundEndPlayerScore = roundEndPlayer.getHand().calculateScore();
-        //     roundEndPlayer.addScore(roundEndPlayerScore * 2); // double le score
-        // } else {
-        //     //donner les scores normalment sinon
-        //     for (PlayerModel player : players) {
-        //         int score = player.getHand().calculateScore();
-        //         player.addScore(score);
-        //     }
-        // }
         
+        //garde pas un code obsolète 
+
         //Nouvelle version du code d'en haut, applique le score a tout le monde
         for (PlayerModel player : players) {
             int score = player.getHand().calculateScore();
@@ -392,6 +394,7 @@ public class GameManager {
                 break;
             }
         }
+
         
         //finir la partie ou commencer une nouvelle manche
         if (end) {
@@ -407,7 +410,7 @@ public class GameManager {
         }
         else {
             gameState = GameState.ROUND_ENDED;
-            System.out.println("\n");
+            System.out.println("\nFin de la manche. \n");
         }
     }
 
