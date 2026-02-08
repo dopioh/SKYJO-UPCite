@@ -57,6 +57,14 @@ public class GameBoardView extends JPanel{
         layeredPane = new JLayeredPane(); // gestionnaire de couche (doc : https://docs.oracle.com/javase/8/docs/api/javax/swing/JLayeredPane.html)
         add(layeredPane, BorderLayout.CENTER);
 
+        // pour resize des que on change de taille de fenetre
+        addComponentListener(new ComponentAdapter() {
+        @Override
+        public void componentResized(ComponentEvent e) {
+            resizeLayers();
+        }
+        });
+
         initComponents();
 
         // afficher les cartes du premier joueur par defaut
@@ -253,7 +261,7 @@ public class GameBoardView extends JPanel{
     }
 
     /**
-     * Methode interne pour resize des qu'on touche un element concernes
+     * Methode interne pour resize selon la taille de la fenetre swing actuelle
      */
     private void resizeLayers() {
         Dimension size = getSize(); // size de la fenetre ?

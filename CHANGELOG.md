@@ -77,6 +77,9 @@
     - affiche "Joueur X - Carte [row][col]" en terminal
     - boutton retour
 
+- Ajout du bot dans le Terminal
+
+
 ### Fixed
 
 - Colonnes et lignes supprimées uniquement si elles sont retournées
