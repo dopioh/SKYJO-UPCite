@@ -5,6 +5,16 @@ import javax.swing.JButton;
 import fr.upc.cr1a.model.GameBoardModel;
 import fr.upc.cr1a.view.GameBoardView;
 
+/**
+ * Controller pour gerer les connections entre la view et le model
+ * Du plateau de jeu
+ * 
+ * @see GameBoardView vue graphique
+ * @see GameBoardModel logique du plateau
+ * 
+ * @author Mei
+ * @author Ian
+ */
 public class GameBoardController {
 
     GameBoardModel gameBoardModel;
@@ -19,14 +29,17 @@ public class GameBoardController {
 
         listener();
     }
-        
+    
+    /**
+     * les listeners du plateau :
+     * - bouton retour vers le menu
+     * - clic sur les cartes affichées
+     * 
+     * Les boutons joueur a gauche ne changent plus la main affichée mais
+     * la fonction buttonPlayerCalled existe toujours dans le model si
+     * on a besoin de changer la main affichée a droite
+     */
     public void listener(){
-        int s = 1;
-        for (JButton jb : gameBoardView.getListPlayerButton()){
-            int tmp = s;
-            jb.addActionListener(e -> gameBoardModel.buttonPlayerCalled(tmp));
-            s++;
-        }
 
         JButton retour = gameBoardView.getBtnRetour();
         retour.addActionListener(e -> gameBoardModel.retourMenuCalled());

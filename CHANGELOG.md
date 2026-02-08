@@ -57,12 +57,30 @@
     - Animation scribble au survol
     - Support d'icônes à côté du texte
     - 3 couleurs prédéfinies (TURQUOISE, GREEN, RED)
+    
+- Cartes Basique pour la vue graphique
+
+- Plateau de jeu avec joueurs cliquable
+
+- Score et main récapitulatif fin de partie
+
+- Premier joueur de manche
+
+- Possibilité d'enchainer 2 manches
 
 - Affichage des cartes sur le plateau
     - CardButton : JButton custom pour afficher les cartes
     - Crop les images et met dans imageCache
     - Rendu d'image en haut qualité
     - Système de switching entre les mains des différents joueurs
+    - affichage du main actuelle en haut
     - affiche "Joueur X - Carte [row][col]" en terminal
     - boutton retour
- 
+
+### Fixed
+
+- Colonnes et lignes supprimées uniquement si elles sont retournées
+
+- Carte de la défausse faceDown dans la main du joueur
+
+

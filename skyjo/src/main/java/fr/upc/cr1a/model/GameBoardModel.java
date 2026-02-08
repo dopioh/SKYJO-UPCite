@@ -1,12 +1,20 @@
 package fr.upc.cr1a.model;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import fr.upc.cr1a.controller.GameBoardController;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
 
+/**
+ * Gere la logique du Plateau de jeu
+ * 
+ * @see GameBoardView pour la vue graphique
+ * @see GameBoardController pour la gestion des cliques/actions
+ * 
+ * @author Mei
+ * @author Ian
+ */
 public class GameBoardModel {
 
     private GameBoardController gameBoardController;
@@ -26,15 +34,16 @@ public class GameBoardModel {
     }
 
     /**
-     * Quand on appuie sur le bouton joueur, on affiche ses cartes
-     * @param nbr le numero du joueur
+     * Methode called quand on appuie ou survol un bouton joueur
+     * @param nbr position du player dans l'ArrayList Button/Player
      */
     public void buttonPlayerCalled(int nbr){
         System.out.println("Button Called " + nbr );
-        if (nbr >= 1 && nbr <= listPlayer.size()) {
-            PlayerModel player = listPlayer.get(nbr - 1);
-            gameBoardView.showPlayerCards(player);
-        }
+        // desactivé pour l'instant pour pas changer de main (à droite) au clic
+        // if (nbr >= 1 && nbr <= listPlayer.size()) {
+        //     PlayerModel player = listPlayer.get(nbr - 1);
+        //     gameBoardView.showPlayerCards(player);
+        // }
     }
 
     public void retourMenuCalled(){

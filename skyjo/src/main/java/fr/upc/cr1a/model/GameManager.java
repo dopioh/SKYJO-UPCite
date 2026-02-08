@@ -114,9 +114,9 @@ public class GameManager {
         return deck;
     }
     
-    /*
-    *Initialisation de la game 
-    */
+    /** 
+     *Initialisation de la game 
+     */
    public void initializeGame(){
         //creer un deck deja melange
         deck = new PiocheModel();
@@ -199,6 +199,7 @@ public class GameManager {
         currentDrawCard = discardPile.getTopCard();
         discardPile.removeCardAtTop();
         turnPhase = TurnPhase.CARD_TAKE_FROM_DISCARD;
+        if (currentDrawCard.isFaceDown()) currentDrawCard.returnCard();
         return currentDrawCard;
     }
     
@@ -214,7 +215,7 @@ public class GameManager {
         hand.replaceCard(row, col, currentDrawCard);
         discardPile.addCardAtTop(cardInHand);
         //montrer la nouvelle carte
-        currentDrawCard.returnCard();
+        if(currentDrawCard.isFaceDown()) currentDrawCard.returnCard();
         currentDrawCard = null;
         
         //vérifier les colonnes/lignes identiques
@@ -259,7 +260,7 @@ public class GameManager {
             boolean sameCard = true;
             for (int row = 1; row < hand.getRows(); row++) {
                 CardModel card = hand.getCard(row, col);
-                if (card == null || card.getCardValue() != firstCard.getCardValue()) {
+                if (card == null || card.isFaceDown() || card.getCardValue() != firstCard.getCardValue()) {
                     sameCard = false;
                     break;
                 }
@@ -291,7 +292,7 @@ public class GameManager {
             boolean sameCard = true;
             for (int col = 1; col < hand.getColumns(); col++) {
                 CardModel card = hand.getCard(row, col);
-                if (card == null || card.getCardValue() != firstCard.getCardValue()) {
+                if (card == null || card.isFaceDown() || card.getCardValue() != firstCard.getCardValue()) {
                     sameCard = false;
                     break;
                 }
@@ -359,21 +360,34 @@ public class GameManager {
                 break;
             }
         }
-        //permet donc t'appliquer la regle si le joueur n'a pas le score le plus bas
+        // //permet donc t'appliquer la regle si le joueur n'a pas le score le plus bas
+        // if (roundEndPlayer != null && roundEndPlayer != lowestPlayer) {
+        //     int roundEndPlayerScore = roundEndPlayer.getHand().calculateScore();
+        //     roundEndPlayer.addScore(roundEndPlayerScore * 2); // double le score
+        // } else {
+        //     //donner les scores normalment sinon
+        //     for (PlayerModel player : players) {
+        //         int score = player.getHand().calculateScore();
+        //         player.addScore(score);
+        //     }
+        // }
+        
+        //Nouvelle version du code d'en haut, applique le score a tout le monde
+        for (PlayerModel player : players) {
+            int score = player.getHand().calculateScore();
+            player.addScore(score);
+        }
+        // Puis ici double le score du joueur qui a lancé la fin de la manche
         if (roundEndPlayer != null && roundEndPlayer != lowestPlayer) {
             int roundEndPlayerScore = roundEndPlayer.getHand().calculateScore();
-            roundEndPlayer.addScore(roundEndPlayerScore * 2); // double le score
-        } else {
-            //donner les scores normalment sinon
-            for (PlayerModel player : players) {
-                int score = player.getHand().calculateScore();
-                player.addScore(score);
-            }
+            roundEndPlayer.addScore(roundEndPlayerScore); 
         }
-        
+
         //affiche les scores totaux
+        System.out.println("Fin de la manche");
         for (PlayerModel player : players) {
             System.out.println(player.getName() + " : " + player.getTotalScore() + " points au total");
+            showHand(player, true);
         }
 
         //regarde si quelqu'un a 100 pts
@@ -401,5 +415,75 @@ public class GameManager {
             gameState = GameState.ROUND_ENDED;
             System.out.println("\n");
         }
+    }
+
+    /**
+     * Si un joueur n'a pas atteint les 100 points, on peut recommencer une nouvelle manche
+     */
+    public void startNewGame() {
+        biggestScorePlayer(); //Le joueur avec le score le plus grand commence
+        System.out.println("Tour de " + getCurrentPlayer().getName());
+        currentDrawCard = null;
+        discardPile = new DefausseModel();
+        initializeGame();
+    }
+
+    /**
+     *affiche la main d'un joueur
+     *si la carte est null = X; face cachée = ?; face visible = valeur
+     */
+    private void showHand(PlayerModel player, boolean showValues) {
+        System.out.println("Main de " + player.getName() + "\n");
+        System.out.println("         Col 0   Col 1   Col 2   Col 3");
+        //boucle qui affiche la main
+        for (int row = 0; row < 3; row++) {
+            System.out.print("Ligne " + row + " ");
+            for (int col = 0; col < 4; col++) {
+                CardModel card = player.getHand().getCard(row, col);
+                if (card == null) {
+                    System.out.print("[  X  ]");
+                } else if (!showValues && card.isFaceDown()) {
+                    System.out.print("[  ?  ]");
+                } else {
+                    System.out.printf("[ %3d ]", card.getCardValue());
+                }
+                System.out.print(" ");
+            }
+            System.out.println();
+        }
+        System.out.println("\n" + "Score de la manche: "+ player.getHand().getVisibleCardScore() + "\n");
+    }
+
+    /**
+     * Joueur avec le plus grand score commence la partie suivante
+     */
+    private void biggestScorePlayer() {
+        int maxScore = Integer.MIN_VALUE;
+        int index = 0;
+        for (int i = 0; i < players.size(); i++) {
+            int score = players.get(i).getTotalScore();
+            if (score > maxScore) {
+                maxScore = score;
+                index = i;
+            }
+        }
+        currentPlayerIndex = index;
+    }
+
+    /**
+     * Détermine le joueur qui commence la partie en regardant ses cartes visibles
+     */
+    public void firstPlayer() {
+        int maxScore = Integer.MIN_VALUE;
+        int index = 0;
+        for (int i = 0; i < players.size(); i++) {
+            int visibleScore = players.get(i).getHand().getVisibleCardScore();
+            if (visibleScore > maxScore) {
+                maxScore = visibleScore;
+                index = i;
+            }
+        }
+        currentPlayerIndex = index;
+        System.out.println("Le joueur " + players.get(currentPlayerIndex).getName() + " commence la partie.");
     }
 }

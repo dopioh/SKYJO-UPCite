@@ -19,8 +19,8 @@ public class GameLauncher {
         new Frame();
 
         // Jeu Partie console 
-        //scanner = new Scanner(System.in);
-        //startGame();
+        scanner = new Scanner(System.in);
+        startGame();
     }
     
     /**
@@ -71,53 +71,30 @@ public class GameLauncher {
         gameManager.initializeGame();
         
         //choisir 2 cartes pour chaque joueur au début
-        for (PlayerModel player : gameManager.getPlayers()) {
-            System.out.println(player.getName() + " choisissez 2 cartes à révéler \n");
-            showHand(player, false);
+        initializeHand();
+
+        //Joueur avec la plus grande carte
+        gameManager.firstPlayer();
+
+        //Boucle de JEU 
+        while (gameManager.getGameState() != GameManager.GameState.GAME_ENDED) {
             
-            for (int i = 0; i < 2; i++) {
-                int row = -1, col = -1;
-                //choisir la carte jusuqu'a donner une carte valide
-                do {
-                    try {
-                        System.out.print("Carte " + (i + 1) + " - Ligne (0-2) : ");
-                        row = scanner.nextInt();
-                        System.out.print("Carte " + (i + 1) + " - Colonne (0-3) : ");
-                        col = scanner.nextInt();
-                        
-                        if (row < 0 || row >= 3 || col < 0 || col >= 4) {
-                            System.out.println("\nPosition invalide ! Réessayez.\n");
-                        } else if (player.getHand().getCard(row, col).isFaceDown() == false) {
-                            System.out.println("\nCette carte est déjà révélée !\n");
-                        } else {
-                            break;
-                        }
-                    } catch (Exception e) {
-                        System.out.println("t'as pas compris quoi? t'as besoin d'un cerveau?\n");
-                        scanner.nextLine();
-                    }
-                } while (true);
-                
-                player.getHand().revealCard(row, col);
-                System.out.println("\nCarte révélée : " + player.getHand().getCard(row, col).getCardValue());
-                showHand(player, false);
-                System.out.println("------------------------------------------------------------------");
+            //boucle de la partie (A bouger plus tard dans la gameLoop peut etre jsp faut ce concerté les amis)
+            while (gameManager.getGameState() == GameManager.GameState.IS_PLAYING || gameManager.getGameState() == GameManager.GameState.LAST_ROUND) {
+                playTurn();
             }
-            scanner.nextLine(); 
+
+            //Manche prochaine
+            if (gameManager.getGameState() == GameManager.GameState.ROUND_ENDED) {
+                System.out.println("----------------------------------------------------------------");
+                System.out.println("\nNouvelle Manche\n");
+                gameManager.startNewGame();
+                initializeHand();
+            }
         }
         
-        System.out.println("\nCarte sur la défausse : " + gameManager.getDiscardPile().getTopCard().getCardValue() + "\n");
         
-        //boucle de la partie (A bouger plus tard dans la gameLoop peut etre jsp faut ce concerté les amis)
-        while (gameManager.getGameState() == GameManager.GameState.IS_PLAYING || gameManager.getGameState() == GameManager.GameState.LAST_ROUND) {
-            playTurn();
-        }
-        
-        //fin de partie
-        if (gameManager.getGameState() == GameManager.GameState.GAME_ENDED) {
-            System.out.println("\nPartie terminée ");
-        }
-        
+        System.out.println("\nPartie terminée ");
         scanner.close();
     }
     
@@ -315,9 +292,51 @@ public class GameLauncher {
             }
             System.out.println();
         }
-    
+        System.out.println("\n" + "Score de la manche: "+ player.getHand().getVisibleCardScore());
+        System.out.println("Score de la partie: "+ (player.getTotalScore() + player.getHand().getVisibleCardScore()) + "\n");
     }
 
+    /**
+     * Sert à initialiser les mains des joueurs en début de partie
+     */
+    private void initializeHand(){
+        for (PlayerModel player : gameManager.getPlayers()) {
+            System.out.println(player.getName() + " choisissez 2 cartes à révéler \n");
+            showHand(player, false);
+            
+            for (int i = 0; i < 2; i++) {
+                int row = -1, col = -1;
+                //choisir la carte jusuqu'a donner une carte valide
+                do {
+                    try {
+                        System.out.print("Carte " + (i + 1) + " - Ligne (0-2) : ");
+                        row = scanner.nextInt();
+                        System.out.print("Carte " + (i + 1) + " - Colonne (0-3) : ");
+                        col = scanner.nextInt();
+                        
+                        if (row < 0 || row >= 3 || col < 0 || col >= 4) {
+                            System.out.println("\nPosition invalide ! Réessayez.\n");
+                        } else if (player.getHand().getCard(row, col).isFaceDown() == false) {
+                            System.out.println("\nCette carte est déjà révélée !\n");
+                        } else {
+                            break;
+                        }
+                    } catch (Exception e) {
+                        System.out.println("t'as pas compris quoi? t'as besoin d'un cerveau?\n");
+                        scanner.nextLine();
+                    }
+                } while (true);
+                
+                player.getHand().revealCard(row, col);
+                System.out.println("\nCarte révélée : " + player.getHand().getCard(row, col).getCardValue());
+                showHand(player, false);
+                System.out.println("------------------------------------------------------------------");
+            }
+            scanner.nextLine(); 
+        }
+        
+        System.out.println("\nCarte sur la défausse : " + gameManager.getDiscardPile().getTopCard().getCardValue() + "\n");
+    }
 
     public static void main(String[] args) throws Exception {
         new GameLauncher();

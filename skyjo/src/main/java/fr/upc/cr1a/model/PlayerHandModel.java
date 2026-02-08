@@ -174,4 +174,21 @@ public class PlayerHandModel {
 
     }
 
+    /**
+     * Calcule le score des cartes visibles d'un joueur
+     * @param player joueur actuel
+     * @return le score total des cartes visibles du joueur
+     */
+    public int getVisibleCardScore() {
+        int res = 0;
+        for (int r = 0; r < this.getRows(); r++) {
+            for (int c = 0; c < this.getColumns(); c++) {
+                CardModel card = this.getCard(r, c);
+                if (card != null && !card.isFaceDown()) {
+                    res += card.getCardValue();
+                }
+            }
+        }
+        return res;
+    }
 }

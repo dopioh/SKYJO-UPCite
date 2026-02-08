@@ -10,6 +10,12 @@ import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.PlayerHandModel;
 import fr.upc.cr1a.model.PlayerModel;
 
+/**
+ * Vue graphique du plateau de jeu avec affichage des cartes et boutons joueurs
+ * 
+ * @author Mei
+ * @author Ian
+ */
 public class GameBoardView extends JPanel{
 
     private static final int cardSpacing = 2; // <----------------
@@ -21,7 +27,6 @@ public class GameBoardView extends JPanel{
     private ArrayList<JButton> buttonlistPlayer; // jusqu'a 8 normalement
 
     // panel : 
-
     private JPanel zonePlayer;
     private JPanel zonePlateau;
 
@@ -35,13 +40,23 @@ public class GameBoardView extends JPanel{
     // joueur actuellement affiche
     private PlayerModel currentPlayer;
 
+    private PlayerPreviewPanel previewPanel; // Le nouveau panel
+    private JLayeredPane layeredPane; // gestion des couches
+
+    // pour fixer le clique
+    private boolean isPinned = false;
+
     public GameBoardView(ArrayList<PlayerModel> listPlayerModels){
         this.listPlayer = listPlayerModels;
         this.buttonlistPlayer = new ArrayList<JButton>();
         this.cardButtons = new CardButton[3][4];
-        setLayout(new GridBagLayout());
+        setLayout(new BorderLayout());
         setOpaque(true);
         setVisible(true);
+
+        layeredPane = new JLayeredPane(); // gestionnaire de couche (doc : https://docs.oracle.com/javase/8/docs/api/javax/swing/JLayeredPane.html)
+        add(layeredPane, BorderLayout.CENTER);
+
         initComponents();
 
         // afficher les cartes du premier joueur par defaut
@@ -54,8 +69,16 @@ public class GameBoardView extends JPanel{
     }
 
     public void initComponents(){
-        System.out.println("initComponents Called");
+        //System.out.println("initComponents Called");
 
+        // PANEL PLATEAU :
+        JPanel plateauPanel = new JPanel();
+        plateauPanel.setOpaque(true);
+        plateauPanel.setLayout(new GridBagLayout());
+
+        layeredPane.add(plateauPanel, JLayeredPane.DEFAULT_LAYER);
+
+        // ZONE PLAYER ( a gauche de l'ecran, la ou y'a les boutons)
         this.zonePlayer = new JPanel();
         zonePlayer.setLayout(new GridBagLayout());
         zonePlayer.setBackground(Color.WHITE);
@@ -71,8 +94,9 @@ public class GameBoardView extends JPanel{
         gbcZonePlayer.anchor = GridBagConstraints.WEST;
         gbcZonePlayer.fill = GridBagConstraints.BOTH;
 
-        add(zonePlayer, gbcZonePlayer);
+        plateauPanel.add(zonePlayer, gbcZonePlayer);
 
+        // ZONE PLATEAU ( 3/4 de l'ecran a partir de la droite, les cartes,pioches,defausses et score seront ici)
         this.zonePlateau = new JPanel();
         zonePlateau.setLayout(new BorderLayout());
         zonePlateau.setBackground(Color.WHITE);
@@ -87,7 +111,7 @@ public class GameBoardView extends JPanel{
         gbcZonePlateau.anchor = GridBagConstraints.EAST;
         gbcZonePlateau.fill = GridBagConstraints.BOTH;
 
-        add(zonePlateau, gbcZonePlateau);
+        plateauPanel.add(zonePlateau, gbcZonePlateau);
 
         // label pour le nom du joueur affiché en haut
         playerNameLabel = new JLabel("Selectionnez un joueur", SwingConstants.CENTER);
@@ -123,11 +147,21 @@ public class GameBoardView extends JPanel{
         bottomPanel.add(btnRetour);
         zonePlateau.add(bottomPanel, BorderLayout.SOUTH);
 
+        // ZONE PREVIEW OTHER PLAYERS ( apparait au dessus de tous les autres panels quand on hover ou clique sur un button)
+        previewPanel = new PlayerPreviewPanel();
+        previewPanel.setVisible(false);
+        previewPanel.setBounds(400, 200, 600, 500); // taille fix pour le test
+        layeredPane.add(previewPanel, JLayeredPane.PALETTE_LAYER);
+
+
+        // BOUTTONS PLAYERS ( a gauche )
         playerButton();
+
+        SwingUtilities.invokeLater(() -> resizeLayers()); // doit s'executer apres que tous les components soit creer
     }
 
     /**
-     * Affiche les cartes d'un joueur dans la grille de droite
+     * Affiche les cartes d'un joueur qu'on veut à droite
      */
     public void showPlayerCards(PlayerModel player) {
         this.currentPlayer = player;
@@ -167,6 +201,11 @@ public class GameBoardView extends JPanel{
         return "/cartes/carte" + val + ".png";
     }
     
+    /**
+     * Initialise tous les boutons selon le nombre de joueur dans la partie
+     * Recuperer l'info de la list de PlayerModel
+     * Creer dans le GameManager (pour le moment)
+     */
     private void playerButton(){
         GridBagConstraints gbcPlayerButton = new GridBagConstraints();
         gbcPlayerButton.gridx = 0;
@@ -180,27 +219,58 @@ public class GameBoardView extends JPanel{
             p.setBackground(Color.WHITE);
             p.setForeground(Color.BLACK);
             p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            //////////// un listner dans viewwwwwwwwww
             p.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered( MouseEvent e) {
-                p.setBackground(new Color(242, 242, 242)); // ne marche pas sur MacOS sans modifier la nature du bouton
-                //p.setForeground(new Color(73, 134, 196));
-            }
+                @Override
+                public void mouseEntered( MouseEvent e) {
+                    p.setBackground(new Color(242, 242, 242)); // ne marche pas sur MacOS sans modifier la nature du bouton     ah bon
+                    //p.setForeground(new Color(73, 134, 196));
+                    showOtherPlayerMain(true);
+                    isPinned = false;
+                }
 
-            @Override
-            public void mouseExited( MouseEvent e) {
-                p.setBackground(Color.WHITE);
-                p.setForeground(Color.BLACK);
-        
-        }});
+                @Override
+                public void mouseExited( MouseEvent e) {
+                    if (!isPinned){
+                        p.setBackground(Color.WHITE);
+                        p.setForeground(Color.BLACK);
+                        showOtherPlayerMain(false);
+                    }
+                }
+            });
             buttonlistPlayer.add(p);
             zonePlayer.add(p,gbcPlayerButton);
             gbcPlayerButton.gridy ++;
         }
     }
 
-    // getter 
+    /**
+     * Affiche, selon le boolean, la preview
+     * @param isVisible
+     */
+    public void showOtherPlayerMain(boolean isVisible){
+        previewPanel.setVisible(isVisible);
+    }
 
+    /**
+     * Methode interne pour resize des qu'on touche un element concernes
+     */
+    private void resizeLayers() {
+        Dimension size = getSize(); // size de la fenetre ?
+        Component[] compsD = layeredPane.getComponentsInLayer(JLayeredPane.DEFAULT_LAYER); // recupere les elements de la couche DEFAULT
+        for (Component c : compsD) {
+            c.setBounds(0, 0, size.width, size.height);
+        }
+
+        Component[] compsP = layeredPane.getComponentsInLayer(JLayeredPane.PALETTE_LAYER);
+        for (Component c : compsP){
+            c.setBounds(size.width/5, size.height/10, size.width - size.width/3, size.height - size.height/5);
+        }
+
+        
+    }
+
+    // getter 
     public ArrayList<JButton> getListPlayerButton(){
         return this.buttonlistPlayer;
     }
