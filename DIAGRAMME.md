@@ -52,7 +52,7 @@ Gère la logique du jeu.
         * Méthode : **getName()**, **getHand()**, **getTotalScore()**, **addScore()**, **resetHand()**
     * `PlayerHandModel`: Grille 4x3 de cartes du joueur
         * Attribut : grid (CardModel[][]), rows=3, columns=4
-        * Méthode : **placeCard()**, **getCard()**, **isAvailable()**, **révéler cartes**, **détecter colonnes complètes**
+        * Méthode : **placeCard()**, **getCard()**, **isAvailable()**, **getVisibleCardScore()**, **révéler cartes**, **détecter colonnes complètes**
     * `PlayerData`: Données persistantes du joueur
         * Attribut : id, rank (Rank), elo, xp, money, skins (ArrayList)
         * Méthode : **getters/setters pour toutes les données**
