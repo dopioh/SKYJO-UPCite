@@ -9,6 +9,8 @@ import fr.upc.cr1a.utils.ImageCache;
 /**
  * JButton qui affiche une image de carte cliquable
  * L'image est redimensionnée une seule fois et gardée en cache
+ * 
+ * @author Ian
  */
 public class CardButton extends JButton {
 

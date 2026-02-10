@@ -1,6 +1,7 @@
 package fr.upc.cr1a.model;
 
 import java.util.List;
+import java.util.Scanner;
 
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
@@ -24,6 +25,7 @@ public class GameManager {
     private GameState gameState;
     private TurnPhase turnPhase;
     private CardModel currentDrawCard;
+    private Scanner scanner;
 
     private GameBoardModel gameBoardModel;
     
@@ -97,6 +99,7 @@ public class GameManager {
         
         currentPlayerIndex = 0;
         firstPlayerToPlayIndex = 0; // le joueur qui commence la manche
+        scanner = new Scanner(System.in);
         deck = new PiocheModel();
         discardPile = new DefausseModel();
         currentDrawCard = null;
@@ -235,10 +238,12 @@ public class GameManager {
         currentDrawCard = null;
         
         //vérifier les colonnes/lignes identiques
-        RemoveIdenticalColumns();
-        RemoveIdenticalRows();
+        GameRuleModel.removeIdenticalColumns(hand, discardPile);
+        GameRuleModel.removeIdenticalRows(hand, discardPile);
         //vérifier si fin de manche
-        checkEndOfRound();
+        if (GameRuleModel.checkEndOfRound(players)) {
+            gameState = GameState.LAST_ROUND;
+        }
         turnPhase = TurnPhase.TURN_ENDED;
     }
     
@@ -259,83 +264,7 @@ public class GameManager {
         getCurrentPlayer().getHand().revealCard(row, col);
     }
 
-    /*
-    *retire les colonnes avec 3 cartes identiques
-    *@param curentPlayer le joueur actuelle
-    *@param hand la main du joueur
-    */
-    private void RemoveIdenticalColumns(){
-        PlayerModel currentPlayer = getCurrentPlayer();
-        PlayerHandModel hand = currentPlayer.getHand();
 
-        for (int col = 0; col < hand.getColumns(); col++) {
-            CardModel firstCard = hand.getCard(0, col);
-            //permet de sauter si une colonne est vide
-            if (firstCard == null) continue;
-
-            boolean sameCard = true;
-            for (int row = 1; row < hand.getRows(); row++) {
-                CardModel card = hand.getCard(row, col);
-                 if (card == null || card.isFaceDown() || card.getCardValue() != firstCard.getCardValue()) {
-                    sameCard = false;
-                    break;
-                }
-            }
-            if (sameCard) {
-                for (int row = 0; row < hand.getRows(); row++) {
-                    CardModel removedCard = hand.getCard(row, col);
-                    discardPile.addCardAtTop(removedCard);
-                    hand.replaceCard(row, col, null);
-                }
-            }
-        }
-    }
-
-    /*
-    *retire les lignes avec 3 cartes identiques
-    *@param curentPlayer le joueur actuelle
-    *@param hand la main du joueur
-    */
-    private void RemoveIdenticalRows(){
-        PlayerModel currentPlayer = getCurrentPlayer();
-        PlayerHandModel hand = currentPlayer.getHand();
-
-        for (int row = 0; row < hand.getRows(); row++) {
-            CardModel firstCard = hand.getCard(row, 0);
-            //permet de sauter si une ligne est vide
-            if (firstCard == null) continue;
-
-            boolean sameCard = true;
-            for (int col = 1; col < hand.getColumns(); col++) {
-                CardModel card = hand.getCard(row, col);
-                 if (card == null || card.isFaceDown() || card.getCardValue() != firstCard.getCardValue()) {
-                    sameCard = false;
-                    break;
-                }
-            }
-            if (sameCard) {
-                for (int col = 0; col < hand.getColumns(); col++) {
-                    CardModel removedCard = hand.getCard(row, col);
-                    discardPile.addCardAtTop(removedCard);
-                    hand.replaceCard(row, col, null);
-                }
-            }
-        }
-    }
-    
-    /*
-    *vérifie si quelqu'un a toutes ses cartes révélées et lance le dernier tour
-    */
-    private void checkEndOfRound() {
-        for (PlayerModel player : players) {
-            //regarde si un joueur a toutes ses cartes révélées
-            if (player.getHand().allCardsRevealed()) {
-                //mettre en mode dernier tour
-                gameState = GameState.LAST_ROUND;
-                return; 
-            }
-        }
-    }
     
     /*
     *fonction qui gère la fin de la manche
@@ -355,40 +284,14 @@ public class GameManager {
             }
         }
         
-        //calculer le score de chacun
-        PlayerModel lowestPlayer = null;
-        int lowestScore = 2000; //volontairement haut
+        //calculer le score de chacun et trouver le joueur avec le score le plus bas
+        PlayerModel lowestPlayer = GameRuleModel.findLowestScorePlayer(players);
         
-        for (PlayerModel player : players) {
-            int score = player.getHand().calculateScore();
-            //cherche le joueur avec le score le plus bas
-            if (score < lowestScore) {
-                lowestScore = score;
-                lowestPlayer = player;
-            }
-        }
-
         //cherche le joueur qui lance la fin de la manche
-        PlayerModel roundEndPlayer = null;
-        for (PlayerModel player : players) {
-            if (player.getHand().allCardsRevealed()) {
-                roundEndPlayer = player;
-                break;
-            }
-        }
+        PlayerModel roundEndPlayer = GameRuleModel.findRoundEndPlayer(players);
         
-        //garde pas un code obsolète 
-
-        //Nouvelle version du code d'en haut, applique le score a tout le monde
-        for (PlayerModel player : players) {
-            int score = player.getHand().calculateScore();
-            player.addScore(score);
-        }
-        // Puis ici double le score du joueur qui a lancé la fin de la manche
-        if (roundEndPlayer != null && roundEndPlayer != lowestPlayer) {
-            int roundEndPlayerScore = roundEndPlayer.getHand().calculateScore();
-            roundEndPlayer.addScore(roundEndPlayerScore); 
-        }
+        //Applique les scores selon les règles Skyjo
+        GameRuleModel.applyRoundScores(players, roundEndPlayer, lowestPlayer);
 
         //affiche les scores totaux
         System.out.println("Fin de la manche");
@@ -398,25 +301,14 @@ public class GameManager {
         }
 
         //regarde si quelqu'un a 100 pts
-        boolean end = false;
-        for (PlayerModel player : players) {
-            if (player.getTotalScore() >= 100) {
-                end = true;
-                break;
-            }
-        }
+        boolean end = GameRuleModel.isGameOver(players);
 
         
         //finir la partie ou commencer une nouvelle manche
         if (end) {
             gameState = GameState.GAME_ENDED;
             //regarde le gagnant
-            PlayerModel winner = players.get(0);
-            for (PlayerModel player : players) {
-                if (player.getTotalScore() < winner.getTotalScore()) {
-                    winner = player;
-                }
-            }
+            PlayerModel winner = GameRuleModel.determineWinner(players);
             System.out.println("WINNER: " + winner.getName() + " avec " + winner.getTotalScore() + " points !?? EZZZZZ");
         }
         else {
@@ -431,7 +323,8 @@ public class GameManager {
     public void startNewGame() {
         currentPlayerIndex = firstPlayerToPlayIndex;
         
-        biggestScorePlayer(); //Le joueur avec le score le plus grand commence
+        //Le joueur avec le score le plus grand commence
+        currentPlayerIndex = GameRuleModel.getBiggestScorePlayerIndex(players);
         System.out.println("Tour de " + getCurrentPlayer().getName());
         currentDrawCard = null;
         discardPile = new DefausseModel();
@@ -461,39 +354,358 @@ public class GameManager {
             }
             System.out.println();
         }
-        System.out.println("\n" + "Score de la manche: "+ player.getHand().getVisibleCardScore() + "\n");
-    }
-
-    /**
-     * Joueur avec le plus grand score commence la partie suivante
-     */
-    private void biggestScorePlayer() {
-        int maxScore = Integer.MIN_VALUE;
-        int index = 0;
-        for (int i = 0; i < players.size(); i++) {
-            int score = players.get(i).getTotalScore();
-            if (score > maxScore) {
-                maxScore = score;
-                index = i;
-            }
-        }
-        currentPlayerIndex = index;
+        System.out.println("\n" + "Score de la manche: "+ player.getHand().getVisibleCardScore());
+        System.out.println("Score de la partie: "+ (player.getTotalScore() + player.getHand().getVisibleCardScore()) + "\n");
     }
 
     /**
      * Détermine le joueur qui commence la partie en regardant ses cartes visibles
      */
     public void firstPlayer() {
-        int maxScore = Integer.MIN_VALUE;
-        int index = 0;
-        for (int i = 0; i < players.size(); i++) {
-            int visibleScore = players.get(i).getHand().getVisibleCardScore();
-            if (visibleScore > maxScore) {
-                maxScore = visibleScore;
-                index = i;
+        currentPlayerIndex = GameRuleModel.getFirstPlayerIndex(players);
+        System.out.println("Le joueur " + players.get(currentPlayerIndex).getName() + " commence la partie.");
+    }
+
+    /**
+     * Déroulement de la partie
+     */
+    public void playGame() {
+        //init la première manche
+        initializeGame();
+        
+        //choisir 2 cartes pour chaque joueur au début
+        initializeHand();
+
+        //Joueur avec la plus grande carte
+        firstPlayer();
+
+        //Boucle de JEU 
+        while (getGameState() != GameState.GAME_ENDED) {
+            
+            //boucle de la partie
+            while (getGameState() == GameState.IS_PLAYING || getGameState() == GameState.LAST_ROUND) {
+                playTurn();
+            }
+
+            //Manche prochaine
+            if (getGameState() == GameState.ROUND_ENDED) {
+                System.out.println("----------------------------------------------------------------");
+                System.out.println("\nNouvelle Manche\n");
+                startNewGame();
+                initializeHand();
             }
         }
-        currentPlayerIndex = index;
-        System.out.println("Le joueur " + players.get(currentPlayerIndex).getName() + " commence la partie.");
+        
+        //fin de partie
+        if (getGameState() == GameState.GAME_ENDED) {
+            System.out.println("\nPartie terminée ");
+        }
+        
+        scanner.close();
+    }
+
+    /**
+     * Initialise la main de chaque joueur en révélant 2 cartes
+     */
+    public void initializeHand() {
+        for (PlayerModel player : getPlayers()) {
+            if (player instanceof BotModel) {
+                BotHandModel hand = ((BotModel) player).getHand();
+                hand.revealRandomCard(2);
+                System.out.println("\n" + player.getName() + " a révelé 2 cartes\n");
+                showHand(player, false);
+                System.out.println("------------------------------------------------------------------");
+            } else {
+                PlayerHandModel hand = player.getHand();
+                System.out.println("\n" + player.getName() + ", choisissez 2 cartes à révéler");
+                showHand(player, false);
+                
+                for (int i = 0; i < 2; i++) {
+                    int row = -1, col = -1;
+                    
+                    do {
+                        try {
+                            System.out.print("Carte " + (i + 1) + " - Ligne (0-2) : ");
+                            row = scanner.nextInt();
+                            System.out.print("Carte " + (i + 1) + " - Colonne (0-3) : ");
+                            col = scanner.nextInt();
+                            
+                            if (row < 0 || row >= 3 || col < 0 || col >= 4) {
+                                System.out.println("\nPosition invalide ! Réessayez.\n");
+                            } else if (!hand.getCard(row, col).isFaceDown()) {
+                                System.out.println("\nCette carte est déjà révélée !\n");
+                            } else {
+                                break;
+                            }
+                        } catch (Exception e) {
+                            System.out.println("t'as pas compris quoi? t'as besoin d'un cerveau?");
+                            scanner.nextLine();
+                        }
+                    } while (true);
+                    
+                    hand.revealCard(row, col);
+                    System.out.println("\nCarte révélée : " + hand.getCard(row, col).getCardValue());
+                    showHand(player, false);
+                }
+                
+                System.out.println("------------------------------------------------------------------");
+                scanner.nextLine();
+            }
+        }
+    }
+
+    /**
+     * Tour complet d'un joueur
+     */
+    public void playTurn() {
+        //début du tour
+        startTurn();
+        PlayerModel currentPlayer = getCurrentPlayer();
+        //regarde si c'est un bot
+        if (currentPlayer instanceof BotModel) {
+            botTurn((BotModel) currentPlayer);
+        } else {
+            playerTurn(currentPlayer);
+        }
+    }
+
+    /**
+     * Tour d'un joueur 
+     */
+    public void playerTurn(PlayerModel player) {
+        System.out.println("----------------------------------------------------------------");
+        
+        //affiche la main du joueur
+        showHand(player, false);
+        
+        //montre la carte sur la défausse
+        System.out.println("\nCarte sur la défausse : " + getDiscardPile().getTopCard().getCardValue());
+        
+        //choisir piocher ou prendre de la défausse
+        System.out.println("----------------------------------------------------------------");
+        System.out.println("\n Action possible :\n");
+        System.out.println("1 = Piocher");
+        System.out.println("2 = Prendre de la défausse");
+        System.out.print("\nVotre choix : ");
+        
+        int choice = 0;
+        boolean validChoice = false;
+        do {
+            try {
+                choice = scanner.nextInt();
+                scanner.nextLine();
+                if (choice == 1 || choice == 2) {
+                    validChoice = true;
+                } else {
+                    System.out.print("T'es pas allé à l'école toi?");
+                }
+            } catch (Exception e) {
+                System.out.print("2 choix possible et t'en donnes une troisième a quoi tu joues");
+                scanner.nextLine();
+            }
+        } while (!validChoice);
+        
+        CardModel drawnCard;
+        boolean mustExchange = false;
+        
+        //choix de prendre de la défausse
+        if (choice == 2) {
+            //échanger une carte
+            drawnCard = takeDiscard();
+            mustExchange = true;
+            System.out.println("--------------------jehaislebot--------------------------------");
+            System.out.println("Vous avez pris : " + drawnCard.getCardValue());
+        } else { //piocher une carte
+            drawnCard = drawDeck();
+            System.out.println("-----------------------ilestnulenplus-----------------------------");
+            System.out.println("Vous avez pioché : " + drawnCard.getCardValue());
+        }
+    
+        //échanger
+        if (mustExchange) {
+            System.out.println("\nEchanger la carte avec une carte de votre main");
+            exchangeCard(player);
+        //quand le jouer pioche 2 actions possibles
+        } else {
+            System.out.println("\n Action possible :\n");
+            System.out.println("1 = Echanger");
+            System.out.println("2 = défausser puis révéler une carte");
+            System.out.print("\nVotre choix : ");
+            
+            int action = 0;
+            boolean validAction = false;
+            do {
+                try {
+                    action = scanner.nextInt();
+                    scanner.nextLine();
+                    if (action == 1 || action == 2) {
+                        validAction = true;
+                    } else {
+                        System.out.print("Tu te crois drole? 1 ou 2 pas autre chose");
+                    }
+                } catch (Exception e) {
+                    System.out.print("T'es un rigolo toi, il te manque la touche 1 et 2 ou quoi?");
+                    scanner.nextLine();
+                }
+            } while (!validAction);
+            //échanger
+            if (action == 1) {
+                exchangeCard(player);
+            } else { //défausser puis révéler une carte
+                //défausser
+                discardDrawCard();
+                System.out.println("\nCarte défaussée");
+                //reveler une carte de la main
+                System.out.println("Revéler une carte de votre main\n");
+                System.out.println("----------------------------------------------------------------");
+                showHand(player, false);
+                //choix de la carte à reveler
+                int row = -1, col = -1;
+                do {
+                    try {
+                        System.out.print("\nLigne (0-2) : ");
+                        row = scanner.nextInt();
+                        System.out.print("Colonne (0-3) : ");
+                        col = scanner.nextInt();
+                        scanner.nextLine();
+                        
+                        if (row < 0 || row >= 3 || col < 0 || col >= 4) {
+                            System.out.println("\nPosition invalide !\n");
+                        } else if (player.getHand().getCard(row, col) == null) {
+                            System.out.println("\nPas de carte à cette position !\n");
+                        } else if (!player.getHand().getCard(row, col).isFaceDown()) {
+                            System.out.println("\nCette carte est t déjà révélée !\n");
+                        } else {
+                            break;
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Les chiffres et toi ça fait 2 apparemment");
+                        scanner.nextLine();
+                    }
+                } while (true);
+                //revéler la carte
+                player.getHand().revealCard(row, col);
+                System.out.println("----------------------------------------------------------");
+                System.out.println("\nCarte révélée : " + player.getHand().getCard(row, col).getCardValue());
+            }
+        }
+        
+        //afficher la main
+        showHand(player, false);
+        
+        //passe au joueur
+        System.out.println("\nAppuyez sur Entrée pour continuer :)");
+        scanner.nextLine();
+        
+        nextPlayer();
+    }
+
+    /**
+     * Tour d'un bot
+     */
+    public void botTurn(BotModel bot) {
+        showHand(bot, false);
+        BotHandModel botHand = bot.getHand();
+        CardModel discardCard = getDiscardPile().getTopCard();
+        System.out.println("\nCarte sur la défausse : " + discardCard.getCardValue());
+        //regarde si il doit la prendre ou non
+        boolean takeDiscard = BotTerminalModel.takeFromDiscard(botHand, discardCard);
+        CardModel drawCard;
+        boolean mustExchange = false; // si il prendre de la défausse obliger d'échanger
+        
+        if (takeDiscard) {
+            //prend de la défausse
+            drawCard = takeDiscard();
+            mustExchange = true;
+            System.out.println(bot.getName() + " prend la carte de la défausse : " + drawCard.getCardValue());
+        } else {
+            //pioche
+            drawCard = drawDeck();
+            System.out.println(bot.getName() + " pioche une carte : " + drawCard.getCardValue());
+        }
+        
+        //quand il pioche soit il défausse soit il échange
+        if (mustExchange) {
+            // obliger d'échanger
+            int[] position = BotTerminalModel.cardToExchange(botHand, drawCard);
+            if (position[0] != -1 && position[1] != -1) {
+                CardModel oldCard = botHand.getCard(position[1], position[0]);
+                exchangeCardInHand(position[0], position[1]);
+                System.out.println(bot.getName() + " échange à [Ligne " + position[1] + ", Col " + position[0] + "]");
+                System.out.println("Carte défaussée : " + oldCard.getCardValue());
+            }
+        } else {
+            //choisit d'échanger ou de défausser
+            boolean exchange = BotTerminalModel.exchangeDrawCard(botHand, drawCard);
+            
+            if (exchange) {
+                //écahnger la carte piochée avec une carte de la main
+                int[] position = BotTerminalModel.cardToExchange(botHand, drawCard);
+                if (position[0] != -1 && position[1] != -1) {
+                    CardModel oldCard = botHand.getCard(position[1], position[0]);
+                    exchangeCardInHand(position[0], position[1]);
+                    System.out.println(bot.getName() + " échange à [Ligne " + position[1] + ", Col " + position[0] + "]");
+                    System.out.println("Carte défaussée : " + oldCard.getCardValue());
+                }
+            } else {
+                //défausser une carte
+                discardDrawCard();
+                System.out.println(bot.getName() + " défausse la carte");
+                
+                //révéler une carte aléatoire
+                botHand.revealRandomCard(1);
+                System.out.println(bot.getName() + " révèle une carte");
+            }
+        }
+        //permet que ça soit pas instantané, donne un aspect moins robotique
+        try {
+            Thread.sleep(1200);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
+        System.out.println("\n-------------------------------------------------------");
+        showHand(bot, false);
+        System.out.println("------------------------------------------------------------");
+        System.out.println("\nAppuyez sur Entrée pour continuer <3");
+        scanner.nextLine();
+        
+        nextPlayer();
+    }
+
+    /**
+     * Fonction pour échanger une carte
+     */
+    public void exchangeCard(PlayerModel player) {
+        System.out.println("\nDonnez l'emplacement de la carte à échanger");
+        System.out.println("------------------------------------------------------------");
+        showHand(player, false);
+        
+        int row = -1, col = -1;
+        do {
+            try {
+                System.out.print("\nLigne (0-2) : ");
+                row = scanner.nextInt();
+                System.out.print("Colonne (0-3) : ");
+                col = scanner.nextInt();
+                scanner.nextLine();
+                
+                if (row < 0 || row >= 3 || col < 0 || col >= 4) {
+                    System.out.println("\nPosition invalide !\n");
+                } else if (player.getHand().getCard(row, col) == null) {
+                    System.out.println("\nPas de carte à cette position !\n");
+                } else {
+                    break;
+                }
+            } catch (Exception e) {
+                System.out.println("Tu sais pas lire une phrase toi, quitte les cours");
+                scanner.nextLine();
+            }
+        } while (true);
+        
+        CardModel oldCard = player.getHand().getCard(row, col);
+        exchangeCardInHand(col, row);
+        System.out.println("\nCarte échangé. Carte défaussée : " + oldCard.getCardValue() + "\n");
+        System.out.println("-------------------------------------------------------------------------");
     }
 }

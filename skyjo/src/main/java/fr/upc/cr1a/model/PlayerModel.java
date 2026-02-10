@@ -2,6 +2,8 @@ package fr.upc.cr1a.model;
 
 /**
  * Modèle représentant un joueur
+ * 
+ * @author Billy
  */
 
 public class PlayerModel {
