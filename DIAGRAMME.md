@@ -56,6 +56,9 @@ Gère la logique du jeu.
     * `PlayerData`: Données persistantes du joueur
         * Attribut : id, rank (Rank), elo, xp, money, skins (ArrayList)
         * Méthode : **getters/setters pour toutes les données**
+    * `BotHandModel`: Grille 4x3 de cartes du bot
+        * Super-classe : **PlayerHandModel**
+        * Méthodess supplémentaires : **revealRandomCard()**, **sameCardInHandPosition()**, **tradeInHand()**, **isAcceptableCard()**
 
 * **Règles et logique** :
     * `GameRuleModel`: Définit les règles du jeu
