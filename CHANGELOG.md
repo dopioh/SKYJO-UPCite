@@ -79,7 +79,6 @@
 
 - Ajout du bot dans le Terminal
 
-
 ### Fixed
 
 - Colonnes et lignes supprimées uniquement si elles sont retournées
@@ -87,4 +86,20 @@
 - Carte de la défausse faceDown dans la main du joueur
 
 - Tout les joueurs jouent pendant la derniere manche
+
+
+## v.0.3: SPRINT 3
+---
+
+### Added
+
+- Liaison view avec `PiocheModel` pour les cartes
+
+- Retournement des cartes au clic
+    - Clic sur une carte face cachée pour la révéler
+    - Blocage des clics sur cartes déjà révélées
+
+- Rotation automatique des joueurs via GameManager
+    - Attente de 2 secondes après révélation d'une carte
+    - Blocage des clics pendant le délai de transition
 

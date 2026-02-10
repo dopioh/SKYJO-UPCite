@@ -21,12 +21,18 @@ public class GameBoardModel {
     private GameBoardView gameBoardView;
     private ArrayList<PlayerModel> listPlayer;
     private Frame frame; // pour revenir au menu
+    private GameManager gameManager;
     
-    public GameBoardModel(ArrayList<PlayerModel> listPlayerModels, Frame frame){
+    public GameBoardModel(ArrayList<PlayerModel> listPlayerModels, Frame frame, GameManager gameManager){
         this.listPlayer = listPlayerModels;
         this.frame = frame;
+        this.gameManager = gameManager;
         this.gameBoardView = new GameBoardView(listPlayerModels);
-        this.gameBoardController = new GameBoardController(this, gameBoardView);
+        this.gameBoardController = new GameBoardController(this, gameBoardView, gameManager);
+    }
+
+    public GameManager getGameManager() {
+        return gameManager;
     }
 
     public GameBoardView getGameBoardView() {
@@ -38,12 +44,8 @@ public class GameBoardModel {
      * @param nbr position du player dans l'ArrayList Button/Player
      */
     public void buttonPlayerCalled(int nbr){
-        System.out.println("Button Called " + nbr );
-        // desactivé pour l'instant pour pas changer de main (à droite) au clic
-        // if (nbr >= 1 && nbr <= listPlayer.size()) {
-        //     PlayerModel player = listPlayer.get(nbr - 1);
-        //     gameBoardView.showPlayerCards(player);
-        // }
+        
+
     }
 
     public void retourMenuCalled(){

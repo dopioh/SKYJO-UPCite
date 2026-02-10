@@ -279,6 +279,10 @@ public class GameBoardView extends JPanel{
     }
 
     // getter 
+    public ArrayList<PlayerModel> getListPlayer(){
+        return this.listPlayer;
+    }
+
     public ArrayList<JButton> getListPlayerButton(){
         return this.buttonlistPlayer;
     }
