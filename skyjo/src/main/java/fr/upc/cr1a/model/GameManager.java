@@ -55,21 +55,23 @@ public class GameManager {
         System.out.println("GameManager Called");
 
         this.players = new ArrayList<>(); // il faudra initialiser les joueurs a un moment
-        for (int i = 1 ; i <= 7 ; i++){   // juste pour les tests avec tous les joueurs
+        for (int i = 1 ; i <= 3 ; i++){   // juste pour les tests avec tous les joueurs
             players.add(new PlayerModel(new PlayerData("Joueur " + i)));
         }
 
-        // TEMPORAIRE : toutes les cartes face cachée pour tester - Ian
+        // Distribution depuis la pioche, cartes face cachée
+        this.deck = new PiocheModel();
         for (PlayerModel player : players) {
             for (int row = 0; row < 3; row++) {
                 for (int col = 0; col < 4; col++) {
-                    CardModel card = new NumberCardModel(true, 0, "blue");
+                    CardModel card = deck.getTopCard();
+                    deck.removeCardAtTop();
                     player.getHand().placeCard(row, col, card);
                 }
             }
         }
 
-        this.gameBoardModel = new GameBoardModel(players, frame);
+        this.gameBoardModel = new GameBoardModel(players, frame, this);
         GameBoardView view = this.gameBoardModel.getGameBoardView();
 
         frame.add(view, "GAME");
