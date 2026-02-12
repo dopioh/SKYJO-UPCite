@@ -57,13 +57,21 @@ Gère la logique du jeu.
         * Attribut : id, rank (Rank), elo, xp, money, skins (ArrayList)
         * Méthode : **getters/setters pour toutes les données**
 
+* **Bot** :
+    * `BotModel`: Représente un bot (héritage de bot)
+        * Attribut : meme que PlayerModel 
+        * Méthode : meme que PlayerModel
+    * `BotHandModel`: Grille 4x3 de cartes du bot
+        * Super-classe : **PlayerHandModel**
+        * Méthodess supplémentaires : **revealRandomCard()**, **sameCardInHandPosition()**, **tradeInHand()**, **isAcceptableCard()**
+
 * **Règles et logique** :
     * `GameRuleModel`: Définit les règles du jeu
         * Constantes : **INITIAL_REVEALED_CARD=2**, **WINNING_SCORE=100**, **COLUMN_SIZE=4**, **ROWS_SIZE=3**
         * Méthode : **canTakeFromDiscard()**, **canDrawFromDeck()**, **mustExchangeCard()**
     * `ScoreCalculator`: Calcule les scores
         * Méthode : **calculateHandScore()**, **détection colonnes identiques**
-    * `Rank`: Enum des rangs (IRON, BRONZE, SILVER, GOLD, PLATINUM, EMERALD, DIAMOND, MASTER, GRANDMASTER, CHALLENGER)
+    * `Rank`: Enum des rangs (OQTF, NOPAPER, A4, NEWSPAPAER, PLASTIC, PAPYRUS, PARCHEMIN, BULLETIN, CESTLACARTE, DEGREES, BLACKCARD, WORMS)
         * Méthode : **findRankByElo()**
 
 * **Audio** :

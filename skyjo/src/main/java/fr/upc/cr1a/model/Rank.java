@@ -2,6 +2,8 @@ package fr.upc.cr1a.model;
 
 /**
  * Classe Enum qui gère les rank pré-defini
+ * 
+ * @author Mei
  */
 public enum Rank {
     // Quels Rang ? Iron,Bonze, Silver, Gold, Platine,Emeraud, Diamand, Master, Challenger ? Ou plus ou moins ?

@@ -7,6 +7,8 @@ import java.awt.*;
 
 /**
  * Panel du main menu avec les bouttons
+ * 
+ * @author Ian
  */
 public class MainMenuPanel extends JPanel {
 
