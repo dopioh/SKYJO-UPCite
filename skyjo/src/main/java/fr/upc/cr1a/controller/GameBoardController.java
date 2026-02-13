@@ -44,8 +44,6 @@ public class GameBoardController {
      * Les boutons joueur a gauche ne changent plus la main affichée mais
      * la fonction buttonPlayerCalled existe toujours dans le model si
      * on a besoin de changer la main affichée a droite
-     * 
-     * IANNN MON LISTENER A GAUCHEEEEE 
      */
     public void listener(){
 
@@ -80,14 +78,6 @@ public class GameBoardController {
                 });
             }
         }
-
-        int s = 1;
-        for (JButton jb : gameBoardView.getListPlayerButton()){
-            int tmp = s;
-            jb.addActionListener(e -> gameBoardModel.buttonPlayerCalled(tmp));
-            s++;
-        }
-
     }
 
     /**
