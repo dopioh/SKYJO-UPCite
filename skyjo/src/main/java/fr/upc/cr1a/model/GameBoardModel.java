@@ -44,7 +44,7 @@ public class GameBoardModel {
      * @param nbr position du player dans l'ArrayList Button/Player
      */
     public void buttonPlayerCalled(int nbr){
-        
+        System.out.println("Button Called " + nbr );
 
     }
 
