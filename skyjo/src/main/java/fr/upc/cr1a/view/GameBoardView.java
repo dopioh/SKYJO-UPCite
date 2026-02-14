@@ -13,8 +13,7 @@ import fr.upc.cr1a.model.PlayerModel;
 /**
  * Vue graphique du plateau de jeu avec affichage des cartes et boutons joueurs
  * 
- * @author Mei
- * @author Ian
+ * @author Mei, Ian, Hugo
  */
 public class GameBoardView extends JPanel{
 
@@ -43,6 +42,11 @@ public class GameBoardView extends JPanel{
     private PlayerPreviewPanel previewPanel; // Le nouveau panel
     private JLayeredPane layeredPane; // gestion des couches
 
+    //Affichage des cartes pilées 
+    private CardButton btnPioche;
+    private CardButton btnDefausse;
+
+
     // pour fixer le clique
     private boolean isPinned = false;
 
@@ -66,6 +70,7 @@ public class GameBoardView extends JPanel{
         });
 
         initComponents();
+        updateDeckDisplay(null, true);
 
         // afficher les cartes du premier joueur par defaut
         if (!listPlayer.isEmpty()) {
@@ -146,6 +151,45 @@ public class GameBoardView extends JPanel{
         }
 
         zonePlateau.add(cardsGrid, BorderLayout.CENTER);
+
+        //Partie droite (EAST) pour les stack de pioche et défausse
+        JPanel cardStack = new JPanel();
+        cardStack.setOpaque(false);
+        cardStack.setLayout(new GridBagLayout());
+
+        GridBagConstraints gbcRight = new GridBagConstraints();
+        gbcRight.gridx = 0;
+        gbcRight.fill = GridBagConstraints.NONE;
+        gbcRight.anchor = GridBagConstraints.CENTER;
+        gbcRight.insets = new Insets(10, 10, 10, 10);
+
+        btnPioche = new CardButton();
+        btnDefausse = new CardButton();
+
+        Dimension bigCardSize = new Dimension(140, 200); // AJUSTER ICI SI CA VOUS PLAIT PAS 
+
+        btnPioche.setPreferredSize(bigCardSize);
+        btnDefausse.setPreferredSize(bigCardSize);
+
+        btnPioche.setMinimumSize(bigCardSize);
+        btnDefausse.setMinimumSize(bigCardSize);
+
+        JLabel labPioche = new JLabel("Pioche", SwingConstants.CENTER);
+        JLabel labDefausse = new JLabel("Défausse", SwingConstants.CENTER);
+        
+        // Pioche
+        gbcRight.gridy = 0;
+        cardStack.add(labPioche, gbcRight);
+        gbcRight.gridy = 1;
+        cardStack.add(btnPioche, gbcRight);
+
+        // Défausse
+        gbcRight.gridy = 2;
+        cardStack.add(labDefausse, gbcRight);
+        gbcRight.gridy = 3;
+        cardStack.add(btnDefausse, gbcRight);
+
+        zonePlateau.add(cardStack, BorderLayout.EAST);
 
         // bouton retour en bas temporaire
         btnRetour = new JButton("Retour");
@@ -297,5 +341,28 @@ public class GameBoardView extends JPanel{
 
     public PlayerModel getCurrentPlayer(){
         return this.currentPlayer;
+    }
+
+    public void updateDeckDisplay(CardModel topDiscard, boolean drawHasCards) {
+        //Pioche
+        if (drawHasCards) {
+            btnPioche.setText("");
+            btnPioche.setCardImage("/cartes/carteDos.png");
+        } else {
+            btnPioche.clearImage();
+            btnPioche.setText("vide");
+        }
+
+        //Défausse
+        if (topDiscard == null) {
+            btnDefausse.clearImage();
+            btnDefausse.setText("vide");
+        } else {
+            btnDefausse.setText("");
+            btnDefausse.setCardImage(getCardImagePath(topDiscard));
+        }
+
+        zonePlateau.revalidate();
+        zonePlateau.repaint();
     }
 }
