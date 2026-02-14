@@ -14,8 +14,8 @@ import fr.upc.cr1a.utils.ImageCache;
  */
 public class CardButton extends JButton {
 
-    private static final int CardW = 80;
-    private static final int CardH = 115; 
+    private static final int CardW = 95;
+    private static final int CardH = 135; 
 
     // crop car la carte n'est pas centrée
     // c'est 1217x1754 apres crop

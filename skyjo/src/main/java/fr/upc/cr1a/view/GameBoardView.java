@@ -134,7 +134,8 @@ public class GameBoardView extends JPanel{
 
         // panel grille pour les cartes
         JPanel cardsGrid = new JPanel(new GridBagLayout());
-        cardsGrid.setOpaque(false);
+        cardsGrid.setOpaque(true);
+        cardsGrid.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(cardSpacing, cardSpacing, cardSpacing, cardSpacing);
@@ -156,11 +157,11 @@ public class GameBoardView extends JPanel{
         JPanel cardStack = new JPanel();
         cardStack.setOpaque(false);
         cardStack.setLayout(new GridBagLayout());
+        cardStack.setPreferredSize(new Dimension(240, 0));
 
         GridBagConstraints gbcRight = new GridBagConstraints();
         gbcRight.gridx = 0;
         gbcRight.fill = GridBagConstraints.NONE;
-        gbcRight.anchor = GridBagConstraints.CENTER;
         gbcRight.insets = new Insets(10, 10, 10, 10);
 
         btnPioche = new CardButton();
