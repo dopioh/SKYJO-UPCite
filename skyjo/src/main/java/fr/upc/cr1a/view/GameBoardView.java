@@ -66,11 +66,12 @@ public class GameBoardView extends JPanel{
         @Override
         public void componentResized(ComponentEvent e) {
             resizeLayers();
+            resizeCards();
         }
         });
 
         initComponents();
-        updateDeckDisplay(null, true);
+        updateCardDisplay(null, true);
 
         // afficher les cartes du premier joueur par defaut
         if (!listPlayer.isEmpty()) {
@@ -344,7 +345,12 @@ public class GameBoardView extends JPanel{
         return this.currentPlayer;
     }
 
-    public void updateDeckDisplay(CardModel topDiscard, boolean drawHasCards) {
+    /**
+     * Mets à jour l'affichage des cartes de la pioche et de la défausse
+     * @param topDiscard Carte du haut de la défausse 
+     * @param drawHasCards 
+     */
+    public void updateCardDisplay(CardModel topDiscard, boolean drawHasCards) {
         //Pioche
         if (drawHasCards) {
             btnPioche.setText("");
@@ -362,6 +368,46 @@ public class GameBoardView extends JPanel{
             btnDefausse.setText("");
             btnDefausse.setCardImage(getCardImagePath(topDiscard));
         }
+
+        zonePlateau.revalidate();
+        zonePlateau.repaint();
+    }
+
+    private void resizeCards() {
+        int largeurZone = zonePlateau.getWidth();
+        int hauteurZone = zonePlateau.getHeight();
+
+        // 95x135 Taille de base
+        int largeurBase = 95;
+        int hauteurBase = 135;
+
+        // facteur simple selon la taille de la fenêtre
+        double facteur = 1.0;
+
+        //Ecran fenetré
+        if (largeurZone >= 1600 || hauteurZone >= 900) {
+            facteur = 1.2;
+        }
+        //Plein ecran
+        if (largeurZone >= 1920 || hauteurZone >= 1080) {
+            facteur = 1.35;
+        }
+
+        int largeurCarte = (int) (largeurBase * facteur);
+        int hauteurCarte = (int) (hauteurBase * facteur);
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 4; j++) {
+                cardButtons[i][j].setCardSize(largeurCarte, hauteurCarte);
+            }
+        }
+
+        // Pioche et Défausse sont plus grands
+        int largeurGrandeCarte = (int) (largeurCarte * 1.7);
+        int hauteurGrandeCarte = (int) (hauteurCarte * 1.7);
+
+        btnPioche.setCardSize(largeurGrandeCarte, hauteurGrandeCarte);
+        btnDefausse.setCardSize(largeurGrandeCarte, hauteurGrandeCarte);
 
         zonePlateau.revalidate();
         zonePlateau.repaint();

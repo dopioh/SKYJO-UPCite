@@ -82,7 +82,8 @@ public class SettingsOverlayController {
         cl.show(content, "JEU");
         overlay.setSelectedTabPanel(overlay.getTabJeuPanel());
         
-        //Changer le label du bot //A modifier plus tard 
+        //Changer le label du bot 
+        //A modifier plus tard 
         overlay.getBotDifficultyButton().addActionListener(e -> { 
             String current = overlay.getBotDifficultyButton().getText();
             switch (current) {
