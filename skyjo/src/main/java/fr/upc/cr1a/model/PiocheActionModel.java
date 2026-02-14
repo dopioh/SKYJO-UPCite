@@ -14,7 +14,7 @@ public class PiocheActionModel extends CardStackModel {
     public PiocheActionModel() {
         for (ActionType type : ActionType.values()) {
             for (int k = 0; k < 3; k++) {
-                this.getStack().add(new ActionCardModel(true, type));
+                this.getStack().add(new ActionCardModel(true, ActionType.TRADE_CARD_WITH_PLAYER));
             }
         }
         Collections.shuffle(this.getStack());
@@ -24,7 +24,7 @@ public class PiocheActionModel extends CardStackModel {
      * Quand la pioche est vide et la reconstruit avec les cartes de la defausse
      * @param defausse
      */
-    public void DefausseInPioche(DefausseModel defausse) {
+    public void DefausseInPioche(DefausseActionModel defausse) {
         if (this.stackSize() == 0) {
             while (defausse.stackSize() > 1) {
                 CardModel carte = defausse.getCardAt(0);

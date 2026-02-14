@@ -30,5 +30,11 @@ public class ActionCardModel extends CardModel {
         this.type = type;
     }
 
+    public ActionType getType() {
+        return this.type;
+    }
+
+
+
 }
 
