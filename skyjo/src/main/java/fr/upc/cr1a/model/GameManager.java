@@ -313,6 +313,11 @@ public class GameManager {
     public void revealCardInHand(int col, int row){
         currentDrawCard.returnCard();
         getCurrentPlayer().getHand().revealCard(row, col);
+
+        // check
+        GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile);
+        GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile);
+
     }
 
 
@@ -497,6 +502,7 @@ public class GameManager {
                     } while (true);
                     
                     hand.revealCard(row, col);
+
                     // verif si c'est une carte etoile
                     CardModel revealedCard = hand.getCard(row, col);
                     if (revealedCard instanceof NumberCardModel numberCard) {
@@ -505,6 +511,11 @@ public class GameManager {
                         }
                     }
                     System.out.println("\nCarte révélée : " + hand.getCard(row, col).getCardValue());
+
+                    // check row & column
+                    GameRuleModel.removeIdenticalColumns(hand, discardPile);
+                    GameRuleModel.removeIdenticalRows(hand, discardPile);
+
                     showHand(player, false);
                 }
                 
@@ -723,6 +734,11 @@ public class GameManager {
                 player.getHand().revealCard(row, col);
                 System.out.println("----------------------------------------------------------");
                 System.out.println("\nCarte révélée : " + player.getHand().getCard(row, col).getCardValue());
+                
+                // check row & column
+                GameRuleModel.removeIdenticalColumns(player.getHand(), discardPile);
+                GameRuleModel.removeIdenticalRows(player.getHand(), discardPile);
+
             }
         }
         
@@ -791,6 +807,11 @@ public class GameManager {
                 //révéler une carte aléatoire
                 botHand.revealRandomCard(1);
                 System.out.println(bot.getName() + " révèle une carte");
+
+                // check row & column
+                GameRuleModel.removeIdenticalColumns(botHand, discardPile);
+                GameRuleModel.removeIdenticalRows(botHand, discardPile);
+
             }
         }
         //permet que ça soit pas instantané, donne un aspect moins robotique
