@@ -37,7 +37,7 @@ public class PlayerPreviewPanel extends JPanel{
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 4; col++) {
-                CardButton btn = cardButtons[row][col];
+                CardButton btn = cardButtons[row][col]; // cardButtons existe pas ici, faut le recreer
                 CardModel card = hand.getCard(row, col);
 
                 if (card == null) {

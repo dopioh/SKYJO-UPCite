@@ -79,6 +79,12 @@ Gère la logique du jeu.
         * Attribut : bgmClip (Clip), enabled (boolean), volume (int)
         * Méthode : **playBgm()**, **playSfx()**, **stopBgm()**, **setEnabled()**, **setVolume()**
 
+* **Plateau** :
+    * `GameBoardModel` Gere la logique du plateau  
+        * Elle relie `GameBoardView` et `GameBoardController`
+        * Methode : **buttonPlayerCalled()** pour gerer l'affichage du `PlayerPreviewPanel`, **retourMenuCalled()**
+
+
 ### VIEW
 
 Gère l'affichage 
@@ -95,6 +101,10 @@ Gère l'affichage
         * Attribut : card (JPanel), backButton, contentPanel, tabJeu, tabAudio, tabAutres
         * Méthode : **getBackButton()**, **getTabJeu()**, **getTabAudio()**, **getTabAutres()**, **createTabButton()**, **createCardPanel()**
 
+* **GameBoardView** :
+
+* **PlayerPreviewPanel** : 
+
 ### CONTROLLER
 
 Gère toutes les entrées du joueur avec l'ordinateur
@@ -106,6 +116,8 @@ Gère toutes les entrées du joueur avec l'ordinateur
 * **SettingsOverlayController** : Contrôleur de l'overlay paramètres
     * Attribut : frame (Frame), audioManager (AudioManager)
     * Méthode : **ActionListener pour backButton, tabJeu, tabAudio, tabAutres, fullscreenButton, soundButton, volumeButtons**
+
+* **GameBoardController** :
 
 ## UTILS
 

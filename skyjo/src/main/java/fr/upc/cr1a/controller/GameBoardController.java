@@ -1,5 +1,8 @@
 package fr.upc.cr1a.controller;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 import javax.swing.*;
 
 import fr.upc.cr1a.model.CardModel;
@@ -84,7 +87,17 @@ public class GameBoardController {
         int s = 1;
         for (JButton jb : gameBoardView.getListPlayerButton()){
             int tmp = s;
-            jb.addActionListener(e -> gameBoardModel.buttonPlayerCalled(tmp));
+            jb.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e){
+                    gameBoardModel.buttonPlayerCalled(tmp);
+                }
+
+                @Override
+                public void mouseClicked(MouseEvent e){
+                    gameBoardModel.buttonPlayerCalled(tmp);
+                }
+            });
             s++;
         }
 

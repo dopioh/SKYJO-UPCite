@@ -298,4 +298,8 @@ public class GameBoardView extends JPanel{
     public PlayerModel getCurrentPlayer(){
         return this.currentPlayer;
     }
+
+    public PlayerPreviewPanel getPlayerPreviewPanel(){
+        return this.previewPanel;
+    }
 }

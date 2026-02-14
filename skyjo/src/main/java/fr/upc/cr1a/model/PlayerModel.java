@@ -1,5 +1,7 @@
 package fr.upc.cr1a.model;
 
+import java.util.ArrayList;
+
 /**
  * Modèle représentant un joueur
  * 
@@ -37,6 +39,10 @@ public class PlayerModel {
     }
     public void resetHand(){
         this.hand = new PlayerHandModel();
+    }
+
+    public static PlayerModel getPlayerModel(int nbr, ArrayList<PlayerModel> listPlayerModel){
+        return listPlayerModel.get(nbr);
     }
     
 }
