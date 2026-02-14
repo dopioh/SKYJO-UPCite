@@ -20,6 +20,8 @@ public class GameManager {
     private ArrayList<PlayerModel> players;
     private PiocheModel deck;
     private DefausseModel discardPile;
+    private PiocheActionModel actionDeck;
+    private DefausseActionModel discardActionPile;
     private int currentPlayerIndex;
     private int firstPlayerToPlayIndex;  // joueur qui a commencé la manche
     private GameState gameState;
@@ -102,8 +104,12 @@ public class GameManager {
         currentPlayerIndex = 0;
         firstPlayerToPlayIndex = 0; // le joueur qui commence la manche
         scanner = new Scanner(System.in);
+
         deck = new PiocheModel();
         discardPile = new DefausseModel();
+        actionDeck = new PiocheActionModel();
+        discardActionPile = new DefausseActionModel();
+
         currentDrawCard = null;
         gameState = GameState.WAITING_FOR_PLAYERS;
         turnPhase = TurnPhase.DRAW_DECISION;
@@ -128,6 +134,14 @@ public class GameManager {
 
     public PiocheModel getDeck(){
         return deck;
+    }
+
+    public DefausseActionModel getDiscardActionPile(){
+        return discardActionPile;
+    }
+
+    public PiocheActionModel getActionDeck(){
+        return actionDeck;
     }
     
     /**
