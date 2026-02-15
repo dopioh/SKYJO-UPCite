@@ -73,5 +73,9 @@ public class PlayerModel {
         this.hand = new PlayerHandModel();
         this.actionHand.clear(); 
     }
+
+    public static PlayerModel getPlayerModel(int nbr, ArrayList<PlayerModel> listPlayerModel){
+        return listPlayerModel.get(nbr);
+    }
     
 }

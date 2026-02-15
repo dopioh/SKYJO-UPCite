@@ -1,5 +1,8 @@
 package fr.upc.cr1a.controller;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 import javax.swing.*;
 
 import fr.upc.cr1a.model.CardModel;
@@ -24,6 +27,8 @@ public class GameBoardController {
     GameBoardView gameBoardView;
     GameManager gameManager;
     private boolean waitingNextTurn = false; // empeche de cliquer pendant l'attente
+    // pour fixer le clique du playerpreview
+    private boolean isPinned = false;
 
     /**
      * Initialise la view et le Model du GameBoard
@@ -78,6 +83,43 @@ public class GameBoardController {
                 });
             }
         }
+
+        int s = 0;
+        for (JButton jb : gameBoardView.getListPlayerButton()){
+            int tmp = s;
+            jb.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e){
+                    gameBoardModel.buttonPlayerCalled(tmp);
+                    gameBoardView.showOtherPlayerMain(true);
+                    isPinned = false;
+                }
+
+                @Override
+                public void mouseClicked(MouseEvent e){
+                    gameBoardModel.buttonPlayerCalled(tmp);
+                    gameBoardView.showOtherPlayerMain(true);
+                    isPinned = false;
+                }
+
+                @Override
+                public void mouseExited( MouseEvent e) {
+                    if (!isPinned){
+                        gameBoardView.showOtherPlayerMain(false);
+                        isPinned = true;
+                    }
+                }
+                @Override
+                public void mouseReleased( MouseEvent e) {
+                    if (!isPinned){
+                        gameBoardView.showOtherPlayerMain(false);
+                        isPinned = true;
+                    }
+                }
+            });
+            s++;
+        }
+
     }
 
     /**
