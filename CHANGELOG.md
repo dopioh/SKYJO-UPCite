@@ -103,3 +103,7 @@
     - Attente de 2 secondes après révélation d'une carte
     - Blocage des clics pendant le délai de transition
 
+- Cartes actions (Joueur seulement)
+    - implémentation de la premiere carte action : tradeCardWithPlayer
+    - ajout des étoiles dans la pioche
+    - initalisation d'une pioche & defausse pour les cartes action
