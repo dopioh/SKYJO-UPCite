@@ -8,6 +8,17 @@ Des classes qui permette d'éxécuter le jeu.
 
 * **GameLauncher** : Permet de lancer le jeu. Ne pas mettre de méthode a l'intérieur(elles seront pluoto dans le gameManager)
 * **GameManager** : Gère tous ce qui entoure le foncitonnement du jeu
+    *   Attribut :
+        * players (ArrayList<PlayerModel>)
+        * deck / discardPile (pioche & défausse normales)
+        * actionDeck / discardActionPile (pioche & défausse actions)
+        * currentPlayerIndex, gameState, turnPhase, currentDrawCard, scanner
+    * Méthode :
+        * **initializeGame()**, **startTurn()**, **nextPlayer()**
+        * **drawDeck()**, **takeDiscard()**, **drawActionDeck()**, **takeActionDiscard()**
+        * **exchangeCardInHand()**, **discardDrawCard()**, **revealCardInHand()**
+        * **playGame()**, **playTurn()**, **playerTurn()**, **botTurn()**
+        * **initializeHand()**, **firstPlayer()**, **startNewGame()**, **endRound()**
 * **GameLoop** : Gère le foncitonnement des cycles du jeu; les updates() et les repaint()
 
 ## 2. MVC 
@@ -42,14 +53,15 @@ Gère la logique du jeu.
 * **Types de cartes** :
     * `NumberCardModel`: Cartes numérotées (hérite de CardModel)
         * Attribut : cardValue, cardColor
-        * Méthode : getter et setter
+        * Méthode : getter et setter, **isStar()**
     * `ActionCardModel`: Cartes spéciales (hérite de CardModel)
-        * Méthode : **a faire**
+        * Attribut : **ActionType**
+        * Méthode : **getType()**
 
 * **Joueur** :
     * `PlayerModel`: Représente un joueur
-        * Attribut : name, hand (PlayerHandModel), totalScore
-        * Méthode : **getName()**, **getHand()**, **getTotalScore()**, **addScore()**, **resetHand()**
+        * Attribut : name, hand (PlayerHandModel), totalScore, starsScore
+        * Méthode : **getName()**, **getHand()**, **getTotalScore()**, **addScore()**, **resetHand()**, **showActionHand()**, **getStarsScore**, **addStarsScore**, **subStarsScore**
     * `PlayerHandModel`: Grille 4x3 de cartes du joueur
         * Attribut : grid (CardModel[][]), rows=3, columns=4
         * Méthode : **placeCard()**, **getCard()**, **isAvailable()**, **getVisibleCardScore()**, **révéler cartes**, **détecter colonnes complètes**
@@ -73,6 +85,8 @@ Gère la logique du jeu.
         * Méthode : **calculateHandScore()**, **détection colonnes identiques**
     * `Rank`: Enum des rangs (OQTF, NOPAPER, A4, NEWSPAPAER, PLASTIC, PAPYRUS, PARCHEMIN, BULLETIN, CESTLACARTE, DEGREES, BLACKCARD, WORMS)
         * Méthode : **findRankByElo()**
+    * `ActionSkills` Implémente les capacités des cartes actions
+        - **Methode** : tradeCardWithPlayer()
 
 * **Audio** :
     * `AudioManager`: Gère la musique et les effets sonores

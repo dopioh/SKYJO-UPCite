@@ -105,3 +105,7 @@
 
 - Main de chaque joueur affichées dans le panel playerpreview
 
+- Cartes actions (Joueur seulement)
+    - implémentation de la premiere carte action : tradeCardWithPlayer
+    - ajout des étoiles dans la pioche
+    - initalisation d'une pioche & defausse pour les cartes action
