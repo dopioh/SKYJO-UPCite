@@ -125,14 +125,13 @@ public class GameManager {
 
         this.gameBoardModel = new GameBoardModel(players, frame, this);
         GameBoardView view = this.gameBoardModel.getGameBoardView();
-
-        frame.add(view, "GAME");
-        frame.showPanel("GAME");
-
+        view.showPlayerCards(players.get(currentPlayerIndex));
         view.updateCardDisplay(
             discardPile.isEmpty() ? null : discardPile.getTopCard(),
             deck.stackSize() > 0
         );
+        frame.add(view, "GAME");
+        frame.showPanel("GAME");
     }
 
 
