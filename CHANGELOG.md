@@ -104,3 +104,5 @@
     - Blocage des clics pendant le délai de transition
 
 - Ajout Pioche et Défausse
+
+- Ajout d'un texte guideAction pour indiquer les actions que le joueur doit faire
