@@ -31,7 +31,6 @@ public class GameBoardView extends JPanel{
 
     // grille de boutons cartes
     private CardButton[][] cardButtons;
-    private JLabel playerNameLabel;
 
     // bouton retour vers le menu
     private JButton btnRetour;
@@ -46,6 +45,11 @@ public class GameBoardView extends JPanel{
     private CardButton btnPioche;
     private CardButton btnDefausse;
 
+    // a qui appartient chaque deck
+    private JLabel playerName;
+
+    //Que dois faire le joueur?
+    private JLabel actionGuide;
 
     // pour fixer le clique
     private boolean isPinned = false;
@@ -127,32 +131,53 @@ public class GameBoardView extends JPanel{
 
         plateauPanel.add(zonePlateau, gbcZonePlateau);
 
-        // label pour le nom du joueur affiché en haut
-        playerNameLabel = new JLabel("Selectionnez un joueur", SwingConstants.CENTER);
-        playerNameLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        playerNameLabel.setForeground(Color.BLACK);
-        zonePlateau.add(playerNameLabel, BorderLayout.NORTH);
-
         // panel grille pour les cartes
         JPanel cardsGrid = new JPanel(new GridBagLayout());
         cardsGrid.setOpaque(true);
         cardsGrid.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-
+    
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(cardSpacing, cardSpacing, cardSpacing, cardSpacing);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        actionGuide = new JLabel("PLACEHOLDER", SwingConstants.CENTER);
+        actionGuide.setFont(new Font("Arial", Font.BOLD, 14));
+        actionGuide.setBorder(BorderFactory.createEmptyBorder(6, 0, 6, 0));
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 4;
+        cardsGrid.add(actionGuide, gbc);
+
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.NONE;
+
+        // Container vertical pour message + cartes
+        JPanel cardsContainer = new JPanel();
+        cardsContainer.setLayout(new BorderLayout());
+        cardsContainer.setOpaque(false);
+
+        //%essage d'action
+        playerName = new JLabel("PLACEHOLDER", SwingConstants.CENTER);
+        playerName.setFont(new Font("Arial", Font.BOLD, 16));
+        playerName.setForeground(Color.BLACK);
+        playerName.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        cardsContainer.add(playerName, BorderLayout.NORTH);
+        cardsContainer.add(cardsGrid, BorderLayout.CENTER);
 
         // creer les 12 CardButton
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 4; col++) {
                 gbc.gridx = col;
-                gbc.gridy = row;
+                gbc.gridy = row+1;
                 CardButton btn = new CardButton();
                 cardButtons[row][col] = btn;
                 cardsGrid.add(btn, gbc);
             }
         }
 
-        zonePlateau.add(cardsGrid, BorderLayout.CENTER);
+        zonePlateau.add(cardsContainer, BorderLayout.CENTER);
 
         //Partie droite (EAST) pour les stack de pioche et défausse
         JPanel cardStack = new JPanel();
@@ -219,7 +244,7 @@ public class GameBoardView extends JPanel{
      */
     public void showPlayerCards(PlayerModel player) {
         this.currentPlayer = player;
-        playerNameLabel.setText("Main de " + player.getName());
+        playerName.setText("Main de " + player.getName());
         PlayerHandModel hand = player.getHand();
 
         for (int row = 0; row < 3; row++) {
@@ -245,7 +270,7 @@ public class GameBoardView extends JPanel{
     /**
      * Retourne le chemin de l'image pour une carte
      */
-    private String getCardImagePath(CardModel card) {
+    public String getCardImagePath(CardModel card) {
         if (card.isFaceDown()) {
             return "/cartes/carteDos.png";
         }
@@ -345,6 +370,18 @@ public class GameBoardView extends JPanel{
         return this.currentPlayer;
     }
 
+    public CardButton getBtnPioche(){ 
+        return btnPioche;
+    }
+
+    public CardButton getBtnDefausse(){
+        return btnDefausse;
+    }
+
+    public void setActionGuide(String message){
+        actionGuide.setText(message);
+    }
+
     /**
      * Mets à jour l'affichage des cartes de la pioche et de la défausse
      * @param topDiscard Carte du haut de la défausse 
@@ -368,7 +405,18 @@ public class GameBoardView extends JPanel{
             btnDefausse.setText("");
             btnDefausse.setCardImage(getCardImagePath(topDiscard));
         }
+        zonePlateau.revalidate();
+        zonePlateau.repaint();
+    }
 
+    public void updateDiscardOnly(CardModel topDiscard) {
+        if (topDiscard == null) {
+            btnDefausse.clearImage();
+            btnDefausse.setText("vide");
+        } else {
+            btnDefausse.setText("");
+            btnDefausse.setCardImage(getCardImagePath(topDiscard));
+        }
         zonePlateau.revalidate();
         zonePlateau.repaint();
     }

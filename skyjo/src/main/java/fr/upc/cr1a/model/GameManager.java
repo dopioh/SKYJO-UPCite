@@ -71,9 +71,15 @@ public class GameManager {
             }
         }
 
+        this.discardPile = new DefausseModel();
+        CardModel firstDiscard = deck.getTopCard();
+        deck.removeCardAtTop();
+        if (firstDiscard.isFaceDown()) firstDiscard.returnCard();
+        discardPile.addCardAtTop(firstDiscard);
+
         this.gameBoardModel = new GameBoardModel(players, frame, this);
         GameBoardView view = this.gameBoardModel.getGameBoardView();
-
+        view.updateCardDisplay(discardPile.getTopCard(), deck.stackSize() > 0);
         frame.add(view, "GAME");
         frame.showPanel("GAME");
     }
