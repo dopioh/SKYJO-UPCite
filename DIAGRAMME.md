@@ -101,9 +101,11 @@ Gère l'affichage
         * Attribut : card (JPanel), backButton, contentPanel, tabJeu, tabAudio, tabAutres
         * Méthode : **getBackButton()**, **getTabJeu()**, **getTabAudio()**, **getTabAutres()**, **createTabButton()**, **createCardPanel()**
 
-* **GameBoardView** :
+* **GameBoardView** : Panel pour afficher le plateau de jeu
+    * Méthode : **initComponents()**, **showPlayerscards()**, **getCardImagePath()**, **resizeLayers()**,
 
-* **PlayerPreviewPanel** : 
+* **PlayerPreviewPanel** : Panel pour afficher les cartes des autres joueurs
+    * Méthode : **showOtherPlayerHand**, **getCardImagePath()**
 
 ### CONTROLLER
 

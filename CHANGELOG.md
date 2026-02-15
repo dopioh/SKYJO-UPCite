@@ -103,3 +103,5 @@
     - Attente de 2 secondes après révélation d'une carte
     - Blocage des clics pendant le délai de transition
 
+- Main de chaque joueur affichées dans le panel playerpreview
+

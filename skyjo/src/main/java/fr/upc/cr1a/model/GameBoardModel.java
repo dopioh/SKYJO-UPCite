@@ -42,6 +42,10 @@ public class GameBoardModel {
         return gameBoardView;
     }
 
+    public GameBoardController getGameBoardController(){
+        return gameBoardController;
+    }
+
     /**
      * Methode called quand on appuie ou survol un bouton joueur
      * @param nbr position du player dans l'ArrayList Button/Player
