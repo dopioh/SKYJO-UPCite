@@ -84,6 +84,58 @@ public class GameManager {
         frame.showPanel("GAME");
     }
 
+    public GameManager(Frame frame, List<PlayerData> playersData){
+        //Creation des joueurs 
+        this.players = new ArrayList<>();
+        for (PlayerData player : playersData) {
+            //créer un BotModel si c'est un bot, sinon créer un player
+            if (player.isBot()) {
+                players.add(new BotModel(player));
+            } else {
+                players.add(new PlayerModel(player));
+            }
+        }
+
+        this.currentPlayerIndex = 0;
+        this.firstPlayerToPlayIndex = 0; // le joueur qui commence la manche
+        this.deck = new PiocheModel();
+        this.discardPile = new DefausseModel();
+        this.currentDrawCard = null;
+        this.gameState = GameState.WAITING_FOR_PLAYERS;
+        this.turnPhase = TurnPhase.DRAW_DECISION;
+
+        //Distribution des cartes
+        for (PlayerModel player : players) {
+            player.resetHand();
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 4; col++) {
+                    CardModel card = deck.getTopCard();
+                    deck.removeCardAtTop();
+                    player.getHand().placeCard(row, col, card);
+                }
+            }
+        }
+
+        CardModel firstDiscard = deck.getTopCard();
+        deck.removeCardAtTop();
+        if (firstDiscard.isFaceDown()) firstDiscard.returnCard();
+        discardPile.addCardAtTop(firstDiscard);
+
+        this.gameState = GameState.IS_PLAYING;
+
+        this.gameBoardModel = new GameBoardModel(players, frame, this);
+        GameBoardView view = this.gameBoardModel.getGameBoardView();
+
+        frame.add(view, "GAME");
+        frame.showPanel("GAME");
+
+        view.updateCardDisplay(
+            discardPile.isEmpty() ? null : discardPile.getTopCard(),
+            deck.stackSize() > 0
+        );
+    }
+
+
     public GameManager(){
        
     }
@@ -143,7 +195,7 @@ public class GameManager {
         //creer un deck deja melange
         deck = new PiocheModel();
         
-        firstPlayerToPlayIndex = currentPlayerIndex; // faut changer ici si le premier joueur n'est pas le joueur 0
+        firstPlayerToPlayIndex = currentPlayerIndex; 
         
         for (PlayerModel player : players) {
             player.resetHand();
