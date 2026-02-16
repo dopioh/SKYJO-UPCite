@@ -121,7 +121,7 @@ public class GameManager {
 
         CardModel firstDiscard = deck.getTopCard();
         deck.removeCardAtTop();
-        if (firstDiscard.isFaceDown()) firstDiscard.returnCard();
+        ensureFaceUp(firstDiscard);
         discardPile.addCardAtTop(firstDiscard);
 
         this.gameState = GameState.IS_PLAYING;
@@ -330,6 +330,7 @@ public class GameManager {
         CardModel cardInHand = hand.getCard(row, col);
         
         //echange de cartes
+        ensureFaceUp(cardInHand);
         hand.replaceCard(row, col, currentDrawCard);
         discardPile.addCardAtTop(cardInHand);
         //montrer la nouvelle carte
@@ -359,6 +360,7 @@ public class GameManager {
     *défausser la carte piochée // en theorie ça marche aussi pour les cartes action
     */
     public void discardDrawCard(){
+        ensureFaceUp(currentDrawCard);
         discardPile.addCardAtTop(currentDrawCard);
         currentDrawCard = null;
         turnPhase = TurnPhase.TURN_ENDED;
@@ -921,5 +923,12 @@ public class GameManager {
         exchangeCardInHand(col, row);
         System.out.println("\nCarte échangé. Carte défaussée : " + oldCard.getCardValue() + "\n");
         System.out.println("-------------------------------------------------------------------------");
+    }
+
+    // Etre sur que la carte est viisble
+    private void ensureFaceUp(CardModel card) {
+        if (card != null && card.isFaceDown()) {
+            card.returnCard();
+        }
     }
 }

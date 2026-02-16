@@ -26,12 +26,9 @@ public class GameBoardController {
     GameBoardView gameBoardView;
     GameManager gameManager;
     private boolean waitingNextTurn = false; // empeche de cliquer pendant l'attente
-<<<<<<< HEAD
     private boolean waitingReveal = false;
-=======
     // pour fixer le clique du playerpreview
     private boolean isPinned = false;
->>>>>>> dev
 
     /**
      * Initialise la view et le Model du GameBoard
@@ -82,6 +79,7 @@ public class GameBoardController {
                     gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
                     gameManager.getDeck().stackSize() > 0
                 );
+                refreshGuide();
                 return;
             }
 
@@ -119,6 +117,7 @@ public class GameBoardController {
 
                         waitingReveal = false;
                         switchToNextPlayer();
+                        refreshGuide();
                         return;
                     }
 
@@ -135,22 +134,16 @@ public class GameBoardController {
                         );
 
                         switchToNextPlayer();
+                        refreshGuide();
                         return;
                     }
 
-                    // Reveler la carte
-                    if (card == null || !card.isFaceDown()) return; // rien faire si deja revelé
-                    currentPlayer.getHand().revealCard(r, c);
-                    gameBoardView.showPlayerCards(currentPlayer);
-
-                    // Attendre 2 secondes et passer au joueur suivant
-                    waitingNextTurn = true;
-                    Timer timer = new Timer(2000, evt -> {
-                        switchToNextPlayer();
-                        waitingNextTurn = false;
-                    });
-                    timer.setRepeats(false);
-                    timer.start();
+                    if (gameManager.getTurnPhase() == GameManager.TurnPhase.DRAW_DECISION) {
+                        refreshGuide();
+                        return;
+                    }
+                    refreshGuide();
+                    return;
                 });
             }
         }

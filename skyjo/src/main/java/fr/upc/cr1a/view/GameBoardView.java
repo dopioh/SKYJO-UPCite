@@ -370,7 +370,6 @@ public class GameBoardView extends JPanel{
         return this.currentPlayer;
     }
 
-<<<<<<< HEAD
     public CardButton getBtnPioche(){ 
         return btnPioche;
     }
@@ -460,9 +459,8 @@ public class GameBoardView extends JPanel{
 
         zonePlateau.revalidate();
         zonePlateau.repaint();
-=======
+    }
     public PlayerPreviewPanel getPlayerPreviewPanel(){
         return this.previewPanel;
->>>>>>> dev
     }
 }
