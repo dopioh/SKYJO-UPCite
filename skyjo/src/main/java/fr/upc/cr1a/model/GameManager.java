@@ -31,6 +31,7 @@ public class GameManager {
     private Scanner scanner;
 
     private GameBoardModel gameBoardModel;
+    private int initRevealCount = 0;
     
     /*
     *classe local enum pour gérer les états du jeu
@@ -44,6 +45,7 @@ public class GameManager {
     }
 
     public enum TurnPhase {
+        INIT_REVEAL,
         DRAW_DECISION,              // joueur doit choisir ; pioche ou défausse
         CARD_DRAW_FROM_DECK,        // carte piochée du deck ; peut échanger ou défausser
         CARD_TAKE_FROM_DISCARD,     // carte prise de la défausse ; doit échanger
@@ -74,12 +76,72 @@ public class GameManager {
             }
         }
 
+        this.discardPile = new DefausseModel();
+        CardModel firstDiscard = deck.getTopCard();
+        deck.removeCardAtTop();
+        if (firstDiscard.isFaceDown()) firstDiscard.returnCard();
+        discardPile.addCardAtTop(firstDiscard);
+
         this.gameBoardModel = new GameBoardModel(players, frame, this);
         GameBoardView view = this.gameBoardModel.getGameBoardView();
-
+        view.updateCardDisplay(discardPile.getTopCard(), deck.stackSize() > 0);
         frame.add(view, "GAME");
         frame.showPanel("GAME");
     }
+
+    public GameManager(Frame frame, List<PlayerData> playersData){
+        //Creation des joueurs 
+        this.players = new ArrayList<>();
+        for (PlayerData player : playersData) {
+            //créer un BotModel si c'est un bot, sinon créer un player
+            if (player.isBot()) {
+                players.add(new BotModel(player));
+            } else {
+                players.add(new PlayerModel(player));
+            }
+        }
+
+        this.currentPlayerIndex = 0;
+        this.firstPlayerToPlayIndex = 0; // le joueur qui commence la manche
+        this.deck = new PiocheModel();
+        this.discardPile = new DefausseModel();
+        this.currentDrawCard = null;
+        this.gameState = GameState.WAITING_FOR_PLAYERS;
+        this.turnPhase = TurnPhase.DRAW_DECISION;
+
+        //Distribution des cartes
+        for (PlayerModel player : players) {
+            player.resetHand();
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 4; col++) {
+                    CardModel card = deck.getTopCard();
+                    deck.removeCardAtTop();
+                    player.getHand().placeCard(row, col, card);
+                }
+            }
+        }
+
+        CardModel firstDiscard = deck.getTopCard();
+        deck.removeCardAtTop();
+        ensureFaceUp(firstDiscard);
+        discardPile.addCardAtTop(firstDiscard);
+
+        this.turnPhase = TurnPhase.INIT_REVEAL;
+        this.currentPlayerIndex = 0;    
+
+        this.gameState = GameState.IS_PLAYING;
+
+        this.gameBoardModel = new GameBoardModel(players, frame, this);
+        GameBoardView view = this.gameBoardModel.getGameBoardView();
+        view.showPlayerCards(players.get(currentPlayerIndex));
+        view.updateCardDisplay(
+            discardPile.isEmpty() ? null : discardPile.getTopCard(),
+            deck.stackSize() > 0
+        );
+        frame.add(view, "GAME");
+        frame.showPanel("GAME");
+    }
+
 
     public GameManager(){
        
@@ -152,7 +214,7 @@ public class GameManager {
         //creer un deck deja melange
         deck = new PiocheModel();
         
-        firstPlayerToPlayIndex = currentPlayerIndex; // faut changer ici si le premier joueur n'est pas le joueur 0
+        firstPlayerToPlayIndex = currentPlayerIndex; 
         
         for (PlayerModel player : players) {
             player.resetHand();
@@ -273,6 +335,7 @@ public class GameManager {
         CardModel cardInHand = hand.getCard(row, col);
         
         //echange de cartes
+        ensureFaceUp(cardInHand);
         hand.replaceCard(row, col, currentDrawCard);
         discardPile.addCardAtTop(cardInHand);
         //montrer la nouvelle carte
@@ -302,6 +365,7 @@ public class GameManager {
     *défausser la carte piochée // en theorie ça marche aussi pour les cartes action
     */
     public void discardDrawCard(){
+        ensureFaceUp(currentDrawCard);
         discardPile.addCardAtTop(currentDrawCard);
         currentDrawCard = null;
         turnPhase = TurnPhase.TURN_ENDED;
@@ -864,5 +928,33 @@ public class GameManager {
         exchangeCardInHand(col, row);
         System.out.println("\nCarte échangé. Carte défaussée : " + oldCard.getCardValue() + "\n");
         System.out.println("-------------------------------------------------------------------------");
+    }
+
+    // Etre sur que la carte est viisble
+    private void ensureFaceUp(CardModel card) {
+        if (card != null && card.isFaceDown()) {
+            card.returnCard();
+        }
+    }
+    
+    public int getInitRevealCount(){
+        return initRevealCount;
+    }
+
+    public boolean revealInitCard(int col, int row){
+        if (turnPhase != TurnPhase.INIT_REVEAL) return false;
+        CardModel card = getCurrentPlayer().getHand().getCard(row, col);
+        if (card == null || !card.isFaceDown()) return false;
+        getCurrentPlayer().getHand().revealCard(row, col);
+        initRevealCount++;
+        if (initRevealCount >= 2) {
+            initRevealCount = 0;
+            currentPlayerIndex++;
+            if (currentPlayerIndex >= players.size()) {
+                currentPlayerIndex = 0;
+                startTurn(); // met DRAW_DECISION
+            }
+        }
+        return true;
     }
 }

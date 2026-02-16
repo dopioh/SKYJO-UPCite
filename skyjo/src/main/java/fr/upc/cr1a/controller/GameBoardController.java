@@ -18,8 +18,7 @@ import fr.upc.cr1a.view.GameBoardView;
  * @see GameBoardView vue graphique
  * @see GameBoardModel logique du plateau
  * 
- * @author Mei
- * @author Ian
+ * @author Mei,Ian,Hugo
  */
 public class GameBoardController {
 
@@ -27,6 +26,7 @@ public class GameBoardController {
     GameBoardView gameBoardView;
     GameManager gameManager;
     private boolean waitingNextTurn = false; // empeche de cliquer pendant l'attente
+    private boolean waitingReveal = false;
     // pour fixer le clique du playerpreview
     private boolean isPinned = false;
 
@@ -39,6 +39,7 @@ public class GameBoardController {
         this.gameManager = gameManager;
 
         listener();
+        refreshGuide();
     }
     
     /**
@@ -55,6 +56,48 @@ public class GameBoardController {
         JButton retour = gameBoardView.getBtnRetour();
         retour.addActionListener(e -> gameBoardModel.retourMenuCalled());
 
+        gameBoardView.getBtnPioche().addActionListener(e -> {
+            if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) return;
+            if (waitingNextTurn) return;
+            if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
+            CardModel drawn = gameManager.drawDeck();
+            if (drawn.isFaceDown()) drawn.returnCard();
+            gameBoardView.getBtnPioche().setCardImage(gameBoardView.getCardImagePath(drawn));
+            gameBoardView.updateDiscardOnly(
+                gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard()
+            );
+            refreshGuide();
+        });
+
+        gameBoardView.getBtnDefausse().addActionListener(e -> {
+            if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) return;
+            if (waitingNextTurn) return;
+            //Si on prend a partir de la défausse
+            if (gameManager.getTurnPhase() == GameManager.TurnPhase.DRAW_DECISION) {
+                if (gameManager.getDiscardPile().isEmpty()) return;
+                CardModel taken = gameManager.takeDiscard();
+                gameBoardView.getBtnDefausse().setCardImage(gameBoardView.getCardImagePath(taken));
+                gameBoardView.updateCardDisplay(
+                    gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
+                    gameManager.getDeck().stackSize() > 0
+                );
+                refreshGuide();
+                return;
+            }
+
+            // Reveal de la carte du deck
+            if (gameManager.getTurnPhase() == GameManager.TurnPhase.CARD_DRAW_FROM_DECK) {
+                gameManager.discardDrawCard();
+                waitingReveal = true; // maintenant il doit révéler une carte
+
+                gameBoardView.updateCardDisplay(
+                    gameManager.getDiscardPile().getTopCard(),
+                    gameManager.getDeck().stackSize() > 0
+                );
+            }
+            refreshGuide();
+        });
+
         // listeners pour les cartes, retourner la carte au clic puis switch joueur après 2s
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 4; col++) {
@@ -66,20 +109,56 @@ public class GameBoardController {
                     if (currentPlayer == null) return;
 
                     CardModel card = currentPlayer.getHand().getCard(r, c);
-                    if (card == null || !card.isFaceDown()) return; // rien faire si deja revelé
 
-                    // Reveler la carte
-                    currentPlayer.getHand().revealCard(r, c);
-                    gameBoardView.showPlayerCards(currentPlayer);
+                    //Partie Reveal de 2 cartes en debut de partie
+                    if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) {
+                        boolean ok = gameManager.revealInitCard(c, r); 
+                        if (!ok) return;
+                        gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
+                        gameBoardView.updateCardDisplay(
+                            gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
+                            gameManager.getDeck().stackSize() > 0
+                        );
+                        refreshGuide();
+                        return;
+                    }
 
-                    // Attendre 2 secondes et passer au joueur suivant
-                    waitingNextTurn = true;
-                    Timer timer = new Timer(2000, evt -> {
+                    // Reveler apres avoir défausser
+                    if (waitingReveal) {
+                        if (card == null || !card.isFaceDown()) return;
+
+                        currentPlayer.getHand().revealCard(r, c);
+                        gameBoardView.showPlayerCards(currentPlayer);
+
+                        waitingReveal = false;
                         switchToNextPlayer();
-                        waitingNextTurn = false;
-                    });
-                    timer.setRepeats(false);
-                    timer.start();
+                        refreshGuide();
+                        return;
+                    }
+
+                    // Echange de carte pioche deck
+                    if (gameManager.getTurnPhase() == GameManager.TurnPhase.CARD_DRAW_FROM_DECK
+                        || gameManager.getTurnPhase() == GameManager.TurnPhase.CARD_TAKE_FROM_DISCARD) {
+
+                        gameManager.exchangeCardInHand(c, r); // col, row (comme ton code)
+                        gameBoardView.showPlayerCards(currentPlayer);
+
+                        gameBoardView.updateCardDisplay(
+                            gameManager.getDiscardPile().getTopCard(),
+                            gameManager.getDeck().stackSize() > 0
+                        );
+
+                        switchToNextPlayer();
+                        refreshGuide();
+                        return;
+                    }
+
+                    if (gameManager.getTurnPhase() == GameManager.TurnPhase.DRAW_DECISION) {
+                        refreshGuide();
+                        return;
+                    }
+                    refreshGuide();
+                    return;
                 });
             }
         }
@@ -127,6 +206,25 @@ public class GameBoardController {
      */
     private void switchToNextPlayer() {
         gameManager.nextPlayer();
+        gameManager.startTurn();
         gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
+        gameBoardView.updateCardDisplay(
+            gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
+            gameManager.getDeck().stackSize() > 0
+        );
+        refreshGuide();
+    }
+
+    /**
+     * Message d'action indiqunat au joueur quoi faire
+     */
+    private void refreshGuide() {
+        switch (gameManager.getTurnPhase()) {
+            case DRAW_DECISION -> gameBoardView.setActionGuide("Choisis : Pioche ou Défausse");
+            case CARD_DRAW_FROM_DECK -> gameBoardView.setActionGuide("Echange ou Défausse puis revele une carte");
+            case CARD_TAKE_FROM_DISCARD -> gameBoardView.setActionGuide("Clique une carte de ta main pour échanger");
+            case TURN_ENDED -> gameBoardView.setActionGuide("Tour terminé");
+            case INIT_REVEAL -> gameBoardView.setActionGuide(gameManager.getCurrentPlayer().getName() + " doit réveler 2 cartes (" + gameManager.getInitRevealCount() + ")");
+        }
     }
 }

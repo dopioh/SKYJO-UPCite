@@ -1,6 +1,8 @@
 package fr.upc.cr1a.view;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import fr.upc.cr1a.controller.MainMenuController;
 import fr.upc.cr1a.controller.SettingsOverlayController;
@@ -37,6 +39,13 @@ public class Frame extends JFrame{
         
         mainMenuPanel = new MainMenuPanel();
         add(mainMenuPanel, "MENU");
+        
+        //Ecran temporaire pour la selection des joueurs
+        JPanel playersPanel = new JPanel();
+        playersPanel.setBackground(java.awt.Color.WHITE);
+        JLabel l1 = new JLabel("Veuillez suivre les instructions du terminal");
+        playersPanel.add(l1);
+        add(playersPanel, "PLAYERS");
 
         //Overlay paramètre
         settingsOverlay = new SettingsOverlay();

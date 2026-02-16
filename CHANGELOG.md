@@ -103,6 +103,12 @@
     - Attente de 2 secondes après révélation d'une carte
     - Blocage des clics pendant le délai de transition
 
+- Ajout Pioche et Défausse
+
+- Ajout d'un texte guideAction pour indiquer les actions que le joueur doit faire
+
+- Panel temporaire pour séléction du nombre de joueur dans le terminal
+
 - Main de chaque joueur affichées dans le panel playerpreview
 
 - Cartes actions (Joueur seulement)
