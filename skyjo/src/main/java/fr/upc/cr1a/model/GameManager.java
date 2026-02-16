@@ -90,9 +90,21 @@ public class GameManager {
         //initialiser les joueurs
         this.players = new ArrayList<>();
         for (PlayerData player : playersData) {
-            //créer un BotModel si c'est un bot, sinon créer un player
+            //créer un BotModel si c'est un bot, sinon créer un playdéfatuter
             if (player.isBot()) {
-                players.add(new BotModel(player));
+                //strat du bot appelé
+                BotStrategyInterface strategy;
+                String botType = player.getBotType();
+                
+                if ("botrow".equals(botType)) {
+                    strategy = new BotRow(); // BotRow
+                } else if ("botlow".equals(botType)) {
+                    strategy = new BotHigh(8); // BotHigh)
+                } else {
+                    strategy = new BotTerminalModel(); // défaut
+                }
+                
+                players.add(new BotModel(player, strategy));
             } else {
                 players.add(new PlayerModel(player));
             }
@@ -311,6 +323,9 @@ public class GameManager {
             //regarde le gagnant
             PlayerModel winner = GameRuleModel.determineWinner(players);
             System.out.println("WINNER: " + winner.getName() + " avec " + winner.getTotalScore() + " points !?? EZZZZZ");
+            
+            // Enregistrer la victoire dans les statistiques
+            BotStatsManager.recordVictory(winner);
         }
         else {
             gameState = GameState.ROUND_ENDED;
@@ -669,8 +684,8 @@ public class GameManager {
         System.out.println("\n-------------------------------------------------------");
         showHand(bot, false);
         System.out.println("------------------------------------------------------------");
-        System.out.println("\nAppuyez sur Entrée pour continuer <3");
-        scanner.nextLine();
+        //System.out.println("\nAppuyez sur Entrée pour continuer <3");
+        //scanner.nextLine();
         
         nextPlayer();
     }
