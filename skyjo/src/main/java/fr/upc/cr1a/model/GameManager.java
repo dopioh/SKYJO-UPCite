@@ -942,12 +942,12 @@ public class GameManager {
     }
 
     public boolean revealInitCard(int col, int row){
-        if (turnPhase != TurnPhase.INIT_REVEAL) return false;
+        if(turnPhase != TurnPhase.INIT_REVEAL) return false;
         CardModel card = getCurrentPlayer().getHand().getCard(row, col);
-        if (card == null || !card.isFaceDown()) return false;
+        if(card == null || !card.isFaceDown()) return false;
         getCurrentPlayer().getHand().revealCard(row, col);
         initRevealCount++;
-        if (initRevealCount >= 2) {
+        if(initRevealCount >= 2) {
             initRevealCount = 0;
             currentPlayerIndex++;
             if (currentPlayerIndex >= players.size()) {
