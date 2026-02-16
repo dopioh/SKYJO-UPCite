@@ -1,5 +1,7 @@
 package fr.upc.cr1a.model;
 
+import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
+
 /**
  * Modèle qui représente un bot
  */
@@ -9,6 +11,7 @@ public class BotModel extends PlayerModel  {
     private final String name; // id unique qui permettra de retrouver le player dans la db
     private BotHandModel hand;
     private int totalScore;
+    private BotStrategyInterface strategy; // stratégie de jeu du bot
     
     
     //constructeur
@@ -17,6 +20,16 @@ public class BotModel extends PlayerModel  {
         this.name = playerData.getID();
         this.hand = new BotHandModel();
         this.totalScore = 0;
+        this.strategy = null; // stratégie par défaut
+    }
+    
+    //constructeur avec stratégie personnalisée
+    public BotModel(PlayerData playerData, BotStrategyInterface strategy){
+        super(playerData);
+        this.name = playerData.getID();
+        this.hand = new BotHandModel();
+        this.totalScore = 0;
+        this.strategy = strategy;
     }
     
     public String getName(){
@@ -29,6 +42,14 @@ public class BotModel extends PlayerModel  {
 
     public int getTotalScore(){
         return totalScore;
+    }
+    
+    public BotStrategyInterface getStrategy(){
+        return strategy;
+    }
+    
+    public void setStrategy(BotStrategyInterface strategy){
+        this.strategy = strategy;
     }
 
     public void addScore(int score){

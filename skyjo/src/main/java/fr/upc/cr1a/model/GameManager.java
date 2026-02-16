@@ -3,6 +3,7 @@ package fr.upc.cr1a.model;
 import java.util.List;
 import java.util.Scanner;
 
+import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
 
@@ -606,10 +607,11 @@ public class GameManager {
     public void botTurn(BotModel bot) {
         showHand(bot, false);
         BotHandModel botHand = bot.getHand();
+        BotStrategyInterface strategy = bot.getStrategy();
         CardModel discardCard = getDiscardPile().getTopCard();
         System.out.println("\nCarte sur la défausse : " + discardCard.getCardValue());
         //regarde si il doit la prendre ou non
-        boolean takeDiscard = BotTerminalModel.takeFromDiscard(botHand, discardCard);
+        boolean takeDiscard = strategy.TakeFromDiscard(botHand, discardCard);
         CardModel drawCard;
         boolean mustExchange = false; // si il prendre de la défausse obliger d'échanger
         
@@ -627,7 +629,7 @@ public class GameManager {
         //quand il pioche soit il défausse soit il échange
         if (mustExchange) {
             // obliger d'échanger
-            int[] position = BotTerminalModel.cardToExchange(botHand, drawCard);
+            int[] position = strategy.CardToExchange(botHand, drawCard);
             if (position[0] != -1 && position[1] != -1) {
                 CardModel oldCard = botHand.getCard(position[1], position[0]);
                 exchangeCardInHand(position[0], position[1]);
@@ -636,11 +638,11 @@ public class GameManager {
             }
         } else {
             //choisit d'échanger ou de défausser
-            boolean exchange = BotTerminalModel.exchangeDrawCard(botHand, drawCard);
+            boolean exchange = strategy.ExchangeDrawCard(botHand, drawCard);
             
             if (exchange) {
                 //écahnger la carte piochée avec une carte de la main
-                int[] position = BotTerminalModel.cardToExchange(botHand, drawCard);
+                int[] position = strategy.CardToExchange(botHand, drawCard);
                 if (position[0] != -1 && position[1] != -1) {
                     CardModel oldCard = botHand.getCard(position[1], position[0]);
                     exchangeCardInHand(position[0], position[1]);
