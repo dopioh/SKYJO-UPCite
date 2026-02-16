@@ -449,6 +449,7 @@ public class GameBoardView extends JPanel{
                 cardButtons[i][j].setCardSize(largeurCarte, hauteurCarte);
             }
         }
+        previewPanel.setCardSize(largeurCarte, hauteurCarte);
 
         // Pioche et Défausse sont plus grands
         int largeurGrandeCarte = (int) (largeurCarte * 1.7);

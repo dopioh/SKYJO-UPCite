@@ -18,6 +18,9 @@ public class PlayerPreviewPanel extends JPanel{
 
     private CardButton[][] cardButtons;
     private static final int cardSpacing = 2;
+
+    private int lastCardW = 95;
+    private int lastCardH = 135;
     
     public PlayerPreviewPanel(){
         setLayout(new BorderLayout());
@@ -43,6 +46,7 @@ public class PlayerPreviewPanel extends JPanel{
                 gbc.gridx = col;
                 gbc.gridy = row;
                 CardButton btn = new CardButton();
+                btn.setCardSize(lastCardW, lastCardH);
                 cardButtons[row][col] = btn;
                 cardsGrid.add(btn, gbc);
             }
@@ -82,6 +86,25 @@ public class PlayerPreviewPanel extends JPanel{
         if (val == -2) return "/cartes/carteMoins2.png";
         if (val == -1) return "/cartes/carteMoins1.png";
         return "/cartes/carte" + val + ".png";
+    }
+
+    /**
+     * Appelle directement la taille des cartes de card model
+     * @param width
+     * @param height
+     */
+    public void setCardSize(int width, int height) {
+        lastCardW = width;
+        lastCardH = height;
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 4; col++) {
+                if (cardButtons[row][col] != null) {
+                    cardButtons[row][col].setCardSize(width, height);
+                }
+            }
+        }
+        revalidate();
+        repaint();
     }
 
     @Override
