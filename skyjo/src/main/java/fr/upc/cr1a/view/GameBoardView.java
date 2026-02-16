@@ -298,7 +298,7 @@ public class GameBoardView extends JPanel{
             p.setBackground(Color.WHITE);
             p.setForeground(Color.BLACK);
             p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            //////////// un listner dans viewwwwwwwwww
+            //////////// un listner dans viewwwwwwwwww // c'est un listener pour modifier des couleurs, faut le laisser la
             p.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered( MouseEvent e) {
@@ -370,6 +370,7 @@ public class GameBoardView extends JPanel{
         return this.currentPlayer;
     }
 
+<<<<<<< HEAD
     public CardButton getBtnPioche(){ 
         return btnPioche;
     }
@@ -459,5 +460,9 @@ public class GameBoardView extends JPanel{
 
         zonePlateau.revalidate();
         zonePlateau.repaint();
+=======
+    public PlayerPreviewPanel getPlayerPreviewPanel(){
+        return this.previewPanel;
+>>>>>>> dev
     }
 }

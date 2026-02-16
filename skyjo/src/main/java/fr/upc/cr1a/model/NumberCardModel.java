@@ -8,24 +8,30 @@ package fr.upc.cr1a.model;
 public class NumberCardModel extends CardModel  {
     private int cardValue;
     private String cardColor; // a changé quand on aura l'ui
+    private boolean star;
 
-    public NumberCardModel(boolean faceDown, String pathImage, int cardValue, String cardColor) {
+    public NumberCardModel(boolean faceDown, String pathImage, int cardValue, String cardColor, boolean star) {
         super(faceDown, pathImage);
         this.cardValue = cardValue;
         this.cardColor = cardColor;
+        this.star = star;
+
     }
 
     // constructeur NumberCardModel sans image
-    public NumberCardModel(boolean faceDown, int cardValue, String cardColor) {
+    public NumberCardModel(boolean faceDown, int cardValue, String cardColor, boolean star) {
         super(faceDown, null);
         this.cardValue = cardValue;
         this.cardColor = cardColor;
+        this.star = star;
+
     }
 
 
     // Getters & Setters
     public int getCardValue() { return cardValue; }
     public String getCardColor() { return cardColor; }
+    public boolean isStar() { return star; }
 
     public void setCardColor(String color) { cardColor = color ;}
     public void setCardValue(int x) { cardValue = x ;} 
