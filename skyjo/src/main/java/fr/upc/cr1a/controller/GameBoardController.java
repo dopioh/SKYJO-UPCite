@@ -34,6 +34,7 @@ public class GameBoardController {
         this.gameManager = gameManager;
 
         listener();
+        refreshGuide();
     }
     
     /**
@@ -59,6 +60,7 @@ public class GameBoardController {
             gameBoardView.updateDiscardOnly(
                 gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard()
             );
+            refreshGuide();
         });
 
         gameBoardView.getBtnDefausse().addActionListener(e -> {
@@ -85,6 +87,7 @@ public class GameBoardController {
                     gameManager.getDeck().stackSize() > 0
                 );
             }
+            refreshGuide();
         });
 
         // listeners pour les cartes, retourner la carte au clic puis switch joueur après 2s
@@ -150,10 +153,24 @@ public class GameBoardController {
      */
     private void switchToNextPlayer() {
         gameManager.nextPlayer();
+        gameManager.startTurn();
         gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
         gameBoardView.updateCardDisplay(
             gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
             gameManager.getDeck().stackSize() > 0
         );
+        refreshGuide();
+    }
+
+    /**
+     * Message d'action indiqunat au joueur quoi faire
+     */
+    private void refreshGuide() {
+        switch (gameManager.getTurnPhase()) {
+            case DRAW_DECISION -> gameBoardView.setActionGuide("Choisis : Pioche ou Défausse");
+            case CARD_DRAW_FROM_DECK -> gameBoardView.setActionGuide("Echange ou Défausse puis revele une carte");
+            case CARD_TAKE_FROM_DISCARD -> gameBoardView.setActionGuide("Clique une carte de ta main pour échanger");
+            case TURN_ENDED -> gameBoardView.setActionGuide("Tour terminé");
+        }
     }
 }

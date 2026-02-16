@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.swing.SwingUtilities;
+
 /**
  * Controller du menu principal avec les bouttons existants (jouer, boutique, paramètres)
  * 
@@ -24,6 +26,7 @@ public class MainMenuController {
     private final Frame frame;
     private final MainMenuPanel view;
     private final AudioManager audio;
+    private final Scanner scanner = new Scanner(System.in);
 
     public MainMenuController(Frame frame, MainMenuPanel view) {
         this.frame = frame;
@@ -56,7 +59,6 @@ public class MainMenuController {
 
         //mais on a besoin d'un ecran temporaire (plus tard ca sera la selection des joueurs/pseudo ou le mode de jeu en ligne ou local)
         new Thread(() -> {
-            Scanner scanner = new Scanner(System.in);
             List<PlayerData> playerNames = new ArrayList<>();
             int botCounter = 0;
             int nbJoueurs = 0;
@@ -92,8 +94,7 @@ public class MainMenuController {
                 playerNames.add(tmp);
             }
             System.out.println("------------------------------------------------------------------");
-            new GameManager(frame, playerNames);
-            scanner.close();
+            SwingUtilities.invokeLater(() -> new GameManager(frame, playerNames));
         }).start();
     }
 
