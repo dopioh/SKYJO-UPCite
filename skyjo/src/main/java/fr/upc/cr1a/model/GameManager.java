@@ -31,6 +31,7 @@ public class GameManager {
     private Scanner scanner;
 
     private GameBoardModel gameBoardModel;
+    private int initRevealCount = 0;
     
     /*
     *classe local enum pour gérer les états du jeu
@@ -44,6 +45,7 @@ public class GameManager {
     }
 
     public enum TurnPhase {
+        INIT_REVEAL,
         DRAW_DECISION,              // joueur doit choisir ; pioche ou défausse
         CARD_DRAW_FROM_DECK,        // carte piochée du deck ; peut échanger ou défausser
         CARD_TAKE_FROM_DISCARD,     // carte prise de la défausse ; doit échanger
@@ -123,6 +125,9 @@ public class GameManager {
         deck.removeCardAtTop();
         ensureFaceUp(firstDiscard);
         discardPile.addCardAtTop(firstDiscard);
+
+        this.turnPhase = TurnPhase.INIT_REVEAL;
+        this.currentPlayerIndex = 0;    
 
         this.gameState = GameState.IS_PLAYING;
 
@@ -930,5 +935,27 @@ public class GameManager {
         if (card != null && card.isFaceDown()) {
             card.returnCard();
         }
+    }
+    
+    public int getInitRevealCount(){
+        return initRevealCount;
+    }
+
+    public boolean revealInitCard(int col, int row){
+if (turnPhase != TurnPhase.INIT_REVEAL) return false;
+
+    CardModel card = getCurrentPlayer().getHand().getCard(row, col);
+        if (card == null || !card.isFaceDown()) return false;
+        getCurrentPlayer().getHand().revealCard(row, col);
+        initRevealCount++;
+        if (initRevealCount >= 2) {
+            initRevealCount = 0;
+            currentPlayerIndex++;
+            if (currentPlayerIndex >= players.size()) {
+                currentPlayerIndex = 0;
+                startTurn(); // met DRAW_DECISION
+            }
+        }
+        return true;
     }
 }

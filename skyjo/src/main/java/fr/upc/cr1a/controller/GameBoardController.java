@@ -57,6 +57,7 @@ public class GameBoardController {
         retour.addActionListener(e -> gameBoardModel.retourMenuCalled());
 
         gameBoardView.getBtnPioche().addActionListener(e -> {
+            if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) return;
             if (waitingNextTurn) return;
             if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
             CardModel drawn = gameManager.drawDeck();
@@ -69,6 +70,7 @@ public class GameBoardController {
         });
 
         gameBoardView.getBtnDefausse().addActionListener(e -> {
+            if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) return;
             if (waitingNextTurn) return;
             //Si on prend a partir de la défausse
             if (gameManager.getTurnPhase() == GameManager.TurnPhase.DRAW_DECISION) {
@@ -107,6 +109,19 @@ public class GameBoardController {
                     if (currentPlayer == null) return;
 
                     CardModel card = currentPlayer.getHand().getCard(r, c);
+
+                    //Partie Reveal de 2 cartes en debut de partie
+                    if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) {
+                        boolean ok = gameManager.revealInitCard(c, r); 
+                        if (!ok) return;
+                        gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
+                        gameBoardView.updateCardDisplay(
+                            gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
+                            gameManager.getDeck().stackSize() > 0
+                        );
+                        refreshGuide();
+                        return;
+                    }
 
                     // Reveler apres avoir défausser
                     if (waitingReveal) {
@@ -209,6 +224,7 @@ public class GameBoardController {
             case CARD_DRAW_FROM_DECK -> gameBoardView.setActionGuide("Echange ou Défausse puis revele une carte");
             case CARD_TAKE_FROM_DISCARD -> gameBoardView.setActionGuide("Clique une carte de ta main pour échanger");
             case TURN_ENDED -> gameBoardView.setActionGuide("Tour terminé");
+            case INIT_REVEAL -> gameBoardView.setActionGuide(gameManager.getCurrentPlayer().getName() + " doit réveler 2 cartes (" + gameManager.getInitRevealCount() + ")");
         }
     }
 }
