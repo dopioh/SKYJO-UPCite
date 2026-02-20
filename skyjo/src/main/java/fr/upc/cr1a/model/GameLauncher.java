@@ -51,14 +51,15 @@ public class GameLauncher {
         
         //Donnez le nom des joueurs
         for (int i = 1; i <= nbJoueurs; i++) {
-            System.out.print("Nom du joueur " + i + " ou 'bot' : ");
+            System.out.print("Nom du joueur " + i + " ou 'bot', 'botRow', 'botLow' : ");
             String inputName = scanner.nextLine();
             
             PlayerData tmp;
-            if (inputName.equalsIgnoreCase("bot")) {
+            if (inputName.equalsIgnoreCase("bot") || inputName.equalsIgnoreCase("botRow") || inputName.equalsIgnoreCase("botLow")) {
                 botCounter++;
                 String botName = "Bot" + botCounter;
-                tmp = new PlayerData(botName, true);
+                String botType = inputName.toLowerCase(); // Stocke le type exact
+                tmp = new PlayerData(botName, true, botType);
             } else {
                 tmp = new PlayerData(inputName);
             }
@@ -69,8 +70,9 @@ public class GameLauncher {
         //créer le game manager
         gameManager = new GameManager(playerNames);
         
-        // Lancer la partie
-        gameManager.playGame();
+        //le modèle terminal et lancer la partie
+        GameTerminalModel terminalModel = new GameTerminalModel(gameManager);
+        terminalModel.playGame();
         
         scanner.close();
     }

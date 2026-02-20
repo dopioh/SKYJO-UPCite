@@ -115,3 +115,17 @@
     - implémentation de la premiere carte action : tradeCardWithPlayer
     - ajout des étoiles dans la pioche
     - initalisation d'une pioche & defausse pour les cartes action
+
+## v.0.3: SPRINT 4
+---
+
+### Added
+
+- BotStatsManager : Fichier qui enregistre les victoires des joueurs
+
+-Ajout de 2 bots botRow et botLow
+
+
+### Modified 
+
+- gameTerminalModel pour séparer et alléger le gameManger

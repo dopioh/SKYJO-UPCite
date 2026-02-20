@@ -20,6 +20,7 @@ public class PlayerData {
     private int xp;
     private int money;
     private boolean isBot; // indique si c'est un bot
+    private String botType; // type de bot
     // les skins sont dans une list de String mais ils auront leur propre classes plus tard
     private ArrayList<String> skins; // tous les skins du jeu et si le joueur l'a, alors l'attribue unlocked du skin est true
 
@@ -35,6 +36,7 @@ public class PlayerData {
         this.xp = 0;
         this.money = 0;
         this.isBot = false;
+        this.botType = null;
         this.skins = null; // a modif plus tard
 
     }
@@ -44,14 +46,16 @@ public class PlayerData {
      * 
      * @param id le nom du bot
      * @param isBot true si c'est un bot
+     * @param botType le type de bot
      */
-    public PlayerData(String id, boolean isBot){
+    public PlayerData(String id, boolean isBot, String botType){
         this.id = id;
         this.rank = Rank.IRON;
         this.elo = 0;
         this.xp = 0;
         this.money = 0;
         this.isBot = isBot;
+        this.botType = botType;
         this.skins = null;
     }
 
@@ -63,6 +67,10 @@ public class PlayerData {
     
     public boolean isBot(){
         return this.isBot;
+    }
+    
+    public String getBotType(){
+        return this.botType;
     }
 
     public Rank getPlayerRank(){

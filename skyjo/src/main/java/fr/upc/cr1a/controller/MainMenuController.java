@@ -87,7 +87,7 @@ public class MainMenuController {
                 if (inputName.equalsIgnoreCase("bot")) {
                     botCounter++;
                     String botName = "Bot" + botCounter;
-                    tmp = new fr.upc.cr1a.model.PlayerData(botName, true);
+                    tmp = new fr.upc.cr1a.model.PlayerData(botName);
                 } else {
                     tmp = new fr.upc.cr1a.model.PlayerData(inputName);
                 }

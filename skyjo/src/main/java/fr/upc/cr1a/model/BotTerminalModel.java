@@ -1,23 +1,40 @@
 package fr.upc.cr1a.model;
 
+import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
+
 /**
  *Classe qui permet au bot de jouer dans le terminal 
  * 
  * @author Billy
  */
-public class BotTerminalModel {
+public class BotTerminalModel implements BotStrategyInterface {
     
-    private static int n = 5; // seuil pour accepter une carte
+    private int n = 5; // seuil pour accepter une carte
     
     /**
-     * regarede si le bot doit prendre la carte de la défausse
-     * @param hand la main du bot
-     * @param discardCard la carte sur la défausse
-     * @return true si le bot prend, false sinon
+     * constructeur par défaut avec seuil 5
      */
-    public static boolean takeFromDiscard(BotHandModel hand, CardModel discardCard) {
+    public BotTerminalModel() {
+        this.n = 5;
+    }
+    
+    /**
+     * constructeur avec seuil personnalisé
+     * @param seuil le seuil pour accepter une carte
+     */
+    public BotTerminalModel(int seuil) {
+        this.n = seuil;
+    }
+    
+    @Override
+    public int getSeuil() {
+        return n;
+    }
+    
+    @Override
+    public boolean TakeFromDiscard(BotHandModel hand, CardModel discardCard) {
         if (discardCard == null) return false;
-        //prendre si la carte est en dessus de n 
+        //prendre si la carte est en dessous du seuil
         boolean isAcceptable = hand.isAcceptableCard(n, discardCard);
         //regarde si la carte est dans la main 
         int[] sameCard = hand.sameCardInHandPostition(discardCard);
@@ -25,28 +42,18 @@ public class BotTerminalModel {
         return isAcceptable || gotSameCard;
     }
     
-    /**
-     *regarde si le bot doit échanger la carte piochée ou la défausser
-     * @param hand la main du bot
-     * @param drawCard la carte piochée
-     * @return true si échange, false si défausse
-     */
-    public static boolean exchangeDrawCard(BotHandModel hand, CardModel drawCard) {
+    @Override
+    public boolean ExchangeDrawCard(BotHandModel hand, CardModel drawCard) {
         if (drawCard == null) return false;
-        //échanger si la carte est en dessus de n
+        //échanger si la carte est en dessous du seuil
         boolean isAcceptable = hand.isAcceptableCard(n, drawCard);
         int[] sameCard = hand.sameCardInHandPostition(drawCard);
         boolean gotSameCard = (sameCard[0] != -1);
         return isAcceptable || gotSameCard;
     }
     
-    /**
-     * regarde quelle carte remplacer dans la main
-     * @param hand la main du bot
-     * @param card la carte à placer
-     * @return tab[row][col]
-     */
-    public static int[] cardToExchange(BotHandModel hand, CardModel card) {
+    @Override
+    public int[] CardToExchange(BotHandModel hand, CardModel card) {
         //regarde si la carte est dans la main
         int[] sameCardPosition = hand.sameCardInHandPostition(card);
         

@@ -4,7 +4,7 @@ package fr.upc.cr1a.model;
 * Modèle de la main d'un bot dans le jeu Skyjo
 * Gère une grille de cartes 4x3 avec des fonctionnalités des règles du jeu
 
-* @author Nassim
+* @author Nassim, Billy
 */
 
 public class BotHandModel extends PlayerHandModel {
