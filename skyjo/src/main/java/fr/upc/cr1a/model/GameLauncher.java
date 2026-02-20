@@ -70,8 +70,9 @@ public class GameLauncher {
         //créer le game manager
         gameManager = new GameManager(playerNames);
         
-        // Lancer la partie
-        gameManager.playGame();
+        //le modèle terminal et lancer la partie
+        GameTerminalModel terminalModel = new GameTerminalModel(gameManager);
+        terminalModel.playGame();
         
         scanner.close();
     }
