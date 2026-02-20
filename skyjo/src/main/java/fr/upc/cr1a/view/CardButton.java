@@ -13,10 +13,6 @@ import fr.upc.cr1a.utils.ImageCache;
  * @author Ian
  */
 public class CardButton extends JButton {
-
-    private static final int CardW = 80;
-    private static final int CardH = 115; 
-
     // crop car la carte n'est pas centrée
     // c'est 1217x1754 apres crop
     private static final int CropLeft = 446;
@@ -29,7 +25,7 @@ public class CardButton extends JButton {
     private BufferedImage cardImage;
 
     public CardButton() {
-        setPreferredSize(new Dimension(CardW, CardH));
+        // setPreferredSize(new Dimension(CardW, CardH));
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         setFocusPainted(false);
         setContentAreaFilled(false);
@@ -85,6 +81,17 @@ public class CardButton extends JButton {
         repaint();
     }
 
+    /**
+     * Sert pour le plein ecran, taille des cartes
+     */
+    public void setCardSize(int w, int h) {
+        Dimension d = new Dimension(w, h);
+        setPreferredSize(d);
+        setMinimumSize(d);
+        setMaximumSize(d);
+        revalidate();
+        repaint();
+    }
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);

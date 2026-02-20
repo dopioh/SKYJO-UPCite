@@ -79,7 +79,6 @@
 
 - Ajout du bot dans le Terminal
 
-
 ### Fixed
 
 - Colonnes et lignes supprimées uniquement si elles sont retournées
@@ -88,3 +87,45 @@
 
 - Tout les joueurs jouent pendant la derniere manche
 
+
+## v.0.3: SPRINT 3
+---
+
+### Added
+
+- Liaison view avec `PiocheModel` pour les cartes
+
+- Retournement des cartes au clic
+    - Clic sur une carte face cachée pour la révéler
+    - Blocage des clics sur cartes déjà révélées
+
+- Rotation automatique des joueurs via GameManager
+    - Attente de 2 secondes après révélation d'une carte
+    - Blocage des clics pendant le délai de transition
+
+- Ajout Pioche et Défausse
+
+- Ajout d'un texte guideAction pour indiquer les actions que le joueur doit faire
+
+- Panel temporaire pour séléction du nombre de joueur dans le terminal
+
+- Main de chaque joueur affichées dans le panel playerpreview
+
+- Cartes actions (Joueur seulement)
+    - implémentation de la premiere carte action : tradeCardWithPlayer
+    - ajout des étoiles dans la pioche
+    - initalisation d'une pioche & defausse pour les cartes action
+
+## v.0.3: SPRINT 4
+---
+
+### Added
+
+- BotStatsManager : Fichier qui enregistre les victoires des joueurs
+
+-Ajout de 2 bots botRow et botLow
+
+
+### Modified 
+
+- gameTerminalModel pour séparer et alléger le gameManger

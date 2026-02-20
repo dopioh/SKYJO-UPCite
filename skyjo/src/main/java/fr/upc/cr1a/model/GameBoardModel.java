@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import fr.upc.cr1a.controller.GameBoardController;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
+import fr.upc.cr1a.view.PlayerPreviewPanel;
 
 /**
  * Gere la logique du Plateau de jeu
@@ -21,16 +22,28 @@ public class GameBoardModel {
     private GameBoardView gameBoardView;
     private ArrayList<PlayerModel> listPlayer;
     private Frame frame; // pour revenir au menu
+    private GameManager gameManager;
+    private PlayerPreviewPanel playerPreviewPanel;
     
-    public GameBoardModel(ArrayList<PlayerModel> listPlayerModels, Frame frame){
+    public GameBoardModel(ArrayList<PlayerModel> listPlayerModels, Frame frame, GameManager gameManager){
         this.listPlayer = listPlayerModels;
         this.frame = frame;
+        this.gameManager = gameManager;
         this.gameBoardView = new GameBoardView(listPlayerModels);
-        this.gameBoardController = new GameBoardController(this, gameBoardView);
+        this.playerPreviewPanel = gameBoardView.getPlayerPreviewPanel();
+        this.gameBoardController = new GameBoardController(this, gameBoardView, gameManager);
+    }
+
+    public GameManager getGameManager() {
+        return gameManager;
     }
 
     public GameBoardView getGameBoardView() {
         return gameBoardView;
+    }
+
+    public GameBoardController getGameBoardController(){
+        return gameBoardController;
     }
 
     /**
@@ -39,11 +52,8 @@ public class GameBoardModel {
      */
     public void buttonPlayerCalled(int nbr){
         System.out.println("Button Called " + nbr );
-        // desactivé pour l'instant pour pas changer de main (à droite) au clic
-        // if (nbr >= 1 && nbr <= listPlayer.size()) {
-        //     PlayerModel player = listPlayer.get(nbr - 1);
-        //     gameBoardView.showPlayerCards(player);
-        // }
+        PlayerModel tmp = PlayerModel.getPlayerModel(nbr, listPlayer);
+        playerPreviewPanel.showOtherPlayerHand(tmp);
     }
 
     public void retourMenuCalled(){

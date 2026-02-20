@@ -13,8 +13,7 @@ import fr.upc.cr1a.model.PlayerModel;
 /**
  * Vue graphique du plateau de jeu avec affichage des cartes et boutons joueurs
  * 
- * @author Mei
- * @author Ian
+ * @author Mei, Ian, Hugo
  */
 public class GameBoardView extends JPanel{
 
@@ -32,7 +31,6 @@ public class GameBoardView extends JPanel{
 
     // grille de boutons cartes
     private CardButton[][] cardButtons;
-    private JLabel playerNameLabel;
 
     // bouton retour vers le menu
     private JButton btnRetour;
@@ -42,6 +40,16 @@ public class GameBoardView extends JPanel{
 
     private PlayerPreviewPanel previewPanel; // Le nouveau panel
     private JLayeredPane layeredPane; // gestion des couches
+
+    //Affichage des cartes pilées 
+    private CardButton btnPioche;
+    private CardButton btnDefausse;
+
+    // a qui appartient chaque deck
+    private JLabel playerName;
+
+    //Que dois faire le joueur?
+    private JLabel actionGuide;
 
     // pour fixer le clique
     private boolean isPinned = false;
@@ -62,10 +70,12 @@ public class GameBoardView extends JPanel{
         @Override
         public void componentResized(ComponentEvent e) {
             resizeLayers();
+            resizeCards();
         }
         });
 
         initComponents();
+        updateCardDisplay(null, true);
 
         // afficher les cartes du premier joueur par defaut
         if (!listPlayer.isEmpty()) {
@@ -121,31 +131,92 @@ public class GameBoardView extends JPanel{
 
         plateauPanel.add(zonePlateau, gbcZonePlateau);
 
-        // label pour le nom du joueur affiché en haut
-        playerNameLabel = new JLabel("Selectionnez un joueur", SwingConstants.CENTER);
-        playerNameLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        playerNameLabel.setForeground(Color.BLACK);
-        zonePlateau.add(playerNameLabel, BorderLayout.NORTH);
-
         // panel grille pour les cartes
         JPanel cardsGrid = new JPanel(new GridBagLayout());
-        cardsGrid.setOpaque(false);
-
+        cardsGrid.setOpaque(true);
+        cardsGrid.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+    
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(cardSpacing, cardSpacing, cardSpacing, cardSpacing);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        actionGuide = new JLabel("PLACEHOLDER", SwingConstants.CENTER);
+        actionGuide.setFont(new Font("Arial", Font.BOLD, 14));
+        actionGuide.setBorder(BorderFactory.createEmptyBorder(6, 0, 6, 0));
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 4;
+        cardsGrid.add(actionGuide, gbc);
+
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.NONE;
+
+        // Container vertical pour message + cartes
+        JPanel cardsContainer = new JPanel();
+        cardsContainer.setLayout(new BorderLayout());
+        cardsContainer.setOpaque(false);
+
+        //%essage d'action
+        playerName = new JLabel("PLACEHOLDER", SwingConstants.CENTER);
+        playerName.setFont(new Font("Arial", Font.BOLD, 16));
+        playerName.setForeground(Color.BLACK);
+        playerName.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        cardsContainer.add(playerName, BorderLayout.NORTH);
+        cardsContainer.add(cardsGrid, BorderLayout.CENTER);
 
         // creer les 12 CardButton
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 4; col++) {
                 gbc.gridx = col;
-                gbc.gridy = row;
+                gbc.gridy = row+1;
                 CardButton btn = new CardButton();
                 cardButtons[row][col] = btn;
                 cardsGrid.add(btn, gbc);
             }
         }
 
-        zonePlateau.add(cardsGrid, BorderLayout.CENTER);
+        zonePlateau.add(cardsContainer, BorderLayout.CENTER);
+
+        //Partie droite (EAST) pour les stack de pioche et défausse
+        JPanel cardStack = new JPanel();
+        cardStack.setOpaque(false);
+        cardStack.setLayout(new GridBagLayout());
+        cardStack.setPreferredSize(new Dimension(240, 0));
+
+        GridBagConstraints gbcRight = new GridBagConstraints();
+        gbcRight.gridx = 0;
+        gbcRight.fill = GridBagConstraints.NONE;
+        gbcRight.insets = new Insets(10, 10, 10, 10);
+
+        btnPioche = new CardButton();
+        btnDefausse = new CardButton();
+
+        Dimension bigCardSize = new Dimension(140, 200); // AJUSTER ICI SI CA VOUS PLAIT PAS 
+
+        btnPioche.setPreferredSize(bigCardSize);
+        btnDefausse.setPreferredSize(bigCardSize);
+
+        btnPioche.setMinimumSize(bigCardSize);
+        btnDefausse.setMinimumSize(bigCardSize);
+
+        JLabel labPioche = new JLabel("Pioche", SwingConstants.CENTER);
+        JLabel labDefausse = new JLabel("Défausse", SwingConstants.CENTER);
+        
+        // Pioche
+        gbcRight.gridy = 0;
+        cardStack.add(labPioche, gbcRight);
+        gbcRight.gridy = 1;
+        cardStack.add(btnPioche, gbcRight);
+
+        // Défausse
+        gbcRight.gridy = 2;
+        cardStack.add(labDefausse, gbcRight);
+        gbcRight.gridy = 3;
+        cardStack.add(btnDefausse, gbcRight);
+
+        zonePlateau.add(cardStack, BorderLayout.EAST);
 
         // bouton retour en bas temporaire
         btnRetour = new JButton("Retour");
@@ -173,7 +244,7 @@ public class GameBoardView extends JPanel{
      */
     public void showPlayerCards(PlayerModel player) {
         this.currentPlayer = player;
-        playerNameLabel.setText("Main de " + player.getName());
+        playerName.setText("Main de " + player.getName());
         PlayerHandModel hand = player.getHand();
 
         for (int row = 0; row < 3; row++) {
@@ -199,7 +270,7 @@ public class GameBoardView extends JPanel{
     /**
      * Retourne le chemin de l'image pour une carte
      */
-    private String getCardImagePath(CardModel card) {
+    public String getCardImagePath(CardModel card) {
         if (card.isFaceDown()) {
             return "/cartes/carteDos.png";
         }
@@ -227,7 +298,7 @@ public class GameBoardView extends JPanel{
             p.setBackground(Color.WHITE);
             p.setForeground(Color.BLACK);
             p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            //////////// un listner dans viewwwwwwwwww
+            //////////// un listner dans viewwwwwwwwww // c'est un listener pour modifier des couleurs, faut le laisser la
             p.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered( MouseEvent e) {
@@ -279,6 +350,10 @@ public class GameBoardView extends JPanel{
     }
 
     // getter 
+    public ArrayList<PlayerModel> getListPlayer(){
+        return this.listPlayer;
+    }
+
     public ArrayList<JButton> getListPlayerButton(){
         return this.buttonlistPlayer;
     }
@@ -293,5 +368,100 @@ public class GameBoardView extends JPanel{
 
     public PlayerModel getCurrentPlayer(){
         return this.currentPlayer;
+    }
+
+    public CardButton getBtnPioche(){ 
+        return btnPioche;
+    }
+
+    public CardButton getBtnDefausse(){
+        return btnDefausse;
+    }
+
+    public void setActionGuide(String message){
+        actionGuide.setText(message);
+    }
+
+    /**
+     * Mets à jour l'affichage des cartes de la pioche et de la défausse
+     * @param topDiscard Carte du haut de la défausse 
+     * @param drawHasCards 
+     */
+    public void updateCardDisplay(CardModel topDiscard, boolean drawHasCards) {
+        //Pioche
+        if (drawHasCards) {
+            btnPioche.setText("");
+            btnPioche.setCardImage("/cartes/carteDos.png");
+        } else {
+            btnPioche.clearImage();
+            btnPioche.setText("vide");
+        }
+
+        //Défausse
+        if (topDiscard == null) {
+            btnDefausse.clearImage();
+            btnDefausse.setText("vide");
+        } else {
+            btnDefausse.setText("");
+            btnDefausse.setCardImage(getCardImagePath(topDiscard));
+        }
+        zonePlateau.revalidate();
+        zonePlateau.repaint();
+    }
+
+    public void updateDiscardOnly(CardModel topDiscard) {
+        if (topDiscard == null) {
+            btnDefausse.clearImage();
+            btnDefausse.setText("vide");
+        } else {
+            btnDefausse.setText("");
+            btnDefausse.setCardImage(getCardImagePath(topDiscard));
+        }
+        zonePlateau.revalidate();
+        zonePlateau.repaint();
+    }
+
+    private void resizeCards() {
+        int largeurZone = zonePlateau.getWidth();
+        int hauteurZone = zonePlateau.getHeight();
+
+        // 95x135 Taille de base
+        int largeurBase = 95;
+        int hauteurBase = 135;
+
+        // facteur simple selon la taille de la fenêtre
+        double facteur = 1.0;
+
+        //Ecran fenetré
+        if (largeurZone >= 1600 || hauteurZone >= 900) {
+            facteur = 1.2;
+        }
+        //Plein ecran
+        if (largeurZone >= 1920 || hauteurZone >= 1080) {
+            facteur = 1.35;
+        }
+
+        int largeurCarte = (int) (largeurBase * facteur);
+        int hauteurCarte = (int) (hauteurBase * facteur);
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 4; j++) {
+                cardButtons[i][j].setCardSize(largeurCarte, hauteurCarte);
+            }
+        }
+        previewPanel.setCardSize(largeurCarte, hauteurCarte);
+
+        // Pioche et Défausse sont plus grands
+        int largeurGrandeCarte = (int) (largeurCarte * 1.7);
+        int hauteurGrandeCarte = (int) (hauteurCarte * 1.7);
+
+        btnPioche.setCardSize(largeurGrandeCarte, hauteurGrandeCarte);
+        btnDefausse.setCardSize(largeurGrandeCarte, hauteurGrandeCarte);
+
+        zonePlateau.revalidate();
+        zonePlateau.repaint();
+    }
+    public PlayerPreviewPanel getPlayerPreviewPanel(){
+        return this.previewPanel;
     }
 }
