@@ -5,10 +5,7 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.*;
 
-import fr.upc.cr1a.model.CardModel;
-import fr.upc.cr1a.model.GameBoardModel;
-import fr.upc.cr1a.model.GameManager;
-import fr.upc.cr1a.model.PlayerModel;
+import fr.upc.cr1a.model.*;
 import fr.upc.cr1a.view.GameBoardView;
 
 /**
@@ -29,6 +26,7 @@ public class GameBoardController {
     private boolean waitingReveal = false;
     // pour fixer le clique du playerpreview
     private boolean isPinned = false;
+    private AudioManager audio;
 
     /**
      * Initialise la view et le Model du GameBoard
@@ -37,6 +35,7 @@ public class GameBoardController {
         this.gameBoardModel = gameBoardModel;
         this.gameBoardView = gameBoardView;
         this.gameManager = gameManager;
+        this.audio = new AudioManager();
 
         listener();
         refreshGuide();
@@ -111,7 +110,7 @@ public class GameBoardController {
                     CardModel card = currentPlayer.getHand().getCard(r, c);
 
                     //Partie Reveal de 2 cartes en debut de partie
-                    if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) {
+                    if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) { // que pendant le choix des deux prems cartes
                         boolean ok = gameManager.revealInitCard(c, r); 
                         if (!ok) return;
                         gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
@@ -205,6 +204,7 @@ public class GameBoardController {
      * Passe au joueur suivant via GameManager et affiche ses cartes
      */
     private void switchToNextPlayer() {
+        nextPlayerSound();
         gameManager.nextPlayer();
         gameManager.startTurn();
         gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
@@ -226,5 +226,9 @@ public class GameBoardController {
             case TURN_ENDED -> gameBoardView.setActionGuide("Tour terminé");
             case INIT_REVEAL -> gameBoardView.setActionGuide(gameManager.getCurrentPlayer().getName() + " doit réveler 2 cartes (" + gameManager.getInitRevealCount() + ")");
         }
+    }
+
+    public void nextPlayerSound(){
+        audio.playSfx("/sfx/round.wav");
     }
 }

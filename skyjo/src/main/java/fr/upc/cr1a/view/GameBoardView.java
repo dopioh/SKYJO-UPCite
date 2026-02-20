@@ -229,7 +229,7 @@ public class GameBoardView extends JPanel{
         // ZONE PREVIEW OTHER PLAYERS ( apparait au dessus de tous les autres panels quand on hover ou clique sur un button)
         previewPanel = new PlayerPreviewPanel();
         previewPanel.setVisible(false);
-        previewPanel.setBounds(400, 200, 600, 500); // taille fix pour le test
+        //previewPanel.setBounds(400, 200, 500, 500); // taille fix pour le test
         layeredPane.add(previewPanel, JLayeredPane.PALETTE_LAYER);
 
 
@@ -328,7 +328,7 @@ public class GameBoardView extends JPanel{
      * @param isVisible
      */
     public void showOtherPlayerMain(boolean isVisible){
-        previewPanel.setVisible(isVisible);
+        previewPanel.fade(isVisible);
     }
 
     /**
@@ -343,7 +343,7 @@ public class GameBoardView extends JPanel{
 
         Component[] compsP = layeredPane.getComponentsInLayer(JLayeredPane.PALETTE_LAYER);
         for (Component c : compsP){
-            c.setBounds(size.width/5, size.height/10, size.width - size.width/3, size.height - size.height/5);
+            c.setBounds(size.width/8, size.height/10, size.width - size.width/3, size.height - size.height/5);
         }
 
         

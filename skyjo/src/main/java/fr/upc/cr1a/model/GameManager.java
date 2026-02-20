@@ -437,6 +437,7 @@ public class GameManager {
         }
         else {
             gameState = GameState.ROUND_ENDED;
+
         }
     }
 
@@ -480,6 +481,7 @@ public class GameManager {
         if (initRevealCount >= 2) {
             initRevealCount = 0;
             currentPlayerIndex++;
+            gameBoardModel.getGameBoardController().nextPlayerSound();
             if (currentPlayerIndex >= players.size()) {
                 currentPlayerIndex = 0;
                 startTurn(); // met DRAW_DECISION
