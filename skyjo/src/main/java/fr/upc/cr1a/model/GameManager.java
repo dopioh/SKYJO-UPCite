@@ -324,8 +324,13 @@ public class GameManager {
             PlayerModel winner = GameRuleModel.determineWinner(players);
             System.out.println("WINNER: " + winner.getName() + " avec " + winner.getTotalScore() + " points !?? EZZZZZ");
             
-            // Enregistrer la victoire dans les statistiques
-            BotStatsManager.recordVictory(winner);
+            //enregistrer la victoire
+            //try {
+            //    BotStatsManager.recordVictory(winner, players);
+            //} catch (Exception e) {
+            //    System.out.println("[ERREUR] Exception lors de recordVictory: " + e.getMessage());
+            //    e.printStackTrace();
+            //}
         }
         else {
             gameState = GameState.ROUND_ENDED;
@@ -675,11 +680,11 @@ public class GameManager {
             }
         }
         //permet que ça soit pas instantané, donne un aspect moins robotique
-        try {
-            Thread.sleep(1200);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        //try {
+            //Thread.sleep(1200);
+        //} catch (InterruptedException e) {
+            //Thread.currentThread().interrupt();
+        //}
         
         System.out.println("\n-------------------------------------------------------");
         showHand(bot, false);
