@@ -5,6 +5,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import fr.upc.cr1a.controller.MainMenuController;
+import fr.upc.cr1a.controller.PlayersSetupController;
 import fr.upc.cr1a.controller.SettingsOverlayController;
 import fr.upc.cr1a.model.AudioManager;
 
@@ -24,6 +25,7 @@ public class Frame extends JFrame{
     private boolean fullscreen = false;
     private Rectangle windowedBounds;
     private final AudioManager audioManager;
+    private PlayersSetupPanel playersSetupPanel;
 
 
     public Frame() {
@@ -40,12 +42,8 @@ public class Frame extends JFrame{
         mainMenuPanel = new MainMenuPanel();
         add(mainMenuPanel, "MENU");
         
-        //Ecran temporaire pour la selection des joueurs
-        JPanel playersPanel = new JPanel();
-        playersPanel.setBackground(java.awt.Color.WHITE);
-        JLabel l1 = new JLabel("Veuillez suivre les instructions du terminal");
-        playersPanel.add(l1);
-        add(playersPanel, "PLAYERS");
+        playersSetupPanel = new PlayersSetupPanel();
+        add(playersSetupPanel, "PLAYERS");
 
         //Overlay paramètre
         settingsOverlay = new SettingsOverlay();
@@ -54,6 +52,7 @@ public class Frame extends JFrame{
         //Contrôleurs
         new SettingsOverlayController(settingsOverlay, this, audioManager);
         new MainMenuController(this, mainMenuPanel);
+        new PlayersSetupController(this, playersSetupPanel);
 
         setVisible(true);
     }
@@ -113,5 +112,9 @@ public class Frame extends JFrame{
 
     public boolean isFullscreen(){
         return fullscreen;
+    }
+
+    public PlayersSetupPanel getPlayersSetupPanel(){
+        return playersSetupPanel;
     }
 }
