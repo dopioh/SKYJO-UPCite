@@ -123,9 +123,13 @@
 
 - BotStatsManager : Fichier qui enregistre les victoires des joueurs
 
--Ajout de 2 bots botRow et botLow
+- Ajout de 2 bots botRow et botLow
 
 - Ajout de GameBoardBotController permet de gérer les bots dans le view
+
+- Animation flottante des cartes
+
+- Petite carte à jouer sous le curseur
 
 
 ### Modified 

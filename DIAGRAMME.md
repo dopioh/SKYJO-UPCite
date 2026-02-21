@@ -150,10 +150,12 @@ tAudioManager()**
         * Méthode : **getBackButton()**, **getTabJeu()**, **getTabAudio()**, **getTabAutres()**, **createTabButton()**, **createCardPanel()**
 
 * **GameBoardView** : Panel pour afficher le plateau de jeu
-    * Méthode : **initComponents()**, **showPlayerscards()**, **getCardImagePath()**, **resizeLayers()**,
+    * Méthode : **initComponents()**, **showPlayerscards()**, **getCardImagePath()**, **resizeLayers()**, **showCursorCard()**, **hideCursorCard()**
 
 * **PlayerPreviewPanel** : Panel pour afficher les cartes des autres joueurs
     * Méthode : **showOtherPlayerHand**, **getCardImagePath()**
+
+* **CursorCardView** : Vue pour la petite carte sous le curseur
 
 ### CONTROLLER
 
