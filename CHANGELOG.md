@@ -136,7 +136,18 @@
 
 - Ajout de GameBoardBotController permet de gérer les bots dans le view
 
+- Nouvelle carte 'vide'
+
 
 ### Modified 
 
 - gameTerminalModel pour séparer et alléger le gameManger
+
+- L'écran de transition est maintenant un ecran de controle pour choisir le nombre de joueur/bots etc.. (contient aussi une option)
+
+
+### Fixed
+
+- Fix on pouvait toujours jouer avec les emplacements vides
+
+- Fix Manche 2 (Le premier tour commencait au joueur 0 et pas au joueuractuel + le bot ne jouait pas)
