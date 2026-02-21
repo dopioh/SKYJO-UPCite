@@ -253,13 +253,16 @@ public class GameBoardView extends JPanel{
                 CardModel card = hand.getCard(row, col);
 
                 if (card == null) {
-                    btn.clearImage();
-                    btn.setText("vide");
+                    btn.setText("");
+                    btn.setCardImage("/cartes/carteVide.png");
+                    btn.setEnabled(false);
                 } else {
+                    btn.setEnabled(true);
                     btn.setText("");
                     String imgPath = getCardImagePath(card);
                     btn.setCardImage(imgPath);
                 }
+                btn.setDisabledIcon(btn.getIcon());//Ca évite de griser la carte désactivée
             }
         }
 
