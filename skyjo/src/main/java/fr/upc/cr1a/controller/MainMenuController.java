@@ -80,14 +80,15 @@ public class MainMenuController {
             } while (!valid);
 
             for (int i = 1; i <= nbJoueurs; i++) {
-                System.out.print("Nom du joueur " + i + " ou 'bot' : ");
+                System.out.print("Nom du joueur " + i + " ou 'bot', 'botRow', 'botLow' : ");
                 String inputName = scanner.nextLine();
 
                 fr.upc.cr1a.model.PlayerData tmp;
-                if (inputName.equalsIgnoreCase("bot")) {
+                if (inputName.equalsIgnoreCase("bot") || inputName.equalsIgnoreCase("botRow") || inputName.equalsIgnoreCase("botLow")) {
                     botCounter++;
                     String botName = "Bot" + botCounter;
-                    tmp = new fr.upc.cr1a.model.PlayerData(botName);
+                    String botType = inputName.toLowerCase();
+                    tmp = new fr.upc.cr1a.model.PlayerData(botName, true, botType);
                 } else {
                     tmp = new fr.upc.cr1a.model.PlayerData(inputName);
                 }

@@ -9,14 +9,14 @@ import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
  * @author Billy
  */
 
-public class BotHigh implements BotStrategyInterface {
+public class BotLow implements BotStrategyInterface {
     
     private int seuil = 8; // seuil plus élevé pour accepter des cartes
     
     /**
      * constructeur avec seuil 8
      */
-    public BotHigh() {
+    public BotLow() {
         this.seuil = 8;
     }
     
@@ -24,7 +24,7 @@ public class BotHigh implements BotStrategyInterface {
      * Constructeur avec un seuil personnalisé
      * @param seuil le seuil pour accepter une carte
      */
-    public BotHigh(int seuil) {
+    public BotLow(int seuil) {
         this.seuil = seuil;
     }
     

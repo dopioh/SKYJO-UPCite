@@ -20,7 +20,11 @@ Des classes qui permette d'éxécuter le jeu.
         * **drawDeck()**, **takeDiscard()**, **drawActionDeck()**, **takeActionDiscard()**
         * **exchangeCardInHand()**, **discardDrawCard()**, **revealCardInHand()**
         * **firstPlayer()**, **startNewGame()**, **endRound()**
-        * **getGameState()**, **getTurnPhase()**, **getPlayers()**, **getDiscardPile()**, **getDeck()**, **getCurrentPlayer()**
+        * **getGameState()**, **getTurnPhase()**, **getPlayers()**, **getDiscardPile()**, **getDeck()**, **getCurrentPlayer()**, **getCurrentDrawCard()**
+        * **revealInitCard()** - Gère la révélation des cartes initiales
+    * Notes :
+        * Supporte différents types de bots (bot, botRow, botLow) via PlayerData
+        * Initialise les bots avec les bonnes stratégies (BotTerminalModel par défaut, BotRow pour botRow, BotHigh(3) pour botLow)
 * **GameTerminalModel** : Gère toutes les interactions du jeu via le terminal (séparé du GameManager)
     * Attribut :
         * scanner (Scanner)
@@ -80,8 +84,11 @@ Gère la logique du jeu.
         * Attribut : grid (CardModel[][]), rows=3, columns=4
         * Méthode : **placeCard()**, **getCard()**, **isAvailable()**, **getVisibleCardScore()**, **révéler cartes**, **détecter colonnes complètes**
     * `PlayerData`: Données persistantes du joueur
-        * Attribut : id, rank (Rank), elo, xp, money, skins (ArrayList)
+        * Attribut : id, rank (Rank), elo, xp, money, skins (ArrayList), botType (String)
         * Méthode : **getters/setters pour toutes les données**
+        * Notes :
+            * botType peut être null (joueur humain), "bot", "botRow", ou "botLow"
+            * Utilisé par GameManager pour initialiser les bots avec la bonne stratégie
 
 * **Bot** :
     * `BotModel`: Représente un bot (héritage de bot)
@@ -148,7 +155,10 @@ Gère l'affichage
         * Méthode : **getBackButton()**, **getTabJeu()**, **getTabAudio()**, **getTabAutres()**, **createTabButton()**, **createCardPanel()**
 
 * **GameBoardView** : Panel pour afficher le plateau de jeu
-    * Méthode : **initComponents()**, **showPlayerscards()**, **getCardImagePath()**, **resizeLayers()**,
+    * Méthode : **initComponents()**, **showPlayerscards()**, **getCardImagePath()**, **resizeLayers()**
+    * Notes :
+        * Supporte l'affichage des bots automatiquement grâce au polymorphisme (BotModel extends PlayerModel)
+        * Affiche tous les types de joueurs (humains et bots) de manière uniforme
 
 * **PlayerPreviewPanel** : Panel pour afficher les cartes des autres joueurs
     * Méthode : **showOtherPlayerHand**, **getCardImagePath()**
@@ -160,12 +170,47 @@ Gère toutes les entrées du joueur avec l'ordinateur
 * **MainMenuController** : Contrôleur du menu principal
     * Attribut : frame (Frame), view (MainMenuPanel), audio (AudioManager)
     * Méthode : **ActionListener pour playButton, settingsButton, shopButton**
+    * Notes :
+        * Accepte les entrées "bot", "botRow", "botLow" pour créer différents types de bots
+        * Crée des PlayerData avec le type de bot approprié pour initialisation par GameManager
 
 * **SettingsOverlayController** : Contrôleur de l'overlay paramètres
     * Attribut : frame (Frame), audioManager (AudioManager)
     * Méthode : **ActionListener pour backButton, tabJeu, tabAudio, tabAutres, fullscreenButton, soundButton, volumeButtons**
 
-* **GameBoardController** :
+* **GameBoardController** : Contrôleur principal du plateau de jeu
+    * Attribut : 
+        * gameBoardView (GameBoardView)
+        * gameManager (GameManager)
+        * frame (Frame)
+        * botController (GameBoardBotController)
+        * waitingNextTurn (boolean)
+    * Méthode :
+        * **listener()** - Gère les clics sur les boutons (pioche, défausse, cartes)
+        * **switchToNextPlayer()** - Gère la transition entre joueurs avec délai de 800ms
+        * **refreshGuide()** - Met à jour le guide d'action selon la phase du jeu
+        * **setWaitingNextTurn()**, **isWaitingNextTurn()** - Gestion de l'état d'attente
+    * Notes :
+        * Délègue toute la logique des bots au GameBoardBotController
+        * Utilise Timer (javax.swing) pour les transitions fluides entre joueurs
+
+* **GameBoardBotController** : Contrôleur dédié au jeu automatique des bots
+    * Attribut :
+        * gameBoardView (GameBoardView)
+        * gameManager (GameManager)
+        * mainController (GameBoardController)
+    * Méthode :
+        * **handleBotTurn()** - Dispatcher principal, appelle les méthodes selon la phase actuelle
+        * **handleBotInit()** - Révèle 2 cartes aléatoires en phase INIT_REVEAL avec délais
+        * **handleBotDrawDecision()** - Phase DRAW_DECISION : décide pioche ou défausse selon stratégie
+        * **handleBotAfterDraw()** - Phase CARD_DRAW_FROM_DECK : échange ou défausse+révèle
+        * **handleBotAfterTakeDiscard()** - Phase CARD_TAKE_FROM_DISCARD : échange obligatoire
+    * Notes :
+        * Utilise Timer (javax.swing) avec délais de 800-1500ms pour visibilité
+        * Réutilise les fonctions de base du GameManager (drawDeck, takeDiscard, exchangeCardInHand, etc.)
+        * Respect du système de phases existant (pas de flux parallèle)
+        * Affiche les cartes piochées via getBtnPioche().setCardImage() pour feedback visuel
+        * Gère les transitions bot→humain avec showPlayerCards()
 
 ## UTILS
 
