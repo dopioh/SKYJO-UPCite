@@ -95,7 +95,19 @@ public class GameManager {
         for (PlayerData player : playersData) {
             //créer un BotModel si c'est un bot, sinon créer un player
             if (player.isBot()) {
-                players.add(new BotModel(player));
+                //strat du bot appelé
+                BotStrategyInterface strategy;
+                String botType = player.getBotType();
+                
+                if ("botrow".equals(botType)) {
+                    strategy = new BotRow(); // BotRow
+                } else if ("botlow".equals(botType)) {
+                    strategy = new BotLow(3); // BotLow
+                } else {
+                    strategy = new BotTerminalModel(); // défaut
+                }
+                
+                players.add(new BotModel(player, strategy));
             } else {
                 players.add(new PlayerModel(player));
             }
@@ -165,7 +177,7 @@ public class GameManager {
                 if ("botrow".equals(botType)) {
                     strategy = new BotRow(); // BotRow
                 } else if ("botlow".equals(botType)) {
-                    strategy = new BotHigh(8); // BotHigh)
+                    strategy = new BotLow(3); // BotLow 
                 } else {
                     strategy = new BotTerminalModel(); // défaut
                 }
@@ -215,6 +227,10 @@ public class GameManager {
 
     public PiocheActionModel getActionDeck(){
         return actionDeck;
+    }
+    
+    public CardModel getCurrentDrawCard(){
+        return currentDrawCard;
     }
     
     /**
@@ -444,16 +460,16 @@ public class GameManager {
     }
 
     /**
-     * Si un joueur n'a pas atteint les 100 points, on peut recommencer une nouvelle manche
+     * Recommence une nouvelle manche, le joueur avec le plus grand score commence
      */
     public void startNewGame() {
-        currentPlayerIndex = firstPlayerToPlayIndex;
-        
-        //Le joueur avec le score le plus grand commence
         currentPlayerIndex = GameRuleModel.getBiggestScorePlayerIndex(players);
         currentDrawCard = null;
         discardPile = new DefausseModel();
         initializeGame();
+        ensureFaceUp(discardPile.getTopCard());
+        turnPhase = TurnPhase.INIT_REVEAL;
+        initRevealCount = 0;
     }
 
     /**
@@ -479,13 +495,18 @@ public class GameManager {
         CardModel card = getCurrentPlayer().getHand().getCard(row, col);
         if (card == null || !card.isFaceDown()) return false;
         getCurrentPlayer().getHand().revealCard(row, col);
+        
+        //regarde et supprimer les colonnes/lignes identiques
+        GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile);
+        GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile);
+        
         initRevealCount++;
         if (initRevealCount >= 2) {
             initRevealCount = 0;
             currentPlayerIndex++;
-            if (currentPlayerIndex >= players.size()) {
-                currentPlayerIndex = 0;
-                startTurn(); // met DRAW_DECISION
+            if (currentPlayerIndex >= players.size()) currentPlayerIndex = 0; 
+            if (currentPlayerIndex == firstPlayerToPlayIndex) {
+                startTurn(); // passe à DRAW_DECISION
             }
             gameBoardModel.getGameBoardController().nextPlayerSound();
         }
