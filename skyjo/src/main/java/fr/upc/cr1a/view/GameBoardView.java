@@ -186,7 +186,7 @@ public class GameBoardView extends JPanel{
         JPanel cardStack = new JPanel();
         cardStack.setOpaque(false);
         cardStack.setLayout(new GridBagLayout());
-        cardStack.setPreferredSize(new Dimension(240, 0));
+        //cardStack.setPreferredSize(new Dimension(240, 0));
 
         GridBagConstraints gbcRight = new GridBagConstraints();
         gbcRight.gridx = 0;
@@ -442,27 +442,19 @@ public class GameBoardView extends JPanel{
     }
 
     private void resizeCards() {
-        int largeurZone = zonePlateau.getWidth();
-        int hauteurZone = zonePlateau.getHeight();
+        int sizeH = this.getHeight();
+        int sizeW = this.getWidth();
 
         // 95x135 Taille de base
-        int largeurBase = 95;
-        int hauteurBase = 135;
+        int largeurCarte = 95;
+        int hauteurCarte = 135;
 
-        // facteur simple selon la taille de la fenêtre
-        double facteur = 1.0;
-
-        //Ecran fenetré
-        if (largeurZone >= 1600 || hauteurZone >= 900) {
-            facteur = 1.2;
-        }
-        //Plein ecran
-        if (largeurZone >= 1920 || hauteurZone >= 1080) {
-            facteur = 1.35;
-        }
-
-        int largeurCarte = (int) (largeurBase * facteur);
-        int hauteurCarte = (int) (hauteurBase * facteur);
+        System.out.println(sizeH);
+        System.out.println(sizeW);
+        if (sizeH >= 720 || sizeW >= 1280){ // ca veut dire qu'on est pas en mode fenetre, et donc on est en full screen..
+            largeurCarte = 95*2;
+            hauteurCarte = 135*2;
+        } 
 
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 4; j++) {
