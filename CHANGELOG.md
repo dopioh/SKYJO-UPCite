@@ -116,7 +116,7 @@
     - ajout des étoiles dans la pioche
     - initalisation d'une pioche & defausse pour les cartes action
 
-## v.0.3: SPRINT 4
+## v.0.4: SPRINT 4
 ---
 
 ### Added
@@ -124,6 +124,15 @@
 - BotStatsManager : Fichier qui enregistre les victoires des joueurs
 
 - Ajout de 2 bots botRow et botLow
+
+- Affichage du score en temps réel pendant la partie
+    - Liaison de `ScoreCalculator` et `PlayerModel` avec la `GameBoardView`
+
+- Écran de fin de manche avec classement des joueurs et leur points actuel
+    - Survol d'un joueur pour voir sa main (`PlayerPreviewPanel`)
+    - Bouton Continuer ou retour au menu selon fin de manche ou fin de partie (`DoodleButton`)
+
+- Partie complète jouable : enchaînement des manches jusqu'à la fin de partie!
 
 - Ajout de GameBoardBotController permet de gérer les bots dans le view
 

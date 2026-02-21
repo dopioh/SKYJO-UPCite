@@ -244,7 +244,9 @@ public class GameBoardView extends JPanel{
      */
     public void showPlayerCards(PlayerModel player) {
         this.currentPlayer = player;
-        playerName.setText("Main de " + player.getName());
+        int score = player.getHand().getVisibleCardScore();
+        int total = player.getTotalScore();
+        playerName.setText("Main de " + player.getName() + " - Manche : " + score + " | Total : " + total);
         PlayerHandModel hand = player.getHand();
 
         for (int row = 0; row < 3; row++) {
