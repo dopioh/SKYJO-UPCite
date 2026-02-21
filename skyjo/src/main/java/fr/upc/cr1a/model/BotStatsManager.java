@@ -64,7 +64,7 @@ public class BotStatsManager {
         
         if (strategy instanceof BotRow) {
             return "BotRow";
-        } else if (strategy instanceof BotHigh) {
+        } else if (strategy instanceof BotLow) {
             int seuil = strategy.getSeuil();
             if (seuil <= 2) {
                 return "BotLow";

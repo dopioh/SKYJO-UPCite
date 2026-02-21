@@ -20,7 +20,8 @@ Des classes qui permette d'éxécuter le jeu.
         * **drawDeck()**, **takeDiscard()**, **drawActionDeck()**, **takeActionDiscard()**
         * **exchangeCardInHand()**, **discardDrawCard()**, **revealCardInHand()**
         * **firstPlayer()**, **startNewGame()**, **endRound()**
-        * **getGameState()**, **getTurnPhase()**, **getPlayers()**, **getDiscardPile()**, **getDeck()**, **getCurrentPlayer()**
+        * **getGameState()**, **getTurnPhase()**, **getPlayers()**, **getDiscardPile()**, **getDeck()**, **getCurrentPlayer()**, **getCurrentDrawCard()**
+        * **revealInitCard()**
 * **GameTerminalModel** : Gère toutes les interactions du jeu via le terminal (séparé du GameManager)
     * Attribut :
         * scanner (Scanner)
@@ -137,14 +138,15 @@ Gère l'affichage
 
 * **Frame** : Fenêtre principale du jeu (JFrame)
     * Attribut : cardLayout (CardLayout), mainMenuPanel, settingsOverlay, fullscreen, windowedBounds, audioManager
-    * Méthode : **showSettingsOverlay()**, **hideSettingsOverlay()**, **toggleFullscreen()**, **getAudioManager()**
+    * Méthode : **showSettingsOverlay()**, **hideSettingsOverlay()**, **toggleFullscreen()**, **ge        * **refreshGuide()** - Met à jour le guide d'action selon la phase du jeu
+tAudioManager()**
 
 * **Panels** :
     * `MainMenuPanel`: Panel du menu principal
         * Attribut : shopButton, playButton, settingsButton
         * Méthode : **getShopButton()**, **getPlayButton()**, **getSettingsButton()**
     * `SettingsOverlay`: Overlay des paramètres (JComponent)
-        * Attribut : card (JPanel), backButton, contentPanel, tabJeu, tabAudio, tabAutres
+        * Attribut : card (JPanel), backBtroontroller pour les botsutton, contentPanel, tabJeu, tabAudio, tabAutres
         * Méthode : **getBackButton()**, **getTabJeu()**, **getTabAudio()**, **getTabAutres()**, **createTabButton()**, **createCardPanel()**
 
 * **GameBoardView** : Panel pour afficher le plateau de jeu
@@ -167,6 +169,17 @@ Gère toutes les entrées du joueur avec l'ordinateur
 
 * **GameBoardController** :
 
+* **GameBoardBotController** : controller pour les bots
+    * Attribut :
+        * gameBoardView (GameBoardView)
+        * gameManager (GameManager)
+        * mainController (GameBoardController)
+    * Méthode :
+        * **handleBotTurn()**
+        * **handleBotInit()**
+        * **handleBotDrawDecision()**
+        * **handleBotAfterDraw()**
+        * **handleBotAfterTakeDiscard()**
 ## UTILS
 
 Classes utilitaires

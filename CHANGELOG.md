@@ -134,6 +134,8 @@
 
 - Partie complète jouable : enchaînement des manches jusqu'à la fin de partie!
 
+- Ajout de GameBoardBotController permet de gérer les bots dans le view
+
 
 ### Modified 
 
