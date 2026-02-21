@@ -18,13 +18,15 @@ import fr.upc.cr1a.view.GameBoardView;
  * @see GameBoardView vue graphique
  * @see GameBoardModel logique du plateau
  * 
- * @author Mei,Ian,Hugo
+ * @author Mei,Ian,Hugo,Billy
  */
 public class GameBoardController {
 
     GameBoardModel gameBoardModel;
     GameBoardView gameBoardView;
     GameManager gameManager;
+    private GameBoardBotController botController;
+    
     private boolean waitingNextTurn = false; // empeche de cliquer pendant l'attente
     private boolean waitingReveal = false;
     // pour fixer le clique du playerpreview
@@ -37,9 +39,13 @@ public class GameBoardController {
         this.gameBoardModel = gameBoardModel;
         this.gameBoardView = gameBoardView;
         this.gameManager = gameManager;
+        this.botController = new GameBoardBotController(gameBoardView, gameManager, this);
 
         listener();
         refreshGuide();
+        
+        //vérifie si c'est un bot
+        SwingUtilities.invokeLater(() -> botController.handleBotTurn());
     }
     
     /**
@@ -120,6 +126,13 @@ public class GameBoardController {
                             gameManager.getDeck().stackSize() > 0
                         );
                         refreshGuide();
+                        
+                        //vérifie si après le tour d'un bot c'est un joeur qui doit jouer pour afficher sa main
+                        Timer checkBotTimer = new Timer(300, ev -> {
+                            botController.handleBotTurn();
+                        });
+                        checkBotTimer.setRepeats(false);
+                        checkBotTimer.start();
                         return;
                     }
 
@@ -131,8 +144,8 @@ public class GameBoardController {
                         gameBoardView.showPlayerCards(currentPlayer);
 
                         waitingReveal = false;
-                        switchToNextPlayer();
                         refreshGuide();
+                        switchToNextPlayer();
                         return;
                     }
 
@@ -148,8 +161,8 @@ public class GameBoardController {
                             gameManager.getDeck().stackSize() > 0
                         );
 
-                        switchToNextPlayer();
                         refreshGuide();
+                        switchToNextPlayer();
                         return;
                     }
 
@@ -204,21 +217,31 @@ public class GameBoardController {
     /**
      * Passe au joueur suivant via GameManager et affiche ses cartes
      */
-    private void switchToNextPlayer() {
-        gameManager.nextPlayer();
-        gameManager.startTurn();
-        gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
-        gameBoardView.updateCardDisplay(
-            gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
-            gameManager.getDeck().stackSize() > 0
-        );
-        refreshGuide();
+    public void switchToNextPlayer() {
+        waitingNextTurn = true;
+        //ajout d'un timer pour voir les cartes avant de changer de main
+        Timer delayTimer = new Timer(800, e -> {
+            gameManager.nextPlayer();
+            gameManager.startTurn();
+            gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
+            gameBoardView.updateCardDisplay(
+                gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
+                gameManager.getDeck().stackSize() > 0
+            );
+            refreshGuide();
+            waitingNextTurn = false;
+            
+            //regarde si c'est un bot
+            botController.handleBotTurn();
+        });
+        delayTimer.setRepeats(false);
+        delayTimer.start();
     }
 
     /**
      * Message d'action indiqunat au joueur quoi faire
      */
-    private void refreshGuide() {
+    public void refreshGuide() {
         switch (gameManager.getTurnPhase()) {
             case DRAW_DECISION -> gameBoardView.setActionGuide("Choisis : Pioche ou Défausse");
             case CARD_DRAW_FROM_DECK -> gameBoardView.setActionGuide("Echange ou Défausse puis revele une carte");
@@ -226,5 +249,16 @@ public class GameBoardController {
             case TURN_ENDED -> gameBoardView.setActionGuide("Tour terminé");
             case INIT_REVEAL -> gameBoardView.setActionGuide(gameManager.getCurrentPlayer().getName() + " doit réveler 2 cartes (" + gameManager.getInitRevealCount() + ")");
         }
+    }
+
+    /**
+     * getter/setter pour waitingNextTurn
+     */
+    public void setWaitingNextTurn(boolean waiting) {
+        this.waitingNextTurn = waiting;
+    }
+
+    public boolean isWaitingNextTurn() {
+        return waitingNextTurn;
     }
 }
