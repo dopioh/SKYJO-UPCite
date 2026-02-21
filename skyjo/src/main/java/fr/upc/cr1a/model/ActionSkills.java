@@ -38,14 +38,32 @@ public class ActionSkills {
 
         CardModel myCard = player.getHand().getCard(myRow, myCol);
         CardModel opCard = target.getHand().getCard(opRow, opCol);
+        boolean myCardStar = ( myCard instanceof NumberCardModel carte) && carte.isStar();
+        boolean opCardStar = ( opCard instanceof NumberCardModel carte) && carte.isStar();
 
         if (myCard == null || opCard == null) {
             System.out.println("Echange annulé: case vide.");
             return;
         }
 
+        // echange
         player.getHand().replaceCard(myRow, myCol, opCard);
         target.getHand().replaceCard(opRow, opCol, myCard);
+
+        // update du compteur d'etoile
+        // pour le joueur qui fait l'action
+        if (!myCardStar && opCardStar) {
+            player.addStarsScore();      // gagne une étoile
+        } else if (myCardStar && !opCardStar) {
+            player.subStarsScore();      // perd une étoile
+        }
+
+        // pour le joueur opposé
+        if (!opCardStar && myCardStar) {
+            target.addStarsScore();
+        } else if (opCardStar && !myCardStar) {
+            target.subStarsScore();
+        }
 
         System.out.println("TRADE_CARD_WITH_PLAYER: échange effectué.");
     }
