@@ -1,15 +1,21 @@
 package fr.upc.cr1a.controller;
 
+import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.*;
 
 import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.GameBoardModel;
 import fr.upc.cr1a.model.GameManager;
+import fr.upc.cr1a.model.GameRuleModel;
 import fr.upc.cr1a.model.PlayerModel;
+import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
+import fr.upc.cr1a.view.RoundEndPanel;
 
 /**
  * Controller pour gerer les connections entre la view et le model
@@ -31,6 +37,8 @@ public class GameBoardController {
     private boolean waitingReveal = false;
     // pour fixer le clique du playerpreview
     private boolean isPinned = false;
+    // panel de fin de manche
+    RoundEndPanel currentRoundEndPanel = null;
 
     /**
      * Initialise la view et le Model du GameBoard
@@ -146,6 +154,11 @@ public class GameBoardController {
                         if (card == null || !card.isFaceDown()) return;
 
                         currentPlayer.getHand().revealCard(r, c);
+                        
+                        //regarde et supprimer les colonnes/lignes identiques
+                        GameRuleModel.removeIdenticalColumns(currentPlayer.getHand(), gameManager.getDiscardPile());
+                        GameRuleModel.removeIdenticalRows(currentPlayer.getHand(), gameManager.getDiscardPile());
+                        
                         gameBoardView.showPlayerCards(currentPlayer);
 
                         waitingReveal = false;
@@ -226,9 +239,19 @@ public class GameBoardController {
     public void switchToNextPlayer() {
         waitingNextTurn = true;
         gameBoardView.hideCursorCard();
-        //ajout d'un timer pour voir les cartes avant de changer de main
+        
+        // timer pour voir les cartes avant de changer de main
         Timer delayTimer = new Timer(800, e -> {
             gameManager.nextPlayer();
+
+            // detecter fin de manche ou fin de partie
+            if (gameManager.getGameState() == GameManager.GameState.ROUND_ENDED
+                || gameManager.getGameState() == GameManager.GameState.GAME_ENDED) {
+                waitingNextTurn = false;
+                showRoundEndScreen();
+                return;
+            }
+
             gameManager.startTurn();
             gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
             gameBoardView.updateCardDisplay(
@@ -237,12 +260,92 @@ public class GameBoardController {
             );
             refreshGuide();
             waitingNextTurn = false;
-            
             //regarde si c'est un bot
             botController.handleBotTurn();
         });
         delayTimer.setRepeats(false);
         delayTimer.start();
+    }
+
+    /**
+     * Affiche l'ecran de fin de manche avec le classement et le bouton continuer/menu
+     */
+    private void showRoundEndScreen() {
+        Frame frame = gameBoardModel.getFrame();
+        if (currentRoundEndPanel != null) {
+            frame.remove(currentRoundEndPanel);
+        }
+
+        boolean isGameOver = gameManager.getGameState() == GameManager.GameState.GAME_ENDED;
+        currentRoundEndPanel = new RoundEndPanel(
+            new ArrayList<>(gameManager.getPlayers()), isGameOver
+        );
+
+        frame.add(currentRoundEndPanel, "ROUND_END");
+        frame.showPanel("ROUND_END");
+
+        // hover sur les joueurs -> preview de leur main
+        List<JLabel> labels = currentRoundEndPanel.getPlayerLabels();
+        List<PlayerModel> sortedPlayers = currentRoundEndPanel.getSortedPlayers();
+        for (int i = 0; i < labels.size(); i++) {
+            JLabel label = labels.get(i);
+            PlayerModel player = sortedPlayers.get(i);
+            label.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    label.setBackground(new Color(242, 242, 242));
+                    currentRoundEndPanel.showPreview(player);
+                }
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    label.setBackground(Color.WHITE);
+                    currentRoundEndPanel.hidePreview();
+                }
+            });
+        }
+
+        // bouton Continuer
+        if (!isGameOver && currentRoundEndPanel.getBtnContinuer() != null) {
+            currentRoundEndPanel.getBtnContinuer().addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) { currentRoundEndPanel.getBtnContinuer().onMouseEnter(); }
+                @Override
+                public void mouseExited(MouseEvent e) { currentRoundEndPanel.getBtnContinuer().onMouseExit(); }
+                @Override
+                public void mouseClicked(MouseEvent e) { ContinueRound(); }
+            });
+        }
+
+        // bouton Menu
+        if (isGameOver && currentRoundEndPanel.getBtnRetourMenu() != null) {
+            currentRoundEndPanel.getBtnRetourMenu().addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) { currentRoundEndPanel.getBtnRetourMenu().onMouseEnter(); }
+                @Override
+                public void mouseExited(MouseEvent e) { currentRoundEndPanel.getBtnRetourMenu().onMouseExit(); }
+                @Override
+                public void mouseClicked(MouseEvent e) { gameBoardModel.retourMenuCalled(); }
+            });
+        }
+    }
+
+    /**
+     * Relance une nouvelle manche apres clic sur Continuer
+     */
+    private void ContinueRound() {
+        gameManager.startNewGame();
+        waitingNextTurn = false;
+        waitingReveal = false;
+        gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
+        gameBoardView.updateCardDisplay(
+            gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
+            gameManager.getDeck().stackSize() > 0
+        );
+        Frame frame = gameBoardModel.getFrame();
+        frame.showPanel("GAME");
+        refreshGuide();
+        // Tour du bot
+        SwingUtilities.invokeLater(() -> botController.handleBotTurn());
     }
 
     /**

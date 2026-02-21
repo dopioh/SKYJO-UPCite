@@ -116,7 +116,7 @@
     - ajout des étoiles dans la pioche
     - initalisation d'une pioche & defausse pour les cartes action
 
-## v.0.3: SPRINT 4
+## v.0.4: SPRINT 4
 ---
 
 ### Added
@@ -125,13 +125,34 @@
 
 - Ajout de 2 bots botRow et botLow
 
+- Affichage du score en temps réel pendant la partie
+    - Liaison de `ScoreCalculator` et `PlayerModel` avec la `GameBoardView`
+
+- Écran de fin de manche avec classement des joueurs et leur points actuel
+    - Survol d'un joueur pour voir sa main (`PlayerPreviewPanel`)
+    - Bouton Continuer ou retour au menu selon fin de manche ou fin de partie (`DoodleButton`)
+
+- Partie complète jouable : enchaînement des manches jusqu'à la fin de partie!
+
+- Ajout de GameBoardBotController permet de gérer les bots dans le view
+
+- Nouvelle carte 'vide'
+
 - Ajout de GameBoardBotController permet de gérer les bots dans le view
 
 - Animation flottante des cartes
 
 - Petite carte à jouer sous le curseur
 
-
 ### Modified 
 
 - gameTerminalModel pour séparer et alléger le gameManger
+
+- L'écran de transition est maintenant un ecran de controle pour choisir le nombre de joueur/bots etc.. (contient aussi une option)
+
+
+### Fixed
+
+- Fix on pouvait toujours jouer avec les emplacements vides
+
+- Fix Manche 2 (Le premier tour commencait au joueur 0 et pas au joueuractuel + le bot ne jouait pas)

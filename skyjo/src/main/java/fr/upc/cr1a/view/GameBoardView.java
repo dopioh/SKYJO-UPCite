@@ -250,7 +250,9 @@ public class GameBoardView extends JPanel{
      */
     public void showPlayerCards(PlayerModel player) {
         this.currentPlayer = player;
-        playerName.setText("Main de " + player.getName());
+        int score = player.getHand().getVisibleCardScore();
+        int total = player.getTotalScore();
+        playerName.setText("Main de " + player.getName() + " - Manche : " + score + " | Total : " + total);
         PlayerHandModel hand = player.getHand();
 
         for (int row = 0; row < 3; row++) {
@@ -259,13 +261,16 @@ public class GameBoardView extends JPanel{
                 CardModel card = hand.getCard(row, col);
 
                 if (card == null) {
-                    btn.clearImage();
-                    btn.setText("vide");
+                    btn.setText("");
+                    btn.setCardImage("/cartes/carteVide.png");
+                    btn.setEnabled(false);
                 } else {
+                    btn.setEnabled(true);
                     btn.setText("");
                     String imgPath = getCardImagePath(card);
                     btn.setCardImage(imgPath);
                 }
+                btn.setDisabledIcon(btn.getIcon());//Ca évite de griser la carte désactivée
             }
         }
 

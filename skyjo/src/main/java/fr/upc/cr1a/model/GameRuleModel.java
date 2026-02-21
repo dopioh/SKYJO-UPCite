@@ -64,7 +64,7 @@ public class GameRuleModel {
         for (int col = 0; col < hand.getColumns(); col++) {
             CardModel firstCard = hand.getCard(0, col);
             //permet de sauter si une colonne est vide
-            if (firstCard == null) continue;
+            if (firstCard == null || firstCard.isFaceDown()) continue;
 
             boolean sameCard = true;
             for (int row = 1; row < hand.getRows(); row++) {
@@ -93,7 +93,7 @@ public class GameRuleModel {
         for (int row = 0; row < hand.getRows(); row++) {
             CardModel firstCard = hand.getCard(row, 0);
             //permet de sauter si une ligne est vide
-            if (firstCard == null) continue;
+            if (firstCard == null || firstCard.isFaceDown()) continue;
 
             boolean sameCard = true;
             for (int col = 1; col < hand.getColumns(); col++) {
