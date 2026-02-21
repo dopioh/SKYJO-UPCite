@@ -243,6 +243,7 @@ public class GameBoardView extends JPanel{
         playerButton();
 
         SwingUtilities.invokeLater(() -> resizeLayers()); // doit s'executer apres que tous les components soit creer
+        SwingUtilities.invokeLater(() -> resizeCards()); // doit s'executer apres que tous les components soit creer
     }
 
     /**
@@ -352,14 +353,14 @@ public class GameBoardView extends JPanel{
             c.setBounds(0, 0, size.width, size.height);
         }
 
-        Component[] compsP = layeredPane.getComponentsInLayer(JLayeredPane.PALETTE_LAYER);
+        Component[] compsP = layeredPane.getComponentsInLayer(JLayeredPane.PALETTE_LAYER); // round changement 
         for (Component c : compsP){
-            c.setBounds(size.width/8, size.height/10, size.width - size.width/3, size.height - size.height/5);
+            c.setBounds(0, 0, size.width, size.height);
         }
 
-        Component[] compsM = layeredPane.getComponentsInLayer(JLayeredPane.MODAL_LAYER);
+        Component[] compsM = layeredPane.getComponentsInLayer(JLayeredPane.MODAL_LAYER); // previewPlayer
         for (Component c : compsM){
-            c.setBounds(size.width/8, size.height/10, size.width - size.width/3, size.height - size.height/5);
+            c.setBounds(size.width/6, size.height/10, size.width - size.width/3, size.height - size.height/5);
         }
 
         
@@ -441,7 +442,8 @@ public class GameBoardView extends JPanel{
         zonePlateau.repaint();
     }
 
-    private void resizeCards() {
+    // a redimenssionner dynamiquement plus tard ?
+    private void resizeCards() {   
         int sizeH = this.getHeight();
         int sizeW = this.getWidth();
 
@@ -452,9 +454,9 @@ public class GameBoardView extends JPanel{
         System.out.println(sizeH);
         System.out.println(sizeW);
         if (sizeH > 720 || sizeW > 1280){ // ca veut dire qu'on est pas en mode fenetre, et donc on est en full screen..
-            largeurCarte = 95+20;
-            hauteurCarte = 135+20;
-            if ( sizeH > 1000 || sizeW > 2000 ){
+            largeurCarte = 95+30;   // pour les petits ecran type 13 pouces
+            hauteurCarte = 135+30;
+            if ( sizeH > 1000 || sizeW > 2000 ){ // pour les gros ecrans types 23/27 pouces
                 largeurCarte = 95*2;
                 hauteurCarte = 135*2;
             }
@@ -477,6 +479,7 @@ public class GameBoardView extends JPanel{
         zonePlateau.revalidate();
         zonePlateau.repaint();
     }
+
     public PlayerPreviewPanel getPlayerPreviewPanel(){
         return this.previewPanel;
     }

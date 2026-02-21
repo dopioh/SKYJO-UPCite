@@ -62,7 +62,7 @@ public class NextRoundPanel extends JPanel {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g.create(); // copie du pinceau
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // bord plus lisses
-        g2.setColor(new Color(255, 196, 184)); // rose tres clair
+        g2.setColor(new Color(237, 237, 237)); 
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20); 
         
         g2.dispose(); // seul la copie est detruite, les cartes peuvent etre dessiner avec le pinceau original
@@ -74,18 +74,31 @@ public class NextRoundPanel extends JPanel {
         super.paintChildren(g);
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g2.setFont(new Font("Arial", Font.BOLD,30)); // fix la version full screen avec les cartes aussi
-        String text = "Prochain Joueur : "+ player.getName();
+        g2.setFont(new Font("Arial", Font.BOLD,50)); 
+        String text = " Prochain Joueur :";
 
         FontMetrics fm = g2.getFontMetrics();
 
         int textWidth = fm.stringWidth(text);
             int textHeight = fm.getAscent();
             int x = (getWidth() - textWidth) / 2;
-            int y = (getHeight() + textHeight) / 2;
+            int y = (getHeight() + textHeight) / 3;
     
         g2.setColor(Color.BLACK);
         g2.drawString(text , x, y);
+
+        g2.setFont(new Font("Arial", Font.BOLD,50));
+        text = player.getName();
+        //fm = g2.getFontMetrics();
+
+        textWidth = fm.stringWidth(text);
+        textHeight = fm.getAscent();
+        x = (getWidth() - textWidth) / 2;
+        y = (getHeight() + textHeight) / 2;
+        
+        g2.drawString(text , x, y);
+        
+        g2.dispose();
     }
 
     @Override

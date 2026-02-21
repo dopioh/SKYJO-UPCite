@@ -141,6 +141,7 @@ public class GameBoardController {
                                         : gameManager.getDiscardPile().getTopCard(),
                                 gameManager.getDeck().stackSize() > 0);
                         refreshGuide();
+                        //System.out.println("ALROS ??");
                         
                         //vérifie si après le tour d'un bot c'est un joeur qui doit jouer pour afficher sa main
                         Timer checkBotTimer = new Timer(300, ev -> {
@@ -148,8 +149,10 @@ public class GameBoardController {
                         });
                         checkBotTimer.setRepeats(false);
                         checkBotTimer.start();
+                        //System.out.println("ALROS ??");
                         return;
                     }
+                    //System.out.println("ALROS ??");
 
                     // Reveler apres avoir défausser
                     if (waitingReveal) {
