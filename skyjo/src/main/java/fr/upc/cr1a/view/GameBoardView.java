@@ -18,6 +18,7 @@ import fr.upc.cr1a.model.PlayerModel;
 public class GameBoardView extends JPanel{
 
     private static final int cardSpacing = 2; // <----------------
+    private static final boolean EnableHandCardAnimations = true; // DESACTIVER SI LE JEU LAG
 
     // elements important : 
     private ArrayList<PlayerModel> listPlayer; // jusqu'a 8 normalement
@@ -174,7 +175,7 @@ public class GameBoardView extends JPanel{
                 gbc.gridx = col;
                 gbc.gridy = row+1;
                 CardButton btn = new CardButton();
-                btn.setAnimationEnabled(true);
+                btn.setAnimationEnabled(EnableHandCardAnimations);
                 cardButtons[row][col] = btn;
                 cardsGrid.add(btn, gbc);
             }
