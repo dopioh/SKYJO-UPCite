@@ -326,6 +326,8 @@ public class GameBoardController {
      */
     private void ContinueRound() {
         gameManager.startNewGame();
+        waitingNextTurn = false;
+        waitingReveal = false;
         gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
         gameBoardView.updateCardDisplay(
             gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
@@ -334,6 +336,8 @@ public class GameBoardController {
         Frame frame = gameBoardModel.getFrame();
         frame.showPanel("GAME");
         refreshGuide();
+        // Tour du bot
+        SwingUtilities.invokeLater(() -> botController.handleBotTurn());
     }
 
     /**

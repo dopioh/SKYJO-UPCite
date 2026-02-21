@@ -501,9 +501,9 @@ public class GameManager {
         if (initRevealCount >= 2) {
             initRevealCount = 0;
             currentPlayerIndex++;
-            if (currentPlayerIndex >= players.size()) {
-                currentPlayerIndex = 0;
-                startTurn(); // met DRAW_DECISION
+            if (currentPlayerIndex >= players.size()) currentPlayerIndex = 0; 
+            if (currentPlayerIndex == firstPlayerToPlayIndex) {
+                startTurn(); // passe à DRAW_DECISION
             }
         }
         return true;
