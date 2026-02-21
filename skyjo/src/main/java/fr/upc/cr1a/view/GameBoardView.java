@@ -451,9 +451,13 @@ public class GameBoardView extends JPanel{
 
         System.out.println(sizeH);
         System.out.println(sizeW);
-        if (sizeH >= 720 || sizeW >= 1280){ // ca veut dire qu'on est pas en mode fenetre, et donc on est en full screen..
-            largeurCarte = 95*2;
-            hauteurCarte = 135*2;
+        if (sizeH > 720 || sizeW > 1280){ // ca veut dire qu'on est pas en mode fenetre, et donc on est en full screen..
+            largeurCarte = 95+20;
+            hauteurCarte = 135+20;
+            if ( sizeH > 1000 || sizeW > 2000 ){
+                largeurCarte = 95*2;
+                hauteurCarte = 135*2;
+            }
         } 
 
         for (int i = 0; i < 3; i++) {
