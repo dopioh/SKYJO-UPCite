@@ -174,6 +174,7 @@ public class GameBoardView extends JPanel{
                 gbc.gridx = col;
                 gbc.gridy = row+1;
                 CardButton btn = new CardButton();
+                btn.setAnimationEnabled(true);
                 cardButtons[row][col] = btn;
                 cardsGrid.add(btn, gbc);
             }
@@ -194,6 +195,8 @@ public class GameBoardView extends JPanel{
 
         btnPioche = new CardButton();
         btnDefausse = new CardButton();
+        btnPioche.setAnimationEnabled(false);
+        btnDefausse.setAnimationEnabled(false);
 
         Dimension bigCardSize = new Dimension(140, 200); // AJUSTER ICI SI CA VOUS PLAIT PAS 
 

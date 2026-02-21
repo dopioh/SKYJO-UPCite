@@ -34,9 +34,14 @@ public class CardButton extends JButton {
     private double floatOffsetX = 0.0; // position x au debut du flottement
     private double floatOffsetY = 0.0; // position y au debut du flottement
     private double scale = 1.0;
-    private double targetScale = 1.0; 
+    private double targetScale = 1.0;
+    private boolean animationEnabled = false;
     
     private final Timer animationTimer = new Timer(16, e -> {
+        if (!animationEnabled) {
+            ((Timer) e.getSource()).stop();
+            return;
+        }
         phase += FloatSpeed;
         floatOffsetX = Math.cos(phase) * FloatWide;
         floatOffsetY = Math.sin(phase) * FloatHigh;
@@ -52,7 +57,6 @@ public class CardButton extends JButton {
         setContentAreaFilled(false);
         setBorderPainted(false);
         setOpaque(false);
-        animationTimer.start();
         
         // grossissement de la carte selon le comportement de la souris
         addMouseListener(new java.awt.event.MouseAdapter() {
@@ -144,7 +148,33 @@ public class CardButton extends JButton {
      * @param newTarget le multiplicateur
      */
     private void animateTo(double newTarget) {
+        if (!animationEnabled) {
+            return;
+        }
         targetScale = newTarget;
+        if (!animationTimer.isRunning()) {
+            animationTimer.start();
+        }
+    }
+
+    /**
+     * Active ou désactive les animations de la carte
+     * @param enabled true pour animer la carte
+     */
+    public void setAnimationEnabled(boolean enabled) {
+        animationEnabled = enabled;
+        if (enabled) {
+            if (!animationTimer.isRunning()) {
+                animationTimer.start();
+            }
+        } else {
+            animationTimer.stop();
+            floatOffsetX = 0.0;
+            floatOffsetY = 0.0;
+            scale = 1.0;
+            targetScale = 1.0;
+            repaint();
+        }
     }
 
 
