@@ -141,3 +141,4 @@
 
 - Fix on pouvait toujours jouer avec les emplacements vides
 
+- Fix Manche 2 (Le premier tour commencait au joueur 0 et pas au joueuractuel + le bot ne jouait pas)
