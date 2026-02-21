@@ -56,6 +56,10 @@ public class GameBoardModel {
         playerPreviewPanel.showOtherPlayerHand(tmp);
     }
 
+    public Frame getFrame() {
+        return frame;
+    }
+
     public void retourMenuCalled(){
         System.out.println("Retour au menu");
         if (frame != null) {

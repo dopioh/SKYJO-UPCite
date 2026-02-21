@@ -457,16 +457,16 @@ public class GameManager {
     }
 
     /**
-     * Si un joueur n'a pas atteint les 100 points, on peut recommencer une nouvelle manche
+     * Recommence une nouvelle manche, le joueur avec le plus grand score commence
      */
     public void startNewGame() {
-        currentPlayerIndex = firstPlayerToPlayIndex;
-        
-        //Le joueur avec le score le plus grand commence
         currentPlayerIndex = GameRuleModel.getBiggestScorePlayerIndex(players);
         currentDrawCard = null;
         discardPile = new DefausseModel();
         initializeGame();
+        ensureFaceUp(discardPile.getTopCard());
+        turnPhase = TurnPhase.INIT_REVEAL;
+        initRevealCount = 0;
     }
 
     /**
@@ -501,9 +501,9 @@ public class GameManager {
         if (initRevealCount >= 2) {
             initRevealCount = 0;
             currentPlayerIndex++;
-            if (currentPlayerIndex >= players.size()) {
-                currentPlayerIndex = 0;
-                startTurn(); // met DRAW_DECISION
+            if (currentPlayerIndex >= players.size()) currentPlayerIndex = 0; 
+            if (currentPlayerIndex == firstPlayerToPlayIndex) {
+                startTurn(); // passe à DRAW_DECISION
             }
         }
         return true;
