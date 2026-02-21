@@ -2,6 +2,8 @@ package fr.upc.cr1a.model;
 
 import java.util.List;
 
+import javax.swing.Timer;
+
 import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
@@ -481,11 +483,11 @@ public class GameManager {
         if (initRevealCount >= 2) {
             initRevealCount = 0;
             currentPlayerIndex++;
-            gameBoardModel.getGameBoardController().nextPlayerSound();
             if (currentPlayerIndex >= players.size()) {
                 currentPlayerIndex = 0;
                 startTurn(); // met DRAW_DECISION
             }
+            gameBoardModel.getGameBoardController().nextPlayerSound();
         }
         return true;
     }

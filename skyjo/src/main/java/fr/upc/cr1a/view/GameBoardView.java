@@ -54,6 +54,9 @@ public class GameBoardView extends JPanel{
     // pour fixer le clique
     private boolean isPinned = false;
 
+    // Panel de l'entre round
+    NextRoundPanel nextRoundPanel;
+
     public GameBoardView(ArrayList<PlayerModel> listPlayerModels){
         this.listPlayer = listPlayerModels;
         this.buttonlistPlayer = new ArrayList<JButton>();
@@ -230,7 +233,10 @@ public class GameBoardView extends JPanel{
         previewPanel = new PlayerPreviewPanel();
         previewPanel.setVisible(false);
         //previewPanel.setBounds(400, 200, 500, 500); // taille fix pour le test
-        layeredPane.add(previewPanel, JLayeredPane.PALETTE_LAYER);
+        layeredPane.add(previewPanel, JLayeredPane.MODAL_LAYER);
+
+        this.nextRoundPanel = new NextRoundPanel(currentPlayer);
+        layeredPane.add(nextRoundPanel, JLayeredPane.PALETTE_LAYER);
 
 
         // BOUTTONS PLAYERS ( a gauche )
@@ -346,6 +352,11 @@ public class GameBoardView extends JPanel{
             c.setBounds(size.width/8, size.height/10, size.width - size.width/3, size.height - size.height/5);
         }
 
+        Component[] compsM = layeredPane.getComponentsInLayer(JLayeredPane.MODAL_LAYER);
+        for (Component c : compsM){
+            c.setBounds(size.width/8, size.height/10, size.width - size.width/3, size.height - size.height/5);
+        }
+
         
     }
 
@@ -380,6 +391,10 @@ public class GameBoardView extends JPanel{
 
     public void setActionGuide(String message){
         actionGuide.setText(message);
+    }
+
+    public NextRoundPanel getNextRoundPanel(){
+        return this.nextRoundPanel;
     }
 
     /**
