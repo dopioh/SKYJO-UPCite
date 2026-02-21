@@ -123,7 +123,7 @@
 
 - BotStatsManager : Fichier qui enregistre les victoires des joueurs
 
--Ajout de 2 bots botRow et botLow
+- Ajout de 2 bots botRow et botLow
 
 - Ajout de GameBoardBotController permet de gérer les bots dans le view
 
