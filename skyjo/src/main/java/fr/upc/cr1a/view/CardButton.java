@@ -26,16 +26,19 @@ public class CardButton extends JButton {
     private BufferedImage cardImage;
 
     // animation d'une carte
+    private static final int FloatWide = 2; // largeur du flottement max
     private static final int FloatHigh = 3; // hauteur du flottement max
     private static final double FloatSpeed = 0.03; // vitesse du flottement
     private static final double ScaleSmoothness = 0.12; // vitesse du resize
     private double phase = Math.random() * Math.PI * 2.0; // chaque carte a une vitesse differente 
+    private double floatOffsetX = 0.0; // position x au debut du flottement
     private double floatOffsetY = 0.0; // position y au debut du flottement
     private double scale = 1.0;
     private double targetScale = 1.0; 
     
     private final Timer animationTimer = new Timer(16, e -> {
         phase += FloatSpeed;
+        floatOffsetX = Math.cos(phase) * FloatWide;
         floatOffsetY = Math.sin(phase) * FloatHigh;
         scale += (targetScale - scale) * ScaleSmoothness;
         repaint();
@@ -154,7 +157,7 @@ public class CardButton extends JButton {
  
             int w = getWidth();
             int h = getHeight();
-            g2.translate(w / 2.0, h / 2.0 + floatOffsetY); // changement origine du bouton au centre de la carte
+            g2.translate(w / 2.0 + floatOffsetX, h / 2.0 + floatOffsetY); // changement origine du bouton au centre de la carte
             g2.scale(scale, scale); // resize depuis la nouvelle origine
             g2.translate(-w / 2.0, -h / 2.0); // replacage de l'origine en haut a gauche pour dessiner la carte 
             g2.drawImage(cardImage, 0, 0, w, h, this);
