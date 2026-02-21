@@ -6,6 +6,7 @@ import fr.upc.cr1a.model.BotHandModel;
 import fr.upc.cr1a.model.BotModel;
 import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.GameManager;
+import fr.upc.cr1a.model.GameRuleModel;
 import fr.upc.cr1a.model.PlayerModel;
 import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
 import fr.upc.cr1a.view.GameBoardView;
@@ -226,6 +227,11 @@ public class GameBoardBotController {
                 //revele une carte aléatoire de sa main
                 Timer revealTimer = new Timer(800, ev -> { // fluidité
                     botHand.revealRandomCard(1);
+                    
+                    //regarde et supprimer les colonnes/lignes identiques
+                    GameRuleModel.removeIdenticalColumns(botHand, gameManager.getDiscardPile());
+                    GameRuleModel.removeIdenticalRows(botHand, gameManager.getDiscardPile());
+                    
                     gameBoardView.showPlayerCards(bot);
                     System.out.println(bot.getName() + " révèle une carte");
                     mainController.setWaitingNextTurn(false);
