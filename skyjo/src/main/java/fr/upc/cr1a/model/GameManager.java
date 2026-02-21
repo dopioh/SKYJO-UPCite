@@ -492,6 +492,11 @@ public class GameManager {
         CardModel card = getCurrentPlayer().getHand().getCard(row, col);
         if (card == null || !card.isFaceDown()) return false;
         getCurrentPlayer().getHand().revealCard(row, col);
+        
+        //regarde et supprimer les colonnes/lignes identiques
+        GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile);
+        GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile);
+        
         initRevealCount++;
         if (initRevealCount >= 2) {
             initRevealCount = 0;

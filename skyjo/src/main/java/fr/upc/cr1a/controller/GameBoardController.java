@@ -11,6 +11,7 @@ import javax.swing.*;
 import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.GameBoardModel;
 import fr.upc.cr1a.model.GameManager;
+import fr.upc.cr1a.model.GameRuleModel;
 import fr.upc.cr1a.model.PlayerModel;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
@@ -148,6 +149,11 @@ public class GameBoardController {
                         if (card == null || !card.isFaceDown()) return;
 
                         currentPlayer.getHand().revealCard(r, c);
+                        
+                        //regarde et supprimer les colonnes/lignes identiques
+                        GameRuleModel.removeIdenticalColumns(currentPlayer.getHand(), gameManager.getDiscardPile());
+                        GameRuleModel.removeIdenticalRows(currentPlayer.getHand(), gameManager.getDiscardPile());
+                        
                         gameBoardView.showPlayerCards(currentPlayer);
 
                         waitingReveal = false;
