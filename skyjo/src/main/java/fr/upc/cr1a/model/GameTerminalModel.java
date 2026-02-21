@@ -117,6 +117,11 @@ public class GameTerminalModel {
             if (player instanceof BotModel) {
                 BotHandModel hand = ((BotModel) player).getHand();
                 hand.revealRandomCard(2);
+                
+                //regarde et supprimer les colonnes/lignes identiques
+                GameRuleModel.removeIdenticalColumns(hand, gameManager.getDiscardPile());
+                GameRuleModel.removeIdenticalRows(hand, gameManager.getDiscardPile());
+                
                 System.out.println("\n" + player.getName() + " a révelé 2 cartes\n");
                 showHand(player, false);
                 System.out.println("------------------------------------------------------------------");
@@ -149,6 +154,11 @@ public class GameTerminalModel {
                     } while (true);
                     
                     hand.revealCard(row, col);
+                    
+                    // Vérifier et supprimer les colonnes/lignes identiques
+                    GameRuleModel.removeIdenticalColumns(hand, gameManager.getDiscardPile());
+                    GameRuleModel.removeIdenticalRows(hand, gameManager.getDiscardPile());
+                    
                     System.out.println("\nCarte révélée : " + hand.getCard(row, col).getCardValue());
                     showHand(player, false);
                 }
@@ -290,6 +300,11 @@ public class GameTerminalModel {
                 } while (true);
                 //revéler la carte
                 player.getHand().revealCard(row, col);
+                
+                //regarde et supprimer les colonnes/lignes identiques
+                GameRuleModel.removeIdenticalColumns(player.getHand(), gameManager.getDiscardPile());
+                GameRuleModel.removeIdenticalRows(player.getHand(), gameManager.getDiscardPile());
+                
                 System.out.println("----------------------------------------------------------");
                 System.out.println("\nCarte révélée : " + player.getHand().getCard(row, col).getCardValue());
             }
@@ -360,6 +375,11 @@ public class GameTerminalModel {
                 
                 //révéler une carte aléatoire
                 botHand.revealRandomCard(1);
+                
+                //regarde et supprimer les colonnes/lignes identiques
+                GameRuleModel.removeIdenticalColumns(botHand, gameManager.getDiscardPile());
+                GameRuleModel.removeIdenticalRows(botHand, gameManager.getDiscardPile());
+                
                 System.out.println(bot.getName() + " révèle une carte");
             }
         }
