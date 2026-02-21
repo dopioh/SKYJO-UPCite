@@ -132,7 +132,7 @@
     - Survol d'un joueur pour voir sa main (`PlayerPreviewPanel`)
     - Bouton Continuer ou retour au menu selon fin de manche ou fin de partie (`DoodleButton`)
 
-- Partie complète jouable : enchaînement des manches jusqu'à la fin de partie!!!
+- Partie complète jouable : enchaînement des manches jusqu'à la fin de partie!
 
 
 ### Modified 
