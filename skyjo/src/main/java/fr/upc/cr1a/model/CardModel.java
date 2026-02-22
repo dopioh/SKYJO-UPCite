@@ -1,5 +1,5 @@
 package fr.upc.cr1a.model;
-import fr.upc.cr1a.interfaces.CardInterface;
+import fr.upc.cr1a.model.interfaces.CardInterface;
 
 /**
  * @author Nassim
@@ -26,9 +26,9 @@ public class CardModel implements CardInterface  {
     public boolean isFaceDown() { return this.faceDown; }
     public String getPathImage() { return this.pathImage; }
 
-    public void revealCard(boolean value) { this.faceDown = value; } 
+    public void returnCard() { this.faceDown = !this.faceDown; } 
     public void setPathImage(String path) { this.pathImage = path ;}
 
-    public int getCardValue() { return 6 ; }
+    public int getCardValue() { return 0 ; }
     public String getCardColor() { return null ; }
 }
