@@ -52,6 +52,7 @@ public class PlayerPreviewPanel extends JPanel{
                 gbc.gridx = col;
                 gbc.gridy = row;
                 CardButton btn = new CardButton();
+                btn.setAnimationEnabled(false);
                 btn.setCardSize(lastCardW, lastCardH);
                 cardButtons[row][col] = btn;
                 cardsGrid.add(btn, gbc);
@@ -164,7 +165,7 @@ public class PlayerPreviewPanel extends JPanel{
 
     @Override
     protected void paintChildren(Graphics g){
-        //if (player == null) System.out.println("PLAYER NULL CA VA CRASH");;
+        if (player == null) return;
         super.paintChildren(g);
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);

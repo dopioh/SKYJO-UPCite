@@ -138,6 +138,13 @@
 
 - Nouvelle carte 'vide'
 
+- Ajout de GameBoardBotController permet de gérer les bots dans le view
+
+- Animation flottante des cartes
+
+- Petite carte à jouer sous le curseur
+
+- Panel de transition entre les rounds
 
 ### Modified 
 
@@ -145,9 +152,13 @@
 
 - L'écran de transition est maintenant un ecran de controle pour choisir le nombre de joueur/bots etc.. (contient aussi une option)
 
+- Effet de fondu pour le PreviewPanel
+
 
 ### Fixed
 
 - Fix on pouvait toujours jouer avec les emplacements vides
 
 - Fix Manche 2 (Le premier tour commencait au joueur 0 et pas au joueuractuel + le bot ne jouait pas)
+
+- Fix Taille des cartes en fullScreen sur grand ecran

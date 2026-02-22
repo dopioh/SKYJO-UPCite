@@ -150,10 +150,15 @@ tAudioManager()**
         * Méthode : **getBackButton()**, **getTabJeu()**, **getTabAudio()**, **getTabAutres()**, **createTabButton()**, **createCardPanel()**
 
 * **GameBoardView** : Panel pour afficher le plateau de jeu
-    * Méthode : **initComponents()**, **showPlayerscards()**, **getCardImagePath()**, **resizeLayers()**,
+    * Méthode : **initComponents()**, **showPlayerscards()**, **getCardImagePath()**, **resizeLayers()**, **showCursorCard()**, **hideCursorCard()**
 
 * **PlayerPreviewPanel** : Panel pour afficher les cartes des autres joueurs
     * Méthode : **showOtherPlayerHand**, **getCardImagePath()**
+
+* **CursorCardView** : Vue pour la petite carte sous le curseur
+
+* **NextRoundPanel** : Panel de transitions entre les rounds
+    * Methode : **fade()**,**paintComponent()**,**paintChildren()**, **paint()**
 
 ### CONTROLLER
 
@@ -167,7 +172,8 @@ Gère toutes les entrées du joueur avec l'ordinateur
     * Attribut : frame (Frame), audioManager (AudioManager)
     * Méthode : **ActionListener pour backButton, tabJeu, tabAudio, tabAutres, fullscreenButton, soundButton, volumeButtons**
 
-* **GameBoardController** :
+* **GameBoardController** : Controller pour le Plateau de jeu (la partie)
+    * Methode : **listener()** pour tous les clics souris, **switchToNextPlayer()**,**nextPlayerSound()** (contrairement a ce que son nom indique, elle lance le son ET l'ecran de transition entre les rounds), **showRoundEndScreen()**, **ContinueRound()**, **refreshGuide()**
 
 * **GameBoardBotController** : controller pour les bots
     * Attribut :

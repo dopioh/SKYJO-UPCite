@@ -279,6 +279,14 @@ public class GameManager {
         return players.get(currentPlayerIndex);
     }
 
+    /**
+     * 
+     * @return
+     */
+    public int getCurrentPlayerIndex(){
+        return this.currentPlayerIndex;
+    }
+
     /*
     *passe au joueur suivant
     */
