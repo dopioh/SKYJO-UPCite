@@ -8,14 +8,8 @@ import java.util.List;
 
 import javax.swing.*;
 
-import fr.upc.cr1a.model.CardModel;
-import fr.upc.cr1a.model.GameBoardModel;
-import fr.upc.cr1a.model.GameManager;
-import fr.upc.cr1a.model.GameRuleModel;
-import fr.upc.cr1a.model.PlayerModel;
-import fr.upc.cr1a.view.Frame;
-import fr.upc.cr1a.view.GameBoardView;
-import fr.upc.cr1a.view.RoundEndPanel;
+import fr.upc.cr1a.model.*;
+import fr.upc.cr1a.view.*;
 
 /**
  * Controller pour gerer les connections entre la view et le model
@@ -30,6 +24,7 @@ public class GameBoardController {
 
     GameBoardModel gameBoardModel;
     GameBoardView gameBoardView;
+    NextRoundPanel nextRoundPanel;
     GameManager gameManager;
     private GameBoardBotController botController;
     
@@ -37,16 +32,19 @@ public class GameBoardController {
     private boolean waitingReveal = false;
     // pour fixer le clique du playerpreview
     private boolean isPinned = false;
+    private AudioManager audio;
     // panel de fin de manche
     RoundEndPanel currentRoundEndPanel = null;
 
     /**
      * Initialise la view et le Model du GameBoard
      */
-    public GameBoardController(GameBoardModel gameBoardModel, GameBoardView gameBoardView, GameManager gameManager){
+    public GameBoardController(GameBoardModel gameBoardModel, GameBoardView gameBoardView, GameManager gameManager) {
         this.gameBoardModel = gameBoardModel;
         this.gameBoardView = gameBoardView;
         this.gameManager = gameManager;
+        this.audio = new AudioManager();
+        this.nextRoundPanel = gameBoardView.getNextRoundPanel();
         this.botController = new GameBoardBotController(gameBoardView, gameManager, this);
 
         listener();
@@ -55,7 +53,7 @@ public class GameBoardController {
         //vérifie si c'est un bot
         SwingUtilities.invokeLater(() -> botController.handleBotTurn());
     }
-    
+
     /**
      * les listeners du plateau :
      * - bouton retour vers le menu
@@ -65,40 +63,44 @@ public class GameBoardController {
      * la fonction buttonPlayerCalled existe toujours dans le model si
      * on a besoin de changer la main affichée a droite
      */
-    public void listener(){
+    public void listener() {
 
         JButton retour = gameBoardView.getBtnRetour();
         retour.addActionListener(e -> gameBoardModel.retourMenuCalled());
 
         gameBoardView.getBtnPioche().addActionListener(e -> {
-            if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) return;
-            if (waitingNextTurn) return;
-            if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
+            if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL)
+                return;
+            if (waitingNextTurn)
+                return;
+            if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION)
+                return;
             CardModel drawn = gameManager.drawDeck();
             if (drawn.isFaceDown()) drawn.returnCard();
             String drawnPath = gameBoardView.getCardImagePath(drawn);
             gameBoardView.getBtnPioche().setCardImage(drawnPath);
             gameBoardView.showCursorCard(drawnPath);
             gameBoardView.updateDiscardOnly(
-                gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard()
-            );
+                    gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard());
             refreshGuide();
         });
 
         gameBoardView.getBtnDefausse().addActionListener(e -> {
-            if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) return;
-            if (waitingNextTurn) return;
-            //Si on prend a partir de la défausse
+            if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL)
+                return;
+            if (waitingNextTurn)
+                return;
+            // Si on prend a partir de la défausse
             if (gameManager.getTurnPhase() == GameManager.TurnPhase.DRAW_DECISION) {
-                if (gameManager.getDiscardPile().isEmpty()) return;
+                if (gameManager.getDiscardPile().isEmpty())
+                    return;
                 CardModel taken = gameManager.takeDiscard();
                 String takenPath = gameBoardView.getCardImagePath(taken);
                 gameBoardView.getBtnDefausse().setCardImage(takenPath);
                 gameBoardView.showCursorCard(takenPath);
                 gameBoardView.updateCardDisplay(
-                    gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
-                    gameManager.getDeck().stackSize() > 0
-                );
+                        gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
+                        gameManager.getDeck().stackSize() > 0);
                 refreshGuide();
                 return;
             }
@@ -110,35 +112,40 @@ public class GameBoardController {
                 gameBoardView.hideCursorCard();
 
                 gameBoardView.updateCardDisplay(
-                    gameManager.getDiscardPile().getTopCard(),
-                    gameManager.getDeck().stackSize() > 0
-                );
+                        gameManager.getDiscardPile().getTopCard(),
+                        gameManager.getDeck().stackSize() > 0);
             }
             refreshGuide();
         });
 
-        // listeners pour les cartes, retourner la carte au clic puis switch joueur après 2s
+        // listeners pour les cartes, retourner la carte au clic puis switch joueur
+        // après 2s
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 4; col++) {
                 final int r = row;
                 final int c = col;
                 gameBoardView.getCardButtons()[row][col].addActionListener(e -> {
-                    if (waitingNextTurn) return; // bloque les clics pendant l'attente
+                    if (waitingNextTurn)
+                        return; // bloque les clics pendant l'attente
                     PlayerModel currentPlayer = gameBoardView.getCurrentPlayer();
-                    if (currentPlayer == null) return;
+                    if (currentPlayer == null)
+                        return;
 
                     CardModel card = currentPlayer.getHand().getCard(r, c);
 
-                    //Partie Reveal de 2 cartes en debut de partie
-                    if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) {
-                        boolean ok = gameManager.revealInitCard(c, r); 
-                        if (!ok) return;
+                    // Partie Reveal de 2 cartes en debut de partie
+                    if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) { // que pendant le choix des
+                                                                                           // deux prems cartes
+                        boolean ok = gameManager.revealInitCard(c, r);
+                        if (!ok)
+                            return;
                         gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
                         gameBoardView.updateCardDisplay(
-                            gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
-                            gameManager.getDeck().stackSize() > 0
-                        );
+                                gameManager.getDiscardPile().isEmpty() ? null
+                                        : gameManager.getDiscardPile().getTopCard(),
+                                gameManager.getDeck().stackSize() > 0);
                         refreshGuide();
+                        //System.out.println("ALROS ??");
                         
                         //vérifie si après le tour d'un bot c'est un joeur qui doit jouer pour afficher sa main
                         Timer checkBotTimer = new Timer(300, ev -> {
@@ -146,12 +153,15 @@ public class GameBoardController {
                         });
                         checkBotTimer.setRepeats(false);
                         checkBotTimer.start();
+                        //System.out.println("ALROS ??");
                         return;
                     }
+                    //System.out.println("ALROS ??");
 
                     // Reveler apres avoir défausser
                     if (waitingReveal) {
-                        if (card == null || !card.isFaceDown()) return;
+                        if (card == null || !card.isFaceDown())
+                            return;
 
                         currentPlayer.getHand().revealCard(r, c);
                         
@@ -169,16 +179,15 @@ public class GameBoardController {
 
                     // Echange de carte pioche deck
                     if (gameManager.getTurnPhase() == GameManager.TurnPhase.CARD_DRAW_FROM_DECK
-                        || gameManager.getTurnPhase() == GameManager.TurnPhase.CARD_TAKE_FROM_DISCARD) {
+                            || gameManager.getTurnPhase() == GameManager.TurnPhase.CARD_TAKE_FROM_DISCARD) {
 
                         gameManager.exchangeCardInHand(c, r); // col, row (comme ton code)
                         gameBoardView.hideCursorCard();
                         gameBoardView.showPlayerCards(currentPlayer);
 
                         gameBoardView.updateCardDisplay(
-                            gameManager.getDiscardPile().getTopCard(),
-                            gameManager.getDeck().stackSize() > 0
-                        );
+                                gameManager.getDiscardPile().getTopCard(),
+                                gameManager.getDeck().stackSize() > 0);
 
                         refreshGuide();
                         switchToNextPlayer();
@@ -195,34 +204,44 @@ public class GameBoardController {
             }
         }
 
+        // Pour le survol et le ckick des preview player
+        // y'a un soucis pour les pinned ici -> bug mineur
         int s = 0;
-        for (JButton jb : gameBoardView.getListPlayerButton()){
+        for (JButton jb : gameBoardView.getListPlayerButton()) {
             int tmp = s;
             jb.addMouseListener(new MouseAdapter() {
                 @Override
-                public void mouseEntered(MouseEvent e){
+                public void mouseEntered(MouseEvent e) {
+                    if (tmp == gameManager.getCurrentPlayerIndex()) {
+                        return;
+                    }
+                    gameBoardModel.buttonPlayerCalled(tmp);
+                    gameBoardView.showOtherPlayerMain(true);
+                    isPinned = false;   
+                }
+
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (tmp == gameManager.getCurrentPlayerIndex()) {
+                        return;
+                    }
                     gameBoardModel.buttonPlayerCalled(tmp);
                     gameBoardView.showOtherPlayerMain(true);
                     isPinned = false;
                 }
 
                 @Override
-                public void mouseClicked(MouseEvent e){
-                    gameBoardModel.buttonPlayerCalled(tmp);
-                    gameBoardView.showOtherPlayerMain(true);
-                    isPinned = false;
-                }
-
-                @Override
-                public void mouseExited( MouseEvent e) {
-                    if (!isPinned){
+                public void mouseExited(MouseEvent e) {
+                    //gameBoardView.setIsPlayer(false);
+                    if (!isPinned) {
                         gameBoardView.showOtherPlayerMain(false);
                         isPinned = true;
                     }
                 }
+
                 @Override
-                public void mouseReleased( MouseEvent e) {
-                    if (!isPinned){
+                public void mouseReleased(MouseEvent e) {
+                    if (!isPinned) {
                         gameBoardView.showOtherPlayerMain(false);
                         isPinned = true;
                     }
@@ -237,11 +256,16 @@ public class GameBoardController {
      * Passe au joueur suivant via GameManager et affiche ses cartes
      */
     public void switchToNextPlayer() {
+        Timer beforeSwitch = new Timer(1500, e -> {
+            nextPlayerSound();
+        });
+        beforeSwitch.setRepeats(false);
+        beforeSwitch.start();
         waitingNextTurn = true;
         gameBoardView.hideCursorCard();
         
         // timer pour voir les cartes avant de changer de main
-        Timer delayTimer = new Timer(800, e -> {
+        Timer delayTimer = new Timer(4000, e -> {
             gameManager.nextPlayer();
 
             // detecter fin de manche ou fin de partie
@@ -357,8 +381,25 @@ public class GameBoardController {
             case CARD_DRAW_FROM_DECK -> gameBoardView.setActionGuide("Echange ou Défausse puis revele une carte");
             case CARD_TAKE_FROM_DISCARD -> gameBoardView.setActionGuide("Clique une carte de ta main pour échanger");
             case TURN_ENDED -> gameBoardView.setActionGuide("Tour terminé");
-            case INIT_REVEAL -> gameBoardView.setActionGuide(gameManager.getCurrentPlayer().getName() + " doit réveler 2 cartes (" + gameManager.getInitRevealCount() + ")");
+            case INIT_REVEAL -> gameBoardView.setActionGuide(gameManager.getCurrentPlayer().getName()
+                    + " doit réveler 2 cartes (" + gameManager.getInitRevealCount() + ")");
         }
+    }
+
+    public void nextPlayerSound() {
+        audio.playSfx("/sfx/round.wav");
+        nextRoundPanel.setCurrentPlayer(gameManager.getCurrentPlayer());
+        nextRoundPanel.fade(true);
+        waitingNextTurn = true;
+        Timer waitTimer = new Timer(4000, e -> {
+            // s'execute apres 5 secondes
+            System.out.println("4 secondes se sont ecoulee");
+            nextRoundPanel.fade(false);
+            waitingNextTurn = false;
+        });
+        waitTimer.setRepeats(false);
+        System.out.println("0 sec");
+        waitTimer.start();
     }
 
     /**

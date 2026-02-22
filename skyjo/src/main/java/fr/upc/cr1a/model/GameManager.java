@@ -2,6 +2,8 @@ package fr.upc.cr1a.model;
 
 import java.util.List;
 
+import javax.swing.Timer;
+
 import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
@@ -277,6 +279,14 @@ public class GameManager {
         return players.get(currentPlayerIndex);
     }
 
+    /**
+     * 
+     * @return
+     */
+    public int getCurrentPlayerIndex(){
+        return this.currentPlayerIndex;
+    }
+
     /*
     *passe au joueur suivant
     */
@@ -453,6 +463,7 @@ public class GameManager {
         }
         else {
             gameState = GameState.ROUND_ENDED;
+
         }
     }
 
@@ -505,6 +516,7 @@ public class GameManager {
             if (currentPlayerIndex == firstPlayerToPlayIndex) {
                 startTurn(); // passe à DRAW_DECISION
             }
+            gameBoardModel.getGameBoardController().nextPlayerSound();
         }
         return true;
     }

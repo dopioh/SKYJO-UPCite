@@ -15,18 +15,18 @@ import fr.upc.cr1a.model.PlayerModel;
  * 
  * @author Mei, Ian, Hugo
  */
-public class GameBoardView extends JPanel{
+public class GameBoardView extends JPanel {
 
     private static final int cardSpacing = 2; // <----------------
-    private static final boolean EnableHandCardAnimations = true; // DESACTIVER SI LE JEU LAG
+    private static final boolean EnableHandCardAnimations = false; // DESACTIVER SI LE JEU LAG
 
-    // elements important : 
+    // elements important :
     private ArrayList<PlayerModel> listPlayer; // jusqu'a 8 normalement
 
-    // a transferer : 
+    // a transferer :
     private ArrayList<JButton> buttonlistPlayer; // jusqu'a 8 normalement
 
-    // panel : 
+    // panel :
     private JPanel zonePlayer;
     private JPanel zonePlateau;
 
@@ -41,23 +41,26 @@ public class GameBoardView extends JPanel{
 
     private PlayerPreviewPanel previewPanel; // Le nouveau panel
     private JLayeredPane layeredPane; // gestion des couches
-    
-    private CursorCardView cursorCardView; 
 
-    //Affichage des cartes pilées 
+    private CursorCardView cursorCardView;
+
+    // Affichage des cartes pilées
     private CardButton btnPioche;
     private CardButton btnDefausse;
 
     // a qui appartient chaque deck
     private JLabel playerName;
 
-    //Que dois faire le joueur?
+    // Que dois faire le joueur?
     private JLabel actionGuide;
 
     // pour fixer le clique
     private boolean isPinned = false;
 
-    public GameBoardView(ArrayList<PlayerModel> listPlayerModels){
+    // Panel de l'entre round
+    NextRoundPanel nextRoundPanel;
+
+    public GameBoardView(ArrayList<PlayerModel> listPlayerModels) {
         this.listPlayer = listPlayerModels;
         this.buttonlistPlayer = new ArrayList<JButton>();
         this.cardButtons = new CardButton[3][4];
@@ -65,16 +68,17 @@ public class GameBoardView extends JPanel{
         setOpaque(true);
         setVisible(true);
 
-        layeredPane = new JLayeredPane(); // gestionnaire de couche (doc : https://docs.oracle.com/javase/8/docs/api/javax/swing/JLayeredPane.html)
+        layeredPane = new JLayeredPane(); // gestionnaire de couche (doc :
+                                          // https://docs.oracle.com/javase/8/docs/api/javax/swing/JLayeredPane.html)
         add(layeredPane, BorderLayout.CENTER);
 
         // pour resize des que on change de taille de fenetre
         addComponentListener(new ComponentAdapter() {
-        @Override
-        public void componentResized(ComponentEvent e) {
-            resizeLayers();
-            resizeCards();
-        }
+            @Override
+            public void componentResized(ComponentEvent e) {
+                resizeLayers();
+                resizeCards();
+            }
         });
 
         initComponents();
@@ -89,8 +93,8 @@ public class GameBoardView extends JPanel{
         repaint();
     }
 
-    public void initComponents(){
-        //System.out.println("initComponents Called");
+    public void initComponents() {
+        // System.out.println("initComponents Called");
 
         // PANEL PLATEAU :
         JPanel plateauPanel = new JPanel();
@@ -117,7 +121,8 @@ public class GameBoardView extends JPanel{
 
         plateauPanel.add(zonePlayer, gbcZonePlayer);
 
-        // ZONE PLATEAU ( 3/4 de l'ecran a partir de la droite, les cartes,pioches,defausses et score seront ici)
+        // ZONE PLATEAU ( 3/4 de l'ecran a partir de la droite, les
+        // cartes,pioches,defausses et score seront ici)
         this.zonePlateau = new JPanel();
         zonePlateau.setLayout(new BorderLayout());
         zonePlateau.setBackground(Color.WHITE);
@@ -138,7 +143,7 @@ public class GameBoardView extends JPanel{
         JPanel cardsGrid = new JPanel(new GridBagLayout());
         cardsGrid.setOpaque(true);
         cardsGrid.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-    
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(cardSpacing, cardSpacing, cardSpacing, cardSpacing);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -160,7 +165,7 @@ public class GameBoardView extends JPanel{
         cardsContainer.setLayout(new BorderLayout());
         cardsContainer.setOpaque(false);
 
-        //%essage d'action
+        // %essage d'action
         playerName = new JLabel("PLACEHOLDER", SwingConstants.CENTER);
         playerName.setFont(new Font("Arial", Font.BOLD, 16));
         playerName.setForeground(Color.BLACK);
@@ -173,7 +178,7 @@ public class GameBoardView extends JPanel{
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 4; col++) {
                 gbc.gridx = col;
-                gbc.gridy = row+1;
+                gbc.gridy = row + 1;
                 CardButton btn = new CardButton();
                 btn.setAnimationEnabled(EnableHandCardAnimations);
                 cardButtons[row][col] = btn;
@@ -183,11 +188,11 @@ public class GameBoardView extends JPanel{
 
         zonePlateau.add(cardsContainer, BorderLayout.CENTER);
 
-        //Partie droite (EAST) pour les stack de pioche et défausse
+        // Partie droite (EAST) pour les stack de pioche et défausse
         JPanel cardStack = new JPanel();
         cardStack.setOpaque(false);
         cardStack.setLayout(new GridBagLayout());
-        cardStack.setPreferredSize(new Dimension(240, 0));
+        // cardStack.setPreferredSize(new Dimension(240, 0));
 
         GridBagConstraints gbcRight = new GridBagConstraints();
         gbcRight.gridx = 0;
@@ -199,7 +204,7 @@ public class GameBoardView extends JPanel{
         btnPioche.setAnimationEnabled(false);
         btnDefausse.setAnimationEnabled(false);
 
-        Dimension bigCardSize = new Dimension(140, 200); // AJUSTER ICI SI CA VOUS PLAIT PAS 
+        Dimension bigCardSize = new Dimension(140, 200); // AJUSTER ICI SI CA VOUS PLAIT PAS
 
         btnPioche.setPreferredSize(bigCardSize);
         btnDefausse.setPreferredSize(bigCardSize);
@@ -209,7 +214,7 @@ public class GameBoardView extends JPanel{
 
         JLabel labPioche = new JLabel("Pioche", SwingConstants.CENTER);
         JLabel labDefausse = new JLabel("Défausse", SwingConstants.CENTER);
-        
+
         // Pioche
         gbcRight.gridy = 0;
         cardStack.add(labPioche, gbcRight);
@@ -232,21 +237,25 @@ public class GameBoardView extends JPanel{
         bottomPanel.add(btnRetour);
         zonePlateau.add(bottomPanel, BorderLayout.SOUTH);
 
-        // ZONE PREVIEW OTHER PLAYERS ( apparait au dessus de tous les autres panels quand on hover ou clique sur un button)
+        // ZONE PREVIEW OTHER PLAYERS ( apparait au dessus de tous les autres panels
+        // quand on hover ou clique sur un button)
         previewPanel = new PlayerPreviewPanel();
         previewPanel.setVisible(false);
-        previewPanel.setBounds(400, 200, 600, 500); // taille fix pour le test
-        layeredPane.add(previewPanel, JLayeredPane.PALETTE_LAYER);
+        // previewPanel.setBounds(400, 200, 500, 500); // taille fix pour le test
+        layeredPane.add(previewPanel, JLayeredPane.MODAL_LAYER);
+
+        this.nextRoundPanel = new NextRoundPanel(currentPlayer);
+        layeredPane.add(nextRoundPanel, JLayeredPane.PALETTE_LAYER);
 
         cursorCardView = new CursorCardView(this);
         cursorCardView.setOverlayBounds(getWidth(), getHeight());
         layeredPane.add(cursorCardView.getOverlay(), JLayeredPane.DRAG_LAYER);
 
-
         // BOUTTONS PLAYERS ( a gauche )
         playerButton();
 
         SwingUtilities.invokeLater(() -> resizeLayers()); // doit s'executer apres que tous les components soit creer
+        SwingUtilities.invokeLater(() -> resizeCards()); // doit s'executer apres que tous les components soit creer
     }
 
     /**
@@ -274,7 +283,7 @@ public class GameBoardView extends JPanel{
                     String imgPath = getCardImagePath(card);
                     btn.setCardImage(imgPath);
                 }
-                btn.setDisabledIcon(btn.getIcon());//Ca évite de griser la carte désactivée
+                btn.setDisabledIcon(btn.getIcon());// Ca évite de griser la carte désactivée
             }
         }
 
@@ -290,60 +299,64 @@ public class GameBoardView extends JPanel{
             return "/cartes/carteDos.png";
         }
         int val = card.getCardValue();
-        if (val == -2) return "/cartes/carteMoins2.png";
-        if (val == -1) return "/cartes/carteMoins1.png";
+        if (val == -2)
+            return "/cartes/carteMoins2.png";
+        if (val == -1)
+            return "/cartes/carteMoins1.png";
         return "/cartes/carte" + val + ".png";
     }
-    
+
     /**
      * Initialise tous les boutons selon le nombre de joueur dans la partie
      * Recuperer l'info de la list de PlayerModel
      * Creer dans le GameManager (pour le moment)
      */
-    private void playerButton(){
+    private void playerButton() {
         GridBagConstraints gbcPlayerButton = new GridBagConstraints();
         gbcPlayerButton.gridx = 0;
         gbcPlayerButton.gridy = 0;
         gbcPlayerButton.weightx = 1;
         gbcPlayerButton.weighty = 1;
-        for (PlayerModel pm : listPlayer){
+        for (PlayerModel pm : listPlayer) {
             JButton p = new JButton(pm.getName());
-            //p.setOpaque(true);
-            //p.setBorderPainted(false);
+            // p.setOpaque(true);
+            // p.setBorderPainted(false);
             p.setBackground(Color.WHITE);
             p.setForeground(Color.BLACK);
             p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            //////////// un listner dans viewwwwwwwwww // c'est un listener pour modifier des couleurs, faut le laisser la
+            //////////// un listner dans viewwwwwwwwww // c'est un listener pour modifier
+            //////////// des couleurs, faut le laisser la
             p.addMouseListener(new MouseAdapter() {
                 @Override
-                public void mouseEntered( MouseEvent e) {
-                    p.setBackground(new Color(242, 242, 242)); // ne marche pas sur MacOS sans modifier la nature du bouton     ah bon
-                    //p.setForeground(new Color(73, 134, 196));
-                    showOtherPlayerMain(true);
+                public void mouseEntered(MouseEvent e) {
+                    p.setBackground(new Color(242, 242, 242)); // ne marche pas sur MacOS sans modifier la nature du bouton // ah bon
+                    // p.setForeground(new Color(73, 134, 196));
+                    // showOtherPlayerMain(true);
                     isPinned = false;
                 }
 
                 @Override
-                public void mouseExited( MouseEvent e) {
-                    if (!isPinned){
+                public void mouseExited(MouseEvent e) {
+                    if (!isPinned) {
                         p.setBackground(Color.WHITE);
                         p.setForeground(Color.BLACK);
-                        showOtherPlayerMain(false);
+                        // showOtherPlayerMain(false);
                     }
                 }
             });
             buttonlistPlayer.add(p);
-            zonePlayer.add(p,gbcPlayerButton);
-            gbcPlayerButton.gridy ++;
+            zonePlayer.add(p, gbcPlayerButton);
+            gbcPlayerButton.gridy++;
         }
     }
 
     /**
      * Affiche, selon le boolean, la preview
+     * 
      * @param isVisible
      */
-    public void showOtherPlayerMain(boolean isVisible){
-        previewPanel.setVisible(isVisible);
+    public void showOtherPlayerMain(boolean isVisible) {
+        previewPanel.fade(isVisible);
     }
 
     /**
@@ -351,58 +364,68 @@ public class GameBoardView extends JPanel{
      */
     private void resizeLayers() {
         Dimension size = getSize(); // size de la fenetre ?
-        Component[] compsD = layeredPane.getComponentsInLayer(JLayeredPane.DEFAULT_LAYER); // recupere les elements de la couche DEFAULT
+        Component[] compsD = layeredPane.getComponentsInLayer(JLayeredPane.DEFAULT_LAYER); // recupere les elements de
+                                                                                           // la couche DEFAULT
         for (Component c : compsD) {
             c.setBounds(0, 0, size.width, size.height);
         }
 
-        Component[] compsP = layeredPane.getComponentsInLayer(JLayeredPane.PALETTE_LAYER);
-        for (Component c : compsP){
-            c.setBounds(size.width/5, size.height/10, size.width - size.width/3, size.height - size.height/5);
+        Component[] compsP = layeredPane.getComponentsInLayer(JLayeredPane.PALETTE_LAYER); // round changement
+        for (Component c : compsP) {
+            c.setBounds(0, 0, size.width, size.height);
+        }
+
+        Component[] compsM = layeredPane.getComponentsInLayer(JLayeredPane.MODAL_LAYER); // previewPlayer
+        for (Component c : compsM) {
+            c.setBounds(size.width / 6, size.height / 10, size.width - size.width / 3, size.height - size.height / 5);
         }
 
         if (cursorCardView != null) {
             cursorCardView.setOverlayBounds(size.width, size.height);
         }
 
-        
     }
 
-    // getter 
-    public ArrayList<PlayerModel> getListPlayer(){
+    // getter
+    public ArrayList<PlayerModel> getListPlayer() {
         return this.listPlayer;
     }
 
-    public ArrayList<JButton> getListPlayerButton(){
+    public ArrayList<JButton> getListPlayerButton() {
         return this.buttonlistPlayer;
     }
 
-    public JButton getBtnRetour(){
+    public JButton getBtnRetour() {
         return this.btnRetour;
     }
 
-    public CardButton[][] getCardButtons(){
+    public CardButton[][] getCardButtons() {
         return this.cardButtons;
     }
 
-    public PlayerModel getCurrentPlayer(){
+    public PlayerModel getCurrentPlayer() {
         return this.currentPlayer;
     }
 
-    public CardButton getBtnPioche(){ 
+    public CardButton getBtnPioche() {
         return btnPioche;
     }
 
-    public CardButton getBtnDefausse(){
+    public CardButton getBtnDefausse() {
         return btnDefausse;
     }
 
-    public void setActionGuide(String message){
+    public void setActionGuide(String message) {
         actionGuide.setText(message);
+    }
+
+    public NextRoundPanel getNextRoundPanel() {
+        return this.nextRoundPanel;
     }
 
     /**
      * Affiche la petite carte sous le curseur pendant une action
+     * 
      * @param imgPath chemin d'image de la carte
      */
     public void showCursorCard(String imgPath) {
@@ -418,11 +441,12 @@ public class GameBoardView extends JPanel{
 
     /**
      * Mets à jour l'affichage des cartes de la pioche et de la défausse
-     * @param topDiscard Carte du haut de la défausse 
-     * @param drawHasCards 
+     * 
+     * @param topDiscard   Carte du haut de la défausse
+     * @param drawHasCards
      */
     public void updateCardDisplay(CardModel topDiscard, boolean drawHasCards) {
-        //Pioche
+        // Pioche
         if (drawHasCards) {
             btnPioche.setText("");
             btnPioche.setCardImage("/cartes/carteDos.png");
@@ -431,7 +455,7 @@ public class GameBoardView extends JPanel{
             btnPioche.setText("vide");
         }
 
-        //Défausse
+        // Défausse
         if (topDiscard == null) {
             btnDefausse.clearImage();
             btnDefausse.setText("vide");
@@ -455,28 +479,26 @@ public class GameBoardView extends JPanel{
         zonePlateau.repaint();
     }
 
+    // a redimenssionner dynamiquement plus tard ?
     private void resizeCards() {
-        int largeurZone = zonePlateau.getWidth();
-        int hauteurZone = zonePlateau.getHeight();
+        int sizeH = this.getHeight();
+        int sizeW = this.getWidth();
 
         // 95x135 Taille de base
-        int largeurBase = 95;
-        int hauteurBase = 135;
+        int largeurCarte = 95;
+        int hauteurCarte = 135;
 
-        // facteur simple selon la taille de la fenêtre
-        double facteur = 1.0;
-
-        //Ecran fenetré
-        if (largeurZone >= 1600 || hauteurZone >= 900) {
-            facteur = 1.2;
+        System.out.println(sizeH);
+        System.out.println(sizeW);
+        if (sizeH > 720 || sizeW > 1280) { // ca veut dire qu'on est pas en mode fenetre, et donc on est en full
+                                           // screen..
+            largeurCarte = 95 + 30; // pour les petits ecran type 13 pouces
+            hauteurCarte = 135 + 30;
+            if (sizeH > 1000 || sizeW > 2000) { // pour les gros ecrans types 23/27 pouces
+                largeurCarte = 95 * 2;
+                hauteurCarte = 135 * 2;
+            }
         }
-        //Plein ecran
-        if (largeurZone >= 1920 || hauteurZone >= 1080) {
-            facteur = 1.35;
-        }
-
-        int largeurCarte = (int) (largeurBase * facteur);
-        int hauteurCarte = (int) (hauteurBase * facteur);
 
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 4; j++) {
@@ -495,7 +517,8 @@ public class GameBoardView extends JPanel{
         zonePlateau.revalidate();
         zonePlateau.repaint();
     }
-    public PlayerPreviewPanel getPlayerPreviewPanel(){
+
+    public PlayerPreviewPanel getPlayerPreviewPanel() {
         return this.previewPanel;
     }
 }
