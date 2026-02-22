@@ -76,7 +76,9 @@ public class GameBoardController {
             if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
             CardModel drawn = gameManager.drawDeck();
             if (drawn.isFaceDown()) drawn.returnCard();
-            gameBoardView.getBtnPioche().setCardImage(gameBoardView.getCardImagePath(drawn));
+            String drawnPath = gameBoardView.getCardImagePath(drawn);
+            gameBoardView.getBtnPioche().setCardImage(drawnPath);
+            gameBoardView.showCursorCard(drawnPath);
             gameBoardView.updateDiscardOnly(
                 gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard()
             );
@@ -90,7 +92,9 @@ public class GameBoardController {
             if (gameManager.getTurnPhase() == GameManager.TurnPhase.DRAW_DECISION) {
                 if (gameManager.getDiscardPile().isEmpty()) return;
                 CardModel taken = gameManager.takeDiscard();
-                gameBoardView.getBtnDefausse().setCardImage(gameBoardView.getCardImagePath(taken));
+                String takenPath = gameBoardView.getCardImagePath(taken);
+                gameBoardView.getBtnDefausse().setCardImage(takenPath);
+                gameBoardView.showCursorCard(takenPath);
                 gameBoardView.updateCardDisplay(
                     gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
                     gameManager.getDeck().stackSize() > 0
@@ -103,6 +107,7 @@ public class GameBoardController {
             if (gameManager.getTurnPhase() == GameManager.TurnPhase.CARD_DRAW_FROM_DECK) {
                 gameManager.discardDrawCard();
                 waitingReveal = true; // maintenant il doit révéler une carte
+                gameBoardView.hideCursorCard();
 
                 gameBoardView.updateCardDisplay(
                     gameManager.getDiscardPile().getTopCard(),
@@ -167,6 +172,7 @@ public class GameBoardController {
                         || gameManager.getTurnPhase() == GameManager.TurnPhase.CARD_TAKE_FROM_DISCARD) {
 
                         gameManager.exchangeCardInHand(c, r); // col, row (comme ton code)
+                        gameBoardView.hideCursorCard();
                         gameBoardView.showPlayerCards(currentPlayer);
 
                         gameBoardView.updateCardDisplay(
@@ -232,6 +238,8 @@ public class GameBoardController {
      */
     public void switchToNextPlayer() {
         waitingNextTurn = true;
+        gameBoardView.hideCursorCard();
+        
         // timer pour voir les cartes avant de changer de main
         Timer delayTimer = new Timer(800, e -> {
             gameManager.nextPlayer();

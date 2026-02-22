@@ -138,6 +138,11 @@
 
 - Nouvelle carte 'vide'
 
+- Ajout de GameBoardBotController permet de gérer les bots dans le view
+
+- Animation flottante des cartes
+
+- Petite carte à jouer sous le curseur
 
 ### Modified 
 

@@ -18,6 +18,7 @@ import fr.upc.cr1a.model.PlayerModel;
 public class GameBoardView extends JPanel{
 
     private static final int cardSpacing = 2; // <----------------
+    private static final boolean EnableHandCardAnimations = true; // DESACTIVER SI LE JEU LAG
 
     // elements important : 
     private ArrayList<PlayerModel> listPlayer; // jusqu'a 8 normalement
@@ -40,6 +41,8 @@ public class GameBoardView extends JPanel{
 
     private PlayerPreviewPanel previewPanel; // Le nouveau panel
     private JLayeredPane layeredPane; // gestion des couches
+    
+    private CursorCardView cursorCardView; 
 
     //Affichage des cartes pilées 
     private CardButton btnPioche;
@@ -172,6 +175,7 @@ public class GameBoardView extends JPanel{
                 gbc.gridx = col;
                 gbc.gridy = row+1;
                 CardButton btn = new CardButton();
+                btn.setAnimationEnabled(EnableHandCardAnimations);
                 cardButtons[row][col] = btn;
                 cardsGrid.add(btn, gbc);
             }
@@ -192,6 +196,8 @@ public class GameBoardView extends JPanel{
 
         btnPioche = new CardButton();
         btnDefausse = new CardButton();
+        btnPioche.setAnimationEnabled(false);
+        btnDefausse.setAnimationEnabled(false);
 
         Dimension bigCardSize = new Dimension(140, 200); // AJUSTER ICI SI CA VOUS PLAIT PAS 
 
@@ -231,6 +237,10 @@ public class GameBoardView extends JPanel{
         previewPanel.setVisible(false);
         previewPanel.setBounds(400, 200, 600, 500); // taille fix pour le test
         layeredPane.add(previewPanel, JLayeredPane.PALETTE_LAYER);
+
+        cursorCardView = new CursorCardView(this);
+        cursorCardView.setOverlayBounds(getWidth(), getHeight());
+        layeredPane.add(cursorCardView.getOverlay(), JLayeredPane.DRAG_LAYER);
 
 
         // BOUTTONS PLAYERS ( a gauche )
@@ -351,6 +361,10 @@ public class GameBoardView extends JPanel{
             c.setBounds(size.width/5, size.height/10, size.width - size.width/3, size.height - size.height/5);
         }
 
+        if (cursorCardView != null) {
+            cursorCardView.setOverlayBounds(size.width, size.height);
+        }
+
         
     }
 
@@ -385,6 +399,21 @@ public class GameBoardView extends JPanel{
 
     public void setActionGuide(String message){
         actionGuide.setText(message);
+    }
+
+    /**
+     * Affiche la petite carte sous le curseur pendant une action
+     * @param imgPath chemin d'image de la carte
+     */
+    public void showCursorCard(String imgPath) {
+        cursorCardView.showCard(imgPath);
+    }
+
+    /**
+     * Cache la petite carte sous le curseur
+     */
+    public void hideCursorCard() {
+        cursorCardView.hideCard();
     }
 
     /**

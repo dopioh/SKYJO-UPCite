@@ -46,6 +46,7 @@ public class PlayerPreviewPanel extends JPanel{
                 gbc.gridx = col;
                 gbc.gridy = row;
                 CardButton btn = new CardButton();
+                btn.setAnimationEnabled(false);
                 btn.setCardSize(lastCardW, lastCardH);
                 cardButtons[row][col] = btn;
                 cardsGrid.add(btn, gbc);
