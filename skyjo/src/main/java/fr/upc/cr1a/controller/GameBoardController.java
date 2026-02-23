@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.*;
 
 import fr.upc.cr1a.model.*;
+import fr.upc.cr1a.model.GameManager.TurnPhase;
 import fr.upc.cr1a.view.*;
 
 /**
@@ -174,6 +175,8 @@ public class GameBoardController {
                         waitingReveal = false;
                         refreshGuide();
                         switchToNextPlayer();
+                        gameManager.setTurnPhase(TurnPhase.TURN_ENDED);
+                        refreshGuide();
                         return;
                     }
 
@@ -380,6 +383,7 @@ public class GameBoardController {
             case DRAW_DECISION -> gameBoardView.setActionGuide("Choisis : Pioche ou Défausse");
             case CARD_DRAW_FROM_DECK -> gameBoardView.setActionGuide("Echange ou Défausse puis revele une carte");
             case CARD_TAKE_FROM_DISCARD -> gameBoardView.setActionGuide("Clique une carte de ta main pour échanger");
+            case CRAD_DISCARD_FROM_DRAW -> gameBoardView.setActionGuide("Veuillez reveler une carte de votre main");
             case TURN_ENDED -> gameBoardView.setActionGuide("Tour terminé");
             case INIT_REVEAL -> gameBoardView.setActionGuide(gameManager.getCurrentPlayer().getName()
                     + " doit réveler 2 cartes (" + gameManager.getInitRevealCount() + ")");
