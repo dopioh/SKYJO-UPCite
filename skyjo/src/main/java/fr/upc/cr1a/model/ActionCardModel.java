@@ -11,8 +11,8 @@ public class ActionCardModel extends CardModel {
             TRADE_CARD_WITH_PLAYER,        // remplacer une carte avec un autre joueur                  DONE
             REPLACE_CARD_IN_HAND,          // deplacer deux cartes dans ta main                         DONE
             PLAY_TWO_TURN,                 // jouer deux fois
-            DRAW_THREE_CARD,               // piocher 3 cartes -› n'en garde 1 seule ou 0               WORKING
-            PLAY_LAST_ACTION_IN_DEFAUSSE,  // jouer la derniere carte action defaussée
+            DRAW_THREE_CARD,               // piocher 3 cartes -› n'en garde 1 seule ou 0               DONE
+            PLAY_LAST_ACTION_IN_DEFAUSSE,  // jouer la derniere carte action defaussée                  WORK
             DEFENSE,                       // carte defense qui annule une action
             ALL_PLAYERS_DROP_CARD,         // chaque joueur doit defausser une carte choisie par le joueur
             SPY_ONE_COLUMN                 // regarder une colonne de carte de sa main 

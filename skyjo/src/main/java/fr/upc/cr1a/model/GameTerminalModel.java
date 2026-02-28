@@ -225,16 +225,25 @@ public class GameTerminalModel {
             case TRADE_CARD_WITH_PLAYER:
                 ActionSkills.tradeCardWithPlayer(scanner, new ArrayList<>(gameManager.getPlayers()), gameManager.getCurrentPlayerIndex());
                 player.getActionHand().remove(actionIndex);
+                gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, selectedAction));
                 break;
 
             case REPLACE_CARD_IN_HAND:
                 ActionSkills.replaceCardInHand(scanner, new ArrayList<>(gameManager.getPlayers()), gameManager.getCurrentPlayerIndex());
                 player.getActionHand().remove(actionIndex);
+                gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, selectedAction));
                 break;
 
             case DRAW_THREE_CARD:
                 ActionSkills.drawThreeCard(scanner, new ArrayList<>(gameManager.getPlayers()), gameManager.getCurrentPlayerIndex(), gameManager);
                 player.getActionHand().remove(actionIndex);
+                gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, selectedAction));
+                break;
+
+            case PLAY_LAST_ACTION_IN_DEFAUSSE:
+                ActionSkills.playLastActionInDefausse(scanner, new ArrayList<>(gameManager.getPlayers()), gameManager.getCurrentPlayerIndex(), gameManager);
+                player.getActionHand().remove(actionIndex);
+                gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, selectedAction));
                 break;
 
 
@@ -254,8 +263,11 @@ public class GameTerminalModel {
         showHand(player, false);
         
         //montre la carte sur la défausse
-        System.out.println("\nCarte sur la défausse : " + gameManager.getDiscardPile().getTopCard().getCardValue());
-        
+        System.out.println("\nCarte numéro sur la défausse : " + gameManager.getDiscardPile().getTopCard().getCardValue());
+        if (gameManager.getDiscardActionPile().stackSize() > 0) {
+            System.out.println("\nCarte action sur la défausse : " + ((ActionCardModel) gameManager.getDiscardActionPile().getTopCard()).getType());
+        }
+
         //choisir piocher ou prendre de la défausse
         System.out.println("----------------------------------------------------------------");
         System.out.println("\n Action possible :\n");

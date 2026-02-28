@@ -157,10 +157,33 @@ public class ActionSkills {
                 break;
         }
 
-
         System.out.println("DRAW_THREE_CARD: succès");
         
     }
+
+    /**
+     * implémentation de PLAY_LAST_ACTION_IN_DEFAUSSE
+     * IMPORTANT -> Pour le moment cette fonction a le comportement suivant: donne au joueur la carte en haut de la defausse action mais il ne la joue pas
+     * @param players liste de tous les joueurs 
+     * @param currentPlayerIndex index du joueur qui fait l'action
+     */
+    public static void playLastActionInDefausse(Scanner scanner, ArrayList<PlayerModel> players, int currentPlayerIndex, GameManager gameManager) {
+        if (gameManager.getDiscardActionPile().getTopCard() != null) {
+            ActionCardModel topCard = (ActionCardModel) gameManager.getDiscardActionPile().getTopCard();
+            PlayerModel player = players.get(currentPlayerIndex);
+            player.getActionHand().add(topCard.getType());
+            gameManager.getDiscardActionPile().removeCardAtTop();
+            System.out.println("PLAY_LAST_ACTION_IN_DEFAUSSE: succès");
+        }
+        else {
+            System.out.println("PLAY_LAST_ACTION_IN_DEFAUSSE: aucune carte action dans la defausse");
+        }
+
+        
+        
+
+    }
+    
 
     /**
      * fonction qui demande la position d'une carte

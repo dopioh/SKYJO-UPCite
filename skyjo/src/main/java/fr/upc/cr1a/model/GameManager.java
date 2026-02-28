@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.swing.Timer;
 
+import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
@@ -195,6 +196,9 @@ public class GameManager {
         discardPile = new DefausseModel();
         actionDeck = new PiocheActionModel();
         discardActionPile = new DefausseActionModel();
+        
+        ActionCardModel initActionCard = new ActionCardModel(true, ActionType.REPLACE_CARD_IN_HAND);
+        discardActionPile.addCardAtTop(initActionCard);
 
         currentDrawCard = null;
         gameState = GameState.WAITING_FOR_PLAYERS;
