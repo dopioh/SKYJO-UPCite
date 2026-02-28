@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 /**
  * @author Nassim
- * Classe qui execute les des cartes action
+ * Classe qui compile tous les comportements des cartes action
  * Se réferer a ActionCardModel pour la description des actions
  */
 public class ActionSkills {
@@ -82,6 +82,7 @@ public class ActionSkills {
      * implémentation de DRAW_THREE_CARD
      * @param players liste de tous les joueurs 
      * @param currentPlayerIndex index du joueur qui fait l'action
+     * @param gameManager le gestionnaire de jeu
      */
     public static void drawThreeCard(Scanner scanner, ArrayList<PlayerModel> players, int currentPlayerIndex, GameManager gameManager) {
         PlayerModel player = players.get(currentPlayerIndex);
@@ -166,6 +167,7 @@ public class ActionSkills {
      * IMPORTANT -> Pour le moment cette fonction a le comportement suivant: donne au joueur la carte en haut de la defausse action mais il ne la joue pas
      * @param players liste de tous les joueurs 
      * @param currentPlayerIndex index du joueur qui fait l'action
+     * @param gameManager le gestionnaire de jeu
      */
     public static void playLastActionInDefausse(Scanner scanner, ArrayList<PlayerModel> players, int currentPlayerIndex, GameManager gameManager) {
         if (gameManager.getDiscardActionPile().getTopCard() != null) {
@@ -185,6 +187,7 @@ public class ActionSkills {
      * IMPORTANT -> je n'ai pas mis de timer donc le joueur a autant de temps qu'il veut pour regarder sa colonne, il fait "entrer" pour continuer la manche
      * @param players liste de tous les joueurs 
      * @param currentPlayerIndex index du joueur qui fait l'action
+     * @param gameManager le gestionnaire de jeu
      */
     public static void spyOneColumn(Scanner scanner, ArrayList<PlayerModel> players, int currentPlayerIndex, GameManager gameManager) {
         int targetedCol = askCardPos(scanner, "entrer le numero de la colonne a reveler temporairement : ", 0, 3);
@@ -214,20 +217,11 @@ public class ActionSkills {
     }
 
     /**
-     * implémentation de PLAY_TWO_TURN
-     * @param players liste de tous les joueurs 
-     * @param currentPlayerIndex index du joueur qui fait l'action
-     * @param gameManager le gestionnaire de jeu
-     */
-    public static void playTwoTurn(Scanner scanner, ArrayList<PlayerModel> players, int currentPlayerIndex, GameManager gameManager) {
-        gameManager.grantExtraTurn();
-        System.out.println("PLAY_TWO_TURN: succès");
-    }
-
-    /**
      * implémentation de ALL_PLAYERS_DROP_CARD
      * @param players liste de tous les joueurs 
      * @param currentPlayerIndex index du joueur qui fait l'action
+     * @param gameManager le gestionnaire de jeu
+     * @param gmt le gameterminalmodel qui sert juste a montrer les mains des joueurs
      */
     public static void allPlayersDropCard(Scanner scanner, ArrayList<PlayerModel> players, int currentPlayerIndex, GameManager gameManager, GameTerminalModel gtm) {
         PlayerModel currentplayer = players.get(currentPlayerIndex);
@@ -250,8 +244,18 @@ public class ActionSkills {
             }
         }
     }
-    
-    
+
+    /**
+     * implémentation de PLAY_TWO_TURN
+     * @param players liste de tous les joueurs 
+     * @param currentPlayerIndex index du joueur qui fait l'action
+     * @param gameManager le gestionnaire de jeu
+     */
+    public static void playTwoTurn(Scanner scanner, ArrayList<PlayerModel> players, int currentPlayerIndex, GameManager gameManager) {
+        gameManager.grantExtraTurn();
+        System.out.println("PLAY_TWO_TURN: succès");
+    }
+
 
     /**
      * fonction qui demande la position d'une carte
