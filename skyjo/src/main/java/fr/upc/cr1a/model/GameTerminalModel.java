@@ -246,7 +246,12 @@ public class GameTerminalModel {
                 gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, selectedAction));
                 break;
 
-
+            case SPY_ONE_COLUMN:
+                ActionSkills.spyOneColumn(scanner, new ArrayList<>(gameManager.getPlayers()), gameManager.getCurrentPlayerIndex(), gameManager);
+                player.getActionHand().remove(actionIndex);
+                gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, selectedAction));
+                break;
+            
             default:
                 System.out.println("Action non implémentée pour le moment.");
                 break;

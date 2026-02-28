@@ -14,7 +14,7 @@ public class PiocheActionModel extends CardStackModel {
     public PiocheActionModel() {
         for (ActionType type : ActionType.values()) {
             for (int k = 0; k < 3; k++) {
-                this.getStack().add(new ActionCardModel(true, ActionType.PLAY_LAST_ACTION_IN_DEFAUSSE));
+                this.getStack().add(new ActionCardModel(true, ActionType.SPY_ONE_COLUMN));
             }
         }
         Collections.shuffle(this.getStack());

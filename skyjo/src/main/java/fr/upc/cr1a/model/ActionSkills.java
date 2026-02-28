@@ -177,16 +177,55 @@ public class ActionSkills {
         }
         else {
             System.out.println("PLAY_LAST_ACTION_IN_DEFAUSSE: aucune carte action dans la defausse");
-        }
-
-        
-        
-
+        }        
     }
+
+    /**
+     * implémentation de SPY_ON_COLUMN
+     * IMPORTANT -> je n'ai pas mis de timer donc le joueur a autant de temps qu'il veut pour regarder sa colonne, il fait "entrer" pour continuer la manche
+     * @param players liste de tous les joueurs 
+     * @param currentPlayerIndex index du joueur qui fait l'action
+     */
+    public static void spyOneColumn(Scanner scanner, ArrayList<PlayerModel> players, int currentPlayerIndex, GameManager gameManager) {
+        int targetedCol = askCardPos(scanner, "entrer le numero de la colonne a reveler temporairement : ", 0, 3);
+        PlayerModel player = players.get(currentPlayerIndex);
+
+        System.out.println("\n--------------------------------zieuzieut--------------------------------\n");
+
+        System.out.println("         Col 0   Col 1   Col 2   Col 3");
+        for (int row = 0; row < 3; row++) {
+            System.out.print("Ligne " + row + " ");
+            for (int col = 0; col < 4; col++) {
+                CardModel card = player.getHand().getCard(row, col);
+                if (card == null) {
+                    System.out.print("[  X  ]");
+                } else if ((col != targetedCol) && (card.isFaceDown())) {
+                    System.out.print("[  ?  ]");
+                } else {
+                    System.out.printf("[ %3d ]", card.getCardValue());
+                }
+                System.out.print(" ");
+            }
+            System.out.println();
+        }
+        System.out.println("\n--------------------------------zieuzieut--------------------------------\n");
+        System.out.println("SPY_ON_COLUMN: succès | presser ENTRER pour continuer...");   
+        scanner.nextLine();   
+    }
+
+    /**
+     * implémentation de ALL_PLAYERS_DROP_CARD
+     * @param players liste de tous les joueurs 
+     * @param currentPlayerIndex index du joueur qui fait l'action
+     */
+    public static void allPlayersDropCard(Scanner scanner, ArrayList<PlayerModel> players, int currentPlayerIndex, GameManager gameManager) {
+    }
+    
     
 
     /**
      * fonction qui demande la position d'une carte
+     * la meilleure fonction du projet
      * @return la coordonnée de la carte
      */
     private static int askCardPos(Scanner scanner, String msg, int min, int max) {
