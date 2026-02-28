@@ -1,6 +1,7 @@
 package fr.upc.cr1a.view;
 
 import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
+import fr.upc.cr1a.utils.ImageCache;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,12 +23,11 @@ public class MainMenuPanel extends JPanel {
         setLayout(new BorderLayout());
 
         //fond
-        backgroundImage = new ImageIcon(getClass().getResource("/background.png")).getImage();
+        backgroundImage = ImageCache.get("/background.png");
 
         JPanel topBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 8));
         topBar.setOpaque(false);
-        ImageIcon accountIcon = new ImageIcon(getClass().getResource("/Account.png"));
-        Image scaledAccount = accountIcon.getImage().getScaledInstance(48, 48, Image.SCALE_SMOOTH);
+        Image scaledAccount = ImageCache.get("/Account.png").getScaledInstance(48, 48, Image.SCALE_SMOOTH);
         accountBtn = new JButton(new ImageIcon(scaledAccount));
         accountBtn.setBorderPainted(false);
         accountBtn.setContentAreaFilled(false);
@@ -44,8 +44,7 @@ public class MainMenuPanel extends JPanel {
         gbc.insets = new Insets(20, 20, 20, 20);
 
         // Logo
-        ImageIcon logoIcon = new ImageIcon(getClass().getResource("/skyjo_logo.png"));
-        Image scaledLogo = logoIcon.getImage().getScaledInstance(400, -1, Image.SCALE_SMOOTH);
+        Image scaledLogo = ImageCache.get("/skyjo_logo.png").getScaledInstance(400, -1, Image.SCALE_SMOOTH);
         JLabel titre = new JLabel(new ImageIcon(scaledLogo));
         gbc.gridy = 0;
         gbc.gridwidth = 3;
