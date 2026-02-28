@@ -232,6 +232,11 @@ public class GameTerminalModel {
                 player.getActionHand().remove(actionIndex);
                 break;
 
+            case DRAW_THREE_CARD:
+                ActionSkills.drawThreeCard(scanner, new ArrayList<>(gameManager.getPlayers()), gameManager.getCurrentPlayerIndex(), gameManager);
+                player.getActionHand().remove(actionIndex);
+                break;
+
 
             default:
                 System.out.println("Action non implémentée pour le moment.");

@@ -79,6 +79,90 @@ public class ActionSkills {
     }
 
     /**
+     * implémentation de DRAW_THREE_CARD
+     * @param players liste de tous les joueurs 
+     * @param currentPlayerIndex index du joueur qui fait l'action
+     */
+    public static void drawThreeCard(Scanner scanner, ArrayList<PlayerModel> players, int currentPlayerIndex, GameManager gameManager) {
+        PlayerModel player = players.get(currentPlayerIndex);
+        NumberCardModel firstDrawnCard = (NumberCardModel) gameManager.drawDeck();
+        NumberCardModel secondDrawnCard = (NumberCardModel) gameManager.drawDeck();
+        NumberCardModel thirdDrawnCard = (NumberCardModel) gameManager.drawDeck();
+
+        firstDrawnCard.returnCard();
+        secondDrawnCard.returnCard();
+        thirdDrawnCard.returnCard();
+
+        System.out.println("Cartes disponibles : " + firstDrawnCard.getCardValue() + " | " + secondDrawnCard.getCardValue() + " | " +  thirdDrawnCard.getCardValue());
+
+        int chosedCard = -1;
+        do {
+            try {
+                System.out.println("choisir une carte (1-3) a remplacer ou (4) pour annuler");
+                chosedCard = scanner.nextInt();
+                scanner.nextLine();
+            } catch (Exception e) {
+                scanner.nextLine();
+                chosedCard = -1;
+            }
+        } while (chosedCard < 0 || chosedCard > 4);
+
+        switch (chosedCard) {
+            case 1:
+                gameManager.getDiscardPile().addCardAtTop(secondDrawnCard);
+                gameManager.getDiscardPile().addCardAtTop(thirdDrawnCard);
+                int firstCardRow = askCardPos(scanner, "ligne carte (0-2) : ", 0, 2);
+                int firstCardCol = askCardPos(scanner, "colonne carte (0-3) : ", 0, 3);
+                CardModel oldCard = player.getHand().getCard(firstCardRow, firstCardCol);
+
+                if (firstDrawnCard == null || oldCard == null) {
+                    System.out.println("Echange annulé: case vide.");
+                    return;
+                }
+
+                gameManager.getDiscardPile().addCardAtTop(oldCard);
+                player.getHand().replaceCard(firstCardRow, firstCardCol, firstDrawnCard);
+                break;
+            case 2:
+                gameManager.getDiscardPile().addCardAtTop(firstDrawnCard);
+                gameManager.getDiscardPile().addCardAtTop(thirdDrawnCard);
+                int secondCardRow = askCardPos(scanner, "ligne carte (0-2) : ", 0, 2);
+                int secondCardCol = askCardPos(scanner, "colonne carte (0-3) : ", 0, 3);
+                CardModel oldCard2 = player.getHand().getCard(secondCardRow, secondCardCol);
+
+                if (secondDrawnCard == null || oldCard2 == null) {
+                    System.out.println("Echange annulé: case vide.");
+                    return;
+                }
+
+                gameManager.getDiscardPile().addCardAtTop(oldCard2);
+                player.getHand().replaceCard(secondCardRow, secondCardCol, secondDrawnCard);
+                break;
+            case 3:
+                gameManager.getDiscardPile().addCardAtTop(firstDrawnCard);
+                gameManager.getDiscardPile().addCardAtTop(secondDrawnCard);
+                int thirdCardRow = askCardPos(scanner, "ligne carte (0-2) : ", 0, 2);
+                int thirdCardCol = askCardPos(scanner, "colonne carte (0-3) : ", 0, 3);
+                CardModel oldCard3 = player.getHand().getCard(thirdCardRow, thirdCardCol);
+
+                if (thirdDrawnCard == null || oldCard3 == null) {
+                    System.out.println("Echange annulé: case vide.");
+                    return;
+                }
+
+                gameManager.getDiscardPile().addCardAtTop(oldCard3);
+                player.getHand().replaceCard(thirdCardRow, thirdCardCol, thirdDrawnCard);
+                break;
+            default:
+                break;
+        }
+
+
+        System.out.println("DRAW_THREE_CARD: succès");
+        
+    }
+
+    /**
      * fonction qui demande la position d'une carte
      * @return la coordonnée de la carte
      */
