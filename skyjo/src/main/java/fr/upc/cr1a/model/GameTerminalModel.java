@@ -227,6 +227,12 @@ public class GameTerminalModel {
                 player.getActionHand().remove(actionIndex);
                 break;
 
+            case REPLACE_CARD_IN_HAND:
+                ActionSkills.replaceCardInHand(scanner, new ArrayList<>(gameManager.getPlayers()), gameManager.getCurrentPlayerIndex());
+                player.getActionHand().remove(actionIndex);
+                break;
+
+
             default:
                 System.out.println("Action non implémentée pour le moment.");
                 break;

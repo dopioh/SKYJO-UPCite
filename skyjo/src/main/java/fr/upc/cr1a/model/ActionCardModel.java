@@ -8,8 +8,8 @@ package fr.upc.cr1a.model;
 public class ActionCardModel extends CardModel {
 
     public enum ActionType {
-            TRADE_CARD_WITH_PLAYER,        // remplacer une carte avec un autre joueur
-            REPLACE_CARD_IN_HAND,          // deplacer deux cartes dans ta main
+            TRADE_CARD_WITH_PLAYER,        // remplacer une carte avec un autre joueur DONE
+            REPLACE_CARD_IN_HAND,          // deplacer deux cartes dans ta main 
             PLAY_TWO_TURN,                 // jouer deux fois
             DRAW_THREE_CARD,               // piocher 3 cartes -› n'en garde 1 seule ou 0
             PLAY_LAST_ACTION_IN_DEFAUSSE,  // jouer la derniere carte action defaussée

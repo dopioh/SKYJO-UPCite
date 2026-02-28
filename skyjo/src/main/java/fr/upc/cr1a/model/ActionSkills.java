@@ -6,15 +6,16 @@ import java.util.Scanner;
 /**
  * @author Nassim
  * Classe qui execute les des cartes action
+ * Se réferer a ActionCardModel pour la description des actions
  */
 public class ActionSkills {
 
     /**
-     * implémentation de TRADE_CARD_WITH_PLAYER (remplacer une carte avec un autre joueur)
+     * implémentation de TRADE_CARD_WITH_PLAYER 
      * @param players liste de tous les joueurs 
-     * @param currentPlayerIndex index du joueur qui fait l'actio,
+     * @param currentPlayerIndex index du joueur qui fait l'action
      */
-    public static void tradeCardWithPlayer( Scanner scanner, ArrayList<PlayerModel> players, int currentPlayerIndex) {
+    public static void tradeCardWithPlayer(Scanner scanner, ArrayList<PlayerModel> players, int currentPlayerIndex) {
         PlayerModel player = players.get(currentPlayerIndex);
 
         int targetPlayerIndex = -1;
@@ -47,7 +48,34 @@ public class ActionSkills {
         player.getHand().replaceCard(myRow, myCol, opCard);
         target.getHand().replaceCard(opRow, opCol, myCard);
 
-        System.out.println("TRADE_CARD_WITH_PLAYER: échange effectué.");
+        System.out.println("TRADE_CARD_WITH_PLAYER: succès");
+    }
+    
+    /**
+     * implémentation de REPLACE_CARD_IN_HAND
+     * @param players liste de tous les joueurs 
+     * @param currentPlayerIndex index du joueur qui fait l'action
+     */
+    public static void replaceCardInHand(Scanner scanner, ArrayList<PlayerModel> players, int currentPlayerIndex) {
+        PlayerModel player = players.get(currentPlayerIndex);
+
+        int firstCardRow = askCardPos(scanner, "ligne 1e carte (0-2) : ", 0, 2);
+        int firstCardCol = askCardPos(scanner, "colonne 1e carte (0-3) : ", 0, 3);
+        int secondCardRow = askCardPos(scanner, "ligne 2e carte (0-2) : ", 0, 2);
+        int secondCardCol = askCardPos(scanner, "colonne 2e carte (0-3) : ", 0, 3);
+
+        CardModel firstCard = player.getHand().getCard(firstCardRow, firstCardCol);
+        CardModel secondCard = player.getHand().getCard(secondCardRow, secondCardCol);
+
+        if (firstCard == null || secondCard == null) {
+            System.out.println("Echange annulé: case vide.");
+            return;
+        }
+
+        player.getHand().replaceCard(secondCardRow, secondCardCol, firstCard);
+        player.getHand().replaceCard(firstCardRow, firstCardCol, secondCard);
+        System.out.println("REPLACE_CARD_IN_HAND: succès");
+        
     }
 
     /**
