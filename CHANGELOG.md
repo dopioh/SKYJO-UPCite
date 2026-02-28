@@ -162,3 +162,16 @@
 - Fix Manche 2 (Le premier tour commencait au joueur 0 et pas au joueuractuel + le bot ne jouait pas)
 
 - Fix Taille des cartes en fullScreen sur grand ecran
+
+## v.0.5: SPRINT 5
+---
+
+### Added
+- Les cartes actions suivantes : 
+    - **REPLACE_CARD_IN_HAND, PLAY_TWO_TURN, DRAW_THREE_CARD, PLAY_LAST_ACTION_IN_DEFAUSSE, ALL_PLAYERS_DROP_CARD, SPY_ONE_COLUMN**
+
+### Modified 
+- Refacto propre dans **GameTerminalModel.useAction()**
+
+### Fixed
+- Reimplémentation du système de carte action qui avait disparu lors d'un ancien refactoring
