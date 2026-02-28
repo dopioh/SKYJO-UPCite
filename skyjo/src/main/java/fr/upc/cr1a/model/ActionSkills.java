@@ -218,7 +218,26 @@ public class ActionSkills {
      * @param players liste de tous les joueurs 
      * @param currentPlayerIndex index du joueur qui fait l'action
      */
-    public static void allPlayersDropCard(Scanner scanner, ArrayList<PlayerModel> players, int currentPlayerIndex, GameManager gameManager) {
+    public static void allPlayersDropCard(Scanner scanner, ArrayList<PlayerModel> players, int currentPlayerIndex, GameManager gameManager, GameTerminalModel gtm) {
+        PlayerModel currentplayer = players.get(currentPlayerIndex);
+        for (PlayerModel joueur : players) {
+            if (joueur != currentplayer) {
+                gtm.showHand(joueur, false);
+                System.out.println("---------------------------------------------");
+                int cardRow = askCardPos(scanner, "ligne de la carte a jeter (0-2) : ", 0, 2);
+                int cardCol = askCardPos(scanner, "colonne de la carte a jeter (0-3) : ", 0, 3);
+
+                int cardToDropValue = joueur.getHand().getCard(cardRow, cardCol).getCardValue();
+                CardModel drawnCardFromPioche = gameManager.drawDeck();
+                drawnCardFromPioche.returnCard();
+                joueur.getHand().replaceCard(cardRow, cardCol, drawnCardFromPioche);
+
+                System.out.println(joueur.getName() + " remplace son " + cardToDropValue + " par un " + drawnCardFromPioche.getCardValue());
+                gameManager.getDiscardPile().addCardAtTop(new NumberCardModel(false, cardToDropValue, null, false));
+                System.out.println("---------------------------------------------");
+
+            }
+        }
     }
     
     

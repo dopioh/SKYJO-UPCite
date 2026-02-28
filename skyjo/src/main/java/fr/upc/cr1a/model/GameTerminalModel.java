@@ -26,7 +26,8 @@ public class GameTerminalModel {
         this.scanner = new Scanner(System.in);
     }
 
-    /**
+    /** 
+     * POURQUOI CETTE FONCTION EST ICI ???
      * Affiche la main d'un joueur dans le terminal
      * Si la carte est null = X; face cachée = ?; face visible = valeur
      * @param player Le joueur dont on affiche la main
@@ -220,41 +221,45 @@ public class GameTerminalModel {
         } while (actionIndex < 0 || actionIndex >= player.getActionHand().size());
 
         ActionType selectedAction = player.getActionHand().get(actionIndex);
-
+        ArrayList<PlayerModel> players = new ArrayList<>(gameManager.getPlayers());
+        boolean actionPlayed = true;
+        System.out.println("\n--------------------------------ACTION!--------------------------------\n");
+        
         switch (selectedAction) {
             case TRADE_CARD_WITH_PLAYER:
-                ActionSkills.tradeCardWithPlayer(scanner, new ArrayList<>(gameManager.getPlayers()), gameManager.getCurrentPlayerIndex());
-                player.getActionHand().remove(actionIndex);
-                gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, selectedAction));
+                ActionSkills.tradeCardWithPlayer(scanner, players, gameManager.getCurrentPlayerIndex());
                 break;
 
             case REPLACE_CARD_IN_HAND:
-                ActionSkills.replaceCardInHand(scanner, new ArrayList<>(gameManager.getPlayers()), gameManager.getCurrentPlayerIndex());
-                player.getActionHand().remove(actionIndex);
-                gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, selectedAction));
+                ActionSkills.replaceCardInHand(scanner, players, gameManager.getCurrentPlayerIndex());
                 break;
 
             case DRAW_THREE_CARD:
-                ActionSkills.drawThreeCard(scanner, new ArrayList<>(gameManager.getPlayers()), gameManager.getCurrentPlayerIndex(), gameManager);
-                player.getActionHand().remove(actionIndex);
-                gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, selectedAction));
+                ActionSkills.drawThreeCard(scanner, players, gameManager.getCurrentPlayerIndex(), gameManager);
                 break;
 
             case PLAY_LAST_ACTION_IN_DEFAUSSE:
-                ActionSkills.playLastActionInDefausse(scanner, new ArrayList<>(gameManager.getPlayers()), gameManager.getCurrentPlayerIndex(), gameManager);
-                player.getActionHand().remove(actionIndex);
-                gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, selectedAction));
+                ActionSkills.playLastActionInDefausse(scanner, players, gameManager.getCurrentPlayerIndex(), gameManager);
                 break;
 
             case SPY_ONE_COLUMN:
-                ActionSkills.spyOneColumn(scanner, new ArrayList<>(gameManager.getPlayers()), gameManager.getCurrentPlayerIndex(), gameManager);
-                player.getActionHand().remove(actionIndex);
-                gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, selectedAction));
+                ActionSkills.spyOneColumn(scanner, players, gameManager.getCurrentPlayerIndex(), gameManager);
+                break;
+            
+            case ALL_PLAYERS_DROP_CARD:
+                ActionSkills.allPlayersDropCard(scanner, players, gameManager.getCurrentPlayerIndex(), gameManager, this);
                 break;
             
             default:
                 System.out.println("Action non implémentée pour le moment.");
+                actionPlayed = false;
                 break;
+        }
+
+        if (actionPlayed) {
+            player.getActionHand().remove(actionIndex);
+            gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, selectedAction));
+            System.out.println("\n--------------------------------ACTION! (fin)----------------------------\n");
         }
     }
 
