@@ -162,3 +162,25 @@
 - Fix Manche 2 (Le premier tour commencait au joueur 0 et pas au joueuractuel + le bot ne jouait pas)
 
 - Fix Taille des cartes en fullScreen sur grand ecran
+
+## v.0.5: SPRINT 5
+---
+
+### Added
+
+- Main menu
+    - Fond d'écran
+    - Logo Skyjo
+    - Bouton compte en haut à droite (J button)
+    - Animation scale au survol du DoodleButton avec ease
+
+### Modified
+
+- Couleurs par défaut du DoodleButton remplacées
+
+- Boutons du Main Menu utilisent des images pour le fond
+
+- Animation scribble du DoodleButton améliorée et adapte au couleurs
+
+- Icônes des DoodleButton plus grandes et mieux centrées
+
