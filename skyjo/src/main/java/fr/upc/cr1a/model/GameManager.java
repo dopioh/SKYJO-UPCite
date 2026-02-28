@@ -30,6 +30,7 @@ public class GameManager {
     private GameState gameState;
     private TurnPhase turnPhase;
     private CardModel currentDrawCard;
+    private int extraTurnsRemaining = 0;  // nombre de tours supplémentaires pour PLAY_TWO_TURN
 
     private GameBoardModel gameBoardModel;
     private int initRevealCount = 0;
@@ -296,6 +297,12 @@ public class GameManager {
     *passe au joueur suivant
     */
     public void nextPlayer() {
+        // si le joueur a des tours supplémentaires
+        if (extraTurnsRemaining > 0) {
+            extraTurnsRemaining--;
+            return;
+        }
+        
         currentPlayerIndex++;
         //revenir au premier si le dernier joueur a joué
         if (currentPlayerIndex >= players.size()) {
@@ -305,6 +312,10 @@ public class GameManager {
         if (gameState == GameState.LAST_ROUND && currentPlayerIndex == firstPlayerToPlayIndex) {
             endRound();
         }
+    }
+
+    public void grantExtraTurn() {
+        this.extraTurnsRemaining = 2;
     }
 
     /*

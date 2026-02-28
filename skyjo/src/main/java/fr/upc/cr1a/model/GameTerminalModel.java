@@ -245,6 +245,10 @@ public class GameTerminalModel {
             case SPY_ONE_COLUMN:
                 ActionSkills.spyOneColumn(scanner, players, gameManager.getCurrentPlayerIndex(), gameManager);
                 break;
+
+            case PLAY_TWO_TURN:
+                ActionSkills.playTwoTurn(scanner, players, gameManager.getCurrentPlayerIndex(), gameManager);
+                break;
             
             case ALL_PLAYERS_DROP_CARD:
                 ActionSkills.allPlayersDropCard(scanner, players, gameManager.getCurrentPlayerIndex(), gameManager, this);

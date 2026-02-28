@@ -214,6 +214,17 @@ public class ActionSkills {
     }
 
     /**
+     * implémentation de PLAY_TWO_TURN
+     * @param players liste de tous les joueurs 
+     * @param currentPlayerIndex index du joueur qui fait l'action
+     * @param gameManager le gestionnaire de jeu
+     */
+    public static void playTwoTurn(Scanner scanner, ArrayList<PlayerModel> players, int currentPlayerIndex, GameManager gameManager) {
+        gameManager.grantExtraTurn();
+        System.out.println("PLAY_TWO_TURN: succès");
+    }
+
+    /**
      * implémentation de ALL_PLAYERS_DROP_CARD
      * @param players liste de tous les joueurs 
      * @param currentPlayerIndex index du joueur qui fait l'action
