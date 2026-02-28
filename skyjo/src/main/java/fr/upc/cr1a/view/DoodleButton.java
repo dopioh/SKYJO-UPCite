@@ -3,8 +3,8 @@ package fr.upc.cr1a.view;
 import fr.upc.cr1a.model.DoodleButtonModel;
 import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
+import fr.upc.cr1a.utils.ImageCache;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
@@ -73,27 +73,15 @@ public class DoodleButton extends JComponent {
         }
 
         // scribble selon couleur
-        try {
-            String scribblePath = "/Button/scribble_" + model.getButtonColor().name().toLowerCase() + ".png";
-            var stream = getClass().getResourceAsStream(scribblePath);
-            if (stream != null) scribbleImg = ImageIO.read(stream);
-        } catch (Exception e) {
-            scribbleImg = null;
-        }
+        String scribblePath = "/Button/scribble_" + model.getButtonColor().name().toLowerCase() + ".png";
+        scribbleImg = ImageCache.get(scribblePath);
 
         // icone a coté si existe
         loadIcon(model.getImagePath());
     }
 
     private void loadIcon(String path) {
-        icon = null;
-        if (path == null) return;
-        try {
-            var stream = getClass().getResourceAsStream(path);
-            if (stream != null) icon = ImageIO.read(stream);
-        } catch (Exception e) {
-            // ps grave on affiche pas
-        }
+        icon = ImageCache.get(path);
     }
 
     private void startAnimationTimer() {
@@ -220,10 +208,7 @@ public class DoodleButton extends JComponent {
     public void setText(String t) { model.setText(t); repaint(); }
     public void setImage(String path) { model.setImagePath(path); loadIcon(path); repaint(); }
     public void setBgImage(String path) {
-        try {
-            var stream = getClass().getResourceAsStream(path);
-            if (stream != null) bgImage = ImageIO.read(stream);
-        } catch (Exception e) { bgImage = null; }
+        bgImage = ImageCache.get(path);
         repaint();
     }
     
