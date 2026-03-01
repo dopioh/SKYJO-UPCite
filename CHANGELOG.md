@@ -172,6 +172,10 @@
 
 - Defausse des actions visibles de chaque tour
 
+- Le set de cartes est différent selon le mode de jeu (base ou action)
+
+- Possibilité d'activité ou desactivé le mode action
+
 
 ### Modified 
 - Refacto propre dans **GameTerminalModel.useAction()**
