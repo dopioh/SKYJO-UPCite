@@ -70,7 +70,7 @@ public class GameManager {
         }
 
         // Distribution depuis la pioche, cartes face cachée
-        this.deck = new PiocheModel();
+        this.deck = new PiocheModel(false);
         for (PlayerModel player : players) {
             for (int row = 0; row < 3; row++) {
                 for (int col = 0; col < 4; col++) {
@@ -120,7 +120,7 @@ public class GameManager {
 
         this.currentPlayerIndex = 0;
         this.firstPlayerToPlayIndex = 0; // le joueur qui commence la manche
-        this.deck = new PiocheModel();
+        this.deck = new PiocheModel(false);
         this.discardPile = new DefausseModel();
         this.currentDrawCard = null;
         this.gameState = GameState.WAITING_FOR_PLAYERS;
@@ -196,10 +196,10 @@ public class GameManager {
         
         currentPlayerIndex = 0;
         firstPlayerToPlayIndex = 0; // le joueur qui commence la manche
-        deck = new PiocheModel();
+        deck = new PiocheModel(this.gameWithAction);
         discardPile = new DefausseModel();
 
-        if (action) {
+        if (this.gameWithAction) {
             actionDeck = new PiocheActionModel();
             discardActionPile = new DefausseActionModel();
             ActionCardModel initActionCard = new ActionCardModel(true, ActionType.REPLACE_CARD_IN_HAND);
@@ -253,7 +253,7 @@ public class GameManager {
     */
    public void initializeGame(){
         //creer un deck deja melange
-        deck = new PiocheModel();
+        //deck = new PiocheModel(); // on a deja un deck initalisé dans le constructeur !
         
         firstPlayerToPlayIndex = currentPlayerIndex; 
         
