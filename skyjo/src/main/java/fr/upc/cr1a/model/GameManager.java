@@ -34,6 +34,8 @@ public class GameManager {
 
     private GameBoardModel gameBoardModel;
     private int initRevealCount = 0;
+
+    private boolean gameWithAction = false; // true si on utilise les actions
     
     /*
     *classe local enum pour gérer les états du jeu
@@ -158,7 +160,7 @@ public class GameManager {
     }
 
 
-    public GameManager(){
+    public GameManager(){ // pourquoi ?
        
     }
 
@@ -167,9 +169,10 @@ public class GameManager {
      * permet de d'initialiser les joueurs avec leurs noms
      * @param playersData
      */
-    public GameManager(List<PlayerData> playersData){
+    public GameManager(List<PlayerData> playersData, boolean action){
         //initialiser les joueurs
         this.players = new ArrayList<>();
+        this.gameWithAction = action;
         for (PlayerData player : playersData) {
             //créer un BotModel si c'est un bot, sinon créer un playdéfatuter
             if (player.isBot()) {
@@ -195,11 +198,13 @@ public class GameManager {
         firstPlayerToPlayIndex = 0; // le joueur qui commence la manche
         deck = new PiocheModel();
         discardPile = new DefausseModel();
-        actionDeck = new PiocheActionModel();
-        discardActionPile = new DefausseActionModel();
-        
-        ActionCardModel initActionCard = new ActionCardModel(true, ActionType.REPLACE_CARD_IN_HAND);
-        discardActionPile.addCardAtTop(initActionCard);
+
+        if (action) {
+            actionDeck = new PiocheActionModel();
+            discardActionPile = new DefausseActionModel();
+            ActionCardModel initActionCard = new ActionCardModel(true, ActionType.REPLACE_CARD_IN_HAND);
+            discardActionPile.addCardAtTop(initActionCard);
+        }
 
         currentDrawCard = null;
         gameState = GameState.WAITING_FOR_PLAYERS;
@@ -238,6 +243,10 @@ public class GameManager {
     public CardModel getCurrentDrawCard(){
         return currentDrawCard;
     }
+
+    public boolean withActionCard() {
+        return this.gameWithAction;
+    } 
     
     /**
     *Initialisation de la game 

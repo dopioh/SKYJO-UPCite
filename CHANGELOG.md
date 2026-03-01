@@ -170,6 +170,9 @@
 - Les cartes actions suivantes : 
     - **REPLACE_CARD_IN_HAND, PLAY_TWO_TURN, DRAW_THREE_CARD, PLAY_LAST_ACTION_IN_DEFAUSSE, ALL_PLAYERS_DROP_CARD, SPY_ONE_COLUMN**
 
+- Defausse des actions visibles de chaque tour
+
+
 ### Modified 
 - Refacto propre dans **GameTerminalModel.useAction()**
 

@@ -68,7 +68,7 @@ public class GameLauncher {
         System.out.println("------------------------------------------------------------------");
         
         //créer le game manager
-        gameManager = new GameManager(playerNames);
+        gameManager = new GameManager(playerNames, false);
         
         //le modèle terminal et lancer la partie
         GameTerminalModel terminalModel = new GameTerminalModel(gameManager);
