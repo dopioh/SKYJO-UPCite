@@ -176,9 +176,23 @@
 
 - Possibilité d'activité ou desactivé le mode action
 
+- Main menu
+    - Fond d'écran
+    - Logo Skyjo
+    - Bouton compte en haut à droite (J button)
+    - Animation scale au survol du DoodleButton avec ease
 
 ### Modified 
 - Refacto propre dans **GameTerminalModel.useAction()**
 
+- Couleurs par défaut du DoodleButton remplacées
+
+- Boutons du Main Menu utilisent des images pour le fond
+
+- Animation scribble du DoodleButton améliorée et adapte au couleurs
+
+- Icônes des DoodleButton plus grandes et mieux centrées
+
 ### Fixed
 - Reimplémentation du système de carte action qui avait disparu lors d'un ancien refactoring
+
