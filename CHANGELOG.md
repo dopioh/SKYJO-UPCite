@@ -167,6 +167,14 @@
 ---
 
 ### Added
+- Les cartes actions suivantes : 
+    - **REPLACE_CARD_IN_HAND, PLAY_TWO_TURN, DRAW_THREE_CARD, PLAY_LAST_ACTION_IN_DEFAUSSE, ALL_PLAYERS_DROP_CARD, SPY_ONE_COLUMN**
+
+- Defausse des actions visibles de chaque tour
+
+- Le set de cartes est différent selon le mode de jeu (base ou action)
+
+- Possibilité d'activité ou desactivé le mode action
 
 - Main menu
     - Fond d'écran
@@ -174,7 +182,8 @@
     - Bouton compte en haut à droite (J button)
     - Animation scale au survol du DoodleButton avec ease
 
-### Modified
+### Modified 
+- Refacto propre dans **GameTerminalModel.useAction()**
 
 - Couleurs par défaut du DoodleButton remplacées
 
@@ -183,4 +192,7 @@
 - Animation scribble du DoodleButton améliorée et adapte au couleurs
 
 - Icônes des DoodleButton plus grandes et mieux centrées
+
+### Fixed
+- Reimplémentation du système de carte action qui avait disparu lors d'un ancien refactoring
 
