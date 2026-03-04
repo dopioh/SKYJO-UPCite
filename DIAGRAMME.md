@@ -119,7 +119,7 @@ Gère la logique du jeu.
     * `Rank`: Enum des rangs (OQTF, NOPAPER, A4, NEWSPAPAER, PLASTIC, PAPYRUS, PARCHEMIN, BULLETIN, CESTLACARTE, DEGREES, BLACKCARD, WORMS)
         * Méthode : **findRankByElo()**
     * `ActionSkills` Implémente les capacités des cartes actions
-        - **Methode** : tradeCardWithPlayer()
+        - **Methode** : tradeCardWithPlayer(), replaceCardInHand(), drawThreeCard(), playLastActionInDefausse(), spyOneColumn(), allPlayersDropCard(), playTwoTurn(), askCardPos()
 
 * **Audio** :
     * `AudioManager`: Gère la musique et les effets sonores
@@ -150,7 +150,7 @@ tAudioManager()**
         * Méthode : **getBackButton()**, **getTabJeu()**, **getTabAudio()**, **getTabAutres()**, **createTabButton()**, **createCardPanel()**
 
 * **GameBoardView** : Panel pour afficher le plateau de jeu
-    * Méthode : **initComponents()**, **showPlayerscards()**, **getCardImagePath()**, **resizeLayers()**, **showCursorCard()**, **hideCursorCard()**
+    * Méthode : **initComponents()**, **showPlayerscards()**, **getCardImagePath()**, **resizeLayers()**, **showCursorCard()**, **hideCursorCard()**, **updateCardDisplay()**, **updateDiscardOnly()**, **updateActionCardDisplay()**, **updateActionDiscardOnly()**
 
 * **PlayerPreviewPanel** : Panel pour afficher les cartes des autres joueurs
     * Méthode : **showOtherPlayerHand**, **getCardImagePath()**
@@ -186,6 +186,9 @@ Gère toutes les entrées du joueur avec l'ordinateur
         * **handleBotDrawDecision()**
         * **handleBotAfterDraw()**
         * **handleBotAfterTakeDiscard()**
+
+* **GameBoardController** : 
+    * Méthode : **updateAllDecksDisplay()**
 ## UTILS
 
 Classes utilitaires

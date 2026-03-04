@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
+import fr.upc.cr1a.model.ActionCardModel;
 import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.PlayerHandModel;
 import fr.upc.cr1a.model.PlayerModel;
@@ -13,7 +14,7 @@ import fr.upc.cr1a.model.PlayerModel;
 /**
  * Vue graphique du plateau de jeu avec affichage des cartes et boutons joueurs
  * 
- * @author Mei, Ian, Hugo
+ * @author Mei, Ian, Hugo, Nassim
  */
 public class GameBoardView extends JPanel {
 
@@ -47,6 +48,11 @@ public class GameBoardView extends JPanel {
     // Affichage des cartes pilées
     private CardButton btnPioche;
     private CardButton btnDefausse;
+
+    private CardButton btnPiocheAction;
+    private CardButton btnDefausseAction;
+    JLabel labPiocheAction; // J'ai besoin de créer les labels ici pour setActionDecksVisible()
+    JLabel labDefausseAction;
 
     // a qui appartient chaque deck
     private JLabel playerName;
@@ -197,35 +203,79 @@ public class GameBoardView extends JPanel {
         GridBagConstraints gbcRight = new GridBagConstraints();
         gbcRight.gridx = 0;
         gbcRight.fill = GridBagConstraints.NONE;
-        gbcRight.insets = new Insets(10, 10, 10, 10);
+        gbcRight.insets = new Insets(5, 5, 5, 5);
 
         btnPioche = new CardButton();
         btnDefausse = new CardButton();
+        btnPiocheAction = new CardButton();
+        btnDefausseAction = new CardButton();
         btnPioche.setAnimationEnabled(false);
         btnDefausse.setAnimationEnabled(false);
+        btnPiocheAction.setAnimationEnabled(false);
+        btnDefausseAction.setAnimationEnabled(false);
 
-        Dimension bigCardSize = new Dimension(140, 200); // AJUSTER ICI SI CA VOUS PLAIT PAS
+        Dimension bigCardSize = new Dimension(100, 140); // AJUSTER ICI SI CA VOUS PLAIT PAS // oui ça me plait pas
 
         btnPioche.setPreferredSize(bigCardSize);
         btnDefausse.setPreferredSize(bigCardSize);
+        btnPiocheAction.setPreferredSize(bigCardSize);
+        btnDefausseAction.setPreferredSize(bigCardSize);
 
         btnPioche.setMinimumSize(bigCardSize);
         btnDefausse.setMinimumSize(bigCardSize);
+        btnPiocheAction.setMinimumSize(bigCardSize);
+        btnDefausseAction.setMinimumSize(bigCardSize);
+
 
         JLabel labPioche = new JLabel("Pioche", SwingConstants.CENTER);
         JLabel labDefausse = new JLabel("Défausse", SwingConstants.CENTER);
+        labPiocheAction = new JLabel("Pioche A", SwingConstants.CENTER);
+        labDefausseAction = new JLabel("Défausse A", SwingConstants.CENTER);
 
-        // Pioche
+
+        // premiere ligne -> defausse et pioche 
+        gbcRight.gridx = 0;
         gbcRight.gridy = 0;
         cardStack.add(labPioche, gbcRight);
+        
+        gbcRight.gridx = 1;
+        gbcRight.gridy = 0;
+        cardStack.add(labDefausse, gbcRight);
+        
+        gbcRight.gridx = 0;
         gbcRight.gridy = 1;
         cardStack.add(btnPioche, gbcRight);
-
-        // Défausse
-        gbcRight.gridy = 2;
-        cardStack.add(labDefausse, gbcRight);
-        gbcRight.gridy = 3;
+        
+        gbcRight.gridx = 1;
+        gbcRight.gridy = 1;
         cardStack.add(btnDefausse, gbcRight);
+
+        // deuxieme ligne -> defausse et pioche action
+        gbcRight.gridx = 0;
+        gbcRight.gridy = 2;
+        cardStack.add(labPiocheAction, gbcRight);
+        
+        gbcRight.gridx = 1;
+        gbcRight.gridy = 2;
+        cardStack.add(labDefausseAction, gbcRight);
+        
+        gbcRight.gridx = 0;
+        gbcRight.gridy = 3;
+        cardStack.add(btnPiocheAction, gbcRight);
+        
+        gbcRight.gridx = 1;
+        gbcRight.gridy = 3;
+        cardStack.add(btnDefausseAction, gbcRight);
+
+        // Initialiser les boutons d'action comme "vide" par défaut
+        btnPiocheAction.setText("vide");
+        btnDefausseAction.setText("vide");
+        
+        // Masquer les pioches d'actions par défaut (visibles seulement en mode action)
+        btnPiocheAction.setVisible(false);
+        btnDefausseAction.setVisible(false);
+        labPiocheAction.setVisible(false);
+        labDefausseAction.setVisible(false);
 
         zonePlateau.add(cardStack, BorderLayout.EAST);
 
@@ -298,6 +348,32 @@ public class GameBoardView extends JPanel {
         if (card.isFaceDown()) {
             return "/cartes/carteDos.png";
         }
+
+        if (card instanceof ActionCardModel) {
+            ActionCardModel actionCard = (ActionCardModel) card;
+            switch (actionCard.getType()) {
+                case TRADE_CARD_WITH_PLAYER:
+                    return "/cartes/carteActionTrade.png";
+                case REPLACE_CARD_IN_HAND:
+                    return "/cartes/carteActionReplace.png";
+                case PLAY_TWO_TURN:
+                    return "/cartes/carteActionTwoTurn.png";
+                case DRAW_THREE_CARD:
+                    return "/cartes/carteActionDraw3.png";
+                case PLAY_LAST_ACTION_IN_DEFAUSSE:
+                    return "/cartes/carteActionReplay.png";
+                case DEFENSE:
+                    return "/cartes/carteActionDefense.png";
+                case ALL_PLAYERS_DROP_CARD:
+                    return "/cartes/carteActionDrop.png";
+                case SPY_ONE_COLUMN:
+                    return "/cartes/carteActionSpy.png";
+                default:
+                    return "/cartes/carteDos.png";
+            }
+        }
+        
+        // Si c'est une carte nombre normale
         int val = card.getCardValue();
         if (val == -2)
             return "/cartes/carteMoins2.png";
@@ -415,6 +491,25 @@ public class GameBoardView extends JPanel {
         return btnDefausse;
     }
 
+    public CardButton getBtnPiocheAction() {
+        return btnPiocheAction;
+    }
+
+    public CardButton getBtnDefausseAction() {
+        return btnDefausseAction;
+    }
+
+    /**
+     * Affiche ou masque les pioches d'actions selon le mode de jeu
+     * @param visible true pour afficher
+     */
+    public void setActionDecksVisible(boolean visible) {
+        btnPiocheAction.setVisible(visible);
+        btnDefausseAction.setVisible(visible);
+        labPiocheAction.setVisible(visible);
+        labDefausseAction.setVisible(visible);
+    }
+
     public void setActionGuide(String message) {
         actionGuide.setText(message);
     }
@@ -479,6 +574,46 @@ public class GameBoardView extends JPanel {
         zonePlateau.repaint();
     }
 
+    /**
+     * Mets à jour l'affichage des cartes de la pioche et de la défausse d'actions
+     * 
+     * @param topActionDiscard   Carte du haut de la défausse d'actions
+     * @param drawActionHasCards
+     */
+    public void updateActionCardDisplay(CardModel topActionDiscard, boolean drawActionHasCards) {
+        // Pioche Action
+        if (drawActionHasCards) {
+            btnPiocheAction.setText("");
+            btnPiocheAction.setCardImage("/cartes/carteDos.png");
+        } else {
+            btnPiocheAction.clearImage();
+            btnPiocheAction.setText("vide");
+        }
+
+        // Défausse Action
+        if (topActionDiscard == null) {
+            btnDefausseAction.clearImage();
+            btnDefausseAction.setText("vide");
+        } else {
+            btnDefausseAction.setText("");
+            btnDefausseAction.setCardImage(getCardImagePath(topActionDiscard));
+        }
+        zonePlateau.revalidate();
+        zonePlateau.repaint();
+    }
+
+    public void updateActionDiscardOnly(CardModel topActionDiscard) {
+        if (topActionDiscard == null) {
+            btnDefausseAction.clearImage();
+            btnDefausseAction.setText("vide");
+        } else {
+            btnDefausseAction.setText("");
+            btnDefausseAction.setCardImage(getCardImagePath(topActionDiscard));
+        }
+        zonePlateau.revalidate();
+        zonePlateau.repaint();
+    }
+
     // a redimenssionner dynamiquement plus tard ?
     private void resizeCards() {
         int sizeH = this.getHeight();
@@ -513,6 +648,8 @@ public class GameBoardView extends JPanel {
 
         btnPioche.setCardSize(largeurGrandeCarte, hauteurGrandeCarte);
         btnDefausse.setCardSize(largeurGrandeCarte, hauteurGrandeCarte);
+        btnPiocheAction.setCardSize(largeurGrandeCarte, hauteurGrandeCarte);
+        btnDefausseAction.setCardSize(largeurGrandeCarte, hauteurGrandeCarte);
 
         zonePlateau.revalidate();
         zonePlateau.repaint();
