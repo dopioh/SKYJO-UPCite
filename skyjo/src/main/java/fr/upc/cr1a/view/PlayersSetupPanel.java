@@ -57,6 +57,7 @@ public class PlayersSetupPanel extends JPanel {
         actionModeToggle = new JToggleButton("Mode Skyjo Action");
         actionModeToggle.setAlignmentX(Component.LEFT_ALIGNMENT);
         actionModeToggle.setFocusPainted(false);
+        actionModeToggle.setSelected(false);
 
         optionsPanel.add(optionsTitle);
         optionsPanel.add(Box.createVerticalStrut(15));
