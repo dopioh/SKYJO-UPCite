@@ -25,11 +25,34 @@ public class PlayersSetupPanel extends JPanel {
         center.setLayout(new BorderLayout());
         center.setOpaque(false);
 
-        JPanel configTop = new JPanel();
+        JPanel configTop = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 10));
         configTop.setOpaque(false);
-        configTop.add(new JLabel("Nombre de joueurs : "));
-        spinner = new JSpinner(new SpinnerNumberModel(2, 2, 8, 1));
+        configTop.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
 
+        JLabel playerCountLabel = new JLabel("Nombre de joueurs (1 à 8) :");
+        playerCountLabel.setFont(new Font("Arial", Font.BOLD, 15));
+
+        spinner = new JSpinner(new SpinnerNumberModel(2, 2, 8, 1));
+        spinner.setPreferredSize(new Dimension(70, 32));
+        spinner.setFont(new Font("Arial", Font.BOLD, 14));
+        spinner.setBorder(BorderFactory.createLineBorder(new Color(190, 190, 190), 1));
+
+        JSpinner.DefaultEditor editor = (JSpinner.DefaultEditor) spinner.getEditor();
+        JFormattedTextField textField = editor.getTextField();
+        textField.setHorizontalAlignment(JTextField.CENTER);
+        textField.setFont(new Font("Arial", Font.BOLD, 14));
+        textField.setBorder(BorderFactory.createEmptyBorder());
+        textField.setBackground(Color.WHITE);
+        for(Component comp : spinner.getComponents()){
+            if (comp instanceof JButton button) {
+                button.setFocusPainted(false);
+                button.setBackground(new Color(245, 245, 245));
+                button.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+                button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
+        }
+
+        configTop.add(playerCountLabel);
         configTop.add(spinner);
         center.add(configTop, BorderLayout.NORTH);
 
@@ -48,8 +71,12 @@ public class PlayersSetupPanel extends JPanel {
         // Panel a droite du container
         JPanel optionsPanel = new JPanel();
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
-        optionsPanel.setOpaque(false);
-        optionsPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        optionsPanel.setOpaque(true);
+        optionsPanel.setBackground(new Color(245, 245, 245));
+        optionsPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200,200,200)),
+                BorderFactory.createEmptyBorder(15,15,15,15)
+        ));
 
         JLabel optionsTitle = new JLabel("Options");
         optionsTitle.setFont(new Font("Arial", Font.BOLD, 18));
