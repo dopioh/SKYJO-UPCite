@@ -17,11 +17,11 @@ public class GameLauncher {
     
     public GameLauncher() {
         // Fenetre du jeu
-        //new Frame();
+        new Frame();
 
         // Jeu dams le Terminal 
-        scanner = new Scanner(System.in);
-        startGame();
+        // scanner = new Scanner(System.in);
+        // startGame();
     }
     
     /**

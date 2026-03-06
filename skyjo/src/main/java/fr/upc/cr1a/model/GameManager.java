@@ -57,43 +57,6 @@ public class GameManager {
         TURN_ENDED                  // tour terminé
     }
 
-    /**
-     * Constructeur qui doit etre appeler pour lancer une partie
-     * Dans la version swing
-    */
-    public GameManager(Frame frame){
-        System.out.println("GameManager Called");
-
-        this.players = new ArrayList<>(); // il faudra initialiser les joueurs a un moment
-        for (int i = 1 ; i <= 3 ; i++){   // juste pour les tests avec tous les joueurs
-            players.add(new PlayerModel(new PlayerData("Joueur " + i)));
-        }
-
-        // Distribution depuis la pioche, cartes face cachée
-        this.deck = new PiocheModel(false);
-        for (PlayerModel player : players) {
-            for (int row = 0; row < 3; row++) {
-                for (int col = 0; col < 4; col++) {
-                    CardModel card = deck.getTopCard();
-                    deck.removeCardAtTop();
-                    player.getHand().placeCard(row, col, card);
-                }
-            }
-        }
-
-        this.discardPile = new DefausseModel();
-        CardModel firstDiscard = deck.getTopCard();
-        deck.removeCardAtTop();
-        if (firstDiscard.isFaceDown()) firstDiscard.returnCard();
-        discardPile.addCardAtTop(firstDiscard);
-
-        this.gameBoardModel = new GameBoardModel(players, frame, this);
-        GameBoardView view = this.gameBoardModel.getGameBoardView();
-        view.updateCardDisplay(discardPile.getTopCard(), deck.stackSize() > 0);
-        frame.add(view, "GAME");
-        frame.showPanel("GAME");
-    }
-
     public GameManager(Frame frame, List<PlayerData> playersData){
         //Creation des joueurs 
         this.players = new ArrayList<>();
