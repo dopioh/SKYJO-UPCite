@@ -188,28 +188,12 @@ public class PlayersSetupPanel extends JPanel {
                     BorderFactory.createLineBorder(new Color(200,200,200)),
                     BorderFactory.createEmptyBorder(4,8,4,8)
             ));
-            nameField.setText("Entrez un nom");
-            nameField.setForeground(Color.GRAY);
+            nameField.setText("Joueur " + playerIndex);
+            nameField.setForeground(Color.BLACK);
             nameField.addMouseListener(new MouseAdapter() {
+                @Override
                 public void mouseClicked(MouseEvent e) {
-                    if (nameField.getText().equals("Entrez un nom")) {
-                        nameField.setText("");
-                    }
-                }
-            });
-
-            nameField.addFocusListener(new java.awt.event.FocusAdapter() {
-                public void focusGained(java.awt.event.FocusEvent e) {
-                    if (nameField.getText().equals("Entrez un nom")) {
-                        nameField.setText("");
-                        nameField.setForeground(Color.BLACK);
-                    }
-                }
-                public void focusLost(java.awt.event.FocusEvent e) {
-                    if (nameField.getText().isEmpty()) {
-                        nameField.setText("Entrez un nom");
-                        nameField.setForeground(Color.GRAY);
-                    }
+                    nameField.setText("");
                 }
             });
 

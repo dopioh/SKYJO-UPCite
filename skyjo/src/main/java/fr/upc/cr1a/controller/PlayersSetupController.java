@@ -54,10 +54,6 @@ public class PlayersSetupController {
                     players.add(new PlayerData(botName, true, type));
                 } else {
                     String name = nameField.getText().trim();
-                    if (name.isEmpty()) {
-                        JOptionPane.showMessageDialog(frame, "Tu as pas mit de pseudo");
-                        return;
-                    }
                     players.add(new PlayerData(name));
                 }
             }
