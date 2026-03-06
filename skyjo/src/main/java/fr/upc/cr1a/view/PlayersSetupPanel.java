@@ -2,6 +2,8 @@ package fr.upc.cr1a.view;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class PlayersSetupPanel extends JPanel {
 
@@ -116,15 +118,13 @@ public class PlayersSetupPanel extends JPanel {
         btnBack = new JButton("Retour");
         btnLaunch = new JButton("Lancer");
 
+        //UX Bouton , a modifier plus tard pour le lier avec la DA du reste
         btnBack.setPreferredSize(new Dimension(120, 36));
         btnLaunch.setPreferredSize(new Dimension(140, 36));
-
         btnBack.setFont(new Font("Arial", Font.PLAIN, 14));
         btnLaunch.setFont(new Font("Arial", Font.BOLD, 14));
-
         btnBack.setFocusPainted(false);
         btnLaunch.setFocusPainted(false);
-
         btnBack.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnLaunch.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnBack.setBackground(new Color(240, 240, 240));
@@ -180,7 +180,39 @@ public class PlayersSetupPanel extends JPanel {
             row.setBackground(new Color(245, 245, 245));
 
             JLabel label = new JLabel("Joueur " + playerIndex + " : ");
-            JTextField nameField = new JTextField(10);
+            
+            JTextField nameField = new JTextField(12);
+            nameField.setPreferredSize(new Dimension(120, 30));
+            nameField.setFont(new Font("Arial", Font.PLAIN, 14));
+            nameField.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(200,200,200)),
+                    BorderFactory.createEmptyBorder(4,8,4,8)
+            ));
+            nameField.setText("Entrez un nom");
+            nameField.setForeground(Color.GRAY);
+            nameField.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+                    if (nameField.getText().equals("Entrez un nom")) {
+                        nameField.setText("");
+                    }
+                }
+            });
+
+            nameField.addFocusListener(new java.awt.event.FocusAdapter() {
+                public void focusGained(java.awt.event.FocusEvent e) {
+                    if (nameField.getText().equals("Entrez un nom")) {
+                        nameField.setText("");
+                        nameField.setForeground(Color.BLACK);
+                    }
+                }
+                public void focusLost(java.awt.event.FocusEvent e) {
+                    if (nameField.getText().isEmpty()) {
+                        nameField.setText("Entrez un nom");
+                        nameField.setForeground(Color.GRAY);
+                    }
+                }
+            });
+
             JCheckBox botCheck = new JCheckBox("Bot");
             JComboBox<String> botType = new JComboBox<>(new String[]{"bot", "botRow", "botLow"});
             botType.setEnabled(false);

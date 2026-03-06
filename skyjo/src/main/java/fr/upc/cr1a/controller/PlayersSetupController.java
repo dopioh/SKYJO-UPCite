@@ -33,6 +33,9 @@ public class PlayersSetupController {
             Component[] rows = view.getPlayersContainer().getComponents();
 
             for (Component comp : rows) {
+                if (!(comp instanceof JPanel)) {
+                    continue;
+                }
                 JPanel row = (JPanel) comp;
                 JTextField nameField = null;
                 JCheckBox botCheck = null;
@@ -52,7 +55,7 @@ public class PlayersSetupController {
                 } else {
                     String name = nameField.getText().trim();
                     if (name.isEmpty()) {
-                        JOptionPane.showMessageDialog(frame, "Tu as pas mit de pseudo !");
+                        JOptionPane.showMessageDialog(frame, "Tu as pas mit de pseudo");
                         return;
                     }
                     players.add(new PlayerData(name));
