@@ -116,6 +116,20 @@ public class PlayersSetupPanel extends JPanel {
         btnBack = new JButton("Retour");
         btnLaunch = new JButton("Lancer");
 
+        btnBack.setPreferredSize(new Dimension(120, 36));
+        btnLaunch.setPreferredSize(new Dimension(140, 36));
+
+        btnBack.setFont(new Font("Arial", Font.PLAIN, 14));
+        btnLaunch.setFont(new Font("Arial", Font.BOLD, 14));
+
+        btnBack.setFocusPainted(false);
+        btnLaunch.setFocusPainted(false);
+
+        btnBack.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnLaunch.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnBack.setBackground(new Color(240, 240, 240));
+        btnLaunch.setBackground(new Color(230, 230, 230));
+
         bottom.add(btnBack);
         bottom.add(btnLaunch);
 
