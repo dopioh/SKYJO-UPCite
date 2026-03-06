@@ -43,6 +43,7 @@ public class PlayersSetupPanel extends JPanel {
 
         JScrollPane scroll = new JScrollPane(playersContainer);
         scroll.setBorder(null);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
 
         // Panel a droite du container
         JPanel optionsPanel = new JPanel();
@@ -58,9 +59,16 @@ public class PlayersSetupPanel extends JPanel {
         actionModeToggle.setAlignmentX(Component.LEFT_ALIGNMENT);
         actionModeToggle.setFocusPainted(false);
 
+        JLabel actionDescription = new JLabel("Ajoute des cartes spéciales et des effets supplémentaires");
+        actionDescription.setFont(new Font("Arial", Font.PLAIN, 12));
+        actionDescription.setForeground(new Color(90, 90, 90));
+        actionDescription.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         optionsPanel.add(optionsTitle);
         optionsPanel.add(Box.createVerticalStrut(15));
         optionsPanel.add(actionModeToggle);
+        optionsPanel.add(Box.createVerticalStrut(8));
+        optionsPanel.add(actionDescription);
         optionsPanel.add(Box.createVerticalGlue());
 
         // Trait de separtation
@@ -121,8 +129,14 @@ public class PlayersSetupPanel extends JPanel {
         playersContainer.removeAll();
         for (int i = 1; i <= count; i++) {
             final int playerIndex = i;
-            JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT));
-            row.setOpaque(false);
+            JPanel row = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 11));
+            row.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(200,200,200)),
+                    BorderFactory.createEmptyBorder(8,8,8,8)
+            ));
+            row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
+            row.setOpaque(true);
+            row.setBackground(new Color(245, 245, 245));
 
             JLabel label = new JLabel("Joueur " + playerIndex + " : ");
             JTextField nameField = new JTextField(10);
@@ -145,6 +159,7 @@ public class PlayersSetupPanel extends JPanel {
             row.add(botCheck);
             row.add(botType);
             playersContainer.add(row);
+            playersContainer.add(Box.createVerticalStrut(2)); // Mini espacement
         }
         playersContainer.revalidate();
         playersContainer.repaint();
