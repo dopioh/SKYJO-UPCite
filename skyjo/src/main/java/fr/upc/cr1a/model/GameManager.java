@@ -122,11 +122,6 @@ public class GameManager {
         frame.showPanel("GAME");
     }
 
-
-    public GameManager(){ // pourquoi ?
-       
-    }
-
     /**
      * constructeur avec les noms des joueurs
      * permet de d'initialiser les joueurs avec leurs noms
