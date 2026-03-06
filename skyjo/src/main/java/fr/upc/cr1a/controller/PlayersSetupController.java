@@ -1,5 +1,6 @@
 package fr.upc.cr1a.controller;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,7 @@ public class PlayersSetupController {
     public PlayersSetupController(Frame frame, PlayersSetupPanel view) {
         this.frame = frame;
         this.view = view;
-
+        addRowHoverEffect();
         view.getBtnBack().addActionListener(e -> frame.showPanel("MENU"));
 
         view.getBtnLaunch().addActionListener(e -> {
@@ -70,10 +71,32 @@ public class PlayersSetupController {
         view.getSpinner().addChangeListener(e -> {
             int value = (int) view.getSpinner().getValue();
             view.rebuildPlayerRows(value);
+            addRowHoverEffect();
         });
 
         view.getActionModeToggle().addActionListener(e -> {
             //Nassim Ici
         });
+    }
+
+    private void addRowHoverEffect() {
+        Component[] rows = view.getPlayersContainer().getComponents();
+        for (Component comp : rows) {
+            if (!(comp instanceof JPanel row)) {
+                continue;
+            }
+            Color normalColor = new Color(245, 245, 245);
+            Color hoverColor = new Color(230, 230, 230);
+            row.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseEntered(java.awt.event.MouseEvent e) {
+                    row.setBackground(hoverColor);
+                }
+                @Override
+                public void mouseExited(java.awt.event.MouseEvent e) {
+                    row.setBackground(normalColor);
+                }
+            });
+        }
     }
 }

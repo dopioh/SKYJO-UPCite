@@ -193,7 +193,11 @@ public class PlayersSetupPanel extends JPanel {
             nameField.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    nameField.setText("");
+                    if (nameField.getText().equals("Joueur " + playerIndex)) {
+                        nameField.setText("");
+                    } else {
+                        nameField.selectAll();
+                    }
                 }
             });
 
