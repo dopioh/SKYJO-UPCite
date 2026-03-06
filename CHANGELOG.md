@@ -205,8 +205,9 @@
 - `AnimLoop` : système centralisé d'animation
     - Un seul Timer à 60fps pour toute le jeu
     - Delta time pour que ça soit pareil sur n'importe quel ordi
-    - `AnimLoop.add(key, task)` / `AnimLoop.remove(key)`
     - Démarrage et arrêt automatiques selon le nombre de tâches enregistrées
+    - Pas besoin de toucher au code de AnimLoop pour l'utiliser, contrairement a Gameloop de worms avec un utilisation simple:
+      - `AnimLoop.add(this, animation)` / `AnimLoop.remove(this)` (voir le javadoc dans AnimLoop pour l'utilisation)
 
 ### Modified
 
