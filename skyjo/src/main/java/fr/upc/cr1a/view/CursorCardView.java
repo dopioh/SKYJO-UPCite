@@ -11,8 +11,8 @@ import java.util.Map;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
-import javax.swing.Timer;
 
+import fr.upc.cr1a.model.AnimLoop;
 import fr.upc.cr1a.utils.ImageCache;
 
 /**
@@ -34,7 +34,6 @@ public class CursorCardView {
     private final JComponent gameboardview;
     private final Overlay overlay;
     private final Map<String, BufferedImage> imageCropCache = new HashMap<>(); // nouveau imageCache pour les cartes croppées (ne sert que pour CursorCard)
-    private final Timer followTimer;
 
     private BufferedImage image;
     private int x;
@@ -44,7 +43,6 @@ public class CursorCardView {
     public CursorCardView(JComponent gameboardview) {
         this.gameboardview = gameboardview;
         this.overlay = new Overlay();
-        this.followTimer = new Timer(16, e -> updatePosition());
     }
 
     public JComponent getOverlay() {
@@ -64,16 +62,14 @@ public class CursorCardView {
         this.image = img;
         this.visible = true;
         updatePosition();
-        if (!followTimer.isRunning()) {
-            followTimer.start();
-        }
+        AnimLoop.add(this, dt -> updatePosition());
         overlay.repaint();
     }
 
     public void hideCard() {
         visible = false;
         image = null;
-        followTimer.stop();
+        AnimLoop.remove(this);
         overlay.repaint();
     }
 

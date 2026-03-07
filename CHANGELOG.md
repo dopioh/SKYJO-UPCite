@@ -196,3 +196,25 @@
 ### Fixed
 - Reimplémentation du système de carte action qui avait disparu lors d'un ancien refactoring
 
+
+## v.0.6: SPRINT 6
+---
+
+### Added
+
+- `AnimLoop` : système centralisé d'animation
+    - Un seul Timer à 60fps pour toute le jeu
+    - Delta time pour que ça soit pareil sur n'importe quel ordi
+    - Démarrage et arrêt automatiques selon le nombre de tâches enregistrées
+    - Pas besoin de toucher au code de AnimLoop pour l'utiliser, contrairement a Gameloop de worms avec un utilisation simple:
+      - `AnimLoop.add(this, animation)` / `AnimLoop.remove(this)` (voir le javadoc dans AnimLoop pour l'utilisation)
+
+### Modified
+
+- Migration vers `AnimLoop` : `DoodleButton`, `NextRoundPanel`, `PlayerPreviewPanel`, `CursorCardView`, `CardButton`
+
+- Vitesse de fade pour l'écran "prochaine joueur" accéléré pour plus de fluidité
+
+### Fixed
+
+- Fluidité globale : Le jeu ne lag plus sur Windows en passant de 12 repaint a un seul pour l'animation carte flottante ainsi que tout les autres animations qui sont maintenant geré avec `AnimLoop`

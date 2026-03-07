@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import javax.swing.*;
 
+import fr.upc.cr1a.model.AnimLoop;
 import fr.upc.cr1a.utils.ImageCache;
 
 /**
@@ -22,13 +23,14 @@ public class CardButton extends JButton {
 
 
     private static final java.util.HashMap<String, BufferedImage> imageCache = new java.util.HashMap<>();
+    private static final java.util.LinkedHashSet<CardButton> cartesAnimees = new java.util.LinkedHashSet<>(); //LinkedHashSet = pas de doublon, garde l'ordre de arrivée pour eviter des bugs
 
     private BufferedImage cardImage;
 
     // animation d'une carte
     private static final int FloatWide = 2; // largeur du flottement max
     private static final int FloatHigh = 3; // hauteur du flottement max
-    private static final double FloatSpeed = 0.03; // vitesse du flottement
+    private static final double FloatSpeed = 0.015; // vitesse du flottement
     private static final double ScaleSmoothness = 0.12; // vitesse du resize
     private double phase = Math.random() * Math.PI * 2.0; // chaque carte a une vitesse differente 
     private double floatOffsetX = 0.0; // position x au debut du flottement
@@ -36,18 +38,6 @@ public class CardButton extends JButton {
     private double scale = 1.0;
     private double targetScale = 1.0;
     private boolean animationEnabled = false;
-    
-    private final Timer animationTimer = new Timer(16, e -> {
-        if (!animationEnabled) {
-            ((Timer) e.getSource()).stop();
-            return;
-        }
-        phase += FloatSpeed;
-        floatOffsetX = Math.cos(phase) * FloatWide;
-        floatOffsetY = Math.sin(phase) * FloatHigh;
-        scale += (targetScale - scale) * ScaleSmoothness;
-        repaint();
-    });
 
 
     public CardButton() {
@@ -152,9 +142,6 @@ public class CardButton extends JButton {
             return;
         }
         targetScale = newTarget;
-        if (!animationTimer.isRunning()) {
-            animationTimer.start();
-        }
     }
 
     /**
@@ -164,11 +151,25 @@ public class CardButton extends JButton {
     public void setAnimationEnabled(boolean enabled) {
         animationEnabled = enabled;
         if (enabled) {
-            if (!animationTimer.isRunning()) {
-                animationTimer.start();
+            boolean premier = cartesAnimees.isEmpty();
+            cartesAnimees.add(this);
+            // on s'inscrit qu'une seule fois pour toute la classe
+            if (premier) {
+                AnimLoop.add(CardButton.class, dt -> {
+                    for (CardButton carte : cartesAnimees.toArray(new CardButton[0])) {
+                        carte.phase += FloatSpeed * dt;
+                        carte.floatOffsetX = Math.cos(carte.phase) * FloatWide;
+                        carte.floatOffsetY = Math.sin(carte.phase) * FloatHigh;
+                        carte.scale += (carte.targetScale - carte.scale) * ScaleSmoothness * dt;
+                        carte.repaint();
+                    }
+                });
             }
         } else {
-            animationTimer.stop();
+            cartesAnimees.remove(this);
+            if (cartesAnimees.isEmpty()) {
+                AnimLoop.remove(CardButton.class);
+            }
             floatOffsetX = 0.0;
             floatOffsetY = 0.0;
             scale = 1.0;

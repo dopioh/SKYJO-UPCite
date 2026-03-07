@@ -20,8 +20,13 @@ public class GameLauncher {
         new Frame();
 
         // Jeu dams le Terminal 
+<<<<<<< HEAD
         // scanner = new Scanner(System.in);
         // startGame();
+=======
+        //scanner = new Scanner(System.in);
+        //startGame();
+>>>>>>> opti_anim
     }
     
     /**

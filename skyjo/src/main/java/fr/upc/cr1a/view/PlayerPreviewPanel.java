@@ -1,5 +1,6 @@
 package fr.upc.cr1a.view;
 
+import fr.upc.cr1a.model.AnimLoop;
 import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.PlayerHandModel;
 import fr.upc.cr1a.model.PlayerModel;
@@ -25,7 +26,6 @@ public class PlayerPreviewPanel extends JPanel{
 
     // Animation fondu : 
     private float opaque = 0.0f; // 0.0 = invisible, 1.0 = totalement opaque
-    private Timer fadeTimer;
     
     public PlayerPreviewPanel(){
         setLayout(new BorderLayout());
@@ -120,35 +120,29 @@ public class PlayerPreviewPanel extends JPanel{
      * @param fadeOn si true, fais apparaitre le panel (et inversement)
      */
     public void fade(boolean fadeOn){
-        if (fadeTimer != null && fadeTimer.isRunning()){
-            fadeTimer.stop();
-        }
+        AnimLoop.remove(this);
             if (fadeOn){
-                // le delay est en ms
+                // le delay geré par AnimLoop
                 setVisible(true);
-                fadeTimer = new Timer(15, e -> {
-                opaque += 0.05f; // vitesse d'apparition
+                AnimLoop.add(this, dt -> {
+                opaque += 0.05f * (float) dt; // vitesse d'apparition
                 if (opaque >= 1.0f){
                     opaque = 1;
-                    fadeTimer.stop();
+                    AnimLoop.remove(this);
                 }
                 repaint();
             });
 
-            fadeTimer.start();
-
             } else {
-                fadeTimer = new Timer(15, e -> {
-                    opaque -= 0.05f;
+                AnimLoop.add(this, dt -> {
+                    opaque -= 0.05f * (float) dt;
                     if (opaque <= 0.0f){
                         opaque = 0;
-                        fadeTimer.stop();
+                        AnimLoop.remove(this);
                         setVisible(false);
                     }
                     repaint();
                 });
-
-                fadeTimer.start();
             }
     }
 
