@@ -39,6 +39,7 @@ public class PlayersSetupController {
         addListeners(view.getBtnLaunch(), () -> lancerPartie());
 
         view.getActionModeToggle().addActionListener(e -> {
+            view.updateCardPreview(view.isSkyjoActionEnabled());
             System.out.println("Cartes action : " + view.isSkyjoActionEnabled());
         });
 

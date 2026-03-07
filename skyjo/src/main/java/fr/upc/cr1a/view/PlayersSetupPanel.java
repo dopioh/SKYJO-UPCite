@@ -5,6 +5,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
+import fr.upc.cr1a.utils.ImageCache;
+import java.awt.image.BufferedImage;
 
 public class PlayersSetupPanel extends JPanel {
 
@@ -14,6 +16,11 @@ public class PlayersSetupPanel extends JPanel {
     private int selectedPlayerCount = 2;
     private JPanel playersContainer;
     private JToggleButton actionModeToggle;
+    
+    private JLabel cardPreview;
+    private JPanel cardsPreviewPanel;
+    private ImageIcon emptyCardIcon;
+    private ImageIcon actionCardIcon;
 
     public PlayersSetupPanel() {
         setLayout(new BorderLayout());
@@ -150,6 +157,20 @@ public class PlayersSetupPanel extends JPanel {
         actionDescription.setForeground(new Color(90, 90, 90));
         actionDescription.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+        cardsPreviewPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        cardsPreviewPanel.setOpaque(false);
+        cardsPreviewPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        emptyCardIcon = loadResizedIconFromCache("/cartes/carteVide.png", 200, 220);
+        actionCardIcon = loadResizedIconFromCache("/cartes/carteActionDos.png", 200, 220);
+
+        cardPreview = new JLabel();
+        cardPreview.setIcon(emptyCardIcon);
+        cardPreview.setAlignmentX(Component.LEFT_ALIGNMENT);
+        cardPreview.setBorder(null);
+
+        cardsPreviewPanel.add(cardPreview);
+
         optionsPanel.add(optionsTitle);
         optionsPanel.add(Box.createVerticalStrut(4));
         optionsPanel.add(optionsSubtitle);
@@ -157,6 +178,8 @@ public class PlayersSetupPanel extends JPanel {
         optionsPanel.add(actionModeToggle);
         optionsPanel.add(Box.createVerticalStrut(8));
         optionsPanel.add(actionDescription);
+        optionsPanel.add(Box.createVerticalStrut(8));
+        optionsPanel.add(cardsPreviewPanel);
         optionsPanel.add(Box.createVerticalGlue());
 
         // Trait de separtation
@@ -283,5 +306,28 @@ public class PlayersSetupPanel extends JPanel {
         }
         playersContainer.revalidate();
         playersContainer.repaint();
+    }
+
+    private ImageIcon loadResizedIconFromCache(String path, int width, int height) {
+        BufferedImage bufferedImage = ImageCache.get(path);
+
+        if (bufferedImage == null) {
+            System.err.println("Image introuvable dans le cache : " + path);
+            return null;
+        }
+
+        Image resized = bufferedImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        return new ImageIcon(resized);
+    }
+
+    public void updateCardPreview(boolean actionEnabled) {
+        if (actionEnabled) {
+            cardPreview.setIcon(actionCardIcon);
+        } else {
+            cardPreview.setIcon(emptyCardIcon);
+        }
+
+        cardsPreviewPanel.revalidate();
+        cardsPreviewPanel.repaint();
     }
 }
