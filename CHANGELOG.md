@@ -196,7 +196,6 @@
 ### Fixed
 - Reimplémentation du système de carte action qui avait disparu lors d'un ancien refactoring
 
-
 ## v.0.6: SPRINT 6
 ---
 
@@ -218,3 +217,12 @@
 ### Fixed
 
 - Fluidité globale : Le jeu ne lag plus sur Windows en passant de 12 repaint a un seul pour l'animation carte flottante ainsi que tout les autres animations qui sont maintenant geré avec `AnimLoop`
+- Selection du mode de jeu (vanilla ou action) dans le menu de selection
+- Affichage de la pioche et de la defausse action en jeu
+- Couverture de tests pour 
+    - les pioches
+    - les defausses
+    - les cartes numéros et les cartes actions
+    - les comportements des cartes actions
+    - la CursorCard
+    - le BotHandModel

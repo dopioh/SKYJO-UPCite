@@ -143,6 +143,7 @@ public class PlayersSetupPanel extends JPanel {
         actionModeToggle = new JToggleButton("Mode Skyjo Action");
         actionModeToggle.setAlignmentX(Component.LEFT_ALIGNMENT);
         actionModeToggle.setFocusPainted(false);
+        actionModeToggle.setSelected(false);
 
         JLabel actionDescription = new JLabel("Ajoute des cartes spéciales et des effets supplémentaires");
         actionDescription.setFont(new Font("Arial", Font.PLAIN, 12));

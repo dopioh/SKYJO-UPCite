@@ -19,7 +19,7 @@ public class GameLauncher {
         // Fenetre du jeu
         new Frame();
 
-        // Jeu dams le Terminal 
+        // Jeu dans le Terminal 
         // scanner = new Scanner(System.in);
         // startGame();
     }
@@ -68,7 +68,6 @@ public class GameLauncher {
         System.out.println("------------------------------------------------------------------");
         
         //créer le game manager
-        gameManager = new GameManager(playerNames, false);
         
         //le modèle terminal et lancer la partie
         GameTerminalModel terminalModel = new GameTerminalModel(gameManager);

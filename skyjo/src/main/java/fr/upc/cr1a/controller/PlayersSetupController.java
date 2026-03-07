@@ -35,20 +35,8 @@ public class PlayersSetupController {
         addListeners(view.getBtnBack(), () -> frame.showPanel("MENU"));
         addListeners(view.getBtnLaunch(), () -> lancerPartie());
 
-        for (Component comp : view.getPlayerCountButtonPanel().getComponents()) {
-            if (comp instanceof JButton button) {
-                button.addActionListener(e -> {
-                    int value = Integer.parseInt(button.getActionCommand());
-                    view.setSelectedPlayerCount(value);
-                    view.rebuildPlayerRows(value);
-                    updatePlayerCountButtonsStyle(value);
-                    addRowHoverEffect();
-                });
-            }
-        }
-
         view.getActionModeToggle().addActionListener(e -> {
-            //Nassim Ici
+            System.out.println("Cartes action : " + view.isSkyjoActionEnabled());
         });
     }
 
@@ -151,7 +139,7 @@ public class PlayersSetupController {
             }
         }
 
-        new GameManager(frame, players);
-        frame.showPanel("GAME");
+        boolean actionMode = view.isSkyjoActionEnabled();
+        new GameManager(frame, players, actionMode);
     }
 }

@@ -57,7 +57,18 @@ public class GameManager {
         TURN_ENDED                  // tour terminé
     }
 
-    public GameManager(Frame frame, List<PlayerData> playersData){
+    /**
+     * Constructeur qui doit etre appeler pour lancer une partie
+     * Dans la version swing
+    */
+    public GameManager(Frame frame, List<PlayerData> playersData, boolean action){
+        this.gameWithAction = action;
+        if (this.gameWithAction) {
+            actionDeck = new PiocheActionModel();
+            discardActionPile = new DefausseActionModel();
+            ActionCardModel initActionCard = new ActionCardModel(true, ActionType.REPLACE_CARD_IN_HAND);
+            discardActionPile.addCardAtTop(initActionCard);
+        }
         //Creation des joueurs 
         this.players = new ArrayList<>();
         for (PlayerData player : playersData) {
@@ -83,7 +94,7 @@ public class GameManager {
 
         this.currentPlayerIndex = 0;
         this.firstPlayerToPlayIndex = 0; // le joueur qui commence la manche
-        this.deck = new PiocheModel(false);
+        this.deck = new PiocheModel(this.gameWithAction);
         this.discardPile = new DefausseModel();
         this.currentDrawCard = null;
         this.gameState = GameState.WAITING_FOR_PLAYERS;
@@ -120,6 +131,10 @@ public class GameManager {
         );
         frame.add(view, "GAME");
         frame.showPanel("GAME");
+    }
+
+    public GameManager(){ // Jle laisse pour pas casser vos tests
+        
     }
 
     /**
