@@ -35,7 +35,7 @@ public class PlayersSetupPanel extends JPanel {
         playerCountLabel.setFont(new Font("Arial", Font.BOLD, 15));
 
         spinner = new JSpinner(new SpinnerNumberModel(2, 2, 8, 1));
-        spinner.setPreferredSize(new Dimension(70, 32));
+        spinner.setPreferredSize(new Dimension(80, 36));
         spinner.setFont(new Font("Arial", Font.BOLD, 14));
         spinner.setBorder(BorderFactory.createLineBorder(new Color(190, 190, 190), 1));
 
@@ -211,8 +211,10 @@ public class PlayersSetupPanel extends JPanel {
                 botType.setEnabled(isBot);
                 if (isBot) {
                     nameField.setText("Bot" + playerIndex);
+                    row.setBackground(new Color(225, 235, 245));
                 } else {
-                    nameField.setText("");
+                    nameField.setText("Joueur " + playerIndex);
+                    row.setBackground(new Color(245, 245, 245));
                 }
             });
             row.add(label);

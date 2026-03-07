@@ -2,6 +2,10 @@ package fr.upc.cr1a.controller;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,16 +89,33 @@ public class PlayersSetupController {
             if (!(comp instanceof JPanel row)) {
                 continue;
             }
-            Color normalColor = new Color(245, 245, 245);
-            Color hoverColor = new Color(230, 230, 230);
+            JCheckBox botCheck = null;
+            for (Component c : row.getComponents()) {
+                if (c instanceof JCheckBox) {
+                    botCheck = (JCheckBox) c;
+                    break;
+                }
+            }
+            if (botCheck == null) {
+                continue;
+            }
+            JCheckBox finalBotCheck = botCheck;
             row.addMouseListener(new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseEntered(java.awt.event.MouseEvent e) {
-                    row.setBackground(hoverColor);
+                    if (finalBotCheck.isSelected()) {
+                        row.setBackground(new Color(170, 205, 255)); // hover bot
+                    } else {
+                        row.setBackground(new Color(230, 230, 230)); // hover joueur
+                    }
                 }
                 @Override
                 public void mouseExited(java.awt.event.MouseEvent e) {
-                    row.setBackground(normalColor);
+                    if (finalBotCheck.isSelected()) {
+                        row.setBackground(new Color(200, 220, 255)); // bot
+                    } else {
+                        row.setBackground(new Color(245, 245, 245)); // joueur
+                    }
                 }
             });
         }
