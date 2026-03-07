@@ -202,3 +202,10 @@
 ### Added
 - Selection du mode de jeu (vanilla ou action) dans le menu de selection
 - Affichage de la pioche et de la defausse action en jeu
+- Couverture de tests pour 
+    - les pioches
+    - les defausses
+    - les cartes numéros et les cartes actions
+    - les comportements des cartes actions
+    - la CursorCard
+    - le BotHandModel
