@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
@@ -32,7 +33,7 @@ public class PlayersSetupController {
         view.getBtnBack().addActionListener(e -> frame.showPanel("MENU"));
 
         view.getBtnLaunch().addActionListener(e -> {
-            int nb = (int) view.getSpinner().getValue();
+            int nb = view.getSelectedPlayerCount();
             List<PlayerData> players = new ArrayList<>();
             int botCounter = 0;
             Component[] rows = view.getPlayersContainer().getComponents();
@@ -72,11 +73,17 @@ public class PlayersSetupController {
             frame.showPanel("GAME");
         });
 
-        view.getSpinner().addChangeListener(e -> {
-            int value = (int) view.getSpinner().getValue();
-            view.rebuildPlayerRows(value);
-            addRowHoverEffect();
-        });
+        for (Component comp : view.getPlayerCountButtonPanel().getComponents()) {
+            if (comp instanceof JButton button) {
+                button.addActionListener(e -> {
+                    int value = Integer.parseInt(button.getActionCommand());
+                    view.setSelectedPlayerCount(value);
+                    view.rebuildPlayerRows(value);
+                    updatePlayerCountButtonsStyle(value);
+                    addRowHoverEffect();
+                });
+            }
+        }
 
         view.getActionModeToggle().addActionListener(e -> {
             //Nassim Ici
@@ -118,6 +125,20 @@ public class PlayersSetupController {
                     }
                 }
             });
+        }
+    }
+
+    private void updatePlayerCountButtonsStyle(int selectedValue) {
+        for (Component comp : view.getPlayerCountButtonPanel().getComponents()) {
+            if (comp instanceof JButton button) {
+                int value = Integer.parseInt(button.getActionCommand());
+
+                if (value == selectedValue) {
+                    button.setBackground(new Color(200, 220, 255));
+                } else {
+                    button.setBackground(new Color(235, 235, 235));
+                }
+            }
         }
     }
 }

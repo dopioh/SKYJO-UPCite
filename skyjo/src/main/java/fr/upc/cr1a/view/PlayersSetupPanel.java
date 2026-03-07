@@ -9,7 +9,8 @@ public class PlayersSetupPanel extends JPanel {
 
     private final JButton btnBack;
     private final JButton btnLaunch;
-    private JSpinner spinner;
+    private JPanel playerCountButtonsPanel;
+    private int selectedPlayerCount = 2;
     private JPanel playersContainer;
     private JToggleButton actionModeToggle;
 
@@ -31,31 +32,26 @@ public class PlayersSetupPanel extends JPanel {
         configTop.setOpaque(false);
         configTop.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
 
-        JLabel playerCountLabel = new JLabel("Nombre de joueurs (1 à 8) :");
+        JLabel playerCountLabel = new JLabel("Nombre de joueurs (2 à 8) :");
         playerCountLabel.setFont(new Font("Arial", Font.BOLD, 15));
 
-        spinner = new JSpinner(new SpinnerNumberModel(2, 2, 8, 1));
-        spinner.setPreferredSize(new Dimension(80, 36));
-        spinner.setFont(new Font("Arial", Font.BOLD, 14));
-        spinner.setBorder(BorderFactory.createLineBorder(new Color(190, 190, 190), 1));
+        configTop.add(playerCountLabel);
 
-        JSpinner.DefaultEditor editor = (JSpinner.DefaultEditor) spinner.getEditor();
-        JFormattedTextField textField = editor.getTextField();
-        textField.setHorizontalAlignment(JTextField.CENTER);
-        textField.setFont(new Font("Arial", Font.BOLD, 14));
-        textField.setBorder(BorderFactory.createEmptyBorder());
-        textField.setBackground(Color.WHITE);
-        for(Component comp : spinner.getComponents()){
-            if (comp instanceof JButton button) {
-                button.setFocusPainted(false);
-                button.setBackground(new Color(245, 245, 245));
-                button.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
-                button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            }
+        playerCountButtonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
+        playerCountButtonsPanel.setOpaque(false);
+
+        for (int i = 2; i <= 8; i++) {
+            JButton btn = new JButton(String.valueOf(i));
+            btn.setPreferredSize(new Dimension(42, 32));
+            btn.setFont(new Font("Arial", Font.BOLD, 14));
+            btn.setFocusPainted(false);
+            btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            btn.setBackground(i == 2 ? new Color(200, 220, 255) : new Color(235, 235, 235));
+            btn.setActionCommand(String.valueOf(i));
+            playerCountButtonsPanel.add(btn);
         }
 
-        configTop.add(playerCountLabel);
-        configTop.add(spinner);
+        configTop.add(playerCountButtonsPanel);
         center.add(configTop, BorderLayout.NORTH);
 
         // Partie centrale
@@ -83,6 +79,11 @@ public class PlayersSetupPanel extends JPanel {
         JLabel optionsTitle = new JLabel("Options");
         optionsTitle.setFont(new Font("Arial", Font.BOLD, 18));
         optionsTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        JLabel optionsSubtitle = new JLabel("Personnalise la partie");
+        optionsSubtitle.setFont(new Font("Arial", Font.PLAIN, 12));
+        optionsSubtitle.setForeground(new Color(100, 100, 100));
+        optionsSubtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         actionModeToggle = new JToggleButton("Mode Skyjo Action");
         actionModeToggle.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -94,7 +95,9 @@ public class PlayersSetupPanel extends JPanel {
         actionDescription.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         optionsPanel.add(optionsTitle);
-        optionsPanel.add(Box.createVerticalStrut(15));
+        optionsPanel.add(Box.createVerticalStrut(4));
+        optionsPanel.add(optionsSubtitle);
+        optionsPanel.add(Box.createVerticalStrut(18));
         optionsPanel.add(actionModeToggle);
         optionsPanel.add(Box.createVerticalStrut(8));
         optionsPanel.add(actionDescription);
@@ -146,8 +149,16 @@ public class PlayersSetupPanel extends JPanel {
         return btnLaunch;
     }
 
-    public JSpinner getSpinner() {
-        return spinner;
+    public JPanel getPlayerCountButtonPanel() {
+        return playerCountButtonsPanel;
+    }
+
+    public int getSelectedPlayerCount() {
+        return selectedPlayerCount;
+    }
+
+    public void setSelectedPlayerCount(int selectedPlayerCount) {
+        this.selectedPlayerCount = selectedPlayerCount;
     }
 
     public JPanel getPlayersContainer() {
