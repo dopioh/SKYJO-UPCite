@@ -62,6 +62,28 @@ public class PlayersSetupPanel extends JPanel {
         playersContainer.setLayout(new BoxLayout(playersContainer, BoxLayout.Y_AXIS));
         playersContainer.setOpaque(false);
 
+        JPanel playersHeader = new JPanel();
+        playersHeader.setLayout(new BoxLayout(playersHeader, BoxLayout.Y_AXIS));
+        playersHeader.setOpaque(true);
+        playersHeader.setBackground(new Color(238, 242, 250));
+        playersHeader.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200)),
+                BorderFactory.createEmptyBorder(12, 12, 12, 12)
+        ));
+
+        JLabel playersTitle = new JLabel("Joueurs de la partie");
+        playersTitle.setFont(new Font("Arial", Font.BOLD, 18));
+        playersTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel playersSubtitle = new JLabel("Configure les participants avant le lancement");
+        playersSubtitle.setFont(new Font("Arial", Font.PLAIN, 12));
+        playersSubtitle.setForeground(new Color(100, 100, 100));
+        playersSubtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        playersHeader.add(playersTitle);
+        playersHeader.add(Box.createVerticalStrut(4));
+        playersHeader.add(playersSubtitle);
+
         JScrollPane scroll = new JScrollPane(playersContainer);
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(16);
@@ -70,11 +92,9 @@ public class PlayersSetupPanel extends JPanel {
             protected JButton createDecreaseButton(int orientation) {
                 return createZeroButton();
             }
-
             protected JButton createIncreaseButton(int orientation) {
                 return createZeroButton();
             }
-
             private JButton createZeroButton() {
                 JButton button = new JButton();
                 button.setPreferredSize(new Dimension(0, 0));
@@ -82,7 +102,6 @@ public class PlayersSetupPanel extends JPanel {
                 button.setMaximumSize(new Dimension(0, 0));
                 return button;
             }
-
             @Override
             protected void configureScrollBarColors() {
                 this.thumbColor = new Color(200,200,200);
@@ -90,6 +109,17 @@ public class PlayersSetupPanel extends JPanel {
             }
         });
 
+        JPanel leftPanel = new JPanel();
+        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+        leftPanel.setOpaque(false);
+
+        playersHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
+        scroll.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        leftPanel.add(playersHeader);
+        leftPanel.add(Box.createVerticalStrut(10));
+        leftPanel.add(scroll);
+        
         // Panel a droite du container
         JPanel optionsPanel = new JPanel();
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
@@ -128,7 +158,7 @@ public class PlayersSetupPanel extends JPanel {
         optionsPanel.add(Box.createVerticalGlue());
 
         // Trait de separtation
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,scroll,optionsPanel);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, optionsPanel);
 
         splitPane.setResizeWeight(0.7);     
         splitPane.setDividerLocation(0.5);  
