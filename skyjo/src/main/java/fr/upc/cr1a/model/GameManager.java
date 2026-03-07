@@ -68,6 +68,7 @@ public class GameManager {
             actionDeck = new PiocheActionModel();
             discardActionPile = new DefausseActionModel();
             ActionCardModel initActionCard = new ActionCardModel(true, ActionType.REPLACE_CARD_IN_HAND);
+            initActionCard.returnCard();
             discardActionPile.addCardAtTop(initActionCard);
         }
 

@@ -45,6 +45,10 @@ public class GameBoardView extends JPanel {
 
     private CursorCardView cursorCardView;
 
+    // Affichage de la main des cartes action du joueur
+    private JPanel actionHandPanel;
+    private ArrayList<CardButton> actionCardButtons;
+
     // Affichage des cartes pilées
     private CardButton btnPioche;
     private CardButton btnDefausse;
@@ -70,6 +74,7 @@ public class GameBoardView extends JPanel {
         this.listPlayer = listPlayerModels;
         this.buttonlistPlayer = new ArrayList<JButton>();
         this.cardButtons = new CardButton[3][4];
+        this.actionCardButtons = new ArrayList<>();
         setLayout(new BorderLayout());
         setOpaque(true);
         setVisible(true);
@@ -179,6 +184,11 @@ public class GameBoardView extends JPanel {
 
         cardsContainer.add(playerName, BorderLayout.NORTH);
         cardsContainer.add(cardsGrid, BorderLayout.CENTER);
+
+        // Panel des cartes actions dans la main du joueur
+        actionHandPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 2));
+        actionHandPanel.setOpaque(false);
+        cardsContainer.add(actionHandPanel, BorderLayout.SOUTH);
 
         // creer les 12 CardButton
         for (int row = 0; row < 3; row++) {
@@ -337,8 +347,45 @@ public class GameBoardView extends JPanel {
             }
         }
 
+        showActionHand(player);
+
         zonePlateau.revalidate();
         zonePlateau.repaint();
+    }
+
+    /**
+     * Affiche les cartes action du joueur en petit au-dessus de la main
+     */
+    public void showActionHand(PlayerModel player) {
+        actionHandPanel.removeAll();
+        actionCardButtons.clear();
+
+        ArrayList<ActionCardModel.ActionType> actions = player.getActionHand();
+        if (actions == null || actions.isEmpty()) {
+            actionHandPanel.repaint();
+            return;
+        }
+
+        for (int i = 0; i < actions.size(); i++) {
+            ActionCardModel.ActionType type = actions.get(i);
+            CardButton btn = new CardButton();
+            btn.setAnimationEnabled(EnableHandCardAnimations);
+
+            // carte temp pour recuperer l'image qui correspond au type
+            ActionCardModel tempCard = new ActionCardModel(false, type);
+            String imgPath = getCardImagePath(tempCard);
+            btn.setCardImage(imgPath);
+            btn.setCardSize(65, 90);
+
+            btn.addActionListener(e -> {
+                System.out.println("carte " + type + " activée !");
+            });
+
+            actionCardButtons.add(btn);
+            actionHandPanel.add(btn);
+        }
+
+        actionHandPanel.repaint();
     }
 
     /**

@@ -81,6 +81,7 @@ public class GameBoardController {
                 return;
             if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION)
                 return;
+
             CardModel drawn = gameManager.drawDeck();
             if (drawn.isFaceDown()) drawn.returnCard();
             String drawnPath = gameBoardView.getCardImagePath(drawn);
@@ -118,6 +119,35 @@ public class GameBoardController {
                 updateAllDecksDisplay();
             }
             refreshGuide();
+        });
+
+        gameBoardView.getBtnPiocheAction().addActionListener(e -> {
+            if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) return;
+            if (waitingNextTurn) return;
+            if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
+            if (!gameManager.withActionCard()) return;
+
+            PlayerModel player = gameManager.getCurrentPlayer();
+            if (player.getStarsScore() <= 0) {
+                System.out.println("Pas assez d'étoiles pour piocher une action !");
+                return;
+            }
+
+            CardModel drawn = gameManager.drawActionDeck();
+            if (drawn.isFaceDown()) drawn.returnCard();
+
+            if (drawn instanceof ActionCardModel actionCard) {
+                player.getActionHand().add(actionCard.getType());
+                System.out.println("Carte action activée : " + actionCard.getType());
+            }
+            player.subStarsScore();
+
+            gameBoardView.showPlayerCards(player);
+            updateAllDecksDisplay();
+
+            gameManager.setTurnPhase(GameManager.TurnPhase.TURN_ENDED);
+            refreshGuide();
+            switchToNextPlayer();
         });
 
         // listeners pour les cartes, retourner la carte au clic puis switch joueur
