@@ -196,3 +196,9 @@
 ### Fixed
 - Reimplémentation du système de carte action qui avait disparu lors d'un ancien refactoring
 
+## v.0.6: SPRINT 6
+---
+
+### Added
+- Selection du mode de jeu (vanilla ou action) dans le menu de selection
+- Affichage de la pioche et de la defausse action en jeu

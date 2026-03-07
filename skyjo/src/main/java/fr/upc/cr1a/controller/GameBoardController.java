@@ -19,7 +19,7 @@ import fr.upc.cr1a.view.*;
  * @see GameBoardView vue graphique
  * @see GameBoardModel logique du plateau
  * 
- * @author Mei,Ian,Hugo,Billy
+ * @author Mei,Ian,Hugo,Billy,Nassim
  */
 public class GameBoardController {
 
@@ -51,6 +51,11 @@ public class GameBoardController {
         listener();
         refreshGuide();
         
+        gameBoardView.setActionDecksVisible(gameManager.withActionCard());
+        
+        // Initialiser l'affichage des pioches (normales + actions)
+        updateAllDecksDisplay();
+        
         //vérifie si c'est un bot
         SwingUtilities.invokeLater(() -> botController.handleBotTurn());
     }
@@ -76,6 +81,7 @@ public class GameBoardController {
                 return;
             if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION)
                 return;
+
             CardModel drawn = gameManager.drawDeck();
             if (drawn.isFaceDown()) drawn.returnCard();
             String drawnPath = gameBoardView.getCardImagePath(drawn);
@@ -99,9 +105,7 @@ public class GameBoardController {
                 String takenPath = gameBoardView.getCardImagePath(taken);
                 gameBoardView.getBtnDefausse().setCardImage(takenPath);
                 gameBoardView.showCursorCard(takenPath);
-                gameBoardView.updateCardDisplay(
-                        gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
-                        gameManager.getDeck().stackSize() > 0);
+                updateAllDecksDisplay();
                 refreshGuide();
                 return;
             }
@@ -112,11 +116,38 @@ public class GameBoardController {
                 waitingReveal = true; // maintenant il doit révéler une carte
                 gameBoardView.hideCursorCard();
 
-                gameBoardView.updateCardDisplay(
-                        gameManager.getDiscardPile().getTopCard(),
-                        gameManager.getDeck().stackSize() > 0);
+                updateAllDecksDisplay();
             }
             refreshGuide();
+        });
+
+        gameBoardView.getBtnPiocheAction().addActionListener(e -> {
+            if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) return;
+            if (waitingNextTurn) return;
+            if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
+            if (!gameManager.withActionCard()) return;
+
+            PlayerModel player = gameManager.getCurrentPlayer();
+            if (player.getStarsScore() <= 0) {
+                System.out.println("Pas assez d'étoiles pour piocher une action !");
+                return;
+            }
+
+            CardModel drawn = gameManager.drawActionDeck();
+            if (drawn.isFaceDown()) drawn.returnCard();
+
+            if (drawn instanceof ActionCardModel actionCard) {
+                player.getActionHand().add(actionCard.getType());
+                System.out.println("Carte action activée : " + actionCard.getType());
+            }
+            player.subStarsScore();
+
+            gameBoardView.showPlayerCards(player);
+            updateAllDecksDisplay();
+
+            gameManager.setTurnPhase(GameManager.TurnPhase.TURN_ENDED);
+            refreshGuide();
+            switchToNextPlayer();
         });
 
         // listeners pour les cartes, retourner la carte au clic puis switch joueur
@@ -141,10 +172,7 @@ public class GameBoardController {
                         if (!ok)
                             return;
                         gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
-                        gameBoardView.updateCardDisplay(
-                                gameManager.getDiscardPile().isEmpty() ? null
-                                        : gameManager.getDiscardPile().getTopCard(),
-                                gameManager.getDeck().stackSize() > 0);
+                        updateAllDecksDisplay();
                         refreshGuide();
                         //System.out.println("ALROS ??");
                         
@@ -188,9 +216,7 @@ public class GameBoardController {
                         gameBoardView.hideCursorCard();
                         gameBoardView.showPlayerCards(currentPlayer);
 
-                        gameBoardView.updateCardDisplay(
-                                gameManager.getDiscardPile().getTopCard(),
-                                gameManager.getDeck().stackSize() > 0);
+                        updateAllDecksDisplay();
 
                         refreshGuide();
                         switchToNextPlayer();
@@ -281,10 +307,7 @@ public class GameBoardController {
 
             gameManager.startTurn();
             gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
-            gameBoardView.updateCardDisplay(
-                gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
-                gameManager.getDeck().stackSize() > 0
-            );
+            updateAllDecksDisplay();
             refreshGuide();
             waitingNextTurn = false;
             //regarde si c'est un bot
@@ -364,10 +387,7 @@ public class GameBoardController {
         waitingNextTurn = false;
         waitingReveal = false;
         gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
-        gameBoardView.updateCardDisplay(
-            gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
-            gameManager.getDeck().stackSize() > 0
-        );
+        updateAllDecksDisplay();
         Frame frame = gameBoardModel.getFrame();
         frame.showPanel("GAME");
         refreshGuide();
@@ -415,5 +435,24 @@ public class GameBoardController {
 
     public boolean isWaitingNextTurn() {
         return waitingNextTurn;
+    }
+
+    /**
+     * Met a jour l'affichage des pioches et défausses
+     */
+    private void updateAllDecksDisplay() {
+        // maj normales
+        gameBoardView.updateCardDisplay(
+            gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
+            gameManager.getDeck().stackSize() > 0
+        );
+
+        // maj actions
+        if (gameManager.withActionCard() && gameManager.getDiscardActionPile() != null && gameManager.getActionDeck() != null) {
+            gameBoardView.updateActionCardDisplay(
+                gameManager.getDiscardActionPile().isEmpty() ? null : gameManager.getDiscardActionPile().getTopCard(),
+                gameManager.getActionDeck().stackSize() > 0
+            );
+        }
     }
 }

@@ -23,7 +23,7 @@ public class PlayersSetupController {
     public PlayersSetupController(Frame frame, PlayersSetupPanel view) {
         this.frame = frame;
         this.view = view;
-
+        
         view.getBtnBack().addActionListener(e -> frame.showPanel("MENU"));
 
         view.getBtnLaunch().addActionListener(e -> {
@@ -58,12 +58,8 @@ public class PlayersSetupController {
                     players.add(new PlayerData(name));
                 }
             }
-            new GameManager(frame, players);
-
-            //------------------------------------------------------------ Faire un truc de ce style pour activer ou non (adapte en fonction de comment toi t'as fait)
-            // boolean actionMode = view.isSkyjoActionEnabled();
-            // new GameManager(frame, players, actionMode);
-            
+            boolean actionMode = view.isSkyjoActionEnabled();
+            new GameManager(frame, players, actionMode);
             
             frame.showPanel("GAME");
         });
@@ -74,7 +70,7 @@ public class PlayersSetupController {
         });
 
         view.getActionModeToggle().addActionListener(e -> {
-            //Nassim Ici
+            System.out.println("Cartes action : " + view.isSkyjoActionEnabled());
         });
     }
 }
