@@ -65,6 +65,30 @@ public class PlayersSetupPanel extends JPanel {
         JScrollPane scroll = new JScrollPane(playersContainer);
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(16);
+        scroll.getVerticalScrollBar().setPreferredSize(new Dimension(6, 0));
+        scroll.getVerticalScrollBar().setUI(new javax.swing.plaf.basic.BasicScrollBarUI() {
+            protected JButton createDecreaseButton(int orientation) {
+                return createZeroButton();
+            }
+
+            protected JButton createIncreaseButton(int orientation) {
+                return createZeroButton();
+            }
+
+            private JButton createZeroButton() {
+                JButton button = new JButton();
+                button.setPreferredSize(new Dimension(0, 0));
+                button.setMinimumSize(new Dimension(0, 0));
+                button.setMaximumSize(new Dimension(0, 0));
+                return button;
+            }
+
+            @Override
+            protected void configureScrollBarColors() {
+                this.thumbColor = new Color(200,200,200);
+                this.trackColor = new Color(245,245,245);
+            }
+        });
 
         // Panel a droite du container
         JPanel optionsPanel = new JPanel();
