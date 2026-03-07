@@ -5,6 +5,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+
+// gson pour recup l'iud que supabase renvoie
+
 /**
  * Classe qui fait la liaison entre le jeu et la base de données
  * SEULEMENT pour qu'un joueur créer ou se connecter à son compte 
@@ -36,7 +42,10 @@ public class SupabaseAuth {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString()); // peut lever une exceptions -> obliger try catch
 
             System.out.println("CODE HTTP : " + response.statusCode());
-            System.out.println("SUPABASE REPONSE : " + response.body()); // print pour le moment, sera gerer selon le code renvoyer plus tard
+            //System.out.println("SUPABASE REPONSE : " + response.body()); // print pour le moment, sera gerer selon le code renvoyer plus tard
+
+            String id = getIUD(response);
+            String accessToken = getAccesToken(response);
             
         } catch (Exception e) {
             e.printStackTrace();          
@@ -60,20 +69,49 @@ public class SupabaseAuth {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             System.out.println("CODE HTTP CREATION : " + response.statusCode());
-            System.out.println("REPONSE SUPABASE : " + response.body());
+            //System.out.println("REPONSE SUPABASE : " + response.body());
+
+            String id = getIUD(response);
+            String accessToken = getAccesToken(response);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    private static String getIUD(HttpResponse<String> response){
+        if (response.statusCode() != 200) return null;
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        JsonObject jsonResponse = gson.fromJson(response.body(), JsonObject.class); // on le transforme en json pour recuperer la value de i'id
+
+        //String prettyJson = gson.toJson(jsonResponse); //pour afficher en joli json la reponse et recup l'id 
+        //System.out.println(prettyJson);
+
+        JsonObject user = jsonResponse.getAsJsonObject("user"); // on peut acceder à la value que d'un objet parent direct
+        String playerID = (String) user.get("id").getAsString();
+
+        System.out.println("PLAYER ID : " + playerID); // à stocker sur le jeu du joueur et la db
+        return playerID;
+    }
+
+    private static String getAccesToken(HttpResponse<String> response){
+        if (response.statusCode() != 200) return null;
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        JsonObject jsonResponse = gson.fromJson(response.body(), JsonObject.class); 
+
+        String accessToken = jsonResponse.getAsJsonPrimitive("access_token").getAsString();
+
+        System.out.println(accessToken);
+        return accessToken;
+    }
+
 
     public static void main(String[] args) { // juste pour tester la connexion 
         //System.out.println("TEST CREATION DE COMPTE : ");
-        //createAccount("azaa.projects@gmail.com", "aza", "LESFLEURSSONTJAUNES");
+        //createAccount("azaa.projects@gmail.com", "aza", "");
 
         System.out.println("TEST CONNECTION AU COMPTE :");
-        connectPlayerByEmail("azaa.projects@gmail.com", "LESFLEURSSONTJAUNES");
+        connectPlayerByEmail("azaa.projects@gmail.com", "");
 
         // le code http renvoyé doit etre 200 si tout marche
         
