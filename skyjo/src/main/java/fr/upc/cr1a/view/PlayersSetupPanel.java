@@ -4,11 +4,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
 
 public class PlayersSetupPanel extends JPanel {
 
-    private final JButton btnBack;
-    private final JButton btnLaunch;
+    private final DoodleButton btnBack;
+    private final DoodleButton btnLaunch;
     private JPanel playerCountButtonsPanel;
     private int selectedPlayerCount = 2;
     private JPanel playersContainer;
@@ -65,7 +66,7 @@ public class PlayersSetupPanel extends JPanel {
         JPanel playersHeader = new JPanel();
         playersHeader.setLayout(new BoxLayout(playersHeader, BoxLayout.Y_AXIS));
         playersHeader.setOpaque(true);
-        playersHeader.setBackground(new Color(238, 242, 250));
+        playersHeader.setBackground(new Color(238, 242, 250));  // COULEUR BORDURE Haut + Gauche
         playersHeader.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
                 BorderFactory.createEmptyBorder(12, 12, 12, 12)
@@ -172,20 +173,10 @@ public class PlayersSetupPanel extends JPanel {
         JPanel bottom = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
         bottom.setOpaque(false);
 
-        btnBack = new JButton("Retour");
-        btnLaunch = new JButton("Lancer");
-
-        //UX Bouton , a modifier plus tard pour le lier avec la DA du reste
-        btnBack.setPreferredSize(new Dimension(120, 36));
-        btnLaunch.setPreferredSize(new Dimension(140, 36));
-        btnBack.setFont(new Font("Arial", Font.PLAIN, 14));
-        btnLaunch.setFont(new Font("Arial", Font.BOLD, 14));
-        btnBack.setFocusPainted(false);
-        btnLaunch.setFocusPainted(false);
-        btnBack.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnLaunch.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnBack.setBackground(new Color(240, 240, 240));
-        btnLaunch.setBackground(new Color(230, 230, 230));
+        btnBack = new DoodleButton("Retour", ButtonColor.RED, 220, 80, null); 
+        btnBack.setBgImage("/Button/button_red.png");
+        btnLaunch = new DoodleButton("Lancer",ButtonColor.GREEN,220,80,"/Button/Play.png"); //Faudrait mettre un triangle du style 
+        btnLaunch.setBgImage("/Button/button_green.png");
 
         bottom.add(btnBack);
         bottom.add(btnLaunch);
@@ -195,11 +186,11 @@ public class PlayersSetupPanel extends JPanel {
         rebuildPlayerRows(2);
     }
 
-    public JButton getBtnBack() {
+    public DoodleButton getBtnBack() {
         return btnBack;
     }
 
-    public JButton getBtnLaunch() {
+    public DoodleButton getBtnLaunch() {
         return btnLaunch;
     }
 
