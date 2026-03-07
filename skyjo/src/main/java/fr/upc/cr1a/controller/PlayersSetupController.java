@@ -16,6 +16,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import fr.upc.cr1a.model.AudioManager;
 import fr.upc.cr1a.model.GameManager;
 import fr.upc.cr1a.model.PlayerData;
 import fr.upc.cr1a.view.DoodleButton;
@@ -26,10 +27,12 @@ public class PlayersSetupController {
 
     private final Frame frame;
     private final PlayersSetupPanel view;
+    private final AudioManager audio;
 
     public PlayersSetupController(Frame frame, PlayersSetupPanel view) {
         this.frame = frame;
         this.view = view;
+        this.audio = frame.getAudioManager();
         addRowHoverEffect();
 
         addListeners(view.getBtnBack(), () -> frame.showPanel("MENU"));
@@ -38,6 +41,18 @@ public class PlayersSetupController {
         view.getActionModeToggle().addActionListener(e -> {
             System.out.println("Cartes action : " + view.isSkyjoActionEnabled());
         });
+
+        for (Component comp : view.getPlayerCountButtonPanel().getComponents()) {
+            if (comp instanceof JButton button) {
+                button.addActionListener(e -> {
+                    int value = Integer.parseInt(button.getActionCommand());
+                    view.setSelectedPlayerCount(value);
+                    view.rebuildPlayerRows(value);
+                    updatePlayerCountButtonsStyle(value);
+                    addRowHoverEffect();
+                });
+            }
+        }
     }
 
     private void addRowHoverEffect() {
@@ -57,9 +72,9 @@ public class PlayersSetupController {
                 continue;
             }
             JCheckBox finalBotCheck = botCheck;
-            row.addMouseListener(new java.awt.event.MouseAdapter() {
+            row.addMouseListener(new MouseAdapter() {
                 @Override
-                public void mouseEntered(java.awt.event.MouseEvent e) {
+                public void mouseEntered(MouseEvent e) {
                     if (finalBotCheck.isSelected()) {
                         row.setBackground(new Color(170, 205, 255)); // hover bot
                     } else {
@@ -67,7 +82,7 @@ public class PlayersSetupController {
                     }
                 }
                 @Override
-                public void mouseExited(java.awt.event.MouseEvent e) {
+                public void mouseExited(MouseEvent e) {
                     if (finalBotCheck.isSelected()) {
                         row.setBackground(new Color(200, 220, 255)); // bot
                     } else {
@@ -104,6 +119,7 @@ public class PlayersSetupController {
             }
             @Override
             public void mouseClicked(MouseEvent e) {
+                audio.playSfx("/sfx/UIclick.wav");
                 action.run();
             }
         });
