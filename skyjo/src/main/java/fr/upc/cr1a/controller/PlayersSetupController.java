@@ -110,7 +110,6 @@ public class PlayersSetupController {
     }
 
     private void lancerPartie() {
-        int nb = view.getSelectedPlayerCount();
         List<PlayerData> players = new ArrayList<>();
         int botCounter = 0;
         Component[] rows = view.getPlayersContainer().getComponents();
@@ -135,10 +134,15 @@ public class PlayersSetupController {
                 players.add(new PlayerData(botName, true, type));
             } else {
                 String name = nameField.getText().trim();
+                if (name == null || name.isBlank()) {
+                    JOptionPane.showMessageDialog(frame,"Tous les joueurs doivent avoir un nom.","Nom manquant",JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
                 players.add(new PlayerData(name));
             }
         }
 
+        
         boolean actionMode = view.isSkyjoActionEnabled();
         new GameManager(frame, players, actionMode);
     }
