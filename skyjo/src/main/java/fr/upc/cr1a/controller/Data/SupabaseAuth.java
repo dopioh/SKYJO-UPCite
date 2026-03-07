@@ -111,7 +111,7 @@ public class SupabaseAuth {
         //createAccount("azaa.projects@gmail.com", "aza", "");
 
         System.out.println("TEST CONNECTION AU COMPTE :");
-        connectPlayerByEmail("azaa.projects@gmail.com", "");
+        connectPlayerByEmail("azaa.projects@gmail.com", "MDPSECRET");
 
         // le code http renvoyé doit etre 200 si tout marche
         

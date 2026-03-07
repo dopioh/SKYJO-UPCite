@@ -4,6 +4,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import fr.upc.cr1a.controller.AccountController;
 import fr.upc.cr1a.controller.MainMenuController;
 import fr.upc.cr1a.controller.PlayersSetupController;
 import fr.upc.cr1a.controller.SettingsOverlayController;
@@ -26,10 +27,12 @@ public class Frame extends JFrame{
     private Rectangle windowedBounds;
     private final AudioManager audioManager;
     private PlayersSetupPanel playersSetupPanel;
+    private AccountController account;
 
 
     public Frame() {
         audioManager = new AudioManager();
+        this.account = new AccountController();
 
         setTitle("SKYJO");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -116,5 +119,9 @@ public class Frame extends JFrame{
 
     public PlayersSetupPanel getPlayersSetupPanel(){
         return playersSetupPanel;
+    }
+
+    public AccountController getAccountController(){
+        return this.account;
     }
 }

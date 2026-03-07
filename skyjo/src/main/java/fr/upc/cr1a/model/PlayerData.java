@@ -24,10 +24,10 @@ public class PlayerData {
     // les skins sont dans une list de String mais ils auront leur propre classes plus tard
     private ArrayList<String> skins; // tous les skins du jeu et si le joueur l'a, alors l'attribue unlocked du skin est true
 
+    // transient pour dire a gson d'eviter de lire l'attribut
+
     /**
-     * Constructeur pour un nouveau joueur
-     * 
-     * @param id le joueur le crée au si il ne possede pas de compte
+     * ANCIEN CONSTRUCTEUR AVANT DB
      */
     public PlayerData(String id){
         this.id = id;

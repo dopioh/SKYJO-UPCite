@@ -9,10 +9,11 @@ package fr.upc.cr1a.controller.Data;
  * @author Mei
  */
 public abstract class SendAPI {
+    protected String urlAPI = "https://api-render-su0t.onrender.com";
     
-    public abstract void WinGame(); // Ou juste StatsGame et on voit qui a gagné avec un param ? 
+    public abstract void WinGame(int totalPlayers, int classement,String accessToken); // Ou juste StatsGame et on voit qui a gagné avec un param ? 
 
-    public abstract void BuyInShop(); // fera baisser la money et give un skin au joueur
+    public abstract void BuyInShop(); // fera baisser la money et give un skin au joueur -> faudrait la definir ici sans qu'elle soit abstraite 
 
     // Quoi d'autres comme requetes possible ? 
 }
