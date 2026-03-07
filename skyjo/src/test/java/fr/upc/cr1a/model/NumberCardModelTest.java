@@ -25,7 +25,7 @@ class NumberCardModelTest {
         assertFalse(c.isFaceDown());
         assertNull(c.getPathImage());
         assertEquals(12, c.getCardValue());
-        assertEquals("rouge", c.getCardColor());
+        assertEquals("vert", c.getCardColor());
     }
 
     @Test
