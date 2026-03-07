@@ -111,6 +111,7 @@ public class PlayersSetupController {
 
     private void lancerPartie() {
         List<PlayerData> players = new ArrayList<>();
+        List<String> usedNames = new ArrayList<>();
         int botCounter = 0;
         Component[] rows = view.getPlayersContainer().getComponents();
         for (Component comp : rows) {
@@ -138,6 +139,11 @@ public class PlayersSetupController {
                     JOptionPane.showMessageDialog(frame,"Tous les joueurs doivent avoir un nom.","Nom manquant",JOptionPane.WARNING_MESSAGE);
                     return;
                 }
+                if (usedNames.contains(name)) {
+                    JOptionPane.showMessageDialog(frame,"Deux joueurs ne peuvent pas avoir le même nom","Nom en double",JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                usedNames.add(name);
                 players.add(new PlayerData(name));
             }
         }
