@@ -81,7 +81,7 @@ public class PlayersSetupPanel extends JPanel {
         optionsTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         
         JLabel optionsSubtitle = new JLabel("Personnalise la partie");
-        optionsSubtitle.setFont(new Font("Arial", Font.PLAIN, 12));
+        optionsSubtitle.setFont(new Font("Arial", Font.PLAIN, 16));
         optionsSubtitle.setForeground(new Color(100, 100, 100));
         optionsSubtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
