@@ -3,16 +3,20 @@ package fr.upc.cr1a.model;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
 
 /**
  * Classe qui gère toutes les interactions du jeu via le terminal
  * Séparée du GameManager pour une meilleure organisation du code
+ * @author Billy & Nassim
  */
+
 public class GameTerminalModel {
 
     private Scanner scanner;
     private GameManager gameManager;
+    private boolean hasGameManagerActionsCard; // seulement pour pas repeter l'appel a chaque check
 
     /**
      * Constructeur
@@ -21,9 +25,11 @@ public class GameTerminalModel {
     public GameTerminalModel(GameManager gameManager) {
         this.gameManager = gameManager;
         this.scanner = new Scanner(System.in);
+        this.hasGameManagerActionsCard = gameManager.withActionCard();
     }
 
-    /**
+    /** 
+     * POURQUOI CETTE FONCTION EST ICI ???
      * Affiche la main d'un joueur dans le terminal
      * Si la carte est null = X; face cachée = ?; face visible = valeur
      * @param player Le joueur dont on affiche la main
@@ -154,6 +160,10 @@ public class GameTerminalModel {
                     } while (true);
                     
                     hand.revealCard(row, col);
+
+                    // si l'etoile retournée est une carte etoile
+                    NumberCardModel cardDrawn = (NumberCardModel) hand.getCard(row, col);
+                    if (cardDrawn.isStar()) player.addStarsScore();
                     
                     // Vérifier et supprimer les colonnes/lignes identiques
                     GameRuleModel.removeIdenticalColumns(hand, gameManager.getDiscardPile());
@@ -185,6 +195,87 @@ public class GameTerminalModel {
     }
 
     /**
+     * Methode pour jouer une action
+     * appelée dans playerTurn() pour éviter de dupliquer le code
+     * @param player joueur courant
+     */
+    private void useAction(PlayerModel player) {
+        if (hasGameManagerActionsCard) {
+
+            if (player.getActionHand().isEmpty()) {
+                System.out.println("Aucune action disponible.");
+                return;
+            }
+
+            System.out.println("Cartes action disponibles :");
+            for (int i = 0; i < player.getActionHand().size(); i++) {
+                System.out.println((i + 1) + " = " + player.getActionHand().get(i));
+            }
+
+            int actionIndex = -1;
+            do {
+                try {
+                    System.out.print("Choisissez une carte action (1-" + player.getActionHand().size() + ") : ");
+                    actionIndex = scanner.nextInt() - 1;
+                    scanner.nextLine();
+                } catch (Exception e) {
+                    scanner.nextLine();
+                    actionIndex = -1;
+                }
+            } while (actionIndex < 0 || actionIndex >= player.getActionHand().size());
+
+            ActionType selectedAction = player.getActionHand().get(actionIndex);
+            ArrayList<PlayerModel> players = new ArrayList<>(gameManager.getPlayers());
+            boolean actionPlayed = true;
+            System.out.println("\n--------------------------------ACTION!--------------------------------\n");
+            
+            switch (selectedAction) {
+                case TRADE_CARD_WITH_PLAYER:
+                    ActionSkills.tradeCardWithPlayer(scanner, players, gameManager.getCurrentPlayerIndex());
+                    break;
+
+                case REPLACE_CARD_IN_HAND:
+                    ActionSkills.replaceCardInHand(scanner, players, gameManager.getCurrentPlayerIndex());
+                    break;
+
+                case DRAW_THREE_CARD:
+                    ActionSkills.drawThreeCard(scanner, players, gameManager.getCurrentPlayerIndex(), gameManager);
+                    break;
+
+                case PLAY_LAST_ACTION_IN_DEFAUSSE:
+                    ActionSkills.playLastActionInDefausse(scanner, players, gameManager.getCurrentPlayerIndex(), gameManager);
+                    break;
+
+                case SPY_ONE_COLUMN:
+                    ActionSkills.spyOneColumn(scanner, players, gameManager.getCurrentPlayerIndex(), gameManager);
+                    break;
+
+                case PLAY_TWO_TURN:
+                    ActionSkills.playTwoTurn(scanner, players, gameManager.getCurrentPlayerIndex(), gameManager);
+                    break;
+                
+                case ALL_PLAYERS_DROP_CARD:
+                    ActionSkills.allPlayersDropCard(scanner, players, gameManager.getCurrentPlayerIndex(), gameManager, this);
+                    break;
+                
+                default:
+                    System.out.println("Action non implémentée pour le moment.");
+                    actionPlayed = false;
+                    break;
+            }
+
+            if (actionPlayed) {
+                player.getActionHand().remove(actionIndex);
+                gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, selectedAction));
+                System.out.println("\n--------------------------------ACTION! (fin)----------------------------\n");
+            }
+        }
+        else {
+            System.out.println("vous ne jouez pas en mode action :p");
+        }
+    }
+
+    /**
      * Tour d'un joueur 
      */
     public void playerTurn(PlayerModel player) {
@@ -194,13 +285,18 @@ public class GameTerminalModel {
         showHand(player, false);
         
         //montre la carte sur la défausse
-        System.out.println("\nCarte sur la défausse : " + gameManager.getDiscardPile().getTopCard().getCardValue());
-        
+        System.out.println("\nCarte numéro sur la défausse : " + gameManager.getDiscardPile().getTopCard().getCardValue());
+        if (hasGameManagerActionsCard && gameManager.getDiscardActionPile().stackSize() > 0) {
+            System.out.println("\nCarte action sur la défausse : " + ((ActionCardModel) gameManager.getDiscardActionPile().getTopCard()).getType());
+        }
+
         //choisir piocher ou prendre de la défausse
         System.out.println("----------------------------------------------------------------");
         System.out.println("\n Action possible :\n");
         System.out.println("1 = Piocher");
         System.out.println("2 = Prendre de la défausse");
+        if (hasGameManagerActionsCard && player.getStarsScore() > 0) System.out.println("3 = Piocher une action (" + player.getStarsScore() + ")");
+        if (hasGameManagerActionsCard && !player.getActionHand().isEmpty()) System.out.println("4 = Jouer une action (" + player.showActionHand() + ")");
         System.out.print("\nVotre choix : ");
         
         int choice = 0;
@@ -209,13 +305,16 @@ public class GameTerminalModel {
             try {
                 choice = scanner.nextInt();
                 scanner.nextLine();
-                if (choice == 1 || choice == 2) {
+                if (choice == 1
+                    || choice == 2
+                    || (choice == 3 && player.getStarsScore() > 0 && hasGameManagerActionsCard)
+                    || (choice == 4 && !player.getActionHand().isEmpty() && hasGameManagerActionsCard)) {
                     validChoice = true;
                 } else {
                     System.out.print("T'es pas allé à l'école toi?");
                 }
             } catch (Exception e) {
-                System.out.print("2 choix possible et t'en donnes une troisième a quoi tu joues");
+                System.out.print("quelque chose s'et mal passé...");
                 scanner.nextLine();
             }
         } while (!validChoice);
@@ -230,6 +329,42 @@ public class GameTerminalModel {
             mustExchange = true;
             System.out.println("--------------------jehaislebot--------------------------------");
             System.out.println("Vous avez pris : " + drawnCard.getCardValue());
+        } else if (choice == 3) {
+            drawnCard = gameManager.drawActionDeck();
+            player.subStarsScore();
+            if (drawnCard instanceof ActionCardModel actionCard) {
+                player.getActionHand().add(actionCard.getType());
+            }
+
+            System.out.println("Vos cartes action - " + player.showActionHand());
+            System.out.println("1 = Utiliser une action");
+            System.out.println("2 = Finir le tour");
+
+            int value = 0;
+            boolean validValue = false;
+            do {
+                try {
+                    value = scanner.nextInt();
+                    scanner.nextLine();
+                    validValue = (value == 1 || value == 2);
+                } catch (Exception e) {
+                    scanner.nextLine();
+                    value = 0;
+                }
+            } while (!validValue);
+
+            if (value == 1) {
+                useAction(player);
+            }
+            gameManager.nextPlayer();
+            return;
+        } else if (choice == 4) {
+            useAction(player);
+            showHand(player, false);
+            System.out.println("\nAppuyez sur Entrée pour continuer :)");
+            scanner.nextLine();
+            gameManager.nextPlayer();
+            return;
         } else { //piocher une carte
             drawnCard = gameManager.drawDeck();
             System.out.println("-----------------------ilestnulenplus-----------------------------");

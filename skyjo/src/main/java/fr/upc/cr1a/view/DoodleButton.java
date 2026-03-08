@@ -3,8 +3,8 @@ package fr.upc.cr1a.view;
 import fr.upc.cr1a.model.DoodleButtonModel;
 import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
+import fr.upc.cr1a.utils.ImageCache;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
@@ -22,12 +22,14 @@ public class DoodleButton extends JComponent {
     private Font font;
     private BufferedImage scribbleImg;
     private BufferedImage icon;
+    private BufferedImage bgImage;
     private float scribbleProgress;
+    private float hoverScale = 1f;
     private Timer animTimer;
 
     // juste texte
     public DoodleButton(String text) {
-        this(text, ButtonColor.TURQUOISE, 300, 100, null);
+        this(text, ButtonColor.YELLOW, 300, 100, null);
     }
 
     // texte + couleur
@@ -43,7 +45,7 @@ public class DoodleButton extends JComponent {
     /**
      * vrai constructeur avec tout
      * @param text texte du bouton
-     * @param color couleur prédéfinie (ButtonColor.TURQUOISE, GREEN, RED)
+     * @param color couleur prédéfinie (ButtonColor.YELLOW, GREEN, RED)
      * @param w largeur du bouton
      * @param h hauteur du bouton
      * @param imagePath chemin de l'image ou null
@@ -70,48 +72,49 @@ public class DoodleButton extends JComponent {
             font = new Font("Arial", Font.BOLD, 48);
         }
 
-        // scribble
-        try {
-            var stream = getClass().getResourceAsStream("/Button/Scribble.png");
-            if (stream != null) scribbleImg = ImageIO.read(stream);
-        } catch (Exception e) {
-            scribbleImg = null;
-        }
+        // scribble selon couleur
+        String scribblePath = "/Button/scribble_" + model.getButtonColor().name().toLowerCase() + ".png";
+        scribbleImg = ImageCache.get(scribblePath);
 
         // icone a coté si existe
         loadIcon(model.getImagePath());
     }
 
     private void loadIcon(String path) {
-        icon = null;
-        if (path == null) return;
-        try {
-            var stream = getClass().getResourceAsStream(path);
-            if (stream != null) icon = ImageIO.read(stream);
-        } catch (Exception e) {
-            // ps grave on affiche pas
-        }
+        icon = ImageCache.get(path);
     }
 
-    // lance animation scribble
-    private void startScribbleAnim() {
-        if (animTimer != null) animTimer.stop();
-        scribbleProgress = 0f;
-        animTimer = new Timer(15, e -> {
-            scribbleProgress += 0.08f;
-            if (scribbleProgress >= 1f) {
-                scribbleProgress = 1f;
-                animTimer.stop();
+    private void startAnimationTimer() {
+        if (animTimer != null) return;
+        animTimer = new Timer(8, e -> {
+            boolean dirty = false;
+            float target = model.isHovered() ? 1.04f : 1f;
+            float diff = target - hoverScale;
+            if (Math.abs(diff) > 0.0003f) {
+                hoverScale += diff * 0.35f;
+                dirty = true;
+            } else if (hoverScale != target) {
+                hoverScale = target;
+                dirty = true;
             }
-            repaint();
+            
+            if (model.isHovered() && scribbleProgress < 1f) {
+                scribbleProgress = Math.min(scribbleProgress + 0.07f, 1f);
+                dirty = true;
+            }
+            if (dirty) repaint();
         });
         animTimer.start();
     }
 
-    private void stopAnim() {
-        if (animTimer != null) animTimer.stop();
+    private void startScribbleAnim() {
         scribbleProgress = 0f;
-        repaint();
+        startAnimationTimer();
+    }
+
+    private void stopAnim() {
+        scribbleProgress = 0f;
+        startAnimationTimer();
     }
 
     @Override
@@ -119,19 +122,32 @@ public class DoodleButton extends JComponent {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // moins pixéliee
 
+        // scale hover centré
+        if (hoverScale != 1f) {
+            double cx = getWidth() / 2.0, cy = getHeight() / 2.0;
+            g2.translate(cx, cy);
+            g2.scale(hoverScale, hoverScale);
+            g2.translate(-cx, -cy);
+        }
+
         int w = getWidth() - 20;
         int h = getHeight() - 20;
         int x = 10, y = 10;
         int seed = model.getText().hashCode(); // pour que chaque bouton = wiggle different
 
-        // ombre
-        g2.setColor(new Color(0, 0, 0, 60));
-        g2.fill(wiggleRect(x, y + 4, w, h, 35, seed));
-
-        // fond en wiggle
-        Path2D forme = wiggleRect(x, y, w, h, 35, seed);
-        g2.setColor(model.getColor());
-        g2.fill(forme);
+        // fond : image ou wiggle
+        if (bgImage != null) {
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            g2.drawImage(bgImage, x, y, w, h, null);
+        } else {
+            // ombre
+            g2.setColor(new Color(0, 0, 0, 60));
+            g2.fill(wiggleRect(x, y + 4, w, h, 35, seed));
+            // fond en wiggle
+            Path2D forme = wiggleRect(x, y, w, h, 35, seed);
+            g2.setColor(model.getColor());
+            g2.fill(forme);
+        }
 
         // texte
         g2.setFont(font);
@@ -139,13 +155,15 @@ public class DoodleButton extends JComponent {
         FontMetrics fm = g2.getFontMetrics();
         String txt = model.getText();
         int txtW = fm.stringWidth(txt);
-        int taille = fm.getAscent(); // sert aussi pour la taille icon
+        int taille = fm.getAscent();
+        int iconSize = (int)(taille * 1.3);
 
         // position du texte (decaler icone not null)
-        int largeurTotale = (icon != null) ? taille + 12 + txtW : txtW;
+        int largeurTotale = (icon != null) ? iconSize + 10 + txtW : txtW;
         int debutX = (getWidth() - largeurTotale) / 2;
-        int txtX = (icon != null) ? debutX + taille + 12 : debutX;
-        int txtY = (getHeight() + taille) / 2 - 12;
+        int txtX = debutX;
+        int txtY = (getHeight() + fm.getAscent() - fm.getDescent()) / 2 - 5;
+        int textCenterY = txtY - (fm.getAscent() - fm.getDescent()) / 2;
 
         // rotation text
         AffineTransform avant = g2.getTransform();
@@ -153,8 +171,10 @@ public class DoodleButton extends JComponent {
 
         // icone si y en a une
         if (icon != null) {
-            int iconeY = (getHeight() - taille) / 2 - 4;
-            g2.drawImage(icon, debutX, iconeY, taille, taille, null);
+            int iconeX = debutX + txtW + 10;
+            int iconeY = textCenterY - iconSize / 2 + (bgImage == null ? 4 : 0);
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            g2.drawImage(icon, iconeX, iconeY, iconSize, iconSize, null);
         }
 
         g2.drawString(txt, txtX, txtY);
@@ -162,10 +182,11 @@ public class DoodleButton extends JComponent {
 
         // scribble au hover
         if (model.isHovered() && scribbleImg != null && scribbleProgress > 0) {
+            float eased = 1f - (float) Math.pow(1 - scribbleProgress, 3); // ease-out
             int scribbleW = txtW;
             int scribbleH = scribbleImg.getHeight() * scribbleW / scribbleImg.getWidth();
             Shape oldClip = g2.getClip();
-            g2.clipRect(txtX, txtY + 5, (int)(scribbleW * scribbleProgress), scribbleH);
+            g2.clipRect(txtX, txtY + 5, (int)(scribbleW * eased), scribbleH);
             g2.drawImage(scribbleImg, txtX, txtY + 5, scribbleW, scribbleH, null);
             g2.setClip(oldClip);
         }
@@ -186,6 +207,10 @@ public class DoodleButton extends JComponent {
     public void setCouleur(ButtonColor c) { model.setColor(c); repaint(); }
     public void setText(String t) { model.setText(t); repaint(); }
     public void setImage(String path) { model.setImagePath(path); loadIcon(path); repaint(); }
+    public void setBgImage(String path) {
+        bgImage = ImageCache.get(path);
+        repaint();
+    }
     
     /**
      * créateur de un rectangle arrondi avec wiggle
