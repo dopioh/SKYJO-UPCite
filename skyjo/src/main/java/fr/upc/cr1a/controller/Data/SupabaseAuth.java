@@ -9,6 +9,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
+import fr.upc.cr1a.model.GameSession;
+
 // gson pour recup l'iud que supabase renvoie
 
 /**
@@ -27,7 +29,7 @@ public class SupabaseAuth {
     private static final String SUPABASE_URL = "https://jfystyeubanlvujvlkvw.supabase.co";
     private static final String SUPABASE_PUBLIC_KEY = "sb_publishable_uprBauX8RjU9OFrQamyhLQ_1JYNeA-a"; // clé publique donc aucun soucis de le mettre en dure ici
 
-    public static void connectPlayerByEmail(String email, String password){
+    public static void connectPlayerByEmail(String email, String password){ // mettre des booleans apres en type retour
         try {
             String jsonBody = "{\"email\": \"" + email + "\", \"password\": \"" + password + "\"}";
 
@@ -46,6 +48,8 @@ public class SupabaseAuth {
 
             String id = getIUD(response);
             String accessToken = getAccesToken(response);
+
+            SendAPI.getStats(accessToken, id);
             
         } catch (Exception e) {
             e.printStackTrace();          
@@ -73,6 +77,8 @@ public class SupabaseAuth {
 
             String id = getIUD(response);
             String accessToken = getAccesToken(response);
+
+            SendAPI.getStats(accessToken, id);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -108,10 +114,13 @@ public class SupabaseAuth {
 
     public static void main(String[] args) { // juste pour tester la connexion 
         //System.out.println("TEST CREATION DE COMPTE : ");
-        //createAccount("azaa.projects@gmail.com", "aza", "");
+        //createAccount("", "aza", "");
 
-        System.out.println("TEST CONNECTION AU COMPTE :");
-        connectPlayerByEmail("azaa.projects@gmail.com", "MDPSECRET");
+        //System.out.println("TEST CONNECTION AU COMPTE :");
+        //connectPlayerByEmail("", "");
+
+        //System.out.println("Une Game Win : ");
+        //SendAPI.WinGameSolo(8, 2, GameSession.getAccessToken()); // pour le moment ca ne modifie rien dans la db, mais l'API recoit la requete
 
         // le code http renvoyé doit etre 200 si tout marche
         

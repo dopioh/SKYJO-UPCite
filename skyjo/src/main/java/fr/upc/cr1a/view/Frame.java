@@ -31,8 +31,6 @@ public class Frame extends JFrame{
 
 
     public Frame() {
-        audioManager = new AudioManager();
-        this.account = new AccountController();
 
         setTitle("SKYJO");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -53,9 +51,11 @@ public class Frame extends JFrame{
         setGlassPane(settingsOverlay);
 
         //Contrôleurs
+        audioManager = new AudioManager();
         new SettingsOverlayController(settingsOverlay, this, audioManager);
         new MainMenuController(this, mainMenuPanel);
         new PlayersSetupController(this, playersSetupPanel);
+        this.account = new AccountController(mainMenuPanel);
 
         setVisible(true);
     }
