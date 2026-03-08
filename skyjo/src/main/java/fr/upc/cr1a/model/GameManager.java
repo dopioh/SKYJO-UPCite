@@ -34,6 +34,7 @@ public class GameManager {
 
     private GameBoardModel gameBoardModel;
     private int initRevealCount = 0;
+    private int roundNumber = 0; // numero de la manche actuelle
 
     private boolean gameWithAction = false; // true si on utilise les actions
     
@@ -496,6 +497,7 @@ public class GameManager {
      * Recommence une nouvelle manche, le joueur avec le plus grand score commence
      */
     public void startNewGame() {
+        roundNumber++;
         currentPlayerIndex = GameRuleModel.getBiggestScorePlayerIndex(players);
         currentDrawCard = null;
         discardPile = new DefausseModel();
@@ -521,6 +523,10 @@ public class GameManager {
     
     public int getInitRevealCount(){
         return initRevealCount;
+    }
+
+    public int getRoundNumber(){
+        return roundNumber;
     }
 
     public boolean revealInitCard(int col, int row){

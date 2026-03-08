@@ -209,12 +209,34 @@
     - Pas besoin de toucher au code de AnimLoop pour l'utiliser, contrairement a Gameloop de worms avec un utilisation simple:
       - `AnimLoop.add(this, animation)` / `AnimLoop.remove(this)` (voir le javadoc dans AnimLoop pour l'utilisation)
 
+- Top bar au dessus du plateau de jeu
+    - Image de fond
+    - Numéro de manche à gauche (`Manche X`)
+    - Instruction au centre
+    - nouveau system de calcul de score du joueur courant à droite (`X P`)
+
+- Système de couleur par joueur
+    - 3 sets d'images : rouge / vert / jaune pour la top bar et le fond
+    - Tourne si plus de 3 joueurs
+    - Fond et top bar changent automatiquement à chaque changement de joueur
+    - Boutons joueurs à gauche colorés selon la couleur du joueur (temporaire)
+
 ### Modified
 
 - Migration vers `AnimLoop` : `DoodleButton`, `NextRoundPanel`, `PlayerPreviewPanel`, `CursorCardView`, `CardButton`
 
 - Vitesse de fade pour l'écran "prochaine joueur" accéléré pour plus de fluidité
 
+- Suppression du label "Main de ..." au dessus des cartes
+
+- Suppression du rectangle/bordure noire autour de la grille de cartes
+
+- Suppression des code en double/nettoyage
+
 ### Fixed
 
 - Fluidité globale : Le jeu ne lag plus sur Windows en passant de 12 repaint a un seul pour l'animation carte flottante ainsi que tout les autres animations qui sont maintenant geré avec `AnimLoop`
+
+- Repaint intelligent : seules les zones nécessaires sont redessinées (ancienne et nouvelle position de la carte curseur) au lieu de tout l'écran
+
+- Plus de lignes/artefacts visibles lors du survol des cartes ou de la preview de la main des autres joueurs

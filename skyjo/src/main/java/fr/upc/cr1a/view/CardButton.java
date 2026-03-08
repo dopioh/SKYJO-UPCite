@@ -156,12 +156,16 @@ public class CardButton extends JButton {
             // on s'inscrit qu'une seule fois pour toute la classe
             if (premier) {
                 AnimLoop.add(CardButton.class, dt -> {
-                    for (CardButton carte : cartesAnimees.toArray(new CardButton[0])) {
+                    CardButton[] cartes = cartesAnimees.toArray(new CardButton[0]);
+                    for (CardButton carte : cartes) {
                         carte.phase += FloatSpeed * dt;
                         carte.floatOffsetX = Math.cos(carte.phase) * FloatWide;
                         carte.floatOffsetY = Math.sin(carte.phase) * FloatHigh;
                         carte.scale += (carte.targetScale - carte.scale) * ScaleSmoothness * dt;
-                        carte.repaint();
+                    }
+                    // un seul repaint du parent
+                    if (cartes.length > 0 && cartes[0].getParent() != null) {
+                        cartes[0].getParent().repaint();
                     }
                 });
             }
