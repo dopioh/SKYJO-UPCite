@@ -22,8 +22,6 @@ public class GameBoardBotController {
     private GameManager gameManager;
     private GameBoardController mainController;
 
-    private static final int BOT_END_TURN_DELAY = 3500;
-
     public GameBoardBotController(GameBoardView gameBoardView, GameManager gameManager, GameBoardController mainController) {
         this.gameBoardView = gameBoardView;
         this.gameManager = gameManager;
@@ -103,9 +101,10 @@ public class GameBoardBotController {
                             gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard(),
                             gameManager.getDeck().stackSize() > 0);
                     mainController.refreshGuide();
+                    mainController.setWaitingNextTurn(false);
 
                     //afficher la main suivante
-                    Timer switchTimer = new Timer(600, evt -> { // fluidité
+                    Timer switchTimer = new Timer(300, evt -> { // fluidité
                         PlayerModel nextPlayer = gameManager.getCurrentPlayer();
                         gameBoardView.showPlayerCards(nextPlayer);
                         mainController.refreshGuide();
@@ -143,7 +142,8 @@ public class GameBoardBotController {
             //cherche la strat du bot
             if (strategy == null) {
                 System.err.println("Erreur: Le bot " + bot.getName() + " n'a pas de stratégie!");
-                switchToNextPlayerWithDelay();
+                mainController.setWaitingNextTurn(false);
+                mainController.switchToNextPlayer();
                 return;
             }
 
@@ -159,9 +159,10 @@ public class GameBoardBotController {
                         gameManager.getDeck().stackSize() > 0);
                 System.out.println(bot.getName() + " prend la défausse : " + taken.getCardValue());
                 mainController.refreshGuide();
+                mainController.setWaitingNextTurn(false);
 
                 //bot échange
-                runLater(1200, () -> handleBotTurn());
+                handleBotTurn();
             } else {
                 //piocher
                 CardModel drawn = gameManager.drawDeck();
@@ -172,9 +173,14 @@ public class GameBoardBotController {
                         gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard());
                 System.out.println(bot.getName() + " pioche : " + drawn.getCardValue());
                 mainController.refreshGuide();
+                mainController.setWaitingNextTurn(false);
 
                 //décide d'échanger ou défausser
-                runLater(1200, () -> handleBotTurn());
+                Timer showCardTimer = new Timer(1000, ev -> { // fluidité
+                    handleBotTurn();
+                });
+                showCardTimer.setRepeats(false);
+                showCardTimer.start();
             }
         });
         decisionTimer.setRepeats(false);
@@ -206,7 +212,8 @@ public class GameBoardBotController {
                             gameManager.getDiscardPile().getTopCard(),
                             gameManager.getDeck().stackSize() > 0);
                     mainController.refreshGuide();
-                    switchToNextPlayerWithDelay();
+                    mainController.setWaitingNextTurn(false);
+                    mainController.switchToNextPlayer();
                 }
             } else {
                 //jeter la carte piochée puis révéler une carte
@@ -227,7 +234,8 @@ public class GameBoardBotController {
                     
                     gameBoardView.showPlayerCards(bot);
                     System.out.println(bot.getName() + " révèle une carte");
-                    switchToNextPlayerWithDelay();
+                    mainController.setWaitingNextTurn(false);
+                    mainController.switchToNextPlayer();
                 });
                 revealTimer.setRepeats(false);
                 revealTimer.start();
@@ -260,19 +268,10 @@ public class GameBoardBotController {
                         gameManager.getDeck().stackSize() > 0);
                 mainController.refreshGuide();
             }
-            switchToNextPlayerWithDelay();
+            mainController.setWaitingNextTurn(false);
+            mainController.switchToNextPlayer();
         });
         exchangeTimer.setRepeats(false);
         exchangeTimer.start();
-    }
-
-    private void switchToNextPlayerWithDelay() {
-        runLater(BOT_END_TURN_DELAY, () -> mainController.switchToNextPlayer());
-    }
-
-    private void runLater(int delay, Runnable action) {
-        Timer timer = new Timer(delay, e -> action.run());
-        timer.setRepeats(false);
-        timer.start();
     }
 }
