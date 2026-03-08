@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import javax.swing.*;
 
 import fr.upc.cr1a.model.ActionCardModel;
+import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.PlayerHandModel;
 import fr.upc.cr1a.model.PlayerModel;
@@ -46,8 +47,11 @@ public class GameBoardView extends JPanel {
     private CursorCardView cursorCardView;
 
     // Affichage de la main des cartes action du joueur
+    private static final int MAX_ACTION_CARDS = 8;
     private JPanel actionHandPanel;
-    private ArrayList<CardButton> actionCardButtons;
+    private CardButton[] actionCardButtons;
+    private ActionType[] actionCardTypes;
+    private int visibleActionCount = 0;   // nombre de boutons actuellement visibles
 
     // Affichage des cartes pilées
     private CardButton btnPioche;
@@ -74,7 +78,8 @@ public class GameBoardView extends JPanel {
         this.listPlayer = listPlayerModels;
         this.buttonlistPlayer = new ArrayList<JButton>();
         this.cardButtons = new CardButton[3][4];
-        this.actionCardButtons = new ArrayList<>();
+        this.actionCardButtons = new CardButton[MAX_ACTION_CARDS];
+        this.actionCardTypes = new ActionType[MAX_ACTION_CARDS];
         setLayout(new BorderLayout());
         setOpaque(true);
         setVisible(true);
@@ -188,6 +193,15 @@ public class GameBoardView extends JPanel {
         // Panel des cartes actions dans la main du joueur
         actionHandPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 2));
         actionHandPanel.setOpaque(false);
+        // pre-creation des cartes actions
+        for (int i = 0; i < MAX_ACTION_CARDS; i++) {
+            CardButton btn = new CardButton();
+            btn.setAnimationEnabled(EnableHandCardAnimations);
+            btn.setCardSize(65, 90);
+            btn.setVisible(false);
+            actionCardButtons[i] = btn;
+            actionHandPanel.add(btn);
+        }
         cardsContainer.add(actionHandPanel, BorderLayout.SOUTH);
 
         // creer les 12 CardButton
@@ -354,38 +368,42 @@ public class GameBoardView extends JPanel {
     }
 
     /**
-     * Affiche les cartes action du joueur en petit au-dessus de la main
+     * maj les boutons carte action
      */
     public void showActionHand(PlayerModel player) {
-        actionHandPanel.removeAll();
-        actionCardButtons.clear();
-
         ArrayList<ActionCardModel.ActionType> actions = player.getActionHand();
-        if (actions == null || actions.isEmpty()) {
-            actionHandPanel.repaint();
-            return;
+        visibleActionCount = (actions == null) ? 0 : actions.size();
+
+        for (int i = 0; i < MAX_ACTION_CARDS; i++) {
+            if (i < visibleActionCount) {
+                ActionType type = actions.get(i);
+                actionCardTypes[i] = type;
+                ActionCardModel tempCard = new ActionCardModel(false, type); // juste pour recup l'image de la bonne carte
+                actionCardButtons[i].setCardImage(getCardImagePath(tempCard));
+                actionCardButtons[i].setVisible(true);
+            } else {
+                actionCardTypes[i] = null;
+                actionCardButtons[i].setVisible(false);
+            }
         }
 
-        for (int i = 0; i < actions.size(); i++) {
-            ActionCardModel.ActionType type = actions.get(i);
-            CardButton btn = new CardButton();
-            btn.setAnimationEnabled(EnableHandCardAnimations);
-
-            // carte temp pour recuperer l'image qui correspond au type
-            ActionCardModel tempCard = new ActionCardModel(false, type);
-            String imgPath = getCardImagePath(tempCard);
-            btn.setCardImage(imgPath);
-            btn.setCardSize(65, 90);
-
-            btn.addActionListener(e -> {
-                System.out.println("carte " + type + " activée !");
-            });
-
-            actionCardButtons.add(btn);
-            actionHandPanel.add(btn);
-        }
-
+        actionHandPanel.revalidate(); //ça sert a quoi ?
         actionHandPanel.repaint();
+    }
+
+    /**
+     * Getters pour que le controller puisse ajouter ses listeners
+     */
+    public CardButton[] getActionCardButtons() {
+        return actionCardButtons;
+    }
+
+    public ActionType getActionCardType(int index) {
+        return actionCardTypes[index];
+    }
+
+    public int getVisibleActionCount() {
+        return visibleActionCount;
     }
 
     /**
