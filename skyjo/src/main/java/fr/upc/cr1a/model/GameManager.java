@@ -27,6 +27,7 @@ public class GameManager {
     private DefausseActionModel discardActionPile;
     private int currentPlayerIndex;
     private int firstPlayerToPlayIndex;  // joueur qui a commencé la manche
+    private int lastRoundTriggerPlayerIndex = -1;  // joueur qui a déclenché le LAST_ROUND
     private GameState gameState;
     private TurnPhase turnPhase;
     private CardModel currentDrawCard;
@@ -130,6 +131,7 @@ public class GameManager {
 
         this.currentPlayerIndex = 0;
         this.firstPlayerToPlayIndex = 0; // le joueur qui commence la manche
+        this.lastRoundTriggerPlayerIndex = -1;  // réinitialiser pour le début de partie
         this.deck = new PiocheModel(false);
         this.discardPile = new DefausseModel();
         this.currentDrawCard = null;
@@ -216,6 +218,7 @@ public class GameManager {
         
         currentPlayerIndex = 0;
         firstPlayerToPlayIndex = 0; // le joueur qui commence la manche
+        lastRoundTriggerPlayerIndex = -1;  // réinitialiser pour le début de partie
         deck = new PiocheModel(this.gameWithAction);
         discardPile = new DefausseModel();
 
@@ -275,7 +278,8 @@ public class GameManager {
         //creer un deck deja melange
         //deck = new PiocheModel(); // on a deja un deck initalisé dans le constructeur !
         
-        firstPlayerToPlayIndex = currentPlayerIndex; 
+        firstPlayerToPlayIndex = currentPlayerIndex;
+        lastRoundTriggerPlayerIndex = -1;  // réinitialiser pour la nouvelle manche
         
         for (PlayerModel player : players) {
             player.resetHand();
@@ -337,8 +341,8 @@ public class GameManager {
         if (currentPlayerIndex >= players.size()) {
             currentPlayerIndex = 0;
         }
-        //regarde si on est sur le dernier tour et si on est revenu au premier joueur
-        if (gameState == GameState.LAST_ROUND && currentPlayerIndex == firstPlayerToPlayIndex) {
+        //regarde si on est sur le dernier tour et si on est revenu au joueur qui a déclenché la fin
+        if (gameState == GameState.LAST_ROUND && currentPlayerIndex == lastRoundTriggerPlayerIndex) {
             endRound();
         }
     }
@@ -434,6 +438,7 @@ public class GameManager {
         //vérifier si fin de manche
         if (GameRuleModel.checkEndOfRound(players)) {
             gameState = GameState.LAST_ROUND;
+            lastRoundTriggerPlayerIndex = currentPlayerIndex;  // stocker le joueur qui déclenche le dernier tour
         }
         turnPhase = TurnPhase.TURN_ENDED;
     }
@@ -458,7 +463,12 @@ public class GameManager {
         // check
         GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile);
         GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile);
-
+        
+        //vérifier si fin de manche
+        if (GameRuleModel.checkEndOfRound(players)) {
+            gameState = GameState.LAST_ROUND;
+            lastRoundTriggerPlayerIndex = currentPlayerIndex;  // stocker le joueur qui déclenche le dernier tour
+        }
     }
 
 

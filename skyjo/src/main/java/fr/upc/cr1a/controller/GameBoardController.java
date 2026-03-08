@@ -379,12 +379,18 @@ public class GameBoardController {
      * Message d'action indiqunat au joueur quoi faire
      */
     public void refreshGuide() {
+        String prefix = "";
+        // Ajouter un indicateur si on est dans le dernier tour
+        if (gameManager.getGameState() == GameManager.GameState.LAST_ROUND) {
+            prefix = "⚠️ DERNIER TOUR ⚠️ - ";
+        }
+        
         switch (gameManager.getTurnPhase()) {
-            case DRAW_DECISION -> gameBoardView.setActionGuide("Choisis : Pioche ou Défausse");
-            case CARD_DRAW_FROM_DECK -> gameBoardView.setActionGuide("Echange ou Défausse puis revele une carte");
-            case CARD_TAKE_FROM_DISCARD -> gameBoardView.setActionGuide("Clique une carte de ta main pour échanger");
-            case CRAD_DISCARD_FROM_DRAW -> gameBoardView.setActionGuide("Veuillez reveler une carte de votre main");
-            case TURN_ENDED -> gameBoardView.setActionGuide("Tour terminé");
+            case DRAW_DECISION -> gameBoardView.setActionGuide(prefix + "Choisis : Pioche ou Défausse");
+            case CARD_DRAW_FROM_DECK -> gameBoardView.setActionGuide(prefix + "Echange ou Défausse puis revele une carte");
+            case CARD_TAKE_FROM_DISCARD -> gameBoardView.setActionGuide(prefix + "Clique une carte de ta main pour échanger");
+            case CRAD_DISCARD_FROM_DRAW -> gameBoardView.setActionGuide(prefix + "Veuillez reveler une carte de votre main");
+            case TURN_ENDED -> gameBoardView.setActionGuide(prefix + "Tour terminé");
             case INIT_REVEAL -> gameBoardView.setActionGuide(gameManager.getCurrentPlayer().getName()
                     + " doit réveler 2 cartes (" + gameManager.getInitRevealCount() + ")");
         }
