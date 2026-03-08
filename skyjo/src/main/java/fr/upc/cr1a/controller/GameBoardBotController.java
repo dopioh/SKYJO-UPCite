@@ -22,7 +22,7 @@ public class GameBoardBotController {
     private GameManager gameManager;
     private GameBoardController mainController;
 
-    private static final int BOT_END_TURN_DELAY = 2000;
+    private static final int BOT_END_TURN_DELAY = 3500;
 
     public GameBoardBotController(GameBoardView gameBoardView, GameManager gameManager, GameBoardController mainController) {
         this.gameBoardView = gameBoardView;
@@ -37,7 +37,6 @@ public class GameBoardBotController {
         PlayerModel currentPlayer = gameManager.getCurrentPlayer();
         //rien faire si c'est pas un bot
         if (!(currentPlayer instanceof BotModel)) {
-            mainController.setWaitingNextTurn(false);
             return;
         }
 
@@ -216,7 +215,7 @@ public class GameBoardBotController {
                         gameManager.getDiscardPile().getTopCard(),
                         gameManager.getDeck().stackSize() > 0);
                 System.out.println(bot.getName() + " défausse et va révéler une carte");
-                gameBoardView.setActionGuide(bot.getName() + " révèle une carte...");
+                mainController.refreshGuide();
 
                 //revele une carte aléatoire de sa main
                 Timer revealTimer = new Timer(800, ev -> { // fluidité
