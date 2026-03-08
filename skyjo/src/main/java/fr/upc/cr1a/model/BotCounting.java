@@ -262,21 +262,68 @@ public class BotCounting implements BotStrategyInterface {
         return false;
     }
     
+    /**
+     * donne la colonne avec le moins de carte visible
+     * @param hand la main du bot
+     * @return index de la colonne ou -1 si aucune
+     */
+    private int EmptyColumn(BotHandModel hand) {
+        int minVisibleCount = Integer.MAX_VALUE;
+        int bestCol = -1;
+        
+        for (int col = 0; col < hand.getColumns(); col++) {
+            //vérifier s'il y a des cartes cachées dans cette colonne
+            boolean faceDownCards = false;
+            for (int row = 0; row < hand.getRows(); row++) {
+                CardModel card = hand.getCard(row, col);
+                if (card != null && card.isFaceDown()) {
+                    faceDownCards = true;
+                    break;
+                }
+            }
+            
+            //si la colonne a des cartes cachées, compter les cartes visibles
+            if (faceDownCards) {
+                int visibleCount = hand.countVisibleCardsInColumn(col);
+                if (visibleCount < minVisibleCount) {
+                    minVisibleCount = visibleCount;
+                    bestCol = col;
+                }
+            }
+        }
+        
+        return bestCol;
+    }
+    
     @Override
     public int[] CardToExchange(BotHandModel hand, CardModel card) {
         int[] sameCardPosition = hand.sameCardInHandPostition(card);
+        
+        //calculer la proba de cette carte
+        double probSameCard = calculateProbaOfTheCard(card.getCardValue());
+        boolean isGoodCard = probSameCard >= 0.65 || card.getCardValue() <= 2;
         
         //si on a la même carte en main
         if (sameCardPosition[0] != -1) {
             int actualCol = sameCardPosition[0];
             int sameCardRow = sameCardPosition[1];
             
-            //calculer la proba de revoir cette carte
-            double probSameCard = calculateProbaOfTheCard(card.getCardValue());
-            
             //bonne proba jouer la colonne
             if (probSameCard >= 0.65) {
-                //prio révéler les carte carché
+                //montrer une carte d'un colonne pas exploqué
+                int emptycol = EmptyColumn(hand);
+                
+                if (emptycol != -1 && emptycol != actualCol) {
+                    //revéler une carte cachée dans la colonne moins explorée
+                    for (int row = 0; row < hand.getRows(); row++) {
+                        CardModel cardInCol = hand.getCard(row, emptycol);
+                        if (cardInCol != null && cardInCol.isFaceDown()) {
+                            return new int[]{emptycol, row};
+                        }
+                    }
+                }
+                
+                //si pas de meilleure colonne, continuer dans la même colonne
                 for (int i = 0; i < hand.getRows(); i++) {
                     CardModel cardInCol = hand.getCard(i, actualCol);
                     if (cardInCol == null) continue;
@@ -304,7 +351,21 @@ public class BotCounting implements BotStrategyInterface {
             }
         }
         
-        //révéler une carte caché de la colonne si la proba d'avoir la meme carte est bonne
+        //si on a une bonne carte, privilégier la découverte
+        if (isGoodCard) {
+            int emptyCol = emptyColumn(hand);
+            if (emptyCol != -1) {
+                //revéler une carte cachée dans la colonne moins explorée
+                for (int row = 0; row < hand.getRows(); row++) {
+                    CardModel cardInCol = hand.getCard(row, emptyCol);
+                    if (cardInCol != null && cardInCol.isFaceDown()) {
+                        return new int[]{emptyCol, row};
+                    }
+                }
+            }
+        }
+        
+        //révéler une carte cachée (n'importe laquelle en dernier recours)
         for (int col = 0; col < hand.getColumns(); col++) {
             for (int row = 0; row < hand.getRows(); row++) {
                 CardModel cardAt = hand.getCard(row, col);
