@@ -55,8 +55,7 @@ public class GameLauncher {
             String inputName = scanner.nextLine();
             
             PlayerData tmp;
-            if (inputName.equalsIgnoreCase("bot") || inputName.equalsIgnoreCase("botRow") || 
-                inputName.equalsIgnoreCase("botLow") || inputName.equalsIgnoreCase("botCounting")) {
+            if (inputName.equalsIgnoreCase("bot") || inputName.equalsIgnoreCase("botRow") || inputName.equalsIgnoreCase("botLow") || inputName.equalsIgnoreCase("botCounting")) {
                 botCounter++;
                 String botName = "Bot" + botCounter;
                 String botType = inputName.toLowerCase(); // Stocke le type exact
