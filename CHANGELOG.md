@@ -196,6 +196,7 @@
 ### Fixed
 - Reimplémentation du système de carte action qui avait disparu lors d'un ancien refactoring
 
+
 ## v.0.6: SPRINT 6
 ---
 
