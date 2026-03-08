@@ -293,11 +293,10 @@ public class GameBoardController {
         updateAllDecksDisplay();
         refreshGuide();
 
-        if (gameManager.getCurrentPlayer() instanceof BotModel) {
-            botController.handleBotTurn();
-        } else {
-            waitingNextTurn = false;
-        }
+        waitingNextTurn = false;
+
+        // regarde si c'est un bot
+        botController.handleBotTurn();
     }
 
     /**
