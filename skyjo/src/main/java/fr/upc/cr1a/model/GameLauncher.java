@@ -21,7 +21,7 @@ public class GameLauncher {
 
         // Jeu dams le Terminal 
         //scanner = new Scanner(System.in);
-       // startGame();
+        //startGame();
     }
     
     /**

@@ -1,5 +1,6 @@
 package fr.upc.cr1a.view;
 
+import fr.upc.cr1a.model.AnimLoop;
 import fr.upc.cr1a.model.DoodleButtonModel;
 import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
 
@@ -25,7 +26,7 @@ public class DoodleButton extends JComponent {
     private BufferedImage bgImage;
     private float scribbleProgress;
     private float hoverScale = 1f;
-    private Timer animTimer;
+    private boolean animRunning = false;
 
     // juste texte
     public DoodleButton(String text) {
@@ -85,26 +86,19 @@ public class DoodleButton extends JComponent {
     }
 
     private void startAnimationTimer() {
-        if (animTimer != null) return;
-        animTimer = new Timer(8, e -> {
-            boolean dirty = false;
+        if (animRunning) return;
+        animRunning = true;
+        AnimLoop.add(this, dt -> {
+            // scale vers la cible (1.04 si hover, 1.0 sinon)
             float target = model.isHovered() ? 1.04f : 1f;
-            float diff = target - hoverScale;
-            if (Math.abs(diff) > 0.0003f) {
-                hoverScale += diff * 0.35f;
-                dirty = true;
-            } else if (hoverScale != target) {
-                hoverScale = target;
-                dirty = true;
-            }
-            
+            hoverScale += (target - hoverScale) * 0.3f * (float) dt;
+
+            // scribble progresse pendant le hover
             if (model.isHovered() && scribbleProgress < 1f) {
-                scribbleProgress = Math.min(scribbleProgress + 0.07f, 1f);
-                dirty = true;
+                scribbleProgress = Math.min(scribbleProgress + 0.15f * (float) dt, 1f);
             }
-            if (dirty) repaint();
+            repaint();
         });
-        animTimer.start();
     }
 
     private void startScribbleAnim() {
