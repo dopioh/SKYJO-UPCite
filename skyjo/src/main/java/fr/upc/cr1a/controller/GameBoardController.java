@@ -36,6 +36,8 @@ public class GameBoardController {
     // panel de fin de manche
     RoundEndPanel currentRoundEndPanel = null;
 
+    private static final int NEXT_TURN_DELAY = 1500;
+
     /**
      * Initialise la view et le Model du GameBoard
      */
@@ -281,23 +283,26 @@ public class GameBoardController {
         gameBoardView.hideCursorCard();
         gameManager.nextPlayer();
         // détecter fin de manche ou fin de partie
-        if (gameManager.getGameState() == GameManager.GameState.ROUND_ENDED
-                || gameManager.getGameState() == GameManager.GameState.GAME_ENDED) {
-            waitingNextTurn = false;
-            showRoundEndScreen();
-            return;
-        }
-
-        gameManager.startTurn();
-        gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
-        updateAllDecksDisplay();
-        refreshGuide();
-
-        if (gameManager.getCurrentPlayer() instanceof BotModel) {
-            botController.handleBotTurn();
-        } else {
-            waitingNextTurn = false;
-        }
+        Timer timer = new Timer(NEXT_TURN_DELAY, e -> {
+            gameManager.nextPlayer();
+            if (gameManager.getGameState() == GameManager.GameState.ROUND_ENDED
+                    || gameManager.getGameState() == GameManager.GameState.GAME_ENDED) {
+                waitingNextTurn = false;
+                showRoundEndScreen();
+                return;
+            }
+            gameManager.startTurn();
+            gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
+            updateAllDecksDisplay();
+            refreshGuide();
+            if (gameManager.getCurrentPlayer() instanceof BotModel) {
+                botController.handleBotTurn();
+            } else {
+                waitingNextTurn = false;
+            }
+        });
+        timer.setRepeats(false);
+        timer.start();
     }
 
     /**
