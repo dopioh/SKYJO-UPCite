@@ -514,7 +514,6 @@ public class GameManager {
             if (currentPlayerIndex == firstPlayerToPlayIndex) {
                 startTurn(); // passe à DRAW_DECISION
             }
-            gameBoardModel.getGameBoardController().nextPlayerSound();
         }
         return true;
     }

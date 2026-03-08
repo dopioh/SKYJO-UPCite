@@ -25,7 +25,6 @@ public class GameBoardController {
 
     GameBoardModel gameBoardModel;
     GameBoardView gameBoardView;
-    NextRoundPanel nextRoundPanel;
     GameManager gameManager;
     private GameBoardBotController botController;
     
@@ -45,7 +44,6 @@ public class GameBoardController {
         this.gameBoardView = gameBoardView;
         this.gameManager = gameManager;
         this.audio = new AudioManager();
-        this.nextRoundPanel = gameBoardView.getNextRoundPanel();
         this.botController = new GameBoardBotController(gameBoardView, gameManager, this);
 
         listener();
@@ -175,14 +173,8 @@ public class GameBoardController {
                         updateAllDecksDisplay();
                         refreshGuide();
                         //System.out.println("ALROS ??");
-                        
-                        //vérifie si après le tour d'un bot c'est un joeur qui doit jouer pour afficher sa main
-                        Timer checkBotTimer = new Timer(300, ev -> {
-                            botController.handleBotTurn();
-                        });
-                        checkBotTimer.setRepeats(false);
-                        checkBotTimer.start();
-                        //System.out.println("ALROS ??");
+                    
+                        botController.handleBotTurn();
                         return;
                     }
                     //System.out.println("ALROS ??");
@@ -285,36 +277,26 @@ public class GameBoardController {
      * Passe au joueur suivant via GameManager et affiche ses cartes
      */
     public void switchToNextPlayer() {
-        Timer beforeSwitch = new Timer(1500, e -> {
-            nextPlayerSound();
-        });
-        beforeSwitch.setRepeats(false);
-        beforeSwitch.start();
         waitingNextTurn = true;
         gameBoardView.hideCursorCard();
-        
-        // timer pour voir les cartes avant de changer de main
-        Timer delayTimer = new Timer(4000, e -> {
-            gameManager.nextPlayer();
-
-            // detecter fin de manche ou fin de partie
-            if (gameManager.getGameState() == GameManager.GameState.ROUND_ENDED
+        gameManager.nextPlayer();
+        // détecter fin de manche ou fin de partie
+        if (gameManager.getGameState() == GameManager.GameState.ROUND_ENDED
                 || gameManager.getGameState() == GameManager.GameState.GAME_ENDED) {
-                waitingNextTurn = false;
-                showRoundEndScreen();
-                return;
-            }
-
-            gameManager.startTurn();
-            gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
-            updateAllDecksDisplay();
-            refreshGuide();
             waitingNextTurn = false;
-            //regarde si c'est un bot
-            botController.handleBotTurn();
-        });
-        delayTimer.setRepeats(false);
-        delayTimer.start();
+            showRoundEndScreen();
+            return;
+        }
+
+        gameManager.startTurn();
+        gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
+        updateAllDecksDisplay();
+        refreshGuide();
+
+        waitingNextTurn = false;
+
+        // regarde si c'est un bot
+        botController.handleBotTurn();
     }
 
     /**
@@ -408,19 +390,6 @@ public class GameBoardController {
             case INIT_REVEAL -> gameBoardView.setActionGuide(gameManager.getCurrentPlayer().getName()
                     + " doit réveler 2 cartes (" + gameManager.getInitRevealCount() + ")");
         }
-    }
-
-    public void nextPlayerSound() {
-        audio.playSfx("/sfx/round.wav"); //je trouve le son bizzare hmm j'ai mis un alternatif ou juste avec ce son c'est bizzare d'etre accompagné d'un fade
-        nextRoundPanel.setCurrentPlayer(gameManager.getCurrentPlayer());
-        nextRoundPanel.fade(true);
-        waitingNextTurn = true;
-        Timer waitTimer = new Timer(2500, e -> {
-            nextRoundPanel.fade(false);
-            waitingNextTurn = false;
-        });
-        waitTimer.setRepeats(false);
-        waitTimer.start();
     }
 
     /**
