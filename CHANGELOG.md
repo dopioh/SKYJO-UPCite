@@ -237,6 +237,16 @@
 
 - Fluidité globale : Le jeu ne lag plus sur Windows en passant de 12 repaint a un seul pour l'animation carte flottante ainsi que tout les autres animations qui sont maintenant geré avec `AnimLoop`
 
-- Repaint intelligent : seules les zones nécessaires sont redessinées (ancienne et nouvelle position de la carte curseur) au lieu de tout l'écran
+- Repaint intelligent : seules les zones nécessaires sont redessinées (ancienne et nouvelle position de la carte curseur) au lieu de tout l'écran -> carte curseur plus fluide
 
 - Plus de lignes/artefacts visibles lors du survol des cartes ou de la preview de la main des autres joueurs
+
+- Selection du mode de jeu (vanilla ou action) dans le menu de selection
+- Affichage de la pioche et de la defausse action en jeu
+- Couverture de tests pour 
+    - les pioches
+    - les defausses
+    - les cartes numéros et les cartes actions
+    - les comportements des cartes actions
+    - la CursorCard
+    - le BotHandModel
