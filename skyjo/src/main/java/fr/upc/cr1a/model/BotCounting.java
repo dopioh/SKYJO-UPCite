@@ -267,7 +267,7 @@ public class BotCounting implements BotStrategyInterface {
      * @param hand la main du bot
      * @return index de la colonne ou -1 si aucune
      */
-    private int EmptyColumn(BotHandModel hand) {
+    private int emptyColumn(BotHandModel hand) {
         int minVisibleCount = Integer.MAX_VALUE;
         int bestCol = -1;
         
@@ -311,7 +311,7 @@ public class BotCounting implements BotStrategyInterface {
             //bonne proba jouer la colonne
             if (probSameCard >= 0.65) {
                 //montrer une carte d'un colonne pas exploqué
-                int emptycol = EmptyColumn(hand);
+                int emptycol = emptyColumn(hand);
                 
                 if (emptycol != -1 && emptycol != actualCol) {
                     //revéler une carte cachée dans la colonne moins explorée
