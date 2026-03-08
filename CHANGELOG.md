@@ -182,6 +182,8 @@
     - Bouton compte en haut à droite (J button)
     - Animation scale au survol du DoodleButton avec ease
 
+- Creation de compte /connexion avec la base de donnees, dans le terminal
+
 ### Modified 
 - Refacto propre dans **GameTerminalModel.useAction()**
 
@@ -196,12 +198,29 @@
 ### Fixed
 - Reimplémentation du système de carte action qui avait disparu lors d'un ancien refactoring
 
+
 ## v.0.6: SPRINT 6
 ---
 
 ### Added
+
+- `AnimLoop` : système centralisé d'animation
+    - Un seul Timer à 60fps pour toute le jeu
+    - Delta time pour que ça soit pareil sur n'importe quel ordi
+    - Démarrage et arrêt automatiques selon le nombre de tâches enregistrées
+    - Pas besoin de toucher au code de AnimLoop pour l'utiliser, contrairement a Gameloop de worms avec un utilisation simple:
+      - `AnimLoop.add(this, animation)` / `AnimLoop.remove(this)` (voir le javadoc dans AnimLoop pour l'utilisation)
+
+- Interface simple au lancement du jeu pour se connecter ou creer un compte (obliger de se connecter pour acceder au jeu)
+
+- Lors de la creation du compte, ses statistiques sont defini automatiquement dans la database
+
+- Apres la creation/login, les infos du joueurs sont sur la db et le cachelocal `PlayerData.java` (il faut juste le reactualiser quand on change une stat dans la db)
+
 - Selection du mode de jeu (vanilla ou action) dans le menu de selection
+
 - Affichage de la pioche et de la defausse action en jeu
+
 - Couverture de tests pour 
     - les pioches
     - les defausses
@@ -209,3 +228,18 @@
     - les comportements des cartes actions
     - la CursorCard
     - le BotHandModel
+
+- debut de recode des actions pour awt/swing
+
+- affichage de la main action du joueur
+
+### Modified
+
+- Migration vers `AnimLoop` : `DoodleButton`, `NextRoundPanel`, `PlayerPreviewPanel`, `CursorCardView`, `CardButton`
+
+- Vitesse de fade pour l'écran "prochaine joueur" accéléré pour plus de fluidité
+
+### Fixed
+
+- Fluidité globale : Le jeu ne lag plus sur Windows en passant de 12 repaint a un seul pour l'animation carte flottante ainsi que tout les autres animations qui sont maintenant geré avec `AnimLoop`
+
