@@ -61,7 +61,17 @@ public class GameManager {
      * Constructeur qui doit etre appeler pour lancer une partie
      * Dans la version swing
     */
-    public GameManager(Frame frame){
+    public GameManager(Frame frame, boolean action){
+        // On l'utilise quand ce gamemanager ??
+        this.gameWithAction = action;
+        if (this.gameWithAction) {
+            actionDeck = new PiocheActionModel();
+            discardActionPile = new DefausseActionModel();
+            ActionCardModel initActionCard = new ActionCardModel(true, ActionType.REPLACE_CARD_IN_HAND);
+            initActionCard.returnCard();
+            discardActionPile.addCardAtTop(initActionCard);
+        }
+
         System.out.println("GameManager Called");
 
         this.players = new ArrayList<>(); // il faudra initialiser les joueurs a un moment
@@ -70,7 +80,7 @@ public class GameManager {
         }
 
         // Distribution depuis la pioche, cartes face cachée
-        this.deck = new PiocheModel(false);
+        this.deck = new PiocheModel(this.gameWithAction);
         for (PlayerModel player : players) {
             for (int row = 0; row < 3; row++) {
                 for (int col = 0; col < 4; col++) {
@@ -94,7 +104,14 @@ public class GameManager {
         frame.showPanel("GAME");
     }
 
-    public GameManager(Frame frame, List<PlayerData> playersData){
+    public GameManager(Frame frame, List<PlayerData> playersData, boolean action){
+        this.gameWithAction = action;
+        if (this.gameWithAction) {
+            actionDeck = new PiocheActionModel();
+            discardActionPile = new DefausseActionModel();
+            ActionCardModel initActionCard = new ActionCardModel(true, ActionType.REPLACE_CARD_IN_HAND);
+            discardActionPile.addCardAtTop(initActionCard);
+        }
         //Creation des joueurs 
         this.players = new ArrayList<>();
         for (PlayerData player : playersData) {
@@ -120,7 +137,7 @@ public class GameManager {
 
         this.currentPlayerIndex = 0;
         this.firstPlayerToPlayIndex = 0; // le joueur qui commence la manche
-        this.deck = new PiocheModel(false);
+        this.deck = new PiocheModel(this.gameWithAction);
         this.discardPile = new DefausseModel();
         this.currentDrawCard = null;
         this.gameState = GameState.WAITING_FOR_PLAYERS;
