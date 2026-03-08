@@ -29,7 +29,7 @@ public class SupabaseAuth {
     private static final String SUPABASE_URL = "https://jfystyeubanlvujvlkvw.supabase.co";
     private static final String SUPABASE_PUBLIC_KEY = "sb_publishable_uprBauX8RjU9OFrQamyhLQ_1JYNeA-a"; // clé publique donc aucun soucis de le mettre en dure ici
 
-    public static void connectPlayerByEmail(String email, String password){ // mettre des booleans apres en type retour
+    public static boolean connectPlayerByEmail(String email, String password){ // mettre des booleans apres en type retour
         try {
             String jsonBody = "{\"email\": \"" + email + "\", \"password\": \"" + password + "\"}";
 
@@ -43,16 +43,21 @@ public class SupabaseAuth {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString()); // peut lever une exceptions -> obliger try catch
 
-            System.out.println("CODE HTTP : " + response.statusCode());
-            //System.out.println("SUPABASE REPONSE : " + response.body()); // print pour le moment, sera gerer selon le code renvoyer plus tard
+            if (response.statusCode() != 200){
+                System.out.println("CODE HTTP : " + response.statusCode());
+                System.out.println("SUPABASE REPONSE : " + response.body());
+                return false;
+            }
 
             String id = getIUD(response);
             String accessToken = getAccesToken(response);
 
             SendAPI.getStats(accessToken, id);
+            return true;
             
         } catch (Exception e) {
-            e.printStackTrace();          
+            e.printStackTrace();       
+            return false;   
         }
     }
 
@@ -60,7 +65,7 @@ public class SupabaseAuth {
         // a definir apres s'etre assuré que par mail ça fonctionne à 100%
     }
 
-    public static void createAccount(String email, String username, String password) {
+    public static boolean createAccount(String email, String username, String password) {
         try {
             String jsonBody = "{\"email\": \"" + email + "\", \"password\": \"" + password + "\", \"data\": {\"username\": \"" + username + "\"}}"; // rajoute l'username en tant que metadata
 
@@ -72,16 +77,22 @@ public class SupabaseAuth {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            System.out.println("CODE HTTP CREATION : " + response.statusCode());
-            //System.out.println("REPONSE SUPABASE : " + response.body());
+            if (response.statusCode() != 200){
+                System.out.println("HTTP CODE PAS 200 : " + response.statusCode());
+                System.out.println("REPONSE SUPABASE : " + response.body());
+                return false;
+            }
 
             String id = getIUD(response);
             String accessToken = getAccesToken(response);
 
             SendAPI.getStats(accessToken, id);
 
+            return true;
+
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
     }
 
@@ -112,12 +123,14 @@ public class SupabaseAuth {
     }
 
 
+    /* Juste pour tester dans le terminal
+    
     public static void main(String[] args) { // juste pour tester la connexion 
-        //System.out.println("TEST CREATION DE COMPTE : ");
+        System.out.println("TEST CREATION DE COMPTE : ");
         //createAccount("", "aza", "");
 
         //System.out.println("TEST CONNECTION AU COMPTE :");
-        //connectPlayerByEmail("", "");
+        connectPlayerByEmail("", "");
 
         //System.out.println("Une Game Win : ");
         //SendAPI.WinGameSolo(8, 2, GameSession.getAccessToken()); // pour le moment ca ne modifie rien dans la db, mais l'API recoit la requete
@@ -125,4 +138,5 @@ public class SupabaseAuth {
         // le code http renvoyé doit etre 200 si tout marche
         
     }
+    */
 }

@@ -5,6 +5,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import fr.upc.cr1a.controller.AccountController;
+import fr.upc.cr1a.controller.ConnexionController;
 import fr.upc.cr1a.controller.MainMenuController;
 import fr.upc.cr1a.controller.PlayersSetupController;
 import fr.upc.cr1a.controller.SettingsOverlayController;
@@ -27,7 +28,11 @@ public class Frame extends JFrame{
     private Rectangle windowedBounds;
     private final AudioManager audioManager;
     private PlayersSetupPanel playersSetupPanel;
-    private AccountController account;
+    private ConnexionPanel connexionPanel;
+
+    // Controller 
+    private AccountController account; // sert a rien pour le moment
+    private ConnexionController connexionController;
 
 
     public Frame() {
@@ -39,7 +44,10 @@ public class Frame extends JFrame{
         
         cardLayout = new CardLayout();
         setLayout(cardLayout);
-        
+
+        connexionPanel = new ConnexionPanel();
+        add(connexionPanel, "CONNEXION");
+
         mainMenuPanel = new MainMenuPanel();
         add(mainMenuPanel, "MENU");
         
@@ -55,6 +63,7 @@ public class Frame extends JFrame{
         new SettingsOverlayController(settingsOverlay, this, audioManager);
         new MainMenuController(this, mainMenuPanel);
         new PlayersSetupController(this, playersSetupPanel);
+        this.connexionController = new ConnexionController(this, connexionPanel);
         this.account = new AccountController(mainMenuPanel);
 
         setVisible(true);
