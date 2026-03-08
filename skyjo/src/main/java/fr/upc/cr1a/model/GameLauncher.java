@@ -17,11 +17,11 @@ public class GameLauncher {
     
     public GameLauncher() {
         // Fenetre du jeu
-        //new Frame();
+        new Frame();
 
         // Jeu dams le Terminal 
-        scanner = new Scanner(System.in);
-        startGame();
+        //scanner = new Scanner(System.in);
+        //startGame();
     }
     
     /**
@@ -51,11 +51,12 @@ public class GameLauncher {
         
         //Donnez le nom des joueurs
         for (int i = 1; i <= nbJoueurs; i++) {
-            System.out.print("Nom du joueur " + i + " ou 'bot', 'botRow', 'botLow' : ");
+            System.out.print("Nom du joueur " + i + " ou 'bot', 'botRow', 'botLow', 'botCounting' : ");
             String inputName = scanner.nextLine();
             
             PlayerData tmp;
-            if (inputName.equalsIgnoreCase("bot") || inputName.equalsIgnoreCase("botRow") || inputName.equalsIgnoreCase("botLow")) {
+            if (inputName.equalsIgnoreCase("bot") || inputName.equalsIgnoreCase("botRow") || 
+                inputName.equalsIgnoreCase("botLow") || inputName.equalsIgnoreCase("botCounting")) {
                 botCounter++;
                 String botName = "Bot" + botCounter;
                 String botType = inputName.toLowerCase(); // Stocke le type exact

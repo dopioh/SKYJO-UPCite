@@ -117,4 +117,25 @@ public class BotHandModel extends PlayerHandModel {
     public boolean isAcceptableCard(int n, CardModel carte) {
         return carte.getCardValue() <= n;
     }
+
+    /**
+     * cpt le nombre de cartes visibles dans une colonne
+     * 
+     * @param col index de la colonne
+     * @return nbr de carte visible ds la colonne
+     */
+    public int countVisibleCardsInColumn(int col) {
+        if (col < 0 || col >= getColumns()) {
+            return 0;
+        }
+        
+        int count = 0;
+        for (int row = 0; row < getRows(); row++) {
+            CardModel card = getCard(row, col);
+            if (card != null && !card.isFaceDown()) {
+                count++;
+            }
+        }
+        return count;
+    }
 }

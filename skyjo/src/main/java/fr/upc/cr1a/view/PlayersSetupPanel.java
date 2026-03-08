@@ -127,7 +127,7 @@ public class PlayersSetupPanel extends JPanel {
             JLabel label = new JLabel("Joueur " + playerIndex + " : ");
             JTextField nameField = new JTextField(10);
             JCheckBox botCheck = new JCheckBox("Bot");
-            JComboBox<String> botType = new JComboBox<>(new String[]{"bot", "botRow", "botLow"});
+            JComboBox<String> botType = new JComboBox<>(new String[]{"bot", "botRow", "botLow", "botCounting"});
             botType.setEnabled(false);
 
             botCheck.addActionListener(e -> {

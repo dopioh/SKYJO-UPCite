@@ -97,6 +97,8 @@ public class GameManager {
     public GameManager(Frame frame, List<PlayerData> playersData){
         //Creation des joueurs 
         this.players = new ArrayList<>();
+        ArrayList<BotCounting> botCountingList = new ArrayList<>();
+        
         for (PlayerData player : playersData) {
             //créer un BotModel si c'est un bot, sinon créer un player
             if (player.isBot()) {
@@ -108,6 +110,9 @@ public class GameManager {
                     strategy = new BotRow(); // BotRow
                 } else if ("botlow".equals(botType)) {
                     strategy = new BotLow(3); // BotLow
+                } else if ("botcounting".equals(botType)) {
+                    strategy = new BotCounting(); // BotCounting
+                    botCountingList.add((BotCounting) strategy);
                 } else {
                     strategy = new BotTerminalModel(); // défaut
                 }
@@ -116,6 +121,11 @@ public class GameManager {
             } else {
                 players.add(new PlayerModel(player));
             }
+        }
+        
+        // Définir le GameManager pour les bots BotCounting
+        for (BotCounting bot : botCountingList) {
+            bot.setGameManager(this);
         }
 
         this.currentPlayerIndex = 0;
@@ -173,6 +183,8 @@ public class GameManager {
         //initialiser les joueurs
         this.players = new ArrayList<>();
         this.gameWithAction = action;
+        ArrayList<BotCounting> botCountingList = new ArrayList<>();
+        
         for (PlayerData player : playersData) {
             //créer un BotModel si c'est un bot, sinon créer un playdéfatuter
             if (player.isBot()) {
@@ -184,6 +196,9 @@ public class GameManager {
                     strategy = new BotRow(); // BotRow
                 } else if ("botlow".equals(botType)) {
                     strategy = new BotLow(3); // BotLow 
+                } else if ("botcounting".equals(botType)) {
+                    strategy = new BotCounting(); // BotCounting
+                    botCountingList.add((BotCounting) strategy);
                 } else {
                     strategy = new BotTerminalModel(); // défaut
                 }
@@ -192,6 +207,11 @@ public class GameManager {
             } else {
                 players.add(new PlayerModel(player));
             }
+        }
+        
+        // Définir le GameManager pour les bots BotCounting
+        for (BotCounting bot : botCountingList) {
+            bot.setGameManager(this);
         }
         
         currentPlayerIndex = 0;
