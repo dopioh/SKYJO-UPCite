@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.swing.Timer;
 
+import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
@@ -29,9 +30,12 @@ public class GameManager {
     private GameState gameState;
     private TurnPhase turnPhase;
     private CardModel currentDrawCard;
+    private int extraTurnsRemaining = 0;  // nombre de tours supplémentaires pour PLAY_TWO_TURN
 
     private GameBoardModel gameBoardModel;
     private int initRevealCount = 0;
+
+    private boolean gameWithAction = false; // true si on utilise les actions
     
     /*
     *classe local enum pour gérer les états du jeu
@@ -57,7 +61,17 @@ public class GameManager {
      * Constructeur qui doit etre appeler pour lancer une partie
      * Dans la version swing
     */
-    public GameManager(Frame frame){
+    public GameManager(Frame frame, boolean action){
+        // On l'utilise quand ce gamemanager ??
+        this.gameWithAction = action;
+        if (this.gameWithAction) {
+            actionDeck = new PiocheActionModel();
+            discardActionPile = new DefausseActionModel();
+            ActionCardModel initActionCard = new ActionCardModel(true, ActionType.REPLACE_CARD_IN_HAND);
+            initActionCard.returnCard();
+            discardActionPile.addCardAtTop(initActionCard);
+        }
+
         System.out.println("GameManager Called");
 
         this.players = new ArrayList<>(); // il faudra initialiser les joueurs a un moment
@@ -66,7 +80,7 @@ public class GameManager {
         }
 
         // Distribution depuis la pioche, cartes face cachée
-        this.deck = new PiocheModel();
+        this.deck = new PiocheModel(this.gameWithAction);
         for (PlayerModel player : players) {
             for (int row = 0; row < 3; row++) {
                 for (int col = 0; col < 4; col++) {
@@ -90,7 +104,14 @@ public class GameManager {
         frame.showPanel("GAME");
     }
 
-    public GameManager(Frame frame, List<PlayerData> playersData){
+    public GameManager(Frame frame, List<PlayerData> playersData, boolean action){
+        this.gameWithAction = action;
+        if (this.gameWithAction) {
+            actionDeck = new PiocheActionModel();
+            discardActionPile = new DefausseActionModel();
+            ActionCardModel initActionCard = new ActionCardModel(true, ActionType.REPLACE_CARD_IN_HAND);
+            discardActionPile.addCardAtTop(initActionCard);
+        }
         //Creation des joueurs 
         this.players = new ArrayList<>();
         for (PlayerData player : playersData) {
@@ -116,7 +137,7 @@ public class GameManager {
 
         this.currentPlayerIndex = 0;
         this.firstPlayerToPlayIndex = 0; // le joueur qui commence la manche
-        this.deck = new PiocheModel();
+        this.deck = new PiocheModel(this.gameWithAction);
         this.discardPile = new DefausseModel();
         this.currentDrawCard = null;
         this.gameState = GameState.WAITING_FOR_PLAYERS;
@@ -156,7 +177,7 @@ public class GameManager {
     }
 
 
-    public GameManager(){
+    public GameManager(){ // pourquoi ?
        
     }
 
@@ -165,9 +186,10 @@ public class GameManager {
      * permet de d'initialiser les joueurs avec leurs noms
      * @param playersData
      */
-    public GameManager(List<PlayerData> playersData){
+    public GameManager(List<PlayerData> playersData, boolean action){
         //initialiser les joueurs
         this.players = new ArrayList<>();
+        this.gameWithAction = action;
         for (PlayerData player : playersData) {
             //créer un BotModel si c'est un bot, sinon créer un playdéfatuter
             if (player.isBot()) {
@@ -191,10 +213,15 @@ public class GameManager {
         
         currentPlayerIndex = 0;
         firstPlayerToPlayIndex = 0; // le joueur qui commence la manche
-        deck = new PiocheModel();
+        deck = new PiocheModel(this.gameWithAction);
         discardPile = new DefausseModel();
-        actionDeck = new PiocheActionModel();
-        discardActionPile = new DefausseActionModel();
+
+        if (this.gameWithAction) {
+            actionDeck = new PiocheActionModel();
+            discardActionPile = new DefausseActionModel();
+            ActionCardModel initActionCard = new ActionCardModel(true, ActionType.REPLACE_CARD_IN_HAND);
+            discardActionPile.addCardAtTop(initActionCard);
+        }
 
         currentDrawCard = null;
         gameState = GameState.WAITING_FOR_PLAYERS;
@@ -233,13 +260,17 @@ public class GameManager {
     public CardModel getCurrentDrawCard(){
         return currentDrawCard;
     }
+
+    public boolean withActionCard() {
+        return this.gameWithAction;
+    } 
     
     /**
     *Initialisation de la game 
     */
    public void initializeGame(){
         //creer un deck deja melange
-        deck = new PiocheModel();
+        //deck = new PiocheModel(); // on a deja un deck initalisé dans le constructeur !
         
         firstPlayerToPlayIndex = currentPlayerIndex; 
         
@@ -292,6 +323,12 @@ public class GameManager {
     *passe au joueur suivant
     */
     public void nextPlayer() {
+        // si le joueur a des tours supplémentaires
+        if (extraTurnsRemaining > 0) {
+            extraTurnsRemaining--;
+            return;
+        }
+        
         currentPlayerIndex++;
         //revenir au premier si le dernier joueur a joué
         if (currentPlayerIndex >= players.size()) {
@@ -301,6 +338,10 @@ public class GameManager {
         if (gameState == GameState.LAST_ROUND && currentPlayerIndex == firstPlayerToPlayIndex) {
             endRound();
         }
+    }
+
+    public void grantExtraTurn() {
+        this.extraTurnsRemaining = 2;
     }
 
     /*
