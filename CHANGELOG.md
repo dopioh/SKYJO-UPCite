@@ -182,6 +182,8 @@
     - Bouton compte en haut à droite (J button)
     - Animation scale au survol du DoodleButton avec ease
 
+- Creation de compte /connexion avec la base de donnees, dans le terminal
+
 ### Modified 
 - Refacto propre dans **GameTerminalModel.useAction()**
 
@@ -208,6 +210,12 @@
     - Démarrage et arrêt automatiques selon le nombre de tâches enregistrées
     - Pas besoin de toucher au code de AnimLoop pour l'utiliser, contrairement a Gameloop de worms avec un utilisation simple:
       - `AnimLoop.add(this, animation)` / `AnimLoop.remove(this)` (voir le javadoc dans AnimLoop pour l'utilisation)
+
+- Interface simple au lancement du jeu pour se connecter ou creer un compte (obliger de se connecter pour acceder au jeu)
+
+- Lors de la creation du compte, ses statistiques sont defini automatiquement dans la database
+
+- Apres la creation/login, les infos du joueurs sont sur la db et le cachelocal `PlayerData.java` (il faut juste le reactualiser quand on change une stat dans la db)
 
 ### Modified
 

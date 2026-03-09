@@ -160,6 +160,9 @@ tAudioManager()**
 * **NextRoundPanel** : Panel de transitions entre les rounds
     * Methode : **fade()**,**paintComponent()**,**paintChildren()**, **paint()**
 
+* **ConnextionPannel** : Panel qui va demander au joueur de se connecter ou créer un compte avant d'entrer dans le jeu.
+    * Methode : **selection()**,**connexion()**,**createAccount()**
+
 ### CONTROLLER
 
 Gère toutes les entrées du joueur avec l'ordinateur
@@ -189,6 +192,20 @@ Gère toutes les entrées du joueur avec l'ordinateur
 
 * **GameBoardController** : 
     * Méthode : **updateAllDecksDisplay()**
+
+* **ConnexionController** : Gere le `ConnexionPanel` et redirige vers `SupabaseAuth` pour lancer des requetes d'auth.  
+    * Methodes : **sendCreate()**, **sendLogin()**  
+
+#### DATA :
+
+* **SendAPI** : Classe qui regroupes des methodes static pour envoyer des donnees a l'API
+    * Variables gloabales : **urlAPI (String)**, **client (HttpClient)**
+    * Methodes : **WinGameSolo()**, **getStats()**
+
+* **SupabaseAuth** : Classe qui gere l'authentification du joueur a la base de donnees
+    * Variables gloabales : **SUPABASE_URL (String)**, **SUPABASE_PUBLIC_KEY (String)**
+    * Methodes : **connectPlayerByEmail()**, **connectPlayerByUsername()**, **createAccount()**,**getIUD()**, **getAccesToken()**
+
 ## UTILS
 
 Classes utilitaires
