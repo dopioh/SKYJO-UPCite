@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.swing.JButton;
 import javax.swing.SwingUtilities;
 
 /**
@@ -27,16 +28,22 @@ public class MainMenuController {
     private final MainMenuPanel view;
     private final AudioManager audio;
     private final Scanner scanner = new Scanner(System.in);
+    private final AccountController accountController;
 
     public MainMenuController(Frame frame, MainMenuPanel view) {
         this.frame = frame;
         this.view = view;
         this.audio = frame.getAudioManager();
+        this.accountController = frame.getAccountController();
 
         // listeners
         ajouterListeners(view.getShopButton(), () -> clicShop());
         ajouterListeners(view.getPlayButton(), () -> clicPlay());
         ajouterListeners(view.getSettingsButton(), () -> clicSettings());
+        view.getAccountButton().addMouseListener(new MouseAdapter() { // n'est pas un DoodleButton donc on peut pas utiliser la fonction d'en dessous
+            @Override
+            public void mouseClicked(MouseEvent e) { clicAccount(); }
+        });
     }
 
     // ajoute hover + clic
@@ -59,5 +66,9 @@ public class MainMenuController {
 
     private void clicSettings() {
         frame.showSettingsOverlay();
+    }
+
+    private void clicAccount() {
+        // MEI ICI ICI ICI pour afficher le panel de gestion de compte
     }
 }

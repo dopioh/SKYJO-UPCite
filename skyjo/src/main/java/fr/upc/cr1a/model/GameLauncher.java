@@ -19,9 +19,9 @@ public class GameLauncher {
         // Fenetre du jeu
         new Frame();
 
-        // Jeu dams le Terminal 
-        //scanner = new Scanner(System.in);
-       // startGame();
+        // Jeu dans le Terminal 
+        // scanner = new Scanner(System.in);
+        // startGame();
     }
     
     /**

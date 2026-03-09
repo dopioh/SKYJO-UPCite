@@ -175,9 +175,8 @@ public class GameManager {
         frame.showPanel("GAME");
     }
 
-
-    public GameManager(){ // pourquoi ?
-       
+    public GameManager(){ // Jle laisse pour pas casser vos tests
+        
     }
 
     /**

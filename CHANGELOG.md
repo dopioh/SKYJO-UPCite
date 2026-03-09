@@ -217,6 +217,15 @@
 
 - Apres la creation/login, les infos du joueurs sont sur la db et le cachelocal `PlayerData.java` (il faut juste le reactualiser quand on change une stat dans la db)
 
+### Modified
+
+- Migration vers `AnimLoop` : `DoodleButton`, `NextRoundPanel`, `PlayerPreviewPanel`, `CursorCardView`, `CardButton`
+
+- Vitesse de fade pour l'écran "prochaine joueur" accéléré pour plus de fluidité
+
+### Fixed
+
+- Fluidité globale : Le jeu ne lag plus sur Windows en passant de 12 repaint a un seul pour l'animation carte flottante ainsi que tout les autres animations qui sont maintenant geré avec `AnimLoop`
 - Selection du mode de jeu (vanilla ou action) dans le menu de selection
 
 - Affichage de la pioche et de la defausse action en jeu
@@ -232,14 +241,3 @@
 - debut de recode des actions pour awt/swing
 
 - affichage de la main action du joueur
-
-### Modified
-
-- Migration vers `AnimLoop` : `DoodleButton`, `NextRoundPanel`, `PlayerPreviewPanel`, `CursorCardView`, `CardButton`
-
-- Vitesse de fade pour l'écran "prochaine joueur" accéléré pour plus de fluidité
-
-### Fixed
-
-- Fluidité globale : Le jeu ne lag plus sur Windows en passant de 12 repaint a un seul pour l'animation carte flottante ainsi que tout les autres animations qui sont maintenant geré avec `AnimLoop`
-
