@@ -97,7 +97,7 @@ public class RoundEndPanel extends JPanel {
         gbcBtn.insets = new Insets(10, 10, 10, 10);
 
         if (!gameOver) {
-            btnContinuer = new DoodleButton("Continuer", ButtonColor.GREEN, 320, 80, "/Button/Continue.png");
+            btnContinuer = new DoodleButton("Continuer", ButtonColor.TURQUOISE, 320, 80, "/Button/Continue.png");
             rightPanel.add(btnContinuer, gbcBtn);
         } else {
             PlayerModel winner = sortedPlayers.get(0);

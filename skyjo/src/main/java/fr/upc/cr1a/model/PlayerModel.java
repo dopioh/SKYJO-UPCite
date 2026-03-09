@@ -25,7 +25,7 @@ public class PlayerModel {
         this.hand = new PlayerHandModel();
         this.actionHand = new ArrayList<>();;
         this.totalScore = 0;
-        this.starsScore = 10;
+        this.starsScore = 0;
     }
     
     public String getName(){
