@@ -26,6 +26,7 @@ Des classes qui permette d'éxécuter le jeu.
     * Attribut :
         * scanner (Scanner)
         * gameManager (GameManager)
+        * hasGameManagerActionsCard (boolean) - Indique si le mode action est actif
     * Méthode :
         * **playGame()** - Déroulement complet de la partie en mode terminal
         * **initializeHand()** - Révélation des 2 cartes initiales avec interaction utilisateur
@@ -33,7 +34,16 @@ Des classes qui permette d'éxécuter le jeu.
         * **exchangeCard()** - Échange de cartes avec interaction utilisateur
         * **showHand()** - Affichage de la main d'un joueur dans le terminal
         * **displayRoundResults()**, **displayWinner()**, **displayNewRound()** - Affichages des résultats
+        * **useAction()** - Permet aux joueurs d'utiliser une carte d'action
         * **closeScanner()** - Fermeture du scanner
+        * **Support du mode action pour les bots** :
+            * **botUseActionRandom()** - Permet au bot de jouer une action aléatoirement (50% de chance)
+            * **botTradeCardWithPlayer()** - Version bot de TRADE_CARD_WITH_PLAYER
+            * **botReplaceCardInHand()** - Version bot de REPLACE_CARD_IN_HAND
+            * **botDrawThreeCard()** - Version bot de DRAW_THREE_CARD
+            * **botPlayLastActionInDefausse()** - Version bot de PLAY_LAST_ACTION_IN_DEFAUSSE
+            * **botSpyOneColumn()** - Version bot de SPY_ONE_COLUMN
+            * **botAllPlayersDropCard()** - Version bot de ALL_PLAYERS_DROP_CARD
 * **GameLoop** : Gère le foncitonnement des cycles du jeu; les updates() et les repaint()
 
 ## 2. MVC 
@@ -92,13 +102,23 @@ Gère la logique du jeu.
         * Super-classe : **PlayerHandModel**
         * Méthodess supplémentaires : **revealRandomCard()**, **sameCardInHandPosition()**, **tradeInHand()**, **isAcceptableCard()**
     * `BotStrategyInterface`: Interface définissant les stratégies de bot
-        * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**
+        * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **getSeuil()**
     * `BotTerminalModel`: Stratégie de bot basique (implémente BotStrategyInterface)
-        * Stratégie par défaut pour les bots
+        * Stratégie par défaut pour les bots avec seuil fixe
     * `BotRow`: Stratégie de bot optimisant les lignes (implémente BotStrategyInterface)
         * Se concentre sur l'élimination de lignes complètes
-    * `BotHigh`: Stratégie de bot évitant les cartes hautes (implémente BotStrategyInterface)
-        * Évite les cartes au-dessus d'un certain seuil
+    * `BotLow`: Stratégie de bot favorisant les cartes basses (implémente BotStrategyInterface)
+        * Privilégie les cartes de faible valeur
+    * `BotCounting`: Stratégie de bot avancée qui compte les cartes (implémente BotStrategyInterface)
+        * Attribut : gameManager (GameManager), cardDeck (Map statique des cartes dans le deck)
+        * Méthode : 
+            * **getSeuil()** - Calcule dynamiquement le seuil basé sur les probabilités
+            * **countVisibleCards()** - Compte toutes les cartes visibles (mains + défausse)
+            * **calculateRemainingCards()** - Calcule les cartes restantes dans la pioche
+            * **calculateAverage()** - Calcule la moyenne pondérée des cartes restantes
+            * **TakeFromDiscard()** - Décision basée sur les probabilités
+            * **ExchangeDrawCard()** - Décision d'échange basée sur les statistiques
+            * **CardToExchange()** - Choix intelligent de la carte à échanger
     * `BotStatsManager`: Gère les statistiques des bots
         * Méthode : **recordVictory()**, gestion des stats de parties
 

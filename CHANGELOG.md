@@ -217,6 +217,9 @@
 
 - Apres la creation/login, les infos du joueurs sont sur la db et le cachelocal `PlayerData.java` (il faut juste le reactualiser quand on change une stat dans la db)
 
+- Ajout d'un nouveau bot botCounting, liaision du bot simple avec le jeu action
+
+
 ### Modified
 
 - Migration vers `AnimLoop` : `DoodleButton`, `NextRoundPanel`, `PlayerPreviewPanel`, `CursorCardView`, `CardButton`
