@@ -15,23 +15,24 @@ import java.util.ArrayList;
 public class PlayerData {
 
     private final String id; // id unique qui permettra de retrouver le player dans la db
-    private Rank rank; // Faire une enum Rang ? Ou une classe ? String pour le moment 
+    private String username;
+    private int rank; // Faire une enum Rang ? Ou une classe ? String pour le moment 
     private int elo; // c'est quoi exactement ? les rr sur valo ?
     private int xp;
     private int money;
-    private boolean isBot; // indique si c'est un bot
-    private String botType; // type de bot
+    private transient boolean isBot; // indique si c'est un bot
+    private transient String botType; // type de bot
     // les skins sont dans une list de String mais ils auront leur propre classes plus tard
-    private ArrayList<String> skins; // tous les skins du jeu et si le joueur l'a, alors l'attribue unlocked du skin est true
+    private ArrayList<String> skins; // tous les skins du jeu et si le joueur l'a, alors l'attribue unlocked du skin est true // on l'a pas appeler depuis la db encore lui
+
+    // transient pour dire a gson d'eviter de lire l'attribut
 
     /**
-     * Constructeur pour un nouveau joueur
-     * 
-     * @param id le joueur le crée au si il ne possede pas de compte
+     * ANCIEN CONSTRUCTEUR AVANT DB
      */
     public PlayerData(String id){
         this.id = id;
-        this.rank = Rank.IRON; // ou on commence unranked ?
+        this.rank = 1; // ou on commence unranked ?
         this.elo = 0;
         this.xp = 0;
         this.money = 0;
@@ -50,7 +51,7 @@ public class PlayerData {
      */
     public PlayerData(String id, boolean isBot, String botType){
         this.id = id;
-        this.rank = Rank.IRON;
+        this.rank = 1;
         this.elo = 0;
         this.xp = 0;
         this.money = 0;
@@ -73,7 +74,7 @@ public class PlayerData {
         return this.botType;
     }
 
-    public Rank getPlayerRank(){
+    public int getPlayerRank(){
         return this.rank;
     }
 
@@ -91,5 +92,9 @@ public class PlayerData {
 
     public ArrayList<String> getListSkinPlayer(){
         return this.skins;
+    }
+
+    public String getUsername(){
+        return this.username;
     }
 }
