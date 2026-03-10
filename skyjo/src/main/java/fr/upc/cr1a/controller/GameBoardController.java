@@ -413,14 +413,14 @@ public class GameBoardController {
     public void nextPlayerSound() {
         audio.playSfx("/sfx/round.wav"); //je trouve le son bizzare hmm j'ai mis un alternatif ou juste avec ce son c'est bizzare d'etre accompagné d'un fade
         nextRoundPanel.setCurrentPlayer(gameManager.getCurrentPlayer());
-        // nextRoundPanel.fade(true);
-        // waitingNextTurn = true;
-        // Timer waitTimer = new Timer(2500, e -> {
-        //     nextRoundPanel.fade(false);
-        //     waitingNextTurn = false;
-        // });
-        // waitTimer.setRepeats(false);
-        // waitTimer.start();
+        nextRoundPanel.fade(true);
+        waitingNextTurn = true;
+        Timer waitTimer = new Timer(2500, e -> {
+            nextRoundPanel.fade(false);
+            waitingNextTurn = false;
+        });
+        waitTimer.setRepeats(false);
+        waitTimer.start();
     }
 
     /**

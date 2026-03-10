@@ -12,6 +12,9 @@ public class ConnexionPanel extends JPanel {
     private CardLayout cardLayout;
     private JPanel cardsContainer;
 
+    // Bouton dev bypass
+    private JButton btnDev;
+
     // Pour la connexion : 
     private JTextField loginEmailField;
     private JPasswordField loginPasswordField; // pour que ca cache quand on ecrit le mdp
@@ -78,6 +81,11 @@ public class ConnexionPanel extends JPanel {
 
         gbc.gridy = 2;
         panel.add(btnToInscription, gbc);
+
+        btnDev = new JButton("Dev");
+        btnDev.setPreferredSize(new Dimension(100, 30));
+        gbc.gridy = 3;
+        panel.add(btnDev, gbc);
 
         return panel;
     }
@@ -234,5 +242,9 @@ public class ConnexionPanel extends JPanel {
 
     public JButton getbtnSubmitInscription() { 
         return btnSubmitInscription; 
+    }
+
+    public JButton getBtnDev() {
+        return btnDev;
     }
 }

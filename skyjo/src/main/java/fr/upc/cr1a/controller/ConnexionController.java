@@ -19,6 +19,7 @@ public class ConnexionController {
     public void listener(){
         connexionPanel.getbtnSubmitInscription().addActionListener(e -> sendCreate());
         connexionPanel.getbtnSubmitConnexion().addActionListener(e -> sendLogin());
+        connexionPanel.getBtnDev().addActionListener(e -> frame.showPanel("MENU"));
     }
 
     public void sendCreate(){

@@ -2,6 +2,7 @@ package fr.upc.cr1a.view;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -68,6 +69,11 @@ public class GameBoardView extends JPanel {
     private Image backgroundImage;
     private Image topBarImage;
     private Font patrickFont;
+
+    // cache du fond redimensionné pour éviter le rescale BICUBIC à chaque repaint
+    private BufferedImage cachedBackground;
+    private int cachedBgWidth;
+    private int cachedBgHeight;
 
     // Affichage de la main des cartes action du joueur
     private JPanel actionHandPanel;
@@ -389,6 +395,7 @@ public class GameBoardView extends JPanel {
         int colorIndex = listPlayer.indexOf(player) % PLAYER_COLORS.length; // parce que on a que 3 couleurs pour l'instant
         topBarImage = ImageCache.get(TOPBAR_IMAGES[colorIndex]);
         backgroundImage = ImageCache.get(BG_IMAGES[colorIndex]);
+        cachedBackground = null; // rendre invalide le cache quand fond change
         updatePoints();
         PlayerHandModel hand = player.getHand();
 
@@ -784,11 +791,20 @@ public class GameBoardView extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         if (backgroundImage != null) {
-            g2d.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+            int w = getWidth();
+            int h = getHeight();
+            if (cachedBackground == null || cachedBgWidth != w || cachedBgHeight != h) {
+                cachedBackground = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D bg = cachedBackground.createGraphics();
+                bg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                bg.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                bg.drawImage(backgroundImage, 0, 0, w, h, null);
+                bg.dispose();
+                cachedBgWidth = w;
+                cachedBgHeight = h;
+            }
+            g.drawImage(cachedBackground, 0, 0, null);
         }
     }
 }

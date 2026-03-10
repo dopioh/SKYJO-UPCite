@@ -10,6 +10,7 @@ import fr.upc.cr1a.controller.MainMenuController;
 import fr.upc.cr1a.controller.PlayersSetupController;
 import fr.upc.cr1a.controller.SettingsOverlayController;
 import fr.upc.cr1a.model.AudioManager;
+import fr.upc.cr1a.utils.ImageCache;
 
 import java.awt.CardLayout;
 import java.awt.Rectangle;
@@ -65,6 +66,45 @@ public class Frame extends JFrame{
         new PlayersSetupController(this, playersSetupPanel);
         this.connexionController = new ConnexionController(this, connexionPanel);
         this.account = new AccountController(mainMenuPanel);
+
+        // Precharge toutes les images du jeu en arriere-plan pour zero lag au lancement   // ça marchéeeeeeeeeeee enfinnnn c'etait ça la raison
+        new Thread(() -> {
+            // cartes
+            ImageCache.preload(
+                "/cartes/carteDos.png", "/cartes/carteVide.png",
+                "/cartes/carteMoins2.png", "/cartes/carteMoins1.png",
+                "/cartes/carte0.png", "/cartes/carte1.png", "/cartes/carte2.png",
+                "/cartes/carte3.png", "/cartes/carte4.png", "/cartes/carte5.png",
+                "/cartes/carte6.png", "/cartes/carte7.png", "/cartes/carte8.png",
+                "/cartes/carte9.png", "/cartes/carte10.png", "/cartes/carte11.png",
+                "/cartes/carte12.png", "/cartes/carteEtoile.png",
+                "/cartes/carteActionTrade.png", "/cartes/carteActionReplace.png",
+                "/cartes/carteActionTwoTurn.png", "/cartes/carteActionDraw3.png",
+                "/cartes/carteActionReplay.png", "/cartes/carteActionDefense.png",
+                "/cartes/carteActionDrop.png", "/cartes/carteActionSpy.png",
+                "/cartes/carteActionDos.png"
+            );
+            // fonds et topbar
+            ImageCache.preload(
+                "/plateau/red_bg.png", "/plateau/green_bg.png", "/plateau/yellow_bg.png",
+                "/plateau/red_topbar.png", "/plateau/green_topbar.png", "/plateau/yellow_topbar.png"
+            );
+            // son : ouvre et ferme chaque clip pour que Java initialise le mixer audio
+            try {
+                String[] sfx = { "/sfx/UIclick.wav", "/sfx/round.wav" };
+                for (String path : sfx) {
+                    var url = Frame.class.getResource(path);
+                    if (url == null) continue;
+                    var ais = javax.sound.sampled.AudioSystem.getAudioInputStream(url);
+                    var clip = javax.sound.sampled.AudioSystem.getClip();
+                    clip.open(ais);
+                    clip.close();
+                    ais.close();
+                }
+            } catch (Exception e) {
+                System.err.println("[Frame] Erreur preload son : " + e.getMessage());
+            }
+        }, "ImagePreload").start();
 
         setVisible(true);
     }

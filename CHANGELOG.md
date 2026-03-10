@@ -258,3 +258,18 @@
     - les comportements des cartes actions
     - la CursorCard
     - le BotHandModel
+
+## v.0.7: SPRINT 7
+---
+
+### Added
+
+- Bouton "Dev" sur l'écran de connexion pour bypasser le login (temporaire)
+
+### Fixed
+
+- Optimisation :
+    - Le jeu ne lag enfin plus
+    - fix de lag quand on clique sur lancer le jeu et au premier changement de joueur
+    - transition changement de joueur / preview carte beaucoup plus fluide
+    - Et bien plus
