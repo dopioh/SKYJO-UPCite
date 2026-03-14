@@ -575,6 +575,12 @@ public class GameBoardView extends JPanel {
         labDefausseAction.setVisible(visible);
     }
 
+    public void setActionHandVisible(boolean visible) {
+        actionHandPanel.setVisible(visible);
+        actionHandPanel.revalidate();
+        actionHandPanel.repaint();
+    }
+
     public void setActionGuide(String message) {
         actionGuide.setText(message);
     }

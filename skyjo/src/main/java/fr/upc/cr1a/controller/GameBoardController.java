@@ -42,10 +42,21 @@ public class GameBoardController {
     // stuff pour les actions 
     // ActionMode ressemble a ActionType SAUF QUE ActionType marchait pour le jeu en terminal
     // j'ai besoin d'autres états pour la logique des actions graphiques
-    private enum ActionMode { NONE, SPY_ONE_COLUMN, REPLACE_CARD_FIRST, REPLACE_CARD_SECOND }
+    private enum ActionMode {
+        NONE,
+        SPY_ONE_COLUMN,
+        REPLACE_CARD_FIRST,
+        REPLACE_CARD_SECOND,
+        TRADE_SELECT_OWN_CARD,
+        TRADE_SELECT_TARGET_PLAYER,
+        TRADE_SELECT_TARGET_CARD
+    }
     private ActionMode actionMode = ActionMode.NONE;
     private int replaceFirstRow = -1;
     private int replaceFirstCol = -1;
+    private int tradeOwnRow = -1;
+    private int tradeOwnCol = -1;
+    private int tradeTargetPlayerIndex = -1;
 
     /**
      * Initialise la view et le Model du GameBoard
@@ -281,6 +292,10 @@ public class GameBoardController {
 
                 @Override
                 public void mouseClicked(MouseEvent e) {
+                    if (actionMode == ActionMode.TRADE_SELECT_TARGET_PLAYER || actionMode == ActionMode.TRADE_SELECT_TARGET_CARD) {
+                        selectTradeTargetPlayer(tmp);
+                        return;
+                    }
                     if (tmp == gameManager.getCurrentPlayerIndex()) {
                         return;
                     }
@@ -347,8 +362,20 @@ public class GameBoardController {
                 replaceFirstCol = -1;
                 player.getActionHand().remove(indexInHand);
                 gameBoardView.showPlayerCards(player);
-                gameBoardView.setActionGuide("SWAP : Clique sur la 1ère carte à échanger");
+                gameBoardView.setActionGuide("ECHANGE : Clique sur la 1ère carte à échanger");
                 System.out.println("carte REPLACE_CARD_IN_HAND activée !");
+                break;
+            
+            case TRADE_CARD_WITH_PLAYER:
+                gameManager.getDiscardActionPile().addCardAtTop(c);
+                actionMode = ActionMode.TRADE_SELECT_OWN_CARD;
+                resetTradeSelection();
+                player.getActionHand().remove(indexInHand);
+                gameBoardView.setActionHandVisible(true);
+                gameBoardView.showOtherPlayerMain(false);
+                gameBoardView.showPlayerCards(player);
+                gameBoardView.setActionGuide("TRADE : Clique une de tes cartes à échanger");
+                System.out.println("carte TRADE_CARD_WITH_PLAYER activée !");
                 break;
 
             default:
@@ -361,11 +388,10 @@ public class GameBoardController {
      * Logique de la carte action une fois activée
      */
     private void handleActionModeClick(int row, int col) {
-        PlayerModel player = gameManager.getCurrentPlayer();
-        if (player == null) return;
-
         switch (actionMode) {
             case SPY_ONE_COLUMN:
+                PlayerModel player = gameManager.getCurrentPlayer();
+                if (player == null) return;
                 PlayerHandModel hand = player.getHand();
                 if (hand == null) return;
                 ArrayList<int[]> hiddenCards = new ArrayList<>();
@@ -398,6 +424,8 @@ public class GameBoardController {
                 break;
             
             case REPLACE_CARD_FIRST:
+                player = gameManager.getCurrentPlayer();
+                if (player == null) return;
                 CardModel card = player.getHand().getCard(row, col);
                 if (card == null) return;
                 replaceFirstRow = row;
@@ -407,6 +435,8 @@ public class GameBoardController {
                 break;
             
             case REPLACE_CARD_SECOND:
+                player = gameManager.getCurrentPlayer();
+                if (player == null) return;
                 if (row == replaceFirstRow && col == replaceFirstCol) return; // même carte
                 CardModel firstCard = player.getHand().getCard(replaceFirstRow, replaceFirstCol);
                 CardModel secondCard = player.getHand().getCard(row, col);
@@ -425,16 +455,105 @@ public class GameBoardController {
 
                 switchToNextPlayer();
                 break;
+            
+            case TRADE_SELECT_OWN_CARD:
+                player = gameManager.getCurrentPlayer();
+                if (player == null) return;
+                CardModel ownCard = player.getHand().getCard(row, col);
+                if (ownCard == null) return;
+                tradeOwnRow = row;
+                tradeOwnCol = col;
+                actionMode = ActionMode.TRADE_SELECT_TARGET_PLAYER;
+                gameBoardView.setActionGuide("TRADE : Clique un joueur cible a gauche (modifiable)");
+                break;
+
+            case TRADE_SELECT_TARGET_PLAYER:
+                gameBoardView.setActionGuide("TRADE : Choisis d'abord un joueur a gauche");
+                break;
+
+            case TRADE_SELECT_TARGET_CARD:
+                completeTrade(row, col);
+                break;
 
             default:
                 break;
         }
     }
 
+    private void selectTradeTargetPlayer(int targetIndex) {
+        // on fait le selectTradeTarget seulement si on est en etat TRADE_SELECT_TARGET_PLAYER ou TRADE_SELECT_TARGET_CARD
+        // si on est Ni dans l'un Ni dans l'autre on quitte
+        if (actionMode != ActionMode.TRADE_SELECT_TARGET_PLAYER && actionMode != ActionMode.TRADE_SELECT_TARGET_CARD) {
+            return;
+        }
+        if (targetIndex == gameManager.getCurrentPlayerIndex()) {
+            gameBoardView.setActionGuide("TRADE : choisis un autre joueur");
+            return;
+        }
+        if (targetIndex < 0 || targetIndex >= gameManager.getPlayers().size()) {
+            return;
+        }
+
+        tradeTargetPlayerIndex = targetIndex;
+        PlayerModel target = gameManager.getPlayers().get(targetIndex);
+        gameBoardView.showOtherPlayerMain(false);
+        gameBoardView.setActionHandVisible(false);
+        gameBoardView.showPlayerCards(target);
+        actionMode = ActionMode.TRADE_SELECT_TARGET_CARD;
+        gameBoardView.setActionGuide("TRADE : Clique une carte de " + target.getName() + " (tu peux changer de cible)");
+    }
+
+    private void completeTrade(int targetRow, int targetCol) {
+        PlayerModel currentPlayer = gameManager.getCurrentPlayer();
+        if (currentPlayer == null) return;
+        if (tradeTargetPlayerIndex < 0 || tradeOwnRow < 0 || tradeOwnCol < 0) return;
+        if (tradeTargetPlayerIndex >= gameManager.getPlayers().size()) return;
+
+        PlayerModel targetPlayer = gameManager.getPlayers().get(tradeTargetPlayerIndex);
+        CardModel myCard = currentPlayer.getHand().getCard(tradeOwnRow, tradeOwnCol);
+        CardModel targetCard = targetPlayer.getHand().getCard(targetRow, targetCol);
+        if (myCard == null || targetCard == null) {
+            gameBoardView.setActionGuide("TRADE : case vide");
+            return;
+        }
+
+        currentPlayer.getHand().replaceCard(tradeOwnRow, tradeOwnCol, targetCard);
+        targetPlayer.getHand().replaceCard(targetRow, targetCol, myCard);
+
+        // checks apres les echnages
+        GameRuleModel.removeIdenticalColumns(currentPlayer.getHand(), gameManager.getDiscardPile());
+        GameRuleModel.removeIdenticalRows(currentPlayer.getHand(), gameManager.getDiscardPile());
+        GameRuleModel.removeIdenticalColumns(targetPlayer.getHand(), gameManager.getDiscardPile());
+        GameRuleModel.removeIdenticalRows(targetPlayer.getHand(), gameManager.getDiscardPile());
+
+        System.out.println("TRADE_CARD_WITH_PLAYER: échange [" + tradeOwnRow + "," + tradeOwnCol + "] <-> joueur "
+                + tradeTargetPlayerIndex + " [" + targetRow + "," + targetCol + "]");
+
+        actionMode = ActionMode.NONE;
+        resetTradeSelection();
+        gameBoardView.setActionHandVisible(true);
+        gameBoardView.showOtherPlayerMain(false);
+        gameBoardView.showPlayerCards(currentPlayer);
+        updateAllDecksDisplay();
+        gameBoardView.setActionGuide("TRADE terminé !");
+        switchToNextPlayer();
+    }
+
+    private void resetTradeSelection() {
+        tradeOwnRow = -1;
+        tradeOwnCol = -1;
+        tradeTargetPlayerIndex = -1;
+    }
+
     /**
      * Passe au joueur suivant via GameManager et affiche ses cartes
      */
     public void switchToNextPlayer() {
+        actionMode = ActionMode.NONE;
+        resetTradeSelection();
+        gameBoardView.setActionHandVisible(true);
+        gameBoardView.showOtherPlayerMain(false);
+
         Timer beforeSwitch = new Timer(1500, e -> {
             nextPlayerSound();
         });
