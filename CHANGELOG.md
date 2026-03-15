@@ -244,3 +244,14 @@
 - debut de recode des actions pour awt/swing
 
 - affichage de la main action du joueur
+
+
+
+
+
+
+
+
+
+
+
