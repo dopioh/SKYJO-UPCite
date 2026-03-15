@@ -350,7 +350,7 @@ public class GameBoardController {
                 gameManager.grantExtraTurn();
                 player.getActionHand().remove(indexInHand);
                 gameBoardView.showPlayerCards(player);
-                gameBoardView.setActionGuide("PLAY_TWO_TURN activé ! Tu rejoues 2 fois.");
+                gameBoardView.setActionGuide("PLAY_TWO_TURN activé ! Tu auras 1 tour supplémentaire.");
                 System.out.println("carte PLAY_TWO_TURN activée !");
                 break;
 
@@ -393,10 +393,77 @@ public class GameBoardController {
                 System.out.println("carte ALL_PLAYERS_DROP_CARD activée !");
                 break;
 
+            case PLAY_LAST_ACTION_IN_DEFAUSSE:
+                player.getActionHand().remove(indexInHand);
+                gameBoardView.showPlayerCards(player);
+
+                ActionType replayedAction = getLastReplayableActionInDiscard();
+                if (replayedAction == null) {
+                    gameBoardView.setActionGuide("REPLAY : aucune action rejouable dans la défausse");
+                    updateAllDecksDisplay();
+                    System.out.println("PLAY_LAST_ACTION_IN_DEFAUSSE: aucune action rejouable");
+                    break;
+                }
+
+                switch (replayedAction) {
+                    case PLAY_TWO_TURN:
+                        gameManager.grantExtraTurn();
+                        gameBoardView.setActionGuide("REPLAY : PLAY_TWO_TURN activé ! Tu auras 1 tour supplémentaire.");
+                        break;
+
+                    case SPY_ONE_COLUMN:
+                        actionMode = ActionMode.SPY_ONE_COLUMN;
+                        gameBoardView.setActionGuide("REPLAY SPY : Clique sur une carte pour espionner sa colonne");
+                        break;
+
+                    case REPLACE_CARD_IN_HAND:
+                        actionMode = ActionMode.REPLACE_CARD_FIRST;
+                        replaceFirstRow = -1;
+                        replaceFirstCol = -1;
+                        gameBoardView.setActionGuide("REPLAY ECHANGE : Clique sur la 1ère carte à échanger");
+                        break;
+
+                    case TRADE_CARD_WITH_PLAYER:
+                        actionMode = ActionMode.TRADE_SELECT_OWN_CARD;
+                        resetTradeSelection();
+                        gameBoardView.setActionHandVisible(true);
+                        gameBoardView.showOtherPlayerMain(false);
+                        gameBoardView.showPlayerCards(player);
+                        gameBoardView.setActionGuide("REPLAY TRADE : Clique une de tes cartes à échanger");
+                        break;
+
+                    case ALL_PLAYERS_DROP_CARD:
+                        startAllPlayersDropAction(player);
+                        break;
+
+                    default:
+                        gameBoardView.setActionGuide("REPLAY : " + replayedAction + " non implémentée en graphique");
+                        break;
+                }
+                updateAllDecksDisplay();
+                System.out.println("carte PLAY_LAST_ACTION_IN_DEFAUSSE activée ! -> " + replayedAction);
+                break;
+
             default:
                 System.out.println("carte " + type + " activée ! (pas encore implémentée en graphique)");
                 break;
         }
+    }
+
+    private ActionType getLastReplayableActionInDiscard() {
+        DefausseActionModel discardActionPile = gameManager.getDiscardActionPile();
+        if (discardActionPile == null) return null;
+
+        ArrayList<CardModel> stack = discardActionPile.getStack();
+        for (int i = 0; i < stack.size(); i++) {
+            CardModel card = stack.get(i);
+            if (!(card instanceof ActionCardModel actionCard)) continue;
+
+            ActionType type = actionCard.getType();
+            if (type == ActionType.DEFENSE) continue;
+            return type;
+        }
+        return null;
     }
 
     /**
@@ -641,7 +708,7 @@ public class GameBoardController {
         GameRuleModel.removeIdenticalColumns(targetPlayer.getHand(), gameManager.getDiscardPile());
         GameRuleModel.removeIdenticalRows(targetPlayer.getHand(), gameManager.getDiscardPile());
 
-        allPlayersDropPendingTargets.remove(allPlayersDropCurrentTargetIndex);
+        allPlayersDropPendingTargets.remove(Integer.valueOf(allPlayersDropCurrentTargetIndex));
         allPlayersDropCurrentTargetIndex = -1;
         updateAllDecksDisplay();
 

@@ -339,7 +339,8 @@ public class GameManager {
     }
 
     public void grantExtraTurn() {
-        this.extraTurnsRemaining = 2;
+        // PLAY_TWO_TURN = 2 tours au total pour le joueur courant, donc 1 tour supplémentaire
+        this.extraTurnsRemaining += 1;
     }
 
     /*
