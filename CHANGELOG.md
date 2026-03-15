@@ -217,6 +217,9 @@
 
 - Apres la creation/login, les infos du joueurs sont sur la db et le cachelocal `PlayerData.java` (il faut juste le reactualiser quand on change une stat dans la db)
 
+- Ajout d'un nouveau bot botCounting, liaision du bot simple avec le jeu action
+
+
 ### Modified
 
 - Migration vers `AnimLoop` : `DoodleButton`, `NextRoundPanel`, `PlayerPreviewPanel`, `CursorCardView`, `CardButton`
@@ -246,13 +249,14 @@
 
 ### Added
 
-- Toutes les cartes actions jouables graphiquement
+- Fin du recode des cartes action pour le mode graphique
 
 ### Modified
 
+- Le système de tour se passe désormais dans `GameLoop.java`
+- Toutes les actions joueurs Swing sont gérées par `HumanTurnController`
 - Main des cartes actions sous les cartes numéro
 
 ### Fixed
 
 - PLAY_TWO_TURN joue 2 tours (contre 3 avant)
-

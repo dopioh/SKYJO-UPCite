@@ -462,6 +462,28 @@ public class GameTerminalModel {
         showHand(bot, false);
         BotHandModel botHand = bot.getHand();
         BotStrategyInterface strategy = bot.getStrategy();
+        
+        //MODE ACTION
+        if (hasGameManagerActionsCard && bot.getStarsScore() > 0 && Math.random() < 0.2) {
+            CardModel drawnActionCard = gameManager.drawActionDeck();
+            bot.subStarsScore();
+            if (drawnActionCard instanceof ActionCardModel actionCard) {
+                bot.getActionHand().add(actionCard.getType());
+                System.out.println(bot.getName() + " pioche une carte action : " + actionCard.getType());
+                System.out.println(bot.getName() + " a maintenant " + bot.getStarsScore() + " étoiles");
+            }
+            
+            //Le bot peut décider de jouer une action immédiatement
+            botUseActionRandom(bot);
+            
+            System.out.println("\n-----------------------------------------------------------");
+            showHand(bot, false);
+            System.out.println("----------------------------------------------------------------");
+            
+            gameManager.nextPlayer();
+            return;
+        }
+        
         CardModel discardCard = gameManager.getDiscardPile().getTopCard();
         System.out.println("\nCarte sur la défausse : " + discardCard.getCardValue());
         //regarde si il doit la prendre ou non
@@ -531,7 +553,235 @@ public class GameTerminalModel {
         //System.out.println("\nAppuyez sur Entrée pour continuer <3");
         //scanner.nextLine();
         
+        //si le mode action est actif, le bot peut jouer une carte d'action aléatoirement
+        botUseActionRandom(bot);
+        
         gameManager.nextPlayer();
+    }
+
+    /**
+     *permet au bot de jouer une carte action
+     * @param bot Le bot qui joue l'action
+     */
+    private void botUseActionRandom(BotModel bot) {
+        //vérifie si le mode action est actif
+        if (!hasGameManagerActionsCard) {
+            return;
+        }
+        
+        //vérifie si le bot a des cartes d'action
+        if (bot.getActionHand().isEmpty()) {
+            return;
+        }
+        
+        //50% de chance de jouer une action
+        if (Math.random() > 0.5) {
+            return;
+        }
+        
+        //Choisit aléatoirement une action parmi celles disponibles
+        int actionIndex = (int) (Math.random() * bot.getActionHand().size());
+        ActionType selectedAction = bot.getActionHand().get(actionIndex);
+        
+        System.out.println(bot.getName() + " utilise l'action : " + selectedAction);
+        
+        ArrayList<PlayerModel> players = new ArrayList<>(gameManager.getPlayers());
+        boolean actionPlayed = true;
+        
+        try {
+            switch (selectedAction) {
+                case TRADE_CARD_WITH_PLAYER:
+                    botTradeCardWithPlayer(bot, players);
+                    break;
+                    
+                case REPLACE_CARD_IN_HAND:
+                    botReplaceCardInHand(bot);
+                    break;
+                    
+                case DRAW_THREE_CARD:
+                    botDrawThreeCard(bot);
+                    break;
+                    
+                case PLAY_LAST_ACTION_IN_DEFAUSSE:
+                    botPlayLastActionInDefausse(bot);
+                    break;
+                    
+                case SPY_ONE_COLUMN:
+                    botSpyOneColumn(bot);
+                    break;
+                    
+                case PLAY_TWO_TURN:
+                    gameManager.grantExtraTurn();
+                    System.out.println(bot.getName() + " jouera deux fois !");
+                    break;
+                    
+                case ALL_PLAYERS_DROP_CARD:
+                    botAllPlayersDropCard(bot, players);
+                    break;
+                    
+                default:
+                    actionPlayed = false;
+                    break;
+            }
+            
+            if (actionPlayed) {
+                bot.getActionHand().remove(actionIndex);
+                gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, selectedAction));
+            }
+        } catch (Exception e) {
+            System.out.println("BUG : " + e.getMessage());
+        }
+    }
+    
+    /**
+     * version bot de TRADE_CARD_WITH_PLAYER
+     */
+    private void botTradeCardWithPlayer(BotModel bot, ArrayList<PlayerModel> players) {
+        int botIndex = players.indexOf(bot);
+        
+        //choisit un autre joueur aléatoirement
+        int targetIndex;
+        do {
+            targetIndex = (int) (Math.random() * players.size());
+        } while (targetIndex == botIndex);
+        
+        PlayerModel target = players.get(targetIndex);
+        
+        //choisit des positions aléatoires
+        int myRow = (int) (Math.random() * 3);
+        int myCol = (int) (Math.random() * 4);
+        int opRow = (int) (Math.random() * 3);
+        int opCol = (int) (Math.random() * 4);
+        
+        CardModel myCard = bot.getHand().getCard(myRow, myCol);
+        CardModel opCard = target.getHand().getCard(opRow, opCol);
+        
+        if (myCard != null && opCard != null) {
+            bot.getHand().replaceCard(myRow, myCol, opCard);
+            target.getHand().replaceCard(opRow, opCol, myCard);
+            System.out.println(bot.getName() + " échange sa carte avec " + target.getName());
+        }
+    }
+    
+    /**
+     * version bot de REPLACE_CARD_IN_HAND
+     */
+    private void botReplaceCardInHand(BotModel bot) {
+        //choisit deux positions aléatoires
+        int row1 = (int) (Math.random() * 3);
+        int col1 = (int) (Math.random() * 4);
+        int row2 = (int) (Math.random() * 3);
+        int col2 = (int) (Math.random() * 4);
+        
+        CardModel card1 = bot.getHand().getCard(row1, col1);
+        CardModel card2 = bot.getHand().getCard(row2, col2);
+        
+        if (card1 != null && card2 != null) {
+            bot.getHand().replaceCard(row1, col1, card2);
+            bot.getHand().replaceCard(row2, col2, card1);
+            System.out.println(bot.getName() + " échange deux cartes dans sa main");
+        }
+    }
+    
+    /**
+     * version bot de DRAW_THREE_CARD
+     */
+    private void botDrawThreeCard(BotModel bot) {
+        NumberCardModel card1 = (NumberCardModel) gameManager.drawDeck();
+        NumberCardModel card2 = (NumberCardModel) gameManager.drawDeck();
+        NumberCardModel card3 = (NumberCardModel) gameManager.drawDeck();
+        
+        card1.returnCard();
+        card2.returnCard();
+        card3.returnCard();
+        
+        System.out.println(bot.getName() + " pioche 3 cartes : " + card1.getCardValue() + ", " + 
+                          card2.getCardValue() + ", " + card3.getCardValue());
+        
+        //choisit aléatoirement une carte ou aucune
+        int choice = (int) (Math.random() * 4);
+        
+        NumberCardModel chosenCard = null;
+        switch (choice) {
+            case 0:
+                chosenCard = card1;
+                gameManager.getDiscardPile().addCardAtTop(card2);
+                gameManager.getDiscardPile().addCardAtTop(card3);
+                break;
+            case 1:
+                chosenCard = card2;
+                gameManager.getDiscardPile().addCardAtTop(card1);
+                gameManager.getDiscardPile().addCardAtTop(card3);
+                break;
+            case 2:
+                chosenCard = card3;
+                gameManager.getDiscardPile().addCardAtTop(card1);
+                gameManager.getDiscardPile().addCardAtTop(card2);
+                break;
+            default:
+                //n'en garde aucune
+                gameManager.getDiscardPile().addCardAtTop(card1);
+                gameManager.getDiscardPile().addCardAtTop(card2);
+                gameManager.getDiscardPile().addCardAtTop(card3);
+                System.out.println(bot.getName() + " ne garde aucune carte");
+                return;
+        }
+        
+        //remplace une carte aléatoire dans sa main
+        int row = (int) (Math.random() * 3);
+        int col = (int) (Math.random() * 4);
+        CardModel oldCard = bot.getHand().getCard(row, col);
+        
+        if (oldCard != null) {
+            gameManager.getDiscardPile().addCardAtTop(oldCard);
+            bot.getHand().replaceCard(row, col, chosenCard);
+            System.out.println(bot.getName() + " garde la carte " + chosenCard.getCardValue());
+        }
+    }
+    
+    /**
+     *version bot de PLAY_LAST_ACTION_IN_DEFAUSSE
+     */
+    private void botPlayLastActionInDefausse(BotModel bot) {
+        if (gameManager.getDiscardActionPile().getTopCard() != null) {
+            ActionCardModel topCard = (ActionCardModel) gameManager.getDiscardActionPile().getTopCard();
+            bot.getActionHand().add(topCard.getType());
+            gameManager.getDiscardActionPile().removeCardAtTop();
+            System.out.println(bot.getName() + " récupère l'action : " + topCard.getType());
+        }
+    }
+    
+    /**
+     * version bot de SPY_ONE_COLUMN
+     */
+    private void botSpyOneColumn(BotModel bot) {
+        int col = (int) (Math.random() * 4);
+        System.out.println(bot.getName() + " espionne la colonne " + col + " de sa main");
+        // Le bot regarde mais n'affiche pas c'est un bot
+    }
+    
+    /**
+     * version bot de ALL_PLAYERS_DROP_CARD
+     */
+    private void botAllPlayersDropCard(BotModel bot, ArrayList<PlayerModel> players) {
+        for (PlayerModel player : players) {
+            if (player != bot) {
+                //choisit une carte aléatoire du joueur
+                int row = (int) (Math.random() * 3);
+                int col = (int) (Math.random() * 4);
+                
+                CardModel cardToDrop = player.getHand().getCard(row, col);
+                if (cardToDrop != null) {
+                    int droppedValue = cardToDrop.getCardValue();
+                    CardModel newCard = gameManager.drawDeck();
+                    newCard.returnCard();
+                    player.getHand().replaceCard(row, col, newCard);
+                    
+                    System.out.println(player.getName() + " remplace son " + droppedValue + " par un " + newCard.getCardValue());
+                    gameManager.getDiscardPile().addCardAtTop(new NumberCardModel(false, droppedValue, null, false));
+                }
+            }
+        }
     }
 
     /**

@@ -434,8 +434,6 @@ public class GameBoardView extends JPanel {
                     return "/cartes/carteActionDraw3.png";
                 case PLAY_LAST_ACTION_IN_DEFAUSSE:
                     return "/cartes/carteActionReplay.png";
-                case DEFENSE:
-                    return "/cartes/carteActionDefense.png";
                 case ALL_PLAYERS_DROP_CARD:
                     return "/cartes/carteActionDrop.png";
                 case SPY_ONE_COLUMN:
