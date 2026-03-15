@@ -59,7 +59,7 @@ public class ConnexionController {
         if (!connexion){
             System.out.println("ERREUR DE CONNEXION : Surement Mot de Passe Errones"); 
         } else {
-            System.out.println("CONNECTÉ AVEC SUCCÈS !");
+            System.out.println("CONNNNNNNNECCTERRRRRRRRRRRRRRRRRRRRRRRRRRR");
             frame.showPanel("MENU");
         }
     }
@@ -67,7 +67,7 @@ public class ConnexionController {
 
     public void sendGuest(){
         // give un PlayerData vide ? ou rjt un attribut "isInvited" et tout le reste en nul ?
-        System.out.println("CONNEXION EN TANT QU'INVITÉ");
+        System.out.println("CONNNNNNNNECCTERRRRRRRRRRRRRRRRRRRRRRRRRRR en tant au'invite");
         frame.showPanel("MENU");
     }
 }

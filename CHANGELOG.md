@@ -245,13 +245,20 @@
 
 - affichage de la main action du joueur
 
+## v.0.7: SPRINT 7
 
+### Added
 
+- Fin du recode des cartes action pour le mode graphique
 
+### Modified
 
+- Le système de tour se passe désormais dans `GameLoop.java`
+- Toutes les actions joueurs Swing sont gérées par `HumanTurnController`
+- Main des cartes actions sous les cartes numéro
+- Bouton invitee pour acceder au jeu sans identifiants
+- Connexion par username dans l'interface
 
+### Fixed
 
-
-
-
-
+- PLAY_TWO_TURN joue 2 tours (contre 3 avant)

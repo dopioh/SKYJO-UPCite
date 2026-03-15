@@ -20,8 +20,8 @@ class PiocheActionModelTest {
 
     @Test
     void testPiocheActionFull() {
-        // 8 types * 3 cartes = 24
-        assertEquals(24, piocheAction.stackSize());
+        // 6 types * 3 cartes = 18
+        assertEquals(18, piocheAction.stackSize());
     }
 
 

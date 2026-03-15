@@ -13,8 +13,10 @@ public class PiocheActionModel extends CardStackModel {
 
     public PiocheActionModel() {
         for (ActionType type : ActionType.values()) {
-            for (int k = 0; k < 3; k++) {
-                this.getStack().add(new ActionCardModel(true, type));
+            if (type != ActionType.DRAW_THREE_CARD) {
+                for (int k = 0; k < 3; k++) {
+                    this.getStack().add(new ActionCardModel(true, type));
+                }
             }
         }
         Collections.shuffle(this.getStack());

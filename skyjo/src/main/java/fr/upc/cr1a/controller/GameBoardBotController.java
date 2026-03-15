@@ -143,7 +143,7 @@ public class GameBoardBotController {
             if (strategy == null) {
                 System.err.println("Erreur: Le bot " + bot.getName() + " n'a pas de stratégie!");
                 mainController.setWaitingNextTurn(false);
-                mainController.switchToNextPlayer();
+                mainController.requestEndTurnFromBot();
                 return;
             }
 
@@ -213,7 +213,7 @@ public class GameBoardBotController {
                             gameManager.getDeck().stackSize() > 0);
                     mainController.refreshGuide();
                     mainController.setWaitingNextTurn(false);
-                    mainController.switchToNextPlayer();
+                    mainController.requestEndTurnFromBot();
                 }
             } else {
                 //jeter la carte piochée puis révéler une carte
@@ -235,7 +235,7 @@ public class GameBoardBotController {
                     gameBoardView.showPlayerCards(bot);
                     System.out.println(bot.getName() + " révèle une carte");
                     mainController.setWaitingNextTurn(false);
-                    mainController.switchToNextPlayer();
+                    mainController.requestEndTurnFromBot();
                 });
                 revealTimer.setRepeats(false);
                 revealTimer.start();
@@ -269,7 +269,7 @@ public class GameBoardBotController {
                 mainController.refreshGuide();
             }
             mainController.setWaitingNextTurn(false);
-            mainController.switchToNextPlayer();
+            mainController.requestEndTurnFromBot();
         });
         exchangeTimer.setRepeats(false);
         exchangeTimer.start();
