@@ -36,6 +36,8 @@ public class Frame extends JFrame{
 
 
     public Frame() {
+        // TEMPORAIRE: passe a false pour remettre l'ecran de connexion.
+        final boolean hideLoginTemporarily = true;
 
         setTitle("SKYJO");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -63,9 +65,12 @@ public class Frame extends JFrame{
         new SettingsOverlayController(settingsOverlay, this, audioManager);
         new MainMenuController(this, mainMenuPanel);
         new PlayersSetupController(this, playersSetupPanel);
-        this.connexionController = new ConnexionController(this, connexionPanel);
+        if (!hideLoginTemporarily) {
+            this.connexionController = new ConnexionController(this, connexionPanel);
+        }
         this.account = new AccountController(mainMenuPanel);
 
+        showPanel(hideLoginTemporarily ? "MENU" : "CONNEXION");
         setVisible(true);
     }
     

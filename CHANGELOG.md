@@ -247,8 +247,16 @@
 
 ## v.0.7: SPRINT 7
 
-### Modified 
+### Added
 
-- Le système de tour se passe désormais dans GameLoop.java 
+- Fin du recode des cartes action pour le mode graphique
 
-- Toutes les actions joueurs sont en Swing sont gérés par HumanTurnController
+### Modified
+
+- Le système de tour se passe désormais dans `GameLoop.java`
+- Toutes les actions joueurs Swing sont gérées par `HumanTurnController`
+- Main des cartes actions sous les cartes numéro
+
+### Fixed
+
+- PLAY_TWO_TURN joue 2 tours (contre 3 avant)

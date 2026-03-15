@@ -24,10 +24,27 @@ public class HumanTurnController {
 
     private boolean waitingReveal = false;
 
-    private enum ActionMode { NONE, SPY_ONE_COLUMN, REPLACE_CARD_FIRST, REPLACE_CARD_SECOND }
+    // stuff cartes actions
+    private enum ActionMode {
+        NONE,
+        SPY_ONE_COLUMN,
+        REPLACE_CARD_FIRST,
+        REPLACE_CARD_SECOND,
+        TRADE_SELECT_OWN_CARD,
+        TRADE_SELECT_TARGET_PLAYER,
+        TRADE_SELECT_TARGET_CARD,
+        ALL_PLAYERS_DROP_SELECT_TARGET,
+        ALL_PLAYERS_DROP_SELECT_CARD
+    }
     private ActionMode actionMode = ActionMode.NONE;
     private int replaceFirstRow = -1;
     private int replaceFirstCol = -1;
+    private int tradeOwnRow = -1;
+    private int tradeOwnCol = -1;
+    private int tradeTargetPlayerIndex = -1;
+    private final ArrayList<Integer> allPlayersDropPendingTargets = new ArrayList<>();
+    private int allPlayersDropCurrentTargetIndex = -1;
+    // fin du stuff actions
 
     public HumanTurnController(GameBoardView gameBoardView,GameManager gameManager,GameBoardController mainController,GameLoop gameLoop) {
         this.gameBoardView = gameBoardView;
@@ -40,6 +57,19 @@ public class HumanTurnController {
         installDeckListeners();
         installHandListeners();
         installActionCardListeners();
+    }
+
+    // pour selectionner un joueur cible
+    public boolean handlePlayerButtonClicked(int targetIndex) {
+        if (actionMode == ActionMode.TRADE_SELECT_TARGET_PLAYER || actionMode == ActionMode.TRADE_SELECT_TARGET_CARD) {
+            selectTradeTargetPlayer(targetIndex);
+            return true;
+        }
+        if (actionMode == ActionMode.ALL_PLAYERS_DROP_SELECT_TARGET || actionMode == ActionMode.ALL_PLAYERS_DROP_SELECT_CARD) {
+            selectAllPlayersDropTarget(targetIndex);
+            return true;
+        }
+        return false;
     }
 
     private void installDeckListeners() {
@@ -103,7 +133,7 @@ public class HumanTurnController {
 
             if (drawn instanceof ActionCardModel actionCard) {
                 player.getActionHand().add(actionCard.getType());
-                System.out.println("Carte action activée : " + actionCard.getType());
+                System.out.println("Carte action piochée : " + actionCard.getType());
             }
 
             player.subStarsScore();
@@ -224,7 +254,7 @@ public class HumanTurnController {
                 gameManager.grantExtraTurn();
                 player.getActionHand().remove(indexInHand);
                 gameBoardView.showPlayerCards(player);
-                gameBoardView.setActionGuide("PLAY_TWO_TURN activé ! Tu rejoues 2 fois.");
+                gameBoardView.setActionGuide("PLAY_TWO_TURN activé ! Tu joueras 2 tours.");
                 System.out.println("carte PLAY_TWO_TURN activée !");
                 break;
 
@@ -246,6 +276,71 @@ public class HumanTurnController {
                 gameBoardView.showPlayerCards(player);
                 gameBoardView.setActionGuide("SWAP : Clique sur la 1ère carte à échanger");
                 System.out.println("carte REPLACE_CARD_IN_HAND activée !");
+                break;
+
+            case TRADE_CARD_WITH_PLAYER:
+                gameManager.getDiscardActionPile().addCardAtTop(c);
+                actionMode = ActionMode.TRADE_SELECT_OWN_CARD;
+                resetTradeSelection();
+                player.getActionHand().remove(indexInHand);
+                gameBoardView.setActionHandVisible(true);
+                gameBoardView.showOtherPlayerMain(false);
+                gameBoardView.showPlayerCards(player);
+                gameBoardView.setActionGuide("TRADE : Clique une de tes cartes à échanger");
+                System.out.println("carte TRADE_CARD_WITH_PLAYER activée !");
+                break;
+
+            case ALL_PLAYERS_DROP_CARD:
+                gameManager.getDiscardActionPile().addCardAtTop(c);
+                player.getActionHand().remove(indexInHand);
+                startAllPlayersDropAction(player);
+                System.out.println("carte ALL_PLAYERS_DROP_CARD activée !");
+                break;
+
+            case PLAY_LAST_ACTION_IN_DEFAUSSE:
+                player.getActionHand().remove(indexInHand);
+                gameBoardView.showPlayerCards(player);
+
+                ActionType replayedAction = getLastReplayableActionInDiscard();
+                if (replayedAction == null) {
+                    gameBoardView.setActionGuide("REPLAY : aucune action rejouable dans la défausse");
+                    mainController.updateAllDecksDisplay();
+                    System.out.println("PLAY_LAST_ACTION_IN_DEFAUSSE: aucune action rejouable");
+                    break;
+                }
+
+                switch (replayedAction) {
+                    case PLAY_TWO_TURN:
+                        gameManager.grantExtraTurn();
+                        gameBoardView.setActionGuide("REPLAY : PLAY_TWO_TURN activé ! Tu auras 1 tour supplémentaire.");
+                        break;
+                    case SPY_ONE_COLUMN:
+                        actionMode = ActionMode.SPY_ONE_COLUMN;
+                        gameBoardView.setActionGuide("REPLAY SPY : Clique sur une carte pour espionner sa colonne");
+                        break;
+                    case REPLACE_CARD_IN_HAND:
+                        actionMode = ActionMode.REPLACE_CARD_FIRST;
+                        replaceFirstRow = -1;
+                        replaceFirstCol = -1;
+                        gameBoardView.setActionGuide("REPLAY ECHANGE : Clique sur la 1ère carte à échanger");
+                        break;
+                    case TRADE_CARD_WITH_PLAYER:
+                        actionMode = ActionMode.TRADE_SELECT_OWN_CARD;
+                        resetTradeSelection();
+                        gameBoardView.setActionHandVisible(true);
+                        gameBoardView.showOtherPlayerMain(false);
+                        gameBoardView.showPlayerCards(player);
+                        gameBoardView.setActionGuide("REPLAY TRADE : Clique une de tes cartes à échanger");
+                        break;
+                    case ALL_PLAYERS_DROP_CARD:
+                        startAllPlayersDropAction(player);
+                        break;
+                    default:
+                        gameBoardView.setActionGuide("REPLAY : " + replayedAction + " non implémentée en graphique");
+                        break;
+                }
+                mainController.updateAllDecksDisplay();
+                System.out.println("carte PLAY_LAST_ACTION_IN_DEFAUSSE activée ! -> " + replayedAction);
                 break;
 
             default:
@@ -323,9 +418,217 @@ public class HumanTurnController {
                 gameLoop.proceedAfterAction();
                 break;
 
+            case TRADE_SELECT_OWN_CARD:
+                CardModel ownCard = player.getHand().getCard(row, col);
+                if (ownCard == null) return;
+
+                tradeOwnRow = row;
+                tradeOwnCol = col;
+                actionMode = ActionMode.TRADE_SELECT_TARGET_PLAYER;
+                gameBoardView.setActionGuide("TRADE : Clique un joueur cible à gauche (modifiable)");
+                break;
+
+            case TRADE_SELECT_TARGET_PLAYER:
+                gameBoardView.setActionGuide("TRADE : Choisis d'abord un joueur à gauche");
+                break;
+
+            case TRADE_SELECT_TARGET_CARD:
+                completeTrade(row, col);
+                break;
+
+            case ALL_PLAYERS_DROP_SELECT_TARGET:
+                gameBoardView.setActionGuide("DROP : Choisis un joueur à gauche");
+                break;
+
+            case ALL_PLAYERS_DROP_SELECT_CARD:
+                applyAllPlayersDropOnSelectedCard(row, col);
+                break;
+
             default:
                 break;
         }
+    }
+
+    private ActionType getLastReplayableActionInDiscard() {
+        if (gameManager.getDiscardActionPile() == null) return null;
+        ArrayList<CardModel> stack = gameManager.getDiscardActionPile().getStack();
+        for (int i = 0; i < stack.size(); i++) {
+            CardModel card = stack.get(i);
+            if (!(card instanceof ActionCardModel actionCard)) {
+                continue;
+            }
+
+            ActionType type = actionCard.getType();
+            if (type == ActionType.PLAY_LAST_ACTION_IN_DEFAUSSE) {
+                continue;
+            }
+            return type;
+        }
+        return null;
+    }
+
+    private void selectTradeTargetPlayer(int targetIndex) {
+        if (actionMode != ActionMode.TRADE_SELECT_TARGET_PLAYER && actionMode != ActionMode.TRADE_SELECT_TARGET_CARD) {
+            return;
+        }
+        if (targetIndex == gameManager.getCurrentPlayerIndex()) {
+            gameBoardView.setActionGuide("TRADE : choisis un autre joueur");
+            return;
+        }
+        if (targetIndex < 0 || targetIndex >= gameManager.getPlayers().size()) {
+            return;
+        }
+
+        tradeTargetPlayerIndex = targetIndex;
+        PlayerModel target = gameManager.getPlayers().get(targetIndex);
+        gameBoardView.showOtherPlayerMain(false);
+        gameBoardView.setActionHandVisible(false);
+        gameBoardView.showPlayerCards(target);
+        actionMode = ActionMode.TRADE_SELECT_TARGET_CARD;
+        gameBoardView.setActionGuide("TRADE : Clique une carte de " + target.getName() + " (tu peux changer de cible)");
+    }
+
+    private void completeTrade(int targetRow, int targetCol) {
+        PlayerModel currentPlayer = gameManager.getCurrentPlayer();
+        if (currentPlayer == null) return;
+        if (tradeTargetPlayerIndex < 0 || tradeOwnRow < 0 || tradeOwnCol < 0) return;
+        if (tradeTargetPlayerIndex >= gameManager.getPlayers().size()) return;
+
+        PlayerModel targetPlayer = gameManager.getPlayers().get(tradeTargetPlayerIndex);
+        CardModel myCard = currentPlayer.getHand().getCard(tradeOwnRow, tradeOwnCol);
+        CardModel targetCard = targetPlayer.getHand().getCard(targetRow, targetCol);
+        if (myCard == null || targetCard == null) {
+            gameBoardView.setActionGuide("TRADE : case vide");
+            return;
+        }
+
+        currentPlayer.getHand().replaceCard(tradeOwnRow, tradeOwnCol, targetCard);
+        targetPlayer.getHand().replaceCard(targetRow, targetCol, myCard);
+
+        GameRuleModel.removeIdenticalColumns(currentPlayer.getHand(), gameManager.getDiscardPile());
+        GameRuleModel.removeIdenticalRows(currentPlayer.getHand(), gameManager.getDiscardPile());
+        GameRuleModel.removeIdenticalColumns(targetPlayer.getHand(), gameManager.getDiscardPile());
+        GameRuleModel.removeIdenticalRows(targetPlayer.getHand(), gameManager.getDiscardPile());
+
+        actionMode = ActionMode.NONE;
+        resetTradeSelection();
+        gameBoardView.setActionHandVisible(true);
+        gameBoardView.showOtherPlayerMain(false);
+        gameBoardView.showPlayerCards(currentPlayer);
+        mainController.updateAllDecksDisplay();
+        gameBoardView.setActionGuide("TRADE terminé !");
+        gameLoop.proceedAfterAction();
+    }
+
+    private void startAllPlayersDropAction(PlayerModel currentPlayer) {
+        resetAllPlayersDropSelection();
+        for (int i = 0; i < gameManager.getPlayers().size(); i++) {
+            if (i != gameManager.getCurrentPlayerIndex()) {
+                allPlayersDropPendingTargets.add(i);
+            }
+        }
+
+        if (allPlayersDropPendingTargets.isEmpty()) {
+            actionMode = ActionMode.NONE;
+            gameBoardView.showPlayerCards(currentPlayer);
+            gameBoardView.setActionGuide("DROP : aucun joueur");
+            gameLoop.proceedAfterAction();
+            return;
+        }
+
+        actionMode = ActionMode.ALL_PLAYERS_DROP_SELECT_TARGET;
+        gameBoardView.setActionHandVisible(false);
+        gameBoardView.showOtherPlayerMain(false);
+        gameBoardView.showPlayerCards(currentPlayer);
+        gameBoardView.setActionGuide("DROP : Choisis un joueur à gauche (" + allPlayersDropPendingTargets.size() + " restants)");
+    }
+
+    private void selectAllPlayersDropTarget(int targetIndex) {
+        if (actionMode != ActionMode.ALL_PLAYERS_DROP_SELECT_TARGET && actionMode != ActionMode.ALL_PLAYERS_DROP_SELECT_CARD) {
+            return;
+        }
+        if (targetIndex == gameManager.getCurrentPlayerIndex()) {
+            gameBoardView.setActionGuide("DROP : choisis un autre joueur");
+            return;
+        }
+        if (!allPlayersDropPendingTargets.contains(targetIndex)) {
+            gameBoardView.setActionGuide("DROP : ce joueur a déjà été affecté");
+            return;
+        }
+
+        allPlayersDropCurrentTargetIndex = targetIndex;
+        PlayerModel target = gameManager.getPlayers().get(targetIndex);
+        gameBoardView.showOtherPlayerMain(false);
+        gameBoardView.setActionHandVisible(false);
+        gameBoardView.showPlayerCards(target);
+        actionMode = ActionMode.ALL_PLAYERS_DROP_SELECT_CARD;
+        gameBoardView.setActionGuide("DROP : Clique une carte de " + target.getName() + " (" + allPlayersDropPendingTargets.size() + " restants)");
+    }
+
+    private void applyAllPlayersDropOnSelectedCard(int row, int col) {
+        PlayerModel currentPlayer = gameManager.getCurrentPlayer();
+        if (currentPlayer == null) return;
+        if (allPlayersDropCurrentTargetIndex < 0) {
+            return;
+        }
+        if (!allPlayersDropPendingTargets.contains(allPlayersDropCurrentTargetIndex)) {
+            return;
+        }
+
+        PlayerModel targetPlayer = gameManager.getPlayers().get(allPlayersDropCurrentTargetIndex);
+        CardModel targetCard = targetPlayer.getHand().getCard(row, col);
+        if (targetCard == null) {
+            gameBoardView.setActionGuide("DROP : case vide");
+            return;
+        }
+
+        CardModel drawnCard = gameManager.drawDeck();
+        if (drawnCard == null) {
+            gameBoardView.setActionGuide("DROP : impossible");
+            return;
+        }
+        if (drawnCard.isFaceDown()) {
+            drawnCard.returnCard();
+        }
+        if (targetCard.isFaceDown()) {
+            targetCard.returnCard();
+        }
+
+        targetPlayer.getHand().replaceCard(row, col, drawnCard);
+        gameManager.getDiscardPile().addCardAtTop(targetCard);
+
+        GameRuleModel.removeIdenticalColumns(targetPlayer.getHand(), gameManager.getDiscardPile());
+        GameRuleModel.removeIdenticalRows(targetPlayer.getHand(), gameManager.getDiscardPile());
+
+        allPlayersDropPendingTargets.remove(Integer.valueOf(allPlayersDropCurrentTargetIndex));
+        allPlayersDropCurrentTargetIndex = -1;
+        mainController.updateAllDecksDisplay();
+
+        if (allPlayersDropPendingTargets.isEmpty()) {
+            actionMode = ActionMode.NONE;
+            resetAllPlayersDropSelection();
+            gameBoardView.setActionHandVisible(true);
+            gameBoardView.showOtherPlayerMain(false);
+            gameBoardView.showPlayerCards(currentPlayer);
+            gameBoardView.setActionGuide("DROP : tous les joueurs ont été affectés");
+            gameLoop.proceedAfterAction();
+            return;
+        }
+
+        actionMode = ActionMode.ALL_PLAYERS_DROP_SELECT_TARGET;
+        gameBoardView.showPlayerCards(currentPlayer);
+        gameBoardView.setActionGuide("DROP : Choisis le prochain joueur (" + allPlayersDropPendingTargets.size() + " restants)");
+    }
+
+    private void resetTradeSelection() {
+        tradeOwnRow = -1;
+        tradeOwnCol = -1;
+        tradeTargetPlayerIndex = -1;
+    }
+
+    private void resetAllPlayersDropSelection() {
+        allPlayersDropPendingTargets.clear();
+        allPlayersDropCurrentTargetIndex = -1;
     }
 
     public void resetTurnState() {
@@ -333,5 +636,9 @@ public class HumanTurnController {
         actionMode = ActionMode.NONE;
         replaceFirstRow = -1;
         replaceFirstCol = -1;
+        resetTradeSelection();
+        resetAllPlayersDropSelection();
+        gameBoardView.setActionHandVisible(true);
+        gameBoardView.showOtherPlayerMain(false);
     }
 }

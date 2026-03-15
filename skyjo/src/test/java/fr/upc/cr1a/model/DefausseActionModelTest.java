@@ -36,7 +36,7 @@ class DefausseActionModelTest {
 
     @Test
     void testMultiAddCardAtTop() {
-        defausseAction.addCardAtTop(new ActionCardModel(false, ActionType.DEFENSE));
+        defausseAction.addCardAtTop(new ActionCardModel(false, ActionType.DRAW_THREE_CARD));
         defausseAction.addCardAtTop(new ActionCardModel(false, ActionType.PLAY_TWO_TURN));
         defausseAction.addCardAtTop(new ActionCardModel(false, ActionType.SPY_ONE_COLUMN));
         assertEquals(3, defausseAction.stackSize());
@@ -45,7 +45,7 @@ class DefausseActionModelTest {
 
     @Test
     void testGetTopCard() {
-        defausseAction.addCardAtTop(new ActionCardModel(false, ActionType.DEFENSE));
+        defausseAction.addCardAtTop(new ActionCardModel(false, ActionType.DRAW_THREE_CARD));
         defausseAction.addCardAtTop(new ActionCardModel(false, ActionType.PLAY_TWO_TURN));
         ActionCardModel top = (ActionCardModel) defausseAction.getTopCard();
         assertEquals(ActionType.PLAY_TWO_TURN, top.getType());
@@ -54,11 +54,11 @@ class DefausseActionModelTest {
 
     @Test
     void testRemoveCardAtTop() {
-        defausseAction.addCardAtTop(new ActionCardModel(false, ActionType.DEFENSE));
+        defausseAction.addCardAtTop(new ActionCardModel(false, ActionType.DRAW_THREE_CARD));
         defausseAction.addCardAtTop(new ActionCardModel(false, ActionType.PLAY_TWO_TURN));
         defausseAction.removeCardAtTop();
         assertEquals(1, defausseAction.stackSize());
-        assertEquals(ActionType.DEFENSE, ((ActionCardModel) defausseAction.getTopCard()).getType());
+        assertEquals(ActionType.DRAW_THREE_CARD, ((ActionCardModel) defausseAction.getTopCard()).getType());
     }
 
 
@@ -76,7 +76,7 @@ class DefausseActionModelTest {
 
     @Test
     void testReplaceCardAt() {
-        defausseAction.addCardAtTop(new ActionCardModel(false, ActionType.DEFENSE));
+        defausseAction.addCardAtTop(new ActionCardModel(false, ActionType.DRAW_THREE_CARD));
         ActionCardModel remplacement = new ActionCardModel(false, ActionType.ALL_PLAYERS_DROP_CARD);
         defausseAction.replaceCardAt(remplacement, 0);
         assertEquals(ActionType.ALL_PLAYERS_DROP_CARD, ((ActionCardModel) defausseAction.getTopCard()).getType());
@@ -85,9 +85,9 @@ class DefausseActionModelTest {
 
     @Test
     void testGetUnderCard() {
-        defausseAction.addCardAtTop(new ActionCardModel(false, ActionType.DEFENSE));
+        defausseAction.addCardAtTop(new ActionCardModel(false, ActionType.DRAW_THREE_CARD));
         defausseAction.addCardAtTop(new ActionCardModel(false, ActionType.SPY_ONE_COLUMN));
         ActionCardModel under = (ActionCardModel) defausseAction.getUnderCard();
-        assertEquals(ActionType.DEFENSE, under.getType());
+        assertEquals(ActionType.DRAW_THREE_CARD, under.getType());
     }
 }

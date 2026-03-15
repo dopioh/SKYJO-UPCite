@@ -100,6 +100,9 @@ public class GameBoardController {
 
                 @Override
                 public void mouseClicked(MouseEvent e) {
+                    if (humanTurnController != null && humanTurnController.handlePlayerButtonClicked(tmp)) {
+                        return;
+                    }
                     if (tmp == gameManager.getCurrentPlayerIndex()) {
                         return;
                     }

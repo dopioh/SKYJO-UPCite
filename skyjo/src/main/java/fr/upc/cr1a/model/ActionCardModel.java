@@ -13,7 +13,6 @@ public class ActionCardModel extends CardModel {
             PLAY_TWO_TURN,                 // jouer deux fois                                                 DONE
             DRAW_THREE_CARD,               // piocher 3 cartes -› n'en garde 1 seule ou 0                     DONE
             PLAY_LAST_ACTION_IN_DEFAUSSE,  // jouer la derniere carte action defaussée                        DONE
-            DEFENSE,                       // carte defense qui annule une action                             on fait une carte defense ou pas ?
             ALL_PLAYERS_DROP_CARD,         // chaque joueur doit defausser une carte choisie par le joueur    DONE
             SPY_ONE_COLUMN                 // regarder une colonne de carte de sa main                        DONE
     }
