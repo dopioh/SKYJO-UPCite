@@ -35,6 +35,8 @@ public class GameManager {
 
     private GameBoardModel gameBoardModel;
     private int initRevealCount = 0;
+    private boolean initRevealStarted = false;  // track si le INIT_REVEAL a commencé pour déterminer le premier joueur
+    private boolean initRevealJustFinished = false;  // flag pour indiquer qu'on vient de finir INIT_REVEAL
 
     private boolean gameWithAction = false; // true si on utilise les actions
     
@@ -97,6 +99,8 @@ public class GameManager {
         if (firstDiscard.isFaceDown()) firstDiscard.returnCard();
         discardPile.addCardAtTop(firstDiscard);
 
+        this.initRevealStarted = false;
+        this.initRevealJustFinished = false;
         this.gameBoardModel = new GameBoardModel(players, frame, this);
         GameBoardView view = this.gameBoardModel.getGameBoardView();
         view.updateCardDisplay(discardPile.getTopCard(), deck.stackSize() > 0);
@@ -236,6 +240,8 @@ public class GameManager {
         lastRoundPlayer = -1;
         deck = new PiocheModel(this.gameWithAction);
         discardPile = new DefausseModel();
+        initRevealStarted = false;
+        initRevealJustFinished = false;
 
         if (this.gameWithAction) {
             actionDeck = new PiocheActionModel();
@@ -247,6 +253,8 @@ public class GameManager {
         currentDrawCard = null;
         gameState = GameState.WAITING_FOR_PLAYERS;
         turnPhase = TurnPhase.DRAW_DECISION;
+        initRevealStarted = false;
+        initRevealJustFinished = false;
     }
     
     //getters
@@ -293,7 +301,9 @@ public class GameManager {
         //creer un deck deja melange
         //deck = new PiocheModel(); // on a deja un deck initalisé dans le constructeur !
         
-        firstPlayerToPlayIndex = currentPlayerIndex;
+        // On ne définit pas firstPlayerToPlayIndex ici, car il sera déterminé après INIT_REVEAL
+        // basé sur la somme des cartes visibles de chaque joueur
+        initRevealStarted = false;
        lastRoundPlayer = -1;  //variable pour savoir qui a lancé la dernière manche
         
         for (PlayerModel player : players) {
@@ -544,16 +554,22 @@ public class GameManager {
     }
 
     /**
-     * Recommence une nouvelle manche, le joueur avec le plus grand score commence
+     * Recommence une nouvelle manche, le joueur avec la plus haute somme de cartes visibles après INIT_REVEAL commence
      */
     public void startNewGame() {
-        currentPlayerIndex = GameRuleModel.getBiggestScorePlayerIndex(players);
+        // Commencer à partir du joueur 0 pour le INIT_REVEAL
+        // Après que tous les joueurs aient révélé 2 cartes, firstPlayer() sera appelé pour
+        // déterminer qui commence réellement en fonction de la somme des cartes visibles
+        currentPlayerIndex = 0;
         currentDrawCard = null;
         discardPile = new DefausseModel();
         initializeGame();
         ensureFaceUp(discardPile.getTopCard());
         turnPhase = TurnPhase.INIT_REVEAL;
         initRevealCount = 0;
+        initRevealStarted = false;  // reset pour la nouvelle manche
+        initRevealJustFinished = false;  // reset pour la nouvelle manche
+        firstPlayerToPlayIndex = 0;  // placeholder, sera mis à jour après INIT_REVEAL
     }
 
     /**
@@ -573,6 +589,14 @@ public class GameManager {
     public int getInitRevealCount(){
         return initRevealCount;
     }
+    
+    public boolean isInitRevealJustFinished() {
+        return initRevealJustFinished;
+    }
+    
+    public void setInitRevealJustFinished(boolean value) {
+        this.initRevealJustFinished = value;
+    }
 
     public boolean revealInitCard(int col, int row){
         if (turnPhase != TurnPhase.INIT_REVEAL) return false;
@@ -587,10 +611,26 @@ public class GameManager {
         initRevealCount++;
         if (initRevealCount >= 2) {
             initRevealCount = 0;
+            
+            // Marquer le debut du INIT_REVEAL (premier joueur)
+            if (!initRevealStarted) {
+                initRevealStarted = true;
+                firstPlayerToPlayIndex = currentPlayerIndex;
+            }
+            
             currentPlayerIndex++;
-            if (currentPlayerIndex >= players.size()) currentPlayerIndex = 0; 
+            if (currentPlayerIndex >= players.size()) currentPlayerIndex = 0;
+            
+            // Quand on revient au premier joueur qui a commence l'INIT_REVEAL,
+            // c'est que tous les joueurs ont revele 2 cartes
             if (currentPlayerIndex == firstPlayerToPlayIndex) {
-                startTurn(); // passe à DRAW_DECISION
+                // Determiner le vrai premier joueur en fonction de la somme des cartes visibles
+                // utilise getFirstPlayerIndex() qui calcule la somme des cartes visibles de chaque joueur
+                firstPlayer();
+                // Mettre a jour firstPlayerToPlayIndex avec le vrai starter (celui avec la plus haute somme visible)
+                firstPlayerToPlayIndex = currentPlayerIndex;
+                initRevealJustFinished = true;  // Flag pour que GameLoop ne appelle pas nextPlayer()
+                startTurn(); // passe a DRAW_DECISION
             }
             gameBoardModel.getGameBoardController().nextPlayerSound();
         }
