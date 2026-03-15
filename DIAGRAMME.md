@@ -196,7 +196,7 @@ Gère toutes les entrées du joueur avec l'ordinateur
     * Méthode : **ActionListener pour backButton, tabJeu, tabAudio, tabAutres, fullscreenButton, soundButton, volumeButtons**
 
 * **GameBoardController** : Controller pour le Plateau de jeu (la partie)
-    * Methode : **listener()** pour tous les clics souris, **switchToNextPlayer()**,**nextPlayerSound()** (contrairement a ce que son nom indique, elle lance le son ET l'ecran de transition entre les rounds), **showRoundEndScreen()**, **ContinueRound()**, **refreshGuide()**
+    * Methode : **listener()** pour tous les clics souris,**nextPlayerSound()** (contrairement a ce que son nom indique, elle lance le son ET l'ecran de transition entre les rounds), **showRoundEndScreen()**, **ContinueRound()**, **refreshGuide()**
 
 * **GameBoardBotController** : controller pour les bots
     * Attribut :
