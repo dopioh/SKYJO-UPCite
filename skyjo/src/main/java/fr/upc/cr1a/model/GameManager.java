@@ -27,6 +27,7 @@ public class GameManager {
     private DefausseActionModel discardActionPile;
     private int currentPlayerIndex;
     private int firstPlayerToPlayIndex;  // joueur qui a commencé la manche
+    private int lastRoundPlayer = -1;  // joueur qui a déclenché le LAST_ROUND
     private GameState gameState;
     private TurnPhase turnPhase;
     private CardModel currentDrawCard;
@@ -113,6 +114,8 @@ public class GameManager {
         }
         //Creation des joueurs 
         this.players = new ArrayList<>();
+        ArrayList<BotCounting> botCountingList = new ArrayList<>();
+        
         for (PlayerData player : playersData) {
             //créer un BotModel si c'est un bot, sinon créer un player
             if (player.isBot()) {
@@ -124,6 +127,9 @@ public class GameManager {
                     strategy = new BotRow(); // BotRow
                 } else if ("botlow".equals(botType)) {
                     strategy = new BotLow(3); // BotLow
+                } else if ("botcounting".equals(botType)) {
+                    strategy = new BotCounting(); // BotCounting
+                    botCountingList.add((BotCounting) strategy);
                 } else {
                     strategy = new BotTerminalModel(); // défaut
                 }
@@ -133,9 +139,15 @@ public class GameManager {
                 players.add(new PlayerModel(player));
             }
         }
+        
+        // Définir le GameManager pour les bots BotCounting
+        for (BotCounting bot : botCountingList) {
+            bot.setGameManager(this);
+        }
 
         this.currentPlayerIndex = 0;
         this.firstPlayerToPlayIndex = 0; // le joueur qui commence la manche
+        this.lastRoundPlayer = -1;
         this.deck = new PiocheModel(this.gameWithAction);
         this.discardPile = new DefausseModel();
         this.currentDrawCard = null;
@@ -188,6 +200,8 @@ public class GameManager {
         //initialiser les joueurs
         this.players = new ArrayList<>();
         this.gameWithAction = action;
+        ArrayList<BotCounting> botCountingList = new ArrayList<>();
+        
         for (PlayerData player : playersData) {
             //créer un BotModel si c'est un bot, sinon créer un playdéfatuter
             if (player.isBot()) {
@@ -199,6 +213,9 @@ public class GameManager {
                     strategy = new BotRow(); // BotRow
                 } else if ("botlow".equals(botType)) {
                     strategy = new BotLow(3); // BotLow 
+                } else if ("botcounting".equals(botType)) {
+                    strategy = new BotCounting(); // BotCounting
+                    botCountingList.add((BotCounting) strategy);
                 } else {
                     strategy = new BotTerminalModel(); // défaut
                 }
@@ -209,8 +226,14 @@ public class GameManager {
             }
         }
         
+        // Définir le GameManager pour les bots BotCounting
+        for (BotCounting bot : botCountingList) {
+            bot.setGameManager(this);
+        }
+        
         currentPlayerIndex = 0;
         firstPlayerToPlayIndex = 0; // le joueur qui commence la manche
+        lastRoundPlayer = -1;
         deck = new PiocheModel(this.gameWithAction);
         discardPile = new DefausseModel();
 
@@ -270,7 +293,8 @@ public class GameManager {
         //creer un deck deja melange
         //deck = new PiocheModel(); // on a deja un deck initalisé dans le constructeur !
         
-        firstPlayerToPlayIndex = currentPlayerIndex; 
+        firstPlayerToPlayIndex = currentPlayerIndex;
+        int lastRoundPlayer = -1;  //variable pour savoir qui a lancé la dernière manche
         
         for (PlayerModel player : players) {
             player.resetHand();
@@ -332,8 +356,8 @@ public class GameManager {
         if (currentPlayerIndex >= players.size()) {
             currentPlayerIndex = 0;
         }
-        //regarde si on est sur le dernier tour et si on est revenu au premier joueur
-        if (gameState == GameState.LAST_ROUND && currentPlayerIndex == firstPlayerToPlayIndex) {
+        //regarde si on est sur le dernier tour et si on est revenu au joueur qui a déclenché la fin
+        if (gameState == GameState.LAST_ROUND && currentPlayerIndex == lastRoundPlayer) {
             endRound();
         }
     }
@@ -429,6 +453,7 @@ public class GameManager {
         //vérifier si fin de manche
         if (GameRuleModel.checkEndOfRound(players)) {
             gameState = GameState.LAST_ROUND;
+            lastRoundPlayer = currentPlayerIndex;  // stocker le joueur qui déclenche le dernier tour
         }
         turnPhase = TurnPhase.TURN_ENDED;
     }
@@ -453,7 +478,12 @@ public class GameManager {
         // check
         GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile);
         GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile);
-
+        
+        //vérifier si fin de manche
+        if (GameRuleModel.checkEndOfRound(players)) {
+            gameState = GameState.LAST_ROUND;
+            lastRoundPlayer = currentPlayerIndex;  // stocker le joueur qui déclenche le dernier tour
+        }
     }
 
 
