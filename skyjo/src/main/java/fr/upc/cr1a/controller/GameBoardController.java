@@ -21,7 +21,6 @@ import fr.upc.cr1a.model.ActionCardModel.ActionType;
  * @see GameBoardView vue graphique
  * @see GameBoardModel logique du plateau
  * 
- * @author Mei,Ian,Hugo,Billy,Nassim
  */
 public class GameBoardController {
 
