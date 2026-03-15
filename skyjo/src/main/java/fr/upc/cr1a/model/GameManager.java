@@ -62,12 +62,54 @@ public class GameManager {
      * Constructeur qui doit etre appeler pour lancer une partie
      * Dans la version swing
     */
+    public GameManager(Frame frame, boolean action){
+        // On l'utilise quand ce gamemanager ??
+        this.gameWithAction = action;
+        if (this.gameWithAction) {
+            actionDeck = new PiocheActionModel();
+            discardActionPile = new DefausseActionModel();
+            ActionCardModel initActionCard = new ActionCardModel(false, ActionType.REPLACE_CARD_IN_HAND);
+            discardActionPile.addCardAtTop(initActionCard);
+        }
+
+        System.out.println("GameManager Called");
+
+        this.players = new ArrayList<>(); // il faudra initialiser les joueurs a un moment
+        for (int i = 1 ; i <= 3 ; i++){   // juste pour les tests avec tous les joueurs
+            players.add(new PlayerModel(new PlayerData("Joueur " + i)));
+        }
+
+        // Distribution depuis la pioche, cartes face cachée
+        this.deck = new PiocheModel(this.gameWithAction);
+        for (PlayerModel player : players) {
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 4; col++) {
+                    CardModel card = deck.getTopCard();
+                    deck.removeCardAtTop();
+                    player.getHand().placeCard(row, col, card);
+                }
+            }
+        }
+
+        this.discardPile = new DefausseModel();
+        CardModel firstDiscard = deck.getTopCard();
+        deck.removeCardAtTop();
+        if (firstDiscard.isFaceDown()) firstDiscard.returnCard();
+        discardPile.addCardAtTop(firstDiscard);
+
+        this.gameBoardModel = new GameBoardModel(players, frame, this);
+        GameBoardView view = this.gameBoardModel.getGameBoardView();
+        view.updateCardDisplay(discardPile.getTopCard(), deck.stackSize() > 0);
+        frame.add(view, "GAME");
+        frame.showPanel("GAME");
+    }
+
     public GameManager(Frame frame, List<PlayerData> playersData, boolean action){
         this.gameWithAction = action;
         if (this.gameWithAction) {
             actionDeck = new PiocheActionModel();
             discardActionPile = new DefausseActionModel();
-            ActionCardModel initActionCard = new ActionCardModel(true, ActionType.REPLACE_CARD_IN_HAND);
+            ActionCardModel initActionCard = new ActionCardModel(false, ActionType.REPLACE_CARD_IN_HAND);
             discardActionPile.addCardAtTop(initActionCard);
         }
         //Creation des joueurs 
@@ -198,7 +240,7 @@ public class GameManager {
         if (this.gameWithAction) {
             actionDeck = new PiocheActionModel();
             discardActionPile = new DefausseActionModel();
-            ActionCardModel initActionCard = new ActionCardModel(true, ActionType.REPLACE_CARD_IN_HAND);
+            ActionCardModel initActionCard = new ActionCardModel(false, ActionType.REPLACE_CARD_IN_HAND);
             discardActionPile.addCardAtTop(initActionCard);
         }
 
