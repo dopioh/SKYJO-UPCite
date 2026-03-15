@@ -210,6 +210,11 @@ Gère toutes les entrées du joueur avec l'ordinateur
         * **handleBotAfterDraw()**
         * **handleBotAfterTakeDiscard()**
 
+* **GameLoop** : Boucle du jeu (Les actions des autres controllers seront acceptés par ce fichier)
+
+* **HumanTurnController** : Toutes les actions joueurs sur le gameBoard
+    * Méthodes : Listeners (tous branché dans GameLoop)
+
 * **GameBoardController** : 
     * Méthode : **updateAllDecksDisplay()**
 

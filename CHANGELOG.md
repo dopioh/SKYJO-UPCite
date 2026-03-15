@@ -244,3 +244,11 @@
 - debut de recode des actions pour awt/swing
 
 - affichage de la main action du joueur
+
+## v.0.7: SPRINT 7
+
+### Modified 
+
+- Le système de tour se passe désormais dans GameLoop.java 
+
+- Toutes les actions joueurs sont en Swing sont gérés par HumanTurnController
