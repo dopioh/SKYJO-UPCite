@@ -145,6 +145,10 @@ public class HumanTurnController {
                         mainController.updateAllDecksDisplay();
                         mainController.refreshGuide();
 
+                        //Première carte du reveal
+                        if (gameManager.getInitRevealCount() == 1) {
+                            return;
+                        }
                         gameLoop.proceedAfterAction();
                         return;
                     }
