@@ -226,11 +226,24 @@ public class GameBoardBotController {
 
                 //revele une carte aléatoire de sa main
                 Timer revealTimer = new Timer(800, ev -> { // fluidité
-                    botHand.revealRandomCard(1);
-                    
-                    //regarde et supprimer les colonnes/lignes identiques
-                    GameRuleModel.removeIdenticalColumns(botHand, gameManager.getDiscardPile());
-                    GameRuleModel.removeIdenticalRows(botHand, gameManager.getDiscardPile());
+                    int row = -1;
+                    int col = -1;
+                    for (int r = 0; r < botHand.getRows() && row == -1; r++) {
+                        for (int c = 0; c < botHand.getColumns(); c++) {
+                            CardModel card = botHand.getCard(r, c);
+                            if (card != null && card.isFaceDown()) {
+                                row = r;
+                                col = c;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (row != -1 && col != -1) {
+                        gameManager.revealCardInHand(col, row);
+                    } else {
+                        gameManager.setTurnPhase(GameManager.TurnPhase.TURN_ENDED);
+                    }
                     
                     gameBoardView.showPlayerCards(bot);
                     System.out.println(bot.getName() + " révèle une carte");

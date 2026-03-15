@@ -186,14 +186,11 @@ public class HumanTurnController {
                     if (waitingReveal) {
                         if (card == null || !card.isFaceDown()) return;
 
-                        currentPlayer.getHand().revealCard(r, c);
-                        GameRuleModel.removeIdenticalColumns(currentPlayer.getHand(), gameManager.getDiscardPile());
-                        GameRuleModel.removeIdenticalRows(currentPlayer.getHand(), gameManager.getDiscardPile());
+                        gameManager.revealCardInHand(c, r);
 
                         gameBoardView.showPlayerCards(currentPlayer);
 
                         waitingReveal = false;
-                        gameManager.setTurnPhase(GameManager.TurnPhase.TURN_ENDED);
                         mainController.refreshGuide();
                         gameLoop.proceedAfterAction();
                         return;

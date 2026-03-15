@@ -294,7 +294,7 @@ public class GameManager {
         //deck = new PiocheModel(); // on a deja un deck initalisé dans le constructeur !
         
         firstPlayerToPlayIndex = currentPlayerIndex;
-        int lastRoundPlayer = -1;  //variable pour savoir qui a lancé la dernière manche
+       lastRoundPlayer = -1;  //variable pour savoir qui a lancé la dernière manche
         
         for (PlayerModel player : players) {
             player.resetHand();
@@ -452,7 +452,7 @@ public class GameManager {
         GameRuleModel.removeIdenticalColumns(hand, discardPile);
         GameRuleModel.removeIdenticalRows(hand, discardPile);
         //vérifier si fin de manche
-        if (GameRuleModel.checkEndOfRound(players)) {
+        if (gameState != GameState.LAST_ROUND && GameRuleModel.checkEndOfRound(players)) {
             gameState = GameState.LAST_ROUND;
             lastRoundPlayer = currentPlayerIndex;  // stocker le joueur qui déclenche le dernier tour
         }
@@ -473,18 +473,23 @@ public class GameManager {
     *montre la carte après avoir défaussé
     */
     public void revealCardInHand(int col, int row){
-        currentDrawCard.returnCard();
-        getCurrentPlayer().getHand().revealCard(row, col);
+        PlayerHandModel hand = getCurrentPlayer().getHand();
+        CardModel card = hand.getCard(row, col);
+        if (card == null || !card.isFaceDown()) {
+            return;
+        }
+        hand.revealCard(row, col);
 
         // check
-        GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile);
-        GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile);
+        GameRuleModel.removeIdenticalColumns(hand, discardPile);
+        GameRuleModel.removeIdenticalRows(hand, discardPile);
         
         //vérifier si fin de manche
-        if (GameRuleModel.checkEndOfRound(players)) {
+        if (gameState != GameState.LAST_ROUND && GameRuleModel.checkEndOfRound(players)) {
             gameState = GameState.LAST_ROUND;
             lastRoundPlayer = currentPlayerIndex;  // stocker le joueur qui déclenche le dernier tour
         }
+        turnPhase = TurnPhase.TURN_ENDED;
     }
 
 
