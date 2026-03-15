@@ -53,7 +53,7 @@ public class GameManager {
         INIT_REVEAL,
         DRAW_DECISION,              // joueur doit choisir ; pioche ou défausse
         CARD_DRAW_FROM_DECK,        // carte piochée du deck ; peut échanger ou défausser
-        CRAD_DISCARD_FROM_DRAW,
+        CARD_DISCARD_FROM_DRAW,
         CARD_TAKE_FROM_DISCARD,     // carte prise de la défausse ; doit échanger
         TURN_ENDED                  // tour terminé
     }
@@ -465,7 +465,7 @@ public class GameManager {
         ensureFaceUp(currentDrawCard);
         discardPile.addCardAtTop(currentDrawCard);
         currentDrawCard = null;
-        turnPhase = TurnPhase.CRAD_DISCARD_FROM_DRAW;
+        turnPhase = TurnPhase.CARD_DISCARD_FROM_DRAW;
     }
     
     /*
