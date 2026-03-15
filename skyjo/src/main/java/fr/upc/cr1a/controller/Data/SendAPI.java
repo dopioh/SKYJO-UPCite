@@ -19,7 +19,7 @@ import fr.upc.cr1a.model.PlayerData;
 public class SendAPI {
     protected static String urlAPI = "https://api-render-su0t.onrender.com";
 
-    protected static  HttpClient client = HttpClient.newHttpClient();
+    protected static HttpClient client = HttpClient.newHttpClient();
     
     public static void WinGameSolo(int totalPlayers, int classement,String accessToken){
         try {
@@ -67,6 +67,7 @@ public class SendAPI {
                 System.out.println("elo : " + playerData.getElo());
                 System.out.println("xp : " + playerData.getXp());
                 System.out.println("money : " + playerData.getMoney());
+                // le mail ne s'affiche pas psq on le recupere que temporerement si on se co avec l'username
             } else {
                 System.out.println("Code HTTP HORS 200 : " + response.statusCode());
             }

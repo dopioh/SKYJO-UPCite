@@ -256,6 +256,8 @@
 - Le système de tour se passe désormais dans `GameLoop.java`
 - Toutes les actions joueurs Swing sont gérées par `HumanTurnController`
 - Main des cartes actions sous les cartes numéro
+- Bouton invitee pour acceder au jeu sans identifiants
+- Connexion par username dans l'interface
 
 ### Fixed
 

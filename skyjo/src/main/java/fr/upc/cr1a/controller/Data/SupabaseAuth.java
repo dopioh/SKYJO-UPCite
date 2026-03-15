@@ -1,5 +1,6 @@
 package fr.upc.cr1a.controller.Data;
 
+//import java.lang.Thread.State;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -7,9 +8,11 @@ import java.net.http.HttpResponse;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+//import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import fr.upc.cr1a.model.GameSession;
+//import fr.upc.cr1a.model.GameSession;
+//import netscape.javascript.JSObject;
 
 // gson pour recup l'iud que supabase renvoie
 
@@ -29,6 +32,8 @@ public class SupabaseAuth {
     private static final String SUPABASE_URL = "https://jfystyeubanlvujvlkvw.supabase.co";
     private static final String SUPABASE_PUBLIC_KEY = "sb_publishable_uprBauX8RjU9OFrQamyhLQ_1JYNeA-a"; // clé publique donc aucun soucis de le mettre en dure ici
 
+    private static final HttpClient clientAuth = HttpClient.newHttpClient();
+
     public static boolean connectPlayerByEmail(String email, String password){ // mettre des booleans apres en type retour
         try {
             String jsonBody = "{\"email\": \"" + email + "\", \"password\": \"" + password + "\"}";
@@ -36,12 +41,12 @@ public class SupabaseAuth {
             String url = SUPABASE_URL + "/auth/v1/token?grant_type=password";
 
             // requete http à envoyer à la database
-            HttpClient client = HttpClient.newHttpClient(); // creer un client pour envoyer apres une requete depuis celui ci
+            //HttpClient client = HttpClient.newHttpClient(); // creer un client pour envoyer apres une requete depuis celui ci
 
             // OBLIGER de mettre "application" meme si c'est du texte qui est envoyé 
             HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).header("Content-Type", "application/json").header("apikey",SUPABASE_PUBLIC_KEY).POST(HttpRequest.BodyPublishers.ofString(jsonBody)).build();
 
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString()); // peut lever une exceptions -> obliger try catch
+            HttpResponse<String> response = clientAuth.send(request, HttpResponse.BodyHandlers.ofString()); // peut lever une exceptions -> obliger try catch
 
             if (response.statusCode() != 200){
                 System.out.println("CODE HTTP : " + response.statusCode());
@@ -61,8 +66,44 @@ public class SupabaseAuth {
         }
     }
 
-    public static void connectPlayerByUsername(String username, String password){
-        // a definir apres s'etre assuré que par mail ça fonctionne à 100%
+    public static boolean connectPlayerByUsername(String username, String password){
+        try {
+
+            String email = getEmailFromUsername(username);
+
+            System.out.println(email);
+
+            if (email == null || email.equals("NON_TROUVE")) {
+                System.out.println("Connexion annulee : Pseudo introuvable ou API injoignable.");
+                return false;
+            }
+
+            boolean connectByMail = connectPlayerByEmail(email, password);
+            return connectByMail;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private static String getEmailFromUsername(String username){
+        try {
+            String url = SendAPI.urlAPI + "/api/player/getEmail?username=" + username;
+
+            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
+
+            HttpResponse<String> response = clientAuth.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200 && !response.body().equals("NON_TROUVE")) {
+                return response.body(); // L'API renvoie directement l'email en texte clair
+            }
+            return null;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static boolean createAccount(String email, String username, String password) {
@@ -71,11 +112,9 @@ public class SupabaseAuth {
 
             String url = SUPABASE_URL + "/auth/v1/signup";
 
-            HttpClient client = HttpClient.newHttpClient();
-
             HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).header("Content-Type", "application/json").header("apikey", SUPABASE_PUBLIC_KEY).POST(HttpRequest.BodyPublishers.ofString(jsonBody)).build();
 
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = clientAuth.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200){
                 System.out.println("HTTP CODE PAS 200 : " + response.statusCode());
@@ -123,14 +162,17 @@ public class SupabaseAuth {
     }
 
 
-    /* Juste pour tester dans le terminal
+   /* Juste pour tester dans le terminal
     
     public static void main(String[] args) { // juste pour tester la connexion 
-        System.out.println("TEST CREATION DE COMPTE : ");
-        //createAccount("", "aza", "");
+        //System.out.println("TEST CREATION DE COMPTE : ");
+        //createAccount("", "", "");
 
         //System.out.println("TEST CONNECTION AU COMPTE :");
-        connectPlayerByEmail("", "");
+        //connectPlayerByEmail("", "");
+
+        System.out.println("TEST CONNECTION AU COMPTE PAR USERNAME :");
+        connectPlayerByUsername("aza", "MDPSECRET");
 
         //System.out.println("Une Game Win : ");
         //SendAPI.WinGameSolo(8, 2, GameSession.getAccessToken()); // pour le moment ca ne modifie rien dans la db, mais l'API recoit la requete
