@@ -12,7 +12,7 @@ import javax.swing.Timer;
  */
 public class GameLoop {
     
-    private static final int END_TURN_DELAY_MS = 1200;
+    private static final int ACTION_DELAY_MS = 1200;
 
     private final GameManager gameManager;
     private final GameBoardView gameBoardView;
@@ -34,42 +34,69 @@ public class GameLoop {
     }
 
     public void startGameLoop() {
-        startCurrentTurn();
+        startCurrentFlow();
     }
 
-    public void startCurrentTurn() {
-        if (gameManager.getTurnPhase() != GameManager.TurnPhase.INIT_REVEAL) {
-            gameManager.startTurn();
+    public void proceedAfterAction() {
+        if (humanController != null) {
+            humanController.setWaitingNextTurn(true);
         }
+        Timer timer = new Timer(ACTION_DELAY_MS, e -> {
+            if (humanController != null) {
+                humanController.setWaitingNextTurn(false);
+            }
+            continueFlow();
+        });
+        timer.setRepeats(false);
+        timer.start();
+    }
 
-        PlayerModel currentPlayer = gameManager.getCurrentPlayer();
-        gameBoardView.showPlayerCards(currentPlayer);
+    private void continueFlow() {
+        if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) {
+            continueInitRevealFlow();
+            return;
+        }
+        finishNormalTurnFlow();
+    }
 
+    private void continueInitRevealFlow() {
         if (humanController != null) {
             humanController.refreshGuide();
         }
-
+        PlayerModel currentPlayer = gameManager.getCurrentPlayer();
+        gameBoardView.showPlayerCards(currentPlayer);
         if (currentPlayer instanceof BotModel) {
             if (botController != null) {
                 botController.handleBotTurn();
             }
         }
     }
-
-    public void requestEndTurn() {
-        Timer timer = new Timer(END_TURN_DELAY_MS, e -> finishCurrentTurn());
-        timer.setRepeats(false);
-        timer.start();
-    }
-
-    private void finishCurrentTurn() {
+    
+    private void finishNormalTurnFlow() {
         gameManager.nextPlayer();
-        if (gameManager.getGameState() == GameManager.GameState.ROUND_ENDED || gameManager.getGameState() == GameManager.GameState.GAME_ENDED) {
+        if (gameManager.getGameState() == GameManager.GameState.ROUND_ENDED
+                || gameManager.getGameState() == GameManager.GameState.GAME_ENDED) {
             if (humanController != null) {
                 humanController.showRoundEndScreenFromLoop();
             }
             return;
         }
-        startCurrentTurn();
+        startCurrentFlow();
+    }
+
+    public void startCurrentFlow() {
+        if (gameManager.getTurnPhase() != GameManager.TurnPhase.INIT_REVEAL) {
+            gameManager.startTurn();
+        }
+        PlayerModel currentPlayer = gameManager.getCurrentPlayer();
+        gameBoardView.showPlayerCards(currentPlayer);
+        if (humanController != null) {
+            humanController.refreshGuide();
+        }
+        if (currentPlayer instanceof BotModel) {
+            if (botController != null) {
+                botController.handleBotTurn();
+            }
+        }
     }
 }

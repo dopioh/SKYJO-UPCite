@@ -266,7 +266,7 @@ public class GameBoardController {
     }
 
     public void requestEndTurnFromBot() {
-        gameLoop.requestEndTurn();
+        gameLoop.proceedAfterAction();
     }
 
     public void showRoundEndScreenFromLoop() {

@@ -113,7 +113,7 @@ public class HumanTurnController {
 
             gameManager.setTurnPhase(GameManager.TurnPhase.TURN_ENDED);
             mainController.refreshGuide();
-            gameLoop.requestEndTurn();
+            gameLoop.proceedAfterAction();
         });
     }
 
@@ -137,18 +137,15 @@ public class HumanTurnController {
                     CardModel card = currentPlayer.getHand().getCard(r, c);
 
                     if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) {
+                        PlayerModel revealedPlayer = gameBoardView.getCurrentPlayer();
                         boolean ok = gameManager.revealInitCard(c, r);
                         if (!ok) return;
 
-                        gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
+                        gameBoardView.showPlayerCards(revealedPlayer);
                         mainController.updateAllDecksDisplay();
                         mainController.refreshGuide();
 
-                        Timer checkBotTimer = new Timer(300, ev -> {
-                            gameLoop.startCurrentTurn();
-                        });
-                        checkBotTimer.setRepeats(false);
-                        checkBotTimer.start();
+                        gameLoop.proceedAfterAction();
                         return;
                     }
 
@@ -164,7 +161,7 @@ public class HumanTurnController {
                         waitingReveal = false;
                         gameManager.setTurnPhase(GameManager.TurnPhase.TURN_ENDED);
                         mainController.refreshGuide();
-                        gameLoop.requestEndTurn();
+                        gameLoop.proceedAfterAction();
                         return;
                     }
 
@@ -177,7 +174,7 @@ public class HumanTurnController {
 
                         mainController.updateAllDecksDisplay();
                         mainController.refreshGuide();
-                        gameLoop.requestEndTurn();
+                        gameLoop.proceedAfterAction();
                         return;
                     }
 
@@ -285,7 +282,7 @@ public class HumanTurnController {
                     }
                     gameBoardView.showPlayerCards(player);
                     mainController.refreshGuide();
-                    gameLoop.requestEndTurn();
+                    gameLoop.proceedAfterAction();
                 });
                 hideTimer.setRepeats(false);
                 hideTimer.start();
@@ -319,7 +316,7 @@ public class HumanTurnController {
                 replaceFirstRow = -1;
                 replaceFirstCol = -1;
 
-                gameLoop.requestEndTurn();
+                gameLoop.proceedAfterAction();
                 break;
 
             default:
