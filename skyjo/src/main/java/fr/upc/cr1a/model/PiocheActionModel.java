@@ -15,7 +15,7 @@ public class PiocheActionModel extends CardStackModel {
         for (ActionType type : ActionType.values()) {
             if (type != ActionType.DEFENSE) {
                 for (int k = 0; k < 3; k++) {
-                    this.getStack().add(new ActionCardModel(true, ActionType.TRADE_CARD_WITH_PLAYER));
+                    this.getStack().add(new ActionCardModel(true, ActionType.ALL_PLAYERS_DROP_CARD));
                 }
             }
         }

@@ -49,7 +49,9 @@ public class GameBoardController {
         REPLACE_CARD_SECOND,
         TRADE_SELECT_OWN_CARD,
         TRADE_SELECT_TARGET_PLAYER,
-        TRADE_SELECT_TARGET_CARD
+        TRADE_SELECT_TARGET_CARD,
+        ALL_PLAYERS_DROP_SELECT_TARGET,
+        ALL_PLAYERS_DROP_SELECT_CARD
     }
     private ActionMode actionMode = ActionMode.NONE;
     private int replaceFirstRow = -1;
@@ -57,6 +59,8 @@ public class GameBoardController {
     private int tradeOwnRow = -1;
     private int tradeOwnCol = -1;
     private int tradeTargetPlayerIndex = -1;
+    private final ArrayList<Integer> allPlayersDropPendingTargets = new ArrayList<>();
+    private int allPlayersDropCurrentTargetIndex = -1;
 
     /**
      * Initialise la view et le Model du GameBoard
@@ -296,6 +300,10 @@ public class GameBoardController {
                         selectTradeTargetPlayer(tmp);
                         return;
                     }
+                    if (actionMode == ActionMode.ALL_PLAYERS_DROP_SELECT_TARGET || actionMode == ActionMode.ALL_PLAYERS_DROP_SELECT_CARD) {
+                        selectAllPlayersDropTarget(tmp);
+                        return;
+                    }
                     if (tmp == gameManager.getCurrentPlayerIndex()) {
                         return;
                     }
@@ -327,7 +335,7 @@ public class GameBoardController {
     }
 
     /**
-     * Logique d'activation d'une carte action
+     * Logique d'activation d'une carte action quand on clique dessus
      */
     private void onActionCardClicked(ActionType type, int indexInHand) {
         if (waitingNextTurn) return;
@@ -377,6 +385,13 @@ public class GameBoardController {
                 gameBoardView.setActionGuide("TRADE : Clique une de tes cartes à échanger");
                 System.out.println("carte TRADE_CARD_WITH_PLAYER activée !");
                 break;
+            
+            case ALL_PLAYERS_DROP_CARD:
+                gameManager.getDiscardActionPile().addCardAtTop(c);
+                player.getActionHand().remove(indexInHand);
+                startAllPlayersDropAction(player);
+                System.out.println("carte ALL_PLAYERS_DROP_CARD activée !");
+                break;
 
             default:
                 System.out.println("carte " + type + " activée ! (pas encore implémentée en graphique)");
@@ -386,6 +401,7 @@ public class GameBoardController {
 
     /**
      * Logique de la carte action une fois activée
+     * Lorsqu'on choisit une carte ou un joueur sur le gameboard
      */
     private void handleActionModeClick(int row, int col) {
         switch (actionMode) {
@@ -475,6 +491,14 @@ public class GameBoardController {
                 completeTrade(row, col);
                 break;
 
+            case ALL_PLAYERS_DROP_SELECT_TARGET:
+                gameBoardView.setActionGuide("DROP : Choisis un joueur a gauche");
+                break;
+
+            case ALL_PLAYERS_DROP_SELECT_CARD:
+                applyAllPlayersDropOnSelectedCard(row, col);
+                break;
+
             default:
                 break;
         }
@@ -539,10 +563,113 @@ public class GameBoardController {
         switchToNextPlayer();
     }
 
+    private void startAllPlayersDropAction(PlayerModel currentPlayer) {
+        resetAllPlayersDropSelection();
+
+        for (int i = 0; i < gameManager.getPlayers().size(); i++) {
+            if (i != gameManager.getCurrentPlayerIndex()) {
+                allPlayersDropPendingTargets.add(i);
+            }
+        }
+
+        if (allPlayersDropPendingTargets.isEmpty()) {
+            actionMode = ActionMode.NONE;
+            gameBoardView.showPlayerCards(currentPlayer);
+            gameBoardView.setActionGuide("DROP : aucun joueur");
+            switchToNextPlayer();
+            return;
+        }
+
+        actionMode = ActionMode.ALL_PLAYERS_DROP_SELECT_TARGET;
+        gameBoardView.setActionHandVisible(false);
+        gameBoardView.showOtherPlayerMain(false);
+        gameBoardView.showPlayerCards(currentPlayer);
+        gameBoardView.setActionGuide("DROP : Choisis un joueur a gauche (" + allPlayersDropPendingTargets.size() + " restants)");
+    }
+
+    private void selectAllPlayersDropTarget(int targetIndex) {
+        if (actionMode != ActionMode.ALL_PLAYERS_DROP_SELECT_TARGET && actionMode != ActionMode.ALL_PLAYERS_DROP_SELECT_CARD) {
+            return;
+        }
+        if (targetIndex == gameManager.getCurrentPlayerIndex()) {
+            gameBoardView.setActionGuide("DROP : choisis un autre joueur");
+            return;
+        }
+        if (!allPlayersDropPendingTargets.contains(targetIndex)) {
+            gameBoardView.setActionGuide("DROP : ce joueur a deja été affecté");
+            return;
+        }
+
+        allPlayersDropCurrentTargetIndex = targetIndex;
+        PlayerModel target = gameManager.getPlayers().get(targetIndex);
+        gameBoardView.showOtherPlayerMain(false);
+        gameBoardView.setActionHandVisible(false);
+        gameBoardView.showPlayerCards(target);
+        actionMode = ActionMode.ALL_PLAYERS_DROP_SELECT_CARD;
+        gameBoardView.setActionGuide("DROP : Clique une carte de " + target.getName() + " (" + allPlayersDropPendingTargets.size() + " restants)");
+    }
+
+    private void applyAllPlayersDropOnSelectedCard(int row, int col) {
+        PlayerModel currentPlayer = gameManager.getCurrentPlayer();
+        if (currentPlayer == null) return;
+        if (allPlayersDropCurrentTargetIndex < 0) return;
+        if (!allPlayersDropPendingTargets.contains(allPlayersDropCurrentTargetIndex)) return;
+
+        PlayerModel targetPlayer = gameManager.getPlayers().get(allPlayersDropCurrentTargetIndex);
+        CardModel targetCard = targetPlayer.getHand().getCard(row, col);
+        if (targetCard == null) {
+            gameBoardView.setActionGuide("DROP : case vide");
+            return;
+        }
+
+        CardModel drawnCard = gameManager.drawDeck();
+        if (drawnCard == null) {
+            gameBoardView.setActionGuide("DROP : impossible");
+            return;
+        }
+        if (drawnCard != null && drawnCard.isFaceDown()) {
+            drawnCard.returnCard();
+        }
+        if (targetCard.isFaceDown()) {
+            targetCard.returnCard();
+        }
+
+        targetPlayer.getHand().replaceCard(row, col, drawnCard);
+        gameManager.getDiscardPile().addCardAtTop(targetCard);
+
+        // checks colonnes et lignes
+        GameRuleModel.removeIdenticalColumns(targetPlayer.getHand(), gameManager.getDiscardPile());
+        GameRuleModel.removeIdenticalRows(targetPlayer.getHand(), gameManager.getDiscardPile());
+
+        allPlayersDropPendingTargets.remove(allPlayersDropCurrentTargetIndex);
+        allPlayersDropCurrentTargetIndex = -1;
+        updateAllDecksDisplay();
+
+        if (allPlayersDropPendingTargets.isEmpty()) {
+            actionMode = ActionMode.NONE;
+            resetAllPlayersDropSelection();
+            gameBoardView.setActionHandVisible(true);
+            gameBoardView.showOtherPlayerMain(false);
+            gameBoardView.showPlayerCards(currentPlayer);
+            gameBoardView.setActionGuide("DROP : tous les joueurs ont ete affectés");
+            switchToNextPlayer();
+            return;
+        }
+
+        actionMode = ActionMode.ALL_PLAYERS_DROP_SELECT_TARGET;
+        gameBoardView.showPlayerCards(currentPlayer);
+        gameBoardView.setActionGuide("DROP : Choisis le prochain joueur (" + allPlayersDropPendingTargets.size() + " restants)");
+    }
+
     private void resetTradeSelection() {
         tradeOwnRow = -1;
         tradeOwnCol = -1;
         tradeTargetPlayerIndex = -1;
+    }
+
+    private void resetAllPlayersDropSelection() {
+        allPlayersDropPendingTargets.clear();
+        allPlayersDropCurrentTargetIndex = -1;
     }
 
     /**
@@ -551,6 +678,7 @@ public class GameBoardController {
     public void switchToNextPlayer() {
         actionMode = ActionMode.NONE;
         resetTradeSelection();
+        resetAllPlayersDropSelection();
         gameBoardView.setActionHandVisible(true);
         gameBoardView.showOtherPlayerMain(false);
 
@@ -655,7 +783,12 @@ public class GameBoardController {
         gameManager.startNewGame();
         waitingNextTurn = false;
         waitingReveal = false;
+
         actionMode = ActionMode.NONE;
+        resetTradeSelection();
+        resetTradeSelection();
+        resetAllPlayersDropSelection();
+
         gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
         updateAllDecksDisplay();
         Frame frame = gameBoardModel.getFrame();
