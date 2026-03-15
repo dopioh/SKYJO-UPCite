@@ -56,11 +56,10 @@ public class GameLoop {
             continueInitRevealFlow();
             return;
         }
-        // Si on vient de finir INIT_REVEAL, ne pas appeler nextPlayer()
-        // car le joueur correct a deja ete determine par firstPlayer()
+        // après initialisation ne pas appeler nextPlayer()
         if (gameManager.isInitRevealJustFinished()) {
-            gameManager.setInitRevealJustFinished(false);  // reset la flag
-            startCurrentFlow();  // Commencer directement le tour du vrai premier joueur
+            gameManager.setInitRevealJustFinished(false);
+            startCurrentFlow();// comencer a jouer
             return;
         }
         finishNormalTurnFlow();
