@@ -67,7 +67,7 @@ public class GameManager {
         if (this.gameWithAction) {
             actionDeck = new PiocheActionModel();
             discardActionPile = new DefausseActionModel();
-            ActionCardModel initActionCard = new ActionCardModel(true, ActionType.REPLACE_CARD_IN_HAND);
+            ActionCardModel initActionCard = new ActionCardModel(false, ActionType.REPLACE_CARD_IN_HAND);
             discardActionPile.addCardAtTop(initActionCard);
         }
         //Creation des joueurs 
@@ -176,7 +176,7 @@ public class GameManager {
         if (this.gameWithAction) {
             actionDeck = new PiocheActionModel();
             discardActionPile = new DefausseActionModel();
-            ActionCardModel initActionCard = new ActionCardModel(true, ActionType.REPLACE_CARD_IN_HAND);
+            ActionCardModel initActionCard = new ActionCardModel(false, ActionType.REPLACE_CARD_IN_HAND);
             discardActionPile.addCardAtTop(initActionCard);
         }
 

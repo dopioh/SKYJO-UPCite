@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.*;
 
 import fr.upc.cr1a.model.*;
+import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.GameManager.TurnPhase;
 import fr.upc.cr1a.view.*;
 
@@ -36,6 +37,12 @@ public class GameBoardController {
     private AudioManager audio;
     // panel de fin de manche
     RoundEndPanel currentRoundEndPanel = null;
+
+    // stuff pour les actions
+    private enum ActionMode { NONE, SPY_ONE_COLUMN, REPLACE_CARD_FIRST, REPLACE_CARD_SECOND }
+    private ActionMode actionMode = ActionMode.NONE;
+    private int replaceFirstRow = -1;
+    private int replaceFirstCol = -1;
 
     /**
      * Initialise la view et le Model du GameBoard
@@ -159,6 +166,13 @@ public class GameBoardController {
                 gameBoardView.getCardButtons()[row][col].addActionListener(e -> {
                     if (waitingNextTurn)
                         return; // bloque les clics pendant l'attente
+
+                    // si il y'a une action en cours on la fait au lieu du comportement habituel
+                    if (actionMode != ActionMode.NONE) {
+                        handleActionModeClick(r, c);
+                        return;
+                    }
+
                     PlayerModel currentPlayer = gameBoardView.getCurrentPlayer();
                     if (currentPlayer == null)
                         return;
@@ -233,6 +247,19 @@ public class GameBoardController {
             }
         }
 
+        // listeners cartes action
+        for (int i = 0; i < gameBoardView.getActionCardButtons().length; i++) {
+            final int id = i;
+            gameBoardView.getActionCardButtons()[i].addActionListener(e -> {
+                if (waitingNextTurn) return;
+                if (actionMode != ActionMode.NONE) return;
+                if (id >= gameBoardView.getVisibleActionCount()) return;
+                ActionType type = gameBoardView.getActionCardType(id);
+                if (type == null) return;
+                onActionCardClicked(type, id);
+            });
+        }
+
         // Pour le survol et le ckick des preview player
         // y'a un soucis pour les pinned ici -> bug mineur
         int s = 0;
@@ -279,6 +306,119 @@ public class GameBoardController {
             s++;
         }
 
+    }
+
+    /**
+     * Logique d'activation d'une carte action
+     */
+    private void onActionCardClicked(ActionType type, int indexInHand) {
+        if (waitingNextTurn) return;
+        if (actionMode != ActionMode.NONE) return;
+
+        PlayerModel player = gameManager.getCurrentPlayer();
+        if (player == null) return;
+        ActionCardModel c = new ActionCardModel(false, type);
+        switch (type) {
+            case PLAY_TWO_TURN:
+                gameManager.getDiscardActionPile().addCardAtTop(c);
+                gameManager.grantExtraTurn();
+                player.getActionHand().remove(indexInHand);
+                gameBoardView.showPlayerCards(player);
+                gameBoardView.setActionGuide("PLAY_TWO_TURN activé ! Tu rejoues 2 fois.");
+                break;
+
+            case SPY_ONE_COLUMN:
+                gameManager.getDiscardActionPile().addCardAtTop(c);
+                actionMode = ActionMode.SPY_ONE_COLUMN;
+                player.getActionHand().remove(indexInHand);
+                gameBoardView.showPlayerCards(player);
+                gameBoardView.setActionGuide("SPY : Clique sur une carte pour espionner sa colonne");
+                break;
+
+            case REPLACE_CARD_IN_HAND:
+                gameManager.getDiscardActionPile().addCardAtTop(c);
+                actionMode = ActionMode.REPLACE_CARD_FIRST;
+                replaceFirstRow = -1;
+                replaceFirstCol = -1;
+                player.getActionHand().remove(indexInHand);
+                gameBoardView.showPlayerCards(player);
+                gameBoardView.setActionGuide("SWAP : Clique sur la 1ère carte à échanger");
+                break;
+
+            default:
+                System.out.println("carte " + type + " activée ! (pas encore implémentée en graphique)");
+                break;
+        }
+    }
+
+    /**
+     * Logique de la carte action une fois activée
+     */
+    private void handleActionModeClick(int row, int col) {
+        PlayerModel player = gameManager.getCurrentPlayer();
+        if (player == null) return;
+
+        switch (actionMode) {
+            case SPY_ONE_COLUMN:
+                PlayerHandModel hand = player.getHand();
+                if (hand == null) return;
+                ArrayList<int[]> hiddenCards = new ArrayList<>();
+
+                for (int r = 0; r < 3; r++) {
+                    CardModel card = hand.getCard(r, col);
+                    if (card != null && card.isFaceDown()) {
+                        card.returnCard();
+                        hiddenCards.add(new int[]{r, col});
+                    }
+                }
+                gameBoardView.showPlayerCards(player);
+                gameBoardView.setActionGuide("Colonne " + col + " révélée ! (3 secondes...)");
+                actionMode = ActionMode.NONE;
+
+                Timer hideTimer = new Timer(3000, ev -> {
+                    for (int[] pos : hiddenCards) {
+                        CardModel card = hand.getCard(pos[0], pos[1]);
+                        if (card != null && !card.isFaceDown()) {
+                            card.returnCard();
+                        }
+                    }
+                    gameBoardView.showPlayerCards(player);
+                    refreshGuide();
+                    switchToNextPlayer();
+                });
+                hideTimer.setRepeats(false);
+                hideTimer.start();
+                break;
+
+            case REPLACE_CARD_FIRST:
+                CardModel card = player.getHand().getCard(row, col);
+                if (card == null) return;
+                replaceFirstRow = row;
+                replaceFirstCol = col;
+                actionMode = ActionMode.REPLACE_CARD_SECOND;
+                gameBoardView.setActionGuide("SWAP : Clique sur la 2ème carte à échanger");
+                break;
+
+            case REPLACE_CARD_SECOND:
+                if (row == replaceFirstRow && col == replaceFirstCol) return;
+                CardModel firstCard = player.getHand().getCard(replaceFirstRow, replaceFirstCol);
+                CardModel secondCard = player.getHand().getCard(row, col);
+                if (firstCard == null || secondCard == null) return;
+
+                player.getHand().replaceCard(replaceFirstRow, replaceFirstCol, secondCard);
+                player.getHand().replaceCard(row, col, firstCard);
+
+                gameBoardView.showPlayerCards(player);
+                gameBoardView.setActionGuide("Cartes échangées !");
+                actionMode = ActionMode.NONE;
+                replaceFirstRow = -1;
+                replaceFirstCol = -1;
+                switchToNextPlayer();
+                break;
+
+            default:
+                break;
+        }
     }
 
     /**
@@ -386,6 +526,7 @@ public class GameBoardController {
         gameManager.startNewGame();
         waitingNextTurn = false;
         waitingReveal = false;
+        actionMode = ActionMode.NONE;
         gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
         updateAllDecksDisplay();
         Frame frame = gameBoardModel.getFrame();

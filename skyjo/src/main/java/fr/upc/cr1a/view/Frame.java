@@ -80,7 +80,7 @@ public class Frame extends JFrame{
                 "/cartes/carte12.png", "/cartes/carteEtoile.png",
                 "/cartes/carteActionTrade.png", "/cartes/carteActionReplace.png",
                 "/cartes/carteActionTwoTurn.png", "/cartes/carteActionDraw3.png",
-                "/cartes/carteActionReplay.png",
+                "/cartes/carteActionReplay.png", /*"/cartes/carteActionDefense.png",*/
                 "/cartes/carteActionDrop.png", "/cartes/carteActionSpy.png",
                 "/cartes/carteActionDos.png"
             );

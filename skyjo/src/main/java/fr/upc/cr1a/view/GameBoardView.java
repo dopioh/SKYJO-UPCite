@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import javax.swing.*;
 
 import fr.upc.cr1a.model.ActionCardModel;
+import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.PlayerHandModel;
 import fr.upc.cr1a.model.PlayerModel;
@@ -76,8 +77,11 @@ public class GameBoardView extends JPanel {
     private int cachedBgHeight;
 
     // Affichage de la main des cartes action du joueur
+    private static final int MAX_ACTION_CARDS = 8;
     private JPanel actionHandPanel;
-    private ArrayList<CardButton> actionCardButtons;
+    private CardButton[] actionCardButtons;
+    private ActionType[] actionCardTypes;
+    private int visibleActionCount = 0;
 
     // Affichage des cartes pilées
     private CardButton btnPioche;
@@ -108,7 +112,8 @@ public class GameBoardView extends JPanel {
         this.listPlayer = listPlayerModels;
         this.buttonlistPlayer = new ArrayList<JButton>();
         this.cardButtons = new CardButton[3][4];
-        this.actionCardButtons = new ArrayList<>();
+        this.actionCardButtons = new CardButton[MAX_ACTION_CARDS];
+        this.actionCardTypes = new ActionType[MAX_ACTION_CARDS];
         setLayout(new BorderLayout());
         setOpaque(true);
         setVisible(true);
@@ -257,6 +262,15 @@ public class GameBoardView extends JPanel {
         // Panel des cartes actions dans la main du joueur
         actionHandPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 2));
         actionHandPanel.setOpaque(false);
+        // pre-creation des boutons action — animation désactivée pour ne pas surcharger l'AnimLoop
+        for (int i = 0; i < MAX_ACTION_CARDS; i++) {
+            CardButton btn = new CardButton();
+            btn.setAnimationEnabled(false);
+            btn.setCardSize(65, 90);
+            btn.setVisible(false);
+            actionCardButtons[i] = btn;
+            actionHandPanel.add(btn);
+        }
         cardsContainer.add(actionHandPanel, BorderLayout.SOUTH);
 
         // creer les 12 CardButton
@@ -426,38 +440,38 @@ public class GameBoardView extends JPanel {
     }
 
     /**
-     * Affiche les cartes action du joueur en petit au-dessus de la main
+     * Met à jour les boutons carte action visibles sans recréer de composants
      */
     public void showActionHand(PlayerModel player) {
-        actionHandPanel.removeAll();
-        actionCardButtons.clear();
-
         ArrayList<ActionCardModel.ActionType> actions = player.getActionHand();
-        if (actions == null || actions.isEmpty()) {
-            actionHandPanel.repaint();
-            return;
-        }
+        visibleActionCount = (actions == null) ? 0 : actions.size();
 
-        for (int i = 0; i < actions.size(); i++) {
-            ActionCardModel.ActionType type = actions.get(i);
-            CardButton btn = new CardButton();
-            btn.setAnimationEnabled(EnableHandCardAnimations);
-
-            // carte temp pour recuperer l'image qui correspond au type
-            ActionCardModel tempCard = new ActionCardModel(false, type);
-            String imgPath = getCardImagePath(tempCard);
-            btn.setCardImage(imgPath);
-            btn.setCardSize(65, 90);
-
-            btn.addActionListener(e -> {
-                System.out.println("carte " + type + " activée !");
-            });
-
-            actionCardButtons.add(btn);
-            actionHandPanel.add(btn);
+        for (int i = 0; i < MAX_ACTION_CARDS; i++) {
+            if (i < visibleActionCount) {
+                ActionType type = actions.get(i);
+                actionCardTypes[i] = type;
+                ActionCardModel tempCard = new ActionCardModel(false, type);
+                actionCardButtons[i].setCardImage(getCardImagePath(tempCard));
+                actionCardButtons[i].setVisible(true);
+            } else {
+                actionCardTypes[i] = null;
+                actionCardButtons[i].setVisible(false);
+            }
         }
 
         actionHandPanel.repaint();
+    }
+
+    public CardButton[] getActionCardButtons() {
+        return actionCardButtons;
+    }
+
+    public ActionType getActionCardType(int index) {
+        return actionCardTypes[index];
+    }
+
+    public int getVisibleActionCount() {
+        return visibleActionCount;
     }
 
     /**
@@ -481,7 +495,7 @@ public class GameBoardView extends JPanel {
                     return "/cartes/carteActionDraw3.png";
                 case PLAY_LAST_ACTION_IN_DEFAUSSE:
                     return "/cartes/carteActionReplay.png";
-                // DEFENSE: cause erreur car on a pas de carte defense, il est parti où ?
+                // DEFENSE: cause erreur pour .jar car on a pas de carte defence, il est parti où ?
                 case ALL_PLAYERS_DROP_CARD:
                     return "/cartes/carteActionDrop.png";
                 case SPY_ONE_COLUMN:
