@@ -4,12 +4,15 @@ import fr.upc.cr1a.model.BotModel;
 import fr.upc.cr1a.model.GameManager;
 import fr.upc.cr1a.model.PlayerModel;
 import fr.upc.cr1a.view.GameBoardView;
+import javax.swing.Timer;
 
 /**
  * Class orchéstrant le système de tour, il dépendra de 2 controllers(HumanTurn et BotTurn) et du gameBoard
  * 
  */
 public class GameLoop {
+    
+    private static final int END_TURN_DELAY_MS = 1200;
 
     private final GameManager gameManager;
     private final GameBoardView gameBoardView;
@@ -54,7 +57,9 @@ public class GameLoop {
     }
 
     public void requestEndTurn() {
-        finishCurrentTurn();
+        Timer timer = new Timer(END_TURN_DELAY_MS, e -> finishCurrentTurn());
+        timer.setRepeats(false);
+        timer.start();
     }
 
     private void finishCurrentTurn() {
