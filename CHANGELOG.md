@@ -241,3 +241,18 @@
 - debut de recode des actions pour awt/swing
 
 - affichage de la main action du joueur
+
+## v.0.7: SPRINT 7
+
+### Added
+
+- Toutes les cartes actions jouables graphiquement
+
+### Modified
+
+- Main des cartes actions sous les cartes numéro
+
+### Fixed
+
+- PLAY_TWO_TURN joue 2 tours (contre 3 avant)
+

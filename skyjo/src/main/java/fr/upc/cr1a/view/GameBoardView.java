@@ -197,12 +197,11 @@ public class GameBoardView extends JPanel {
         for (int i = 0; i < MAX_ACTION_CARDS; i++) {
             CardButton btn = new CardButton();
             btn.setAnimationEnabled(EnableHandCardAnimations);
-            btn.setCardSize(65, 90);
+            btn.setCardSize(75, 100);
             btn.setVisible(false);
             actionCardButtons[i] = btn;
             actionHandPanel.add(btn);
         }
-        cardsContainer.add(actionHandPanel, BorderLayout.SOUTH);
 
         // creer les 12 CardButton
         for (int row = 0; row < 3; row++) {
@@ -215,6 +214,14 @@ public class GameBoardView extends JPanel {
                 cardsGrid.add(btn, gbc);
             }
         }
+
+        GridBagConstraints gbcActionHand = new GridBagConstraints();
+        gbcActionHand.gridx = 0;
+        gbcActionHand.gridy = 4;
+        gbcActionHand.gridwidth = 4;
+        gbcActionHand.insets = new Insets(8, cardSpacing, 6, cardSpacing);
+        gbcActionHand.anchor = GridBagConstraints.CENTER;
+        cardsGrid.add(actionHandPanel, gbcActionHand);
 
         zonePlateau.add(cardsContainer, BorderLayout.CENTER);
 
