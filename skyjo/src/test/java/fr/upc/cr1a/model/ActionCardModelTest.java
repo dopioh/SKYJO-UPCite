@@ -30,7 +30,7 @@ class ActionCardModelTest {
 
     @Test
     void testReturnCard() {
-        ActionCardModel card = new ActionCardModel(true, ActionType.DEFENSE);
+        ActionCardModel card = new ActionCardModel(true, ActionType.PLAY_TWO_TURN);
         assertTrue(card.isFaceDown());
         card.returnCard();
         assertFalse(card.isFaceDown());

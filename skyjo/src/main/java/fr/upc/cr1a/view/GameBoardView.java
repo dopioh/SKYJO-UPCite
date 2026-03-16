@@ -81,7 +81,7 @@ public class GameBoardView extends JPanel {
     private JPanel actionHandPanel;
     private CardButton[] actionCardButtons;
     private ActionType[] actionCardTypes;
-    private int visibleActionCount = 0;
+    private int visibleActionCount = 0;   // nombre de boutons actuellement visibles
 
     // Affichage des cartes pilées
     private CardButton btnPioche;
@@ -271,7 +271,6 @@ public class GameBoardView extends JPanel {
             actionCardButtons[i] = btn;
             actionHandPanel.add(btn);
         }
-        cardsContainer.add(actionHandPanel, BorderLayout.SOUTH);
 
         // creer les 12 CardButton
         for (int row = 0; row < 3; row++) {
@@ -284,6 +283,14 @@ public class GameBoardView extends JPanel {
                 cardsGrid.add(btn, gbc);
             }
         }
+
+        GridBagConstraints gbcActionHand = new GridBagConstraints();
+        gbcActionHand.gridx = 0;
+        gbcActionHand.gridy = 4;
+        gbcActionHand.gridwidth = 4;
+        gbcActionHand.insets = new Insets(8, cardSpacing, 6, cardSpacing);
+        gbcActionHand.anchor = GridBagConstraints.CENTER;
+        cardsGrid.add(actionHandPanel, gbcActionHand);
 
         zonePlateau.add(cardsContainer, BorderLayout.CENTER);
 
@@ -450,7 +457,7 @@ public class GameBoardView extends JPanel {
             if (i < visibleActionCount) {
                 ActionType type = actions.get(i);
                 actionCardTypes[i] = type;
-                ActionCardModel tempCard = new ActionCardModel(false, type);
+                ActionCardModel tempCard = new ActionCardModel(false, type); // juste pour recup l'image de la bonne carte
                 actionCardButtons[i].setCardImage(getCardImagePath(tempCard));
                 actionCardButtons[i].setVisible(true);
             } else {
@@ -459,9 +466,13 @@ public class GameBoardView extends JPanel {
             }
         }
 
+        actionHandPanel.revalidate(); //ça sert a quoi ?
         actionHandPanel.repaint();
     }
 
+    /**
+     * Getters pour que le controller puisse ajouter ses listeners
+     */
     public CardButton[] getActionCardButtons() {
         return actionCardButtons;
     }
@@ -495,7 +506,6 @@ public class GameBoardView extends JPanel {
                     return "/cartes/carteActionDraw3.png";
                 case PLAY_LAST_ACTION_IN_DEFAUSSE:
                     return "/cartes/carteActionReplay.png";
-                // DEFENSE: cause erreur pour .jar car on a pas de carte defence, il est parti où ?
                 case ALL_PLAYERS_DROP_CARD:
                     return "/cartes/carteActionDrop.png";
                 case SPY_ONE_COLUMN:
@@ -638,6 +648,12 @@ public class GameBoardView extends JPanel {
         btnDefausseAction.setVisible(visible);
         labPiocheAction.setVisible(visible);
         labDefausseAction.setVisible(visible);
+    }
+
+    public void setActionHandVisible(boolean visible) {
+        actionHandPanel.setVisible(visible);
+        actionHandPanel.revalidate();
+        actionHandPanel.repaint();
     }
 
     public void setActionGuide(String message) {

@@ -282,7 +282,7 @@ public class PlayersSetupPanel extends JPanel {
             });
 
             JCheckBox botCheck = new JCheckBox("Bot");
-            JComboBox<String> botType = new JComboBox<>(new String[]{"bot", "botRow", "botLow"});
+            JComboBox<String> botType = new JComboBox<>(new String[]{"bot", "botRow", "botLow", "botCounting"});
             botType.setEnabled(false);
 
             botCheck.addActionListener(e -> {

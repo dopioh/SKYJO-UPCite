@@ -229,6 +229,9 @@
 
 - Apres la creation/login, les infos du joueurs sont sur la db et le cachelocal `PlayerData.java` (il faut juste le reactualiser quand on change une stat dans la db)
 
+- Ajout d'un nouveau bot botCounting, liaision du bot simple avec le jeu action
+
+
 ### Modified
 
 - Migration vers `AnimLoop` : `DoodleButton`, `NextRoundPanel`, `PlayerPreviewPanel`, `CursorCardView`, `CardButton`
@@ -250,7 +253,9 @@
 - Plus de lignes/artefacts visibles lors du survol des cartes ou de la preview de la main des autres joueurs
 
 - Selection du mode de jeu (vanilla ou action) dans le menu de selection
+
 - Affichage de la pioche et de la defausse action en jeu
+
 - Couverture de tests pour 
     - les pioches
     - les defausses
@@ -259,12 +264,24 @@
     - la CursorCard
     - le BotHandModel
 
+- debut de recode des actions pour awt/swing
+
+- affichage de la main action du joueur
+
 ## v.0.7: SPRINT 7
 ---
 
 ### Added
 
-- Bouton "Dev" sur l'écran de connexion pour bypasser le login (temporaire)
+- Fin du recode des cartes action pour le mode graphique
+- Bouton invitée pour accéder au jeu sans identifiants
+
+### Modified
+
+- Le système de tour se passe désormais dans `GameLoop.java`
+- Toutes les actions joueurs Swing sont gérées par `HumanTurnController`
+- Main des cartes actions sous les cartes numéro
+- Connexion par username dans l'interface
 
 ### Fixed
 
@@ -273,3 +290,4 @@
     - fix de lag quand on clique sur lancer le jeu et au premier changement de joueur
     - transition changement de joueur / preview carte beaucoup plus fluide
     - Et bien plus
+- PLAY_TWO_TURN joue 2 tours (contre 3 avant)
