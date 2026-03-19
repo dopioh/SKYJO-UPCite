@@ -291,3 +291,23 @@
     - transition changement de joueur / preview carte beaucoup plus fluide
     - Et bien plus
 - PLAY_TWO_TURN joue 2 tours (contre 3 avant)
+
+## v.0.8: SPRINT 8
+---
+
+### Added
+
+- Transition au changement de joueur (`PlayerTransitionPanel`)
+    - Bande colorée en couleur du joueur avec le nom du joueur
+
+- Mailmap
+
+### Fixed
+
+- Le joueur qui commence après l'init reveal est maintenant correctement déterminé par le score des cartes révélées (`firstPlayer`)
+
+- L'index du joueur de départ n'est plus avancé en double à la fin de l'init reveal
+
+- Fix lag pour Linux : problème due au tick irrégulier patched
+
+- Fix boutons qui ne répondaient pas au premier clic quand la souris arrivait trop vite (`mouseClicked` -> `mousePressed`)

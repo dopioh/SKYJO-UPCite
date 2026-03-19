@@ -174,7 +174,7 @@ public class GameBoardController {
                 @Override
                 public void mouseExited(MouseEvent e) { currentRoundEndPanel.getBtnContinuer().onMouseExit(); }
                 @Override
-                public void mouseClicked(MouseEvent e) { ContinueRound(); }
+                public void mousePressed(MouseEvent e) { ContinueRound(); }
             });
         }
 
@@ -186,7 +186,7 @@ public class GameBoardController {
                 @Override
                 public void mouseExited(MouseEvent e) { currentRoundEndPanel.getBtnRetourMenu().onMouseExit(); }
                 @Override
-                public void mouseClicked(MouseEvent e) { gameBoardModel.retourMenuCalled(); }
+                public void mousePressed(MouseEvent e) { gameBoardModel.retourMenuCalled(); }
             });
         }
     }

@@ -108,6 +108,9 @@ public class GameBoardView extends JPanel {
     // Panel de l'entre round
     NextRoundPanel nextRoundPanel;
 
+    // Panel de transition lors du changement de joueur
+    private PlayerTransitionPanel transitionPanel;
+
     public GameBoardView(ArrayList<PlayerModel> listPlayerModels) {
         this.listPlayer = listPlayerModels;
         this.buttonlistPlayer = new ArrayList<JButton>();
@@ -397,6 +400,9 @@ public class GameBoardView extends JPanel {
         this.nextRoundPanel = new NextRoundPanel(currentPlayer);
         layeredPane.add(nextRoundPanel, JLayeredPane.PALETTE_LAYER);
 
+        transitionPanel = new PlayerTransitionPanel();
+        layeredPane.add(transitionPanel, JLayeredPane.POPUP_LAYER);
+
         cursorCardView = new CursorCardView(this);
         cursorCardView.setOverlayBounds(getWidth(), getHeight());
         layeredPane.add(cursorCardView.getOverlay(), JLayeredPane.DRAG_LAYER);
@@ -596,6 +602,11 @@ public class GameBoardView extends JPanel {
             c.setBounds(size.width / 6, size.height / 10, size.width - size.width / 3, size.height - size.height / 5);
         }
 
+        Component[] compsPopup = layeredPane.getComponentsInLayer(JLayeredPane.POPUP_LAYER); // transition
+        for (Component c : compsPopup) {
+            c.setBounds(0, 0, size.width, size.height);
+        }
+
         if (cursorCardView != null) {
             cursorCardView.setOverlayBounds(size.width, size.height);
         }
@@ -674,6 +685,16 @@ public class GameBoardView extends JPanel {
 
     public NextRoundPanel getNextRoundPanel() {
         return this.nextRoundPanel;
+    }
+
+    /**
+     * Lance l'animation de transition entre les tours de joueurs
+     * @param player  Le joueur dont c'est le tour
+     * @param onDone  appelé en fin d'animation
+     */
+    public void showPlayerTransition(PlayerModel player, Runnable onDone) {
+        int colorIndex = listPlayer.indexOf(player) % PLAYER_COLORS.length;
+        transitionPanel.showTransition(player.getName(), PLAYER_COLORS[colorIndex], onDone);
     }
 
     /**
