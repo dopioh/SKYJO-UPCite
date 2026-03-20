@@ -308,6 +308,6 @@
 
 - L'index du joueur de départ n'est plus avancé en double à la fin de l'init reveal
 
-- Fix lag pour Linux : problème due au tick irrégulier patched
+- Linux : Si le jeu détecte qu'elle tourne sous linux, elle désactive automatiquement l'animation carte flottante qui lag, mais en laissant l'effet scale (hover) car elle ne lag pas
 
 - Fix boutons qui ne répondaient pas au premier clic quand la souris arrivait trop vite (`mouseClicked` -> `mousePressed`)
