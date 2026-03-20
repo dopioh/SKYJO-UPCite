@@ -24,6 +24,7 @@ public class CardButton extends JButton {
 
     private static final java.util.HashMap<String, BufferedImage> imageCache = new java.util.HashMap<>();
     private static final java.util.LinkedHashSet<CardButton> cartesAnimees = new java.util.LinkedHashSet<>(); //LinkedHashSet = pas de doublon, garde l'ordre de arrivée pour eviter des bugs
+    private static final boolean IS_LINUX = System.getProperty("os.name", "").toLowerCase().contains("linux");
 
     private BufferedImage cardImage;
 
@@ -32,7 +33,7 @@ public class CardButton extends JButton {
     private static final int FloatHigh = 3; // hauteur du flottement max
     private static final double FloatSpeed = 0.015; // vitesse du flottement
     private static final double ScaleSmoothness = 0.12; // vitesse du resize
-    private double phase = Math.random() * Math.PI * 2.0; // chaque carte a une vitesse differente 
+    private double phase = Math.random() * Math.PI * 2.0; // chaque carte a une vitesse differente
     private double floatOffsetX = 0.0; // position x au debut du flottement
     private double floatOffsetY = 0.0; // position y au debut du flottement
     private double scale = 1.0;
@@ -156,11 +157,13 @@ public class CardButton extends JButton {
             // on s'inscrit qu'une seule fois pour toute la classe
             if (premier) {
                 AnimLoop.add(CardButton.class, dt -> {
-                    double t = System.currentTimeMillis() / 1000.0;
                     CardButton[] cartes = cartesAnimees.toArray(new CardButton[0]);
                     for (CardButton carte : cartes) {
-                        carte.floatOffsetX = Math.cos(t * FloatSpeed * 60 + carte.phase) * FloatWide;
-                        carte.floatOffsetY = Math.sin(t * FloatSpeed * 60 + carte.phase) * FloatHigh;
+                        if (!IS_LINUX) {
+                            carte.phase += FloatSpeed * dt;
+                            carte.floatOffsetX = Math.cos(carte.phase) * FloatWide;
+                            carte.floatOffsetY = Math.sin(carte.phase) * FloatHigh;
+                        }
                         carte.scale += (carte.targetScale - carte.scale) * ScaleSmoothness * dt;
                     }
                     // un seul repaint du parent
