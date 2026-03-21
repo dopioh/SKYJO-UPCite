@@ -268,3 +268,12 @@
 ### Added
 - Systeme d'overlay quand on passe la souris sur une carte action
 - Description des cartes action
+- Les etoiles dans la main se comportent comme des jokers
+- Les etoiles peuvent se faire voler par des adversaires
+- Si on pioche une carte etoile :
+    - soit on la joue directement et piocher une action
+    - soit on peut la met dans notre main et piocher une action aux prochains tours
+
+### Modified
+- Refactor des checks lignes/colonnes
+- Ajout du cas wildcard (joker etoile) dans les checks lignes/colonnes
