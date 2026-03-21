@@ -18,6 +18,7 @@ Des classes qui permette d'éxécuter le jeu.
     * Méthode :
         * **initializeGame()**, **startTurn()**, **nextPlayer()**
         * **drawDeck()**, **takeDiscard()**, **drawActionDeck()**, **takeActionDiscard()**
+        * **drawActionRewardCard()**, **grantActionForStar()**
         * **exchangeCardInHand()**, **discardDrawCard()**, **revealCardInHand()**
         * **firstPlayer()**, **startNewGame()**, **endRound()**
         * **getGameState()**, **getTurnPhase()**, **getPlayers()**, **getDiscardPile()**, **getDeck()**, **getCurrentPlayer()**, **getCurrentDrawCard()**
@@ -35,9 +36,11 @@ Des classes qui permette d'éxécuter le jeu.
         * **showHand()** - Affichage de la main d'un joueur dans le terminal
         * **displayRoundResults()**, **displayWinner()**, **displayNewRound()** - Affichages des résultats
         * **useAction()** - Permet aux joueurs d'utiliser une carte d'action
+        * **grantActionForStar()** - Applique l'effet étoile (gagne une action)
+        * **revealRandomFaceDownCard()** - Révèle une carte cachée aléatoire (utilisé pour les bots)
         * **closeScanner()** - Fermeture du scanner
         * **Support du mode action pour les bots** :
-            * **botUseActionRandom()** - Permet au bot de jouer une action aléatoirement (50% de chance)
+            * **botUseActionRandom()** - Permet au bot de jouer une action aléatoirement
             * **botTradeCardWithPlayer()** - Version bot de TRADE_CARD_WITH_PLAYER
             * **botReplaceCardInHand()** - Version bot de REPLACE_CARD_IN_HAND
             * **botDrawThreeCard()** - Version bot de DRAW_THREE_CARD
@@ -85,8 +88,8 @@ Gère la logique du jeu.
 
 * **Joueur** :
     * `PlayerModel`: Représente un joueur
-        * Attribut : name, hand (PlayerHandModel), totalScore, starsScore
-        * Méthode : **getName()**, **getHand()**, **getTotalScore()**, **addScore()**, **resetHand()**, **showActionHand()**, **getStarsScore**, **addStarsScore**, **subStarsScore**
+        * Attribut : name, hand (PlayerHandModel), totalScore
+        * Méthode : **getName()**, **getHand()**, **getTotalScore()**, **addScore()**, **resetHand()**, **showActionHand()**
     * `PlayerHandModel`: Grille 4x3 de cartes du joueur
         * Attribut : grid (CardModel[][]), rows=3, columns=4
         * Méthode : **placeCard()**, **getCard()**, **isAvailable()**, **getVisibleCardScore()**, **révéler cartes**, **détecter colonnes complètes**
@@ -141,7 +144,7 @@ Gère la logique du jeu.
     * `Rank`: Enum des rangs (OQTF, NOPAPER, A4, NEWSPAPAER, PLASTIC, PAPYRUS, PARCHEMIN, BULLETIN, CESTLACARTE, DEGREES, BLACKCARD, WORMS)
         * Méthode : **findRankByElo()**
     * `ActionSkills` Implémente les capacités des cartes actions
-        - **Methode** : tradeCardWithPlayer(), replaceCardInHand(), drawThreeCard(), playLastActionInDefausse(), spyOneColumn(), allPlayersDropCard(), playTwoTurn(), askCardPos()
+        - **Methode** : tradeCardWithPlayer(), replaceCardInHand(), drawThreeCard(), playLastActionInDefausse(), spyOneColumn(), allPlayersDropCard(), playTwoTurn(), askCardPos(), grantActionForStar()
 
 * **Audio** :
     * `AudioManager`: Gère la musique et les effets sonores
@@ -218,6 +221,8 @@ Gère toutes les entrées du joueur avec l'ordinateur
         * **handleBotDrawDecision()**
         * **handleBotAfterDraw()**
         * **handleBotAfterTakeDiscard()**
+        * **revealRandomFaceDownCard()**
+        * **grantActionForStar()**
 
 * **GameLoop** : Boucle du jeu (Les actions des autres controllers seront acceptés par ce fichier)
 
@@ -231,6 +236,7 @@ Gère toutes les entrées du joueur avec l'ordinateur
         * **startAllPlayersDropAction()** - Initiation de l'action "drop" pour tous
         * **selectAllPlayersDropTarget()** - Sélection de la cible pour le drop
         * **applyAllPlayersDropOnSelectedCard()** - Application du drop sur la carte sélectionnée
+        * **grantActionForStar()** - Applique l'effet étoile côté
         * **resetTurnState()** - Réinitialisation de l'état du tour
         * **Listeners** pour savoir si le curseur est sur une carte action 
 
