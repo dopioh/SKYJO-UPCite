@@ -262,3 +262,9 @@
 ### Fixed
 
 - PLAY_TWO_TURN joue 2 tours (contre 3 avant)
+
+## v.0.8: SPRINT 8
+
+### Added
+- Systeme d'overlay quand on passe la souris sur une carte action
+- Description des cartes actions
