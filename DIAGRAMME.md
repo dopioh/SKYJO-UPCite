@@ -129,6 +129,8 @@ Gère la logique du jeu.
             * **canTakeFromDiscard()**, **canDrawFromDeck()**, **mustExchangeCard()**
             * **checkEndOfRound()** - Vérifie si la manche est terminée
             * **removeIdenticalColumns()**, **removeIdenticalRows()** - Supprime les colonnes/lignes identiques
+            * **isWildcardColumn** retourne Vrai si une colonne doit etre supprimée (avec joker)
+            * **isWildcardRow** retourne Vrai si une ligne doit etre supprimée (avec joker)
             * **findLowestScorePlayer()**, **findRoundEndPlayer()** - Trouve les joueurs spécifiques
             * **applyRoundScores()** - Applique les scores de la manche selon les règles
             * **isGameOver()** - Vérifie si un joueur a atteint 100 points
