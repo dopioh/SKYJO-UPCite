@@ -27,6 +27,12 @@ public class GameLoop {
 
     private boolean gameActive = true;
 
+    private TimeoutTurnController timeoutController;
+
+    public void setTimeoutController(TimeoutTurnController timeoutController) {
+        this.timeoutController = timeoutController;
+    }
+
     public GameLoop(GameManager gameManager, GameBoardView gameBoardView) {
         this.gameManager = gameManager;
         this.gameBoardView = gameBoardView;
@@ -46,9 +52,7 @@ public class GameLoop {
 
     public void proceedAfterAction() {
         if (!gameActive) return;
-
-        startTurnCountdown();
-        
+        stopTurnCountdown();
         if (humanController != null) {
             humanController.setWaitingNextTurn(true);
         }
@@ -106,15 +110,19 @@ public class GameLoop {
         
         PlayerModel currentPlayer = gameManager.getCurrentPlayer();
         gameBoardView.showPlayerCards(currentPlayer);
-        startTurnCountdown();
 
         if (humanController != null) {
             humanController.refreshGuide();
         }
         if (currentPlayer instanceof BotModel) {
+            stopTurnCountdown();
+            gameBoardView.setTurnTimerText("--");
+
             if (botController != null) {
                 botController.handleBotTurn();
             }
+        } else {
+            startTurnCountdown();
         }
     }
 
@@ -148,5 +156,23 @@ public class GameLoop {
         gameActive = false;
         stopTurnCountdown();
         gameBoardView.setTurnTimerText("--");
+    }
+
+    private void handleTurnTimeout() {
+        if (!isGameActive()) return;
+        stopTurnCountdown();
+        if (humanController != null) {
+            humanController.setWaitingNextTurn(true);
+        }
+        PlayerModel currentPlayer = gameManager.getCurrentPlayer();
+        if (currentPlayer instanceof BotModel) {
+            if (botController != null) {
+                botController.handleBotTurn();
+            }
+            return;
+        }
+        if (timeoutController != null) {
+            timeoutController.handleTimeoutForCurrentPlayer();
+        }
     }
 }

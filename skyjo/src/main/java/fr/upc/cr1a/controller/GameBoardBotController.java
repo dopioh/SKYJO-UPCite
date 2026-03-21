@@ -3,6 +3,7 @@ package fr.upc.cr1a.controller;
 import javax.swing.Timer;
 
 import fr.upc.cr1a.model.BotHandModel;
+import fr.upc.cr1a.model.BotLow;
 import fr.upc.cr1a.model.BotModel;
 import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.GameManager;

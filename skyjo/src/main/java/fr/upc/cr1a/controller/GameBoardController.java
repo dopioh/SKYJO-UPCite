@@ -38,6 +38,8 @@ public class GameBoardController {
     // panel de fin de manche
     RoundEndPanel currentRoundEndPanel = null;
 
+    private TimeoutTurnController timeoutTurnController;
+
     /**
      * Initialise la view et le Model du GameBoard
      */
@@ -52,6 +54,9 @@ public class GameBoardController {
         this.gameLoop = new GameLoop(gameManager, gameBoardView);
         this.gameLoop.setHumanController(this);
         this.gameLoop.setBotController(botController);
+
+        this.timeoutTurnController = new TimeoutTurnController(gameBoardView, gameManager, this, gameLoop);
+        this.gameLoop.setTimeoutController(timeoutTurnController);
 
         this.humanTurnController = new HumanTurnController(gameBoardView, gameManager, this, gameLoop);
         humanTurnController.installListeners();
