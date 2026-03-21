@@ -12,6 +12,11 @@ import javax.swing.Timer;
  */
 public class GameLoop {
     
+    private static final int TURN_DURATION_SECONDS = 20;
+
+    private Timer turnCountdownTimer;
+    private int remainingSeconds;
+
     private static final int ACTION_DELAY_MS = 1200;
 
     private final GameManager gameManager;
@@ -19,6 +24,8 @@ public class GameLoop {
 
     private GameBoardController humanController;
     private GameBoardBotController botController;
+
+    private boolean gameActive = true;
 
     public GameLoop(GameManager gameManager, GameBoardView gameBoardView) {
         this.gameManager = gameManager;
@@ -38,6 +45,10 @@ public class GameLoop {
     }
 
     public void proceedAfterAction() {
+        if (!gameActive) return;
+
+        startTurnCountdown();
+        
         if (humanController != null) {
             humanController.setWaitingNextTurn(true);
         }
@@ -52,6 +63,7 @@ public class GameLoop {
     }
 
     private void continueFlow() {
+        if (!gameActive) return;
         if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) {
             continueInitRevealFlow();
             return;
@@ -59,7 +71,8 @@ public class GameLoop {
         finishNormalTurnFlow();
     }
 
-    private void continueInitRevealFlow() {
+    private void continueInitRevealFlow(){
+        if (!gameActive) return;
         if (humanController != null) {
             humanController.refreshGuide();
         }
@@ -73,6 +86,7 @@ public class GameLoop {
     }
     
     private void finishNormalTurnFlow() {
+        if (!gameActive) return;
         gameManager.nextPlayer();
         if (gameManager.getGameState() == GameManager.GameState.ROUND_ENDED
                 || gameManager.getGameState() == GameManager.GameState.GAME_ENDED) {
@@ -85,11 +99,15 @@ public class GameLoop {
     }
 
     public void startCurrentFlow() {
+        if (!gameActive) return;
         if (gameManager.getTurnPhase() != GameManager.TurnPhase.INIT_REVEAL) {
             gameManager.startTurn();
         }
+        
         PlayerModel currentPlayer = gameManager.getCurrentPlayer();
         gameBoardView.showPlayerCards(currentPlayer);
+        startTurnCountdown();
+
         if (humanController != null) {
             humanController.refreshGuide();
         }
@@ -98,5 +116,37 @@ public class GameLoop {
                 botController.handleBotTurn();
             }
         }
+    }
+
+    private void startTurnCountdown() {
+        stopTurnCountdown();
+        remainingSeconds = TURN_DURATION_SECONDS;
+        gameBoardView.setTurnTimerText(""+remainingSeconds);
+        turnCountdownTimer = new Timer(1000, e -> {
+            if (!isGameActive()) return;
+            remainingSeconds--;
+            gameBoardView.setTurnTimerText(""+remainingSeconds);
+            if (remainingSeconds <= 0) {
+                turnCountdownTimer.stop();
+                handleTurnTimeout();
+            }
+        });
+        turnCountdownTimer.start();
+    }
+
+    private void stopTurnCountdown() {
+        if (turnCountdownTimer != null && turnCountdownTimer.isRunning()) {
+            turnCountdownTimer.stop();
+        }
+    }
+
+    public boolean isGameActive() {
+        return gameActive;
+    }
+
+    public void stopGame() {
+        gameActive = false;
+        stopTurnCountdown();
+        gameBoardView.setTurnTimerText("--");
     }
 }

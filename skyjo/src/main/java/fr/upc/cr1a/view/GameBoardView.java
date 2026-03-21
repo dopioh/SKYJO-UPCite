@@ -74,6 +74,9 @@ public class GameBoardView extends JPanel {
     // Panel de l'entre round
     NextRoundPanel nextRoundPanel;
 
+    // Temps pour les tours
+    private JLabel turnTimerLabel;
+
     public GameBoardView(ArrayList<PlayerModel> listPlayerModels) {
         this.listPlayer = listPlayerModels;
         this.buttonlistPlayer = new ArrayList<JButton>();
@@ -308,7 +311,18 @@ public class GameBoardView extends JPanel {
         labPiocheAction.setVisible(false);
         labDefausseAction.setVisible(false);
 
-        zonePlateau.add(cardStack, BorderLayout.EAST);
+
+        JPanel rightPanel = new JPanel(new BorderLayout());
+        rightPanel.setOpaque(false);
+
+        turnTimerLabel = new JLabel("Temps restant : -- s", SwingConstants.CENTER);
+        turnTimerLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        turnTimerLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        rightPanel.add(turnTimerLabel, BorderLayout.NORTH);
+        rightPanel.add(cardStack, BorderLayout.CENTER);
+
+        zonePlateau.add(rightPanel, BorderLayout.EAST);
 
         // bouton retour en bas temporaire
         btnRetour = new JButton("Retour");
@@ -733,5 +747,11 @@ public class GameBoardView extends JPanel {
 
     public PlayerPreviewPanel getPlayerPreviewPanel() {
         return this.previewPanel;
+    }
+
+    public void setTurnTimerText(String text) {
+        if (turnTimerLabel != null) {
+            turnTimerLabel.setText("Temps restant : "+ text +" s");
+        }
     }
 }

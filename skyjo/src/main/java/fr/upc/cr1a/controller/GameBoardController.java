@@ -80,7 +80,10 @@ public class GameBoardController {
     public void listener() {
 
         JButton retour = gameBoardView.getBtnRetour();
-        retour.addActionListener(e -> gameBoardModel.retourMenuCalled());
+        retour.addActionListener(e -> {
+            gameLoop.stopGame();
+            gameBoardModel.retourMenuCalled();
+        });
 
         // Pour le survol et le ckick des preview player
         // y'a un soucis pour les pinned ici -> bug mineur
