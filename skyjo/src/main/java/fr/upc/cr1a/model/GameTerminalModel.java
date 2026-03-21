@@ -122,7 +122,12 @@ public class GameTerminalModel {
         for (PlayerModel player : gameManager.getPlayers()) {
             if (player instanceof BotModel) {
                 BotHandModel hand = ((BotModel) player).getHand();
-                hand.revealRandomCard(2);
+                for (int i = 0; i < 2; i++) {
+                    CardModel revealedCard = revealRandomFaceDownCard(hand);
+                    if (GameManager.isStarCard(revealedCard)) {
+                        grantActionForStar(player);
+                    }
+                }
                 
                 //regarde et supprimer les colonnes/lignes identiques
                 GameRuleModel.removeIdenticalColumns(hand, gameManager.getDiscardPile(), player);
@@ -160,6 +165,10 @@ public class GameTerminalModel {
                     } while (true);
                     
                     hand.revealCard(row, col);
+                    CardModel revealedCard = hand.getCard(row, col);
+                    if (GameManager.isStarCard(revealedCard)) {
+                        grantActionForStar(player);
+                    }
 
                     // Vérifier et supprimer les colonnes/lignes identiques
                     GameRuleModel.removeIdenticalColumns(hand, gameManager.getDiscardPile(), player);
@@ -291,7 +300,7 @@ public class GameTerminalModel {
         System.out.println("\n Action possible :\n");
         System.out.println("1 = Piocher");
         System.out.println("2 = Prendre de la défausse");
-        if (hasGameManagerActionsCard && player.getStarsScore() > 0) System.out.println("3 = Piocher une action (" + player.getStarsScore() + ")");
+        if (hasGameManagerActionsCard) System.out.println("3 = Piocher une action");
         if (hasGameManagerActionsCard && !player.getActionHand().isEmpty()) System.out.println("4 = Jouer une action (" + player.showActionHand() + ")");
         System.out.print("\nVotre choix : ");
         
@@ -303,7 +312,7 @@ public class GameTerminalModel {
                 scanner.nextLine();
                 if (choice == 1
                     || choice == 2
-                    || (choice == 3 && player.getStarsScore() > 0 && hasGameManagerActionsCard)
+                    || (choice == 3 && hasGameManagerActionsCard)
                     || (choice == 4 && !player.getActionHand().isEmpty() && hasGameManagerActionsCard)) {
                     validChoice = true;
                 } else {
@@ -326,32 +335,16 @@ public class GameTerminalModel {
             System.out.println("--------------------jehaislebot--------------------------------");
             System.out.println("Vous avez pris : " + drawnCard.getCardValue());
         } else if (choice == 3) {
-            drawnCard = gameManager.drawActionDeck();
-            player.subStarsScore();
-            if (drawnCard instanceof ActionCardModel actionCard) {
+            ActionCardModel actionCard = gameManager.drawActionRewardCard();
+            if (actionCard != null) {
                 player.getActionHand().add(actionCard.getType());
+                System.out.println("Carte action piochée : " + actionCard.getType());
+            } else {
+                System.out.println("Aucune carte action disponible.");
             }
 
             System.out.println("Vos cartes action - " + player.showActionHand());
-            System.out.println("1 = Utiliser une action");
-            System.out.println("2 = Finir le tour");
-
-            int value = 0;
-            boolean validValue = false;
-            do {
-                try {
-                    value = scanner.nextInt();
-                    scanner.nextLine();
-                    validValue = (value == 1 || value == 2);
-                } catch (Exception e) {
-                    scanner.nextLine();
-                    value = 0;
-                }
-            } while (!validValue);
-
-            if (value == 1) {
-                useAction(player);
-            }
+            System.out.println("L'action piochée sera jouable au prochain tour.");
             gameManager.nextPlayer();
             return;
         } else if (choice == 4) {
@@ -365,6 +358,10 @@ public class GameTerminalModel {
             drawnCard = gameManager.drawDeck();
             System.out.println("-----------------------ilestnulenplus-----------------------------");
             System.out.println("Vous avez pioché : " + drawnCard.getCardValue());
+        }
+
+        if (GameManager.isStarCard(drawnCard)) {
+            grantActionForStar(player);
         }
     
         //échanger
@@ -431,6 +428,10 @@ public class GameTerminalModel {
                 } while (true);
                 //revéler la carte
                 player.getHand().revealCard(row, col);
+                CardModel revealedCard = player.getHand().getCard(row, col);
+                if (GameManager.isStarCard(revealedCard)) {
+                    grantActionForStar(player);
+                }
                 
                 //regarde et supprimer les colonnes/lignes identiques
                 GameRuleModel.removeIdenticalColumns(player.getHand(), gameManager.getDiscardPile(), player);
@@ -458,24 +459,21 @@ public class GameTerminalModel {
         showHand(bot, false);
         BotHandModel botHand = bot.getHand();
         BotStrategyInterface strategy = bot.getStrategy();
+
+        // Le bot ne peut jouer qu'une action déjà en main en début de tour.
+        if (botUseActionRandom(bot)) {
+            gameManager.nextPlayer();
+            return;
+        }
         
         //MODE ACTION
-        if (hasGameManagerActionsCard && bot.getStarsScore() > 0 && Math.random() < 0.2) {
-            CardModel drawnActionCard = gameManager.drawActionDeck();
-            bot.subStarsScore();
-            if (drawnActionCard instanceof ActionCardModel actionCard) {
+        if (hasGameManagerActionsCard && Math.random() < 0.2) {
+            ActionCardModel actionCard = gameManager.drawActionRewardCard();
+            if (actionCard != null) {
                 bot.getActionHand().add(actionCard.getType());
                 System.out.println(bot.getName() + " pioche une carte action : " + actionCard.getType());
-                System.out.println(bot.getName() + " a maintenant " + bot.getStarsScore() + " étoiles");
+                System.out.println("Cette action sera jouable au prochain tour.");
             }
-            
-            //Le bot peut décider de jouer une action immédiatement
-            botUseActionRandom(bot);
-            
-            System.out.println("\n-----------------------------------------------------------");
-            showHand(bot, false);
-            System.out.println("----------------------------------------------------------------");
-            
             gameManager.nextPlayer();
             return;
         }
@@ -496,6 +494,10 @@ public class GameTerminalModel {
             //pioche
             drawCard = gameManager.drawDeck();
             System.out.println(bot.getName() + " pioche une carte : " + drawCard.getCardValue());
+        }
+
+        if (GameManager.isStarCard(drawCard)) {
+            grantActionForStar(bot);
         }
         
         //quand il pioche soit il défausse soit il échange
@@ -527,7 +529,10 @@ public class GameTerminalModel {
                 System.out.println(bot.getName() + " défausse la carte");
                 
                 //révéler une carte aléatoire
-                botHand.revealRandomCard(1);
+                CardModel revealedCard = revealRandomFaceDownCard(botHand);
+                if (GameManager.isStarCard(revealedCard)) {
+                    grantActionForStar(bot);
+                }
                 
                 //regarde et supprimer les colonnes/lignes identiques
                 GameRuleModel.removeIdenticalColumns(botHand, gameManager.getDiscardPile(), bot);
@@ -549,9 +554,6 @@ public class GameTerminalModel {
         //System.out.println("\nAppuyez sur Entrée pour continuer <3");
         //scanner.nextLine();
         
-        //si le mode action est actif, le bot peut jouer une carte d'action aléatoirement
-        botUseActionRandom(bot);
-        
         gameManager.nextPlayer();
     }
 
@@ -559,20 +561,20 @@ public class GameTerminalModel {
      *permet au bot de jouer une carte action
      * @param bot Le bot qui joue l'action
      */
-    private void botUseActionRandom(BotModel bot) {
+    private boolean botUseActionRandom(BotModel bot) {
         //vérifie si le mode action est actif
         if (!hasGameManagerActionsCard) {
-            return;
+            return false;
         }
         
         //vérifie si le bot a des cartes d'action
         if (bot.getActionHand().isEmpty()) {
-            return;
+            return false;
         }
         
         //50% de chance de jouer une action
         if (Math.random() > 0.5) {
-            return;
+            return false;
         }
         
         //Choisit aléatoirement une action parmi celles disponibles
@@ -626,6 +628,34 @@ public class GameTerminalModel {
             }
         } catch (Exception e) {
             System.out.println("BUG : " + e.getMessage());
+            return false;
+        }
+        return actionPlayed;
+    }
+
+    private CardModel revealRandomFaceDownCard(PlayerHandModel hand) {
+        ArrayList<int[]> hiddenCards = new ArrayList<>();
+        for (int row = 0; row < hand.getRows(); row++) {
+            for (int col = 0; col < hand.getColumns(); col++) {
+                CardModel card = hand.getCard(row, col);
+                if (card != null && card.isFaceDown()) {
+                    hiddenCards.add(new int[] { row, col });
+                }
+            }
+        }
+        if (hiddenCards.isEmpty()) {
+            return null;
+        }
+
+        int[] selected = hiddenCards.get((int) (Math.random() * hiddenCards.size()));
+        hand.revealCard(selected[0], selected[1]);
+        return hand.getCard(selected[0], selected[1]);
+    }
+
+    private void grantActionForStar(PlayerModel player) {
+        ActionCardModel actionFromStar = gameManager.grantActionForStar(player);
+        if (actionFromStar == null) {
+            return;
         }
     }
     
@@ -690,9 +720,18 @@ public class GameTerminalModel {
         card1.returnCard();
         card2.returnCard();
         card3.returnCard();
+
+        if (GameManager.isStarCard(card1)) {
+            grantActionForStar(bot);
+        }
+        if (GameManager.isStarCard(card2)) {
+            grantActionForStar(bot);
+        }
+        if (GameManager.isStarCard(card3)) {
+            grantActionForStar(bot);
+        }
         
-        System.out.println(bot.getName() + " pioche 3 cartes : " + card1.getCardValue() + ", " + 
-                          card2.getCardValue() + ", " + card3.getCardValue());
+        System.out.println(bot.getName() + " pioche 3 cartes : " + card1.getCardValue() + ", " + card2.getCardValue() + ", " + card3.getCardValue());
         
         //choisit aléatoirement une carte ou aucune
         int choice = (int) (Math.random() * 4);
@@ -772,6 +811,9 @@ public class GameTerminalModel {
                     CardModel newCard = gameManager.drawDeck();
                     newCard.returnCard();
                     player.getHand().replaceCard(row, col, newCard);
+                    if (GameManager.isStarCard(newCard)) {
+                        grantActionForStar(player);
+                    }
                     
                     System.out.println(player.getName() + " remplace son " + droppedValue + " par un " + newCard.getCardValue());
                     gameManager.getDiscardPile().addCardAtTop(new NumberCardModel(false, droppedValue, null, false));

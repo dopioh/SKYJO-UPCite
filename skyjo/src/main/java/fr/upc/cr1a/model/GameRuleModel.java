@@ -70,9 +70,6 @@ public class GameRuleModel {
                 for (int row = 0; row < hand.getRows(); row++) {
                     CardModel removedCard = hand.getCard(row, col);
                     discardPile.addCardAtTop(removedCard);
-                    if (joueur != null && GameManager.isStarCard(removedCard)) {
-                        joueur.subStarsScore();
-                    }
                     hand.replaceCard(row, col, null);
                 }
             }
@@ -94,9 +91,6 @@ public class GameRuleModel {
                 for (int col = 0; col < hand.getColumns(); col++) {
                     CardModel removedCard = hand.getCard(row, col);
                     discardPile.addCardAtTop(removedCard);
-                    if (joueur != null && GameManager.isStarCard(removedCard)) {
-                        joueur.subStarsScore();
-                    }
                     hand.replaceCard(row, col, null);
                 }
             }

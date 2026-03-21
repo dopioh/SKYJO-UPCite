@@ -403,6 +403,46 @@ public class GameManager {
         return currentDrawCard;
     }
 
+    /**
+     * pioche une action recompense automatiquement apres reveal d'une etoile
+     * sans modif les etats ingame
+     */
+    public ActionCardModel drawActionRewardCard(){
+        if (actionDeck == null) {
+            return null;
+        }
+        if (actionDeck.stackSize() == 0) {
+            actionDeck.DefausseInPioche(discardActionPile);
+        }
+        if (actionDeck.stackSize() == 0) {
+            return null;
+        }
+        CardModel card = actionDeck.getTopCard();
+        actionDeck.removeCardAtTop();
+        ensureFaceUp(card);
+        if (card instanceof ActionCardModel actionCard) {
+            return actionCard;
+        }
+        return null;
+    }
+
+    /**
+     * applique l'effet etoile sur un joueur : gagne une carte action
+     * @param player joueur qui gagne l'action
+     * @return la carte action gagnée ou null si indisponible
+     */
+    public ActionCardModel grantActionForStar(PlayerModel player) {
+        if (player == null || !gameWithAction) {
+            return null;
+        }
+        ActionCardModel actionCard = drawActionRewardCard();
+        if (actionCard == null) {
+            return null;
+        }
+        player.getActionHand().add(actionCard.getType());
+        return actionCard;
+    }
+
     /*
     *prendre la carte de la défausse
     *@return la carte prise
@@ -439,18 +479,10 @@ public class GameManager {
         ensureFaceUp(cardInHand);
         hand.replaceCard(row, col, currentDrawCard);
         discardPile.addCardAtTop(cardInHand);
-
-        if (isStarCard(cardInHand)) {
-            currentPlayer.subStarsScore();
-        }
         //montrer la nouvelle carte
         if(currentDrawCard.isFaceDown()) currentDrawCard.returnCard();
         if (currentDrawCard.isFaceDown()) {
             currentDrawCard.returnCard();
-        }
-
-        if (isStarCard(currentDrawCard)) {
-            currentPlayer.addStarsScore();
         }
         currentDrawCard = null;
         
