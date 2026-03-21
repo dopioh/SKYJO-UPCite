@@ -171,9 +171,15 @@ tAudioManager()**
 
 * **GameBoardView** : Panel pour afficher le plateau de jeu
     * Méthode : **initComponents()**, **showPlayerscards()**, **getCardImagePath()**, **resizeLayers()**, **showCursorCard()**, **hideCursorCard()**, **updateCardDisplay()**, **updateDiscardOnly()**, **updateActionCardDisplay()**, **updateActionDiscardOnly()**
+    * **showActionDescription**
+    * **hideActionDescription**
+    * **getActionTitle**
+    * **getActionDescription**
 
 * **PlayerPreviewPanel** : Panel pour afficher les cartes des autres joueurs
     * Méthode : **showOtherPlayerHand**, **getCardImagePath()**
+
+* **ActionDescriptionOverlayPanel** : système d'overlay qui affiche les détails d'une carte action quand le curseur se trouve au dessus (hover)
 
 * **CursorCardView** : Vue pour la petite carte sous le curseur
 
@@ -214,8 +220,17 @@ Gère toutes les entrées du joueur avec l'ordinateur
 * **GameLoop** : Boucle du jeu (Les actions des autres controllers seront acceptés par ce fichier)
 
 * **HumanTurnController** : Toutes les actions joueurs sur le gameBoard
-    * Méthodes : **installListeners()**, **handlePlayerButtonClicked()**, listeners des pioches/mains/actions
-    * Méthodes (actions) : **onActionCardClicked()**, **handleActionModeClick()**, **selectTradeTargetPlayer()**, **completeTrade()**, **startAllPlayersDropAction()**, **selectAllPlayersDropTarget()**, **applyAllPlayersDropOnSelectedCard()**, **resetTurnState()**
+    * Méthode : **installListeners()**, **handlePlayerButtonClicked()**, listeners des pioches/mains/actions
+    * Méthodes (actions) : 
+        * **onActionCardClicked()** - Gestion du clic sur une carte action
+        * **handleActionModeClick()** - Gestion des clics en mode action
+        * **selectTradeTargetPlayer()** - Sélection du joueur cible pour l'échange
+        * **completeTrade()** - Finalisation de l'échange
+        * **startAllPlayersDropAction()** - Initiation de l'action "drop" pour tous
+        * **selectAllPlayersDropTarget()** - Sélection de la cible pour le drop
+        * **applyAllPlayersDropOnSelectedCard()** - Application du drop sur la carte sélectionnée
+        * **resetTurnState()** - Réinitialisation de l'état du tour
+        * **Listeners** pour savoir si le curseur est sur une carte action 
 
 * **ConnexionController** : Gere le `ConnexionPanel` et redirige vers `SupabaseAuth` pour lancer des requetes d'auth.  
     * Methodes : **sendCreate()**, **sendLogin()**  

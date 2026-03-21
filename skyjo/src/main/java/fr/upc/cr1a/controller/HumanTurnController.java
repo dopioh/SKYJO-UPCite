@@ -1,5 +1,7 @@
 package fr.upc.cr1a.controller;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import javax.swing.Timer;
 
@@ -145,6 +147,28 @@ public class HumanTurnController {
             mainController.refreshGuide();
             gameLoop.proceedAfterAction();
         });
+
+        gameBoardView.getBtnDefausseAction().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (!gameManager.withActionCard()) {
+                    return;
+                }
+                if (gameManager.getDiscardActionPile() == null || gameManager.getDiscardActionPile().isEmpty()) {
+                    return;
+                }
+
+                CardModel topCard = gameManager.getDiscardActionPile().getTopCard();
+                if (topCard instanceof ActionCardModel actionCard) {
+                    gameBoardView.showActionDescription(actionCard.getType());
+                }
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                gameBoardView.hideActionDescription();
+            }
+        });
     }
 
     private void installHandListeners() {
@@ -226,6 +250,23 @@ public class HumanTurnController {
     private void installActionCardListeners() {
         for (int i = 0; i < gameBoardView.getActionCardButtons().length; i++) {
             final int id = i;
+
+            gameBoardView.getActionCardButtons()[i].addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    if (id >= gameBoardView.getVisibleActionCount()) {
+                        return;
+                    }
+                    ActionType type = gameBoardView.getActionCardType(id);
+                    gameBoardView.showActionDescription(type);
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    gameBoardView.hideActionDescription();
+                }
+            });
+
             gameBoardView.getActionCardButtons()[i].addActionListener(e -> {
                 if (mainController.isWaitingNextTurn()) return;
                 if (actionMode != ActionMode.NONE) return;
@@ -234,6 +275,7 @@ public class HumanTurnController {
                 ActionType type = gameBoardView.getActionCardType(id);
                 if (type == null) return;
 
+                gameBoardView.hideActionDescription();
                 onActionCardClicked(type, id);
             });
         }
@@ -640,5 +682,6 @@ public class HumanTurnController {
         resetAllPlayersDropSelection();
         gameBoardView.setActionHandVisible(true);
         gameBoardView.showOtherPlayerMain(false);
+        gameBoardView.hideActionDescription();
     }
 }
