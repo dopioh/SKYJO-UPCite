@@ -267,4 +267,4 @@
 
 ### Added
 - Systeme d'overlay quand on passe la souris sur une carte action
-- Description des cartes actions
+- Description des cartes action
