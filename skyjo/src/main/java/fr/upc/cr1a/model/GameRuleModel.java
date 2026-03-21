@@ -61,6 +61,10 @@ public class GameRuleModel {
      * @param discardPile la pile de défausse où les cartes seront placées
      */
     public static void removeIdenticalColumns(PlayerHandModel hand, DefausseModel discardPile){
+        removeIdenticalColumns(hand, discardPile, null);
+    }
+
+    public static void removeIdenticalColumns(PlayerHandModel hand, DefausseModel discardPile, PlayerModel joueur){
         for (int col = 0; col < hand.getColumns(); col++) {
             CardModel firstCard = hand.getCard(0, col);
             //permet de sauter si une colonne est vide
@@ -78,6 +82,9 @@ public class GameRuleModel {
                 for (int row = 0; row < hand.getRows(); row++) {
                     CardModel removedCard = hand.getCard(row, col);
                     discardPile.addCardAtTop(removedCard);
+                    if (joueur != null && GameManager.isStarCard(removedCard)) {
+                        joueur.subStarsScore();
+                    }
                     hand.replaceCard(row, col, null);
                 }
             }
@@ -90,6 +97,10 @@ public class GameRuleModel {
      * @param discardPile la pile de défausse où les cartes seront placées
      */
     public static void removeIdenticalRows(PlayerHandModel hand, DefausseModel discardPile){
+        removeIdenticalRows(hand, discardPile, null);
+    }
+
+    public static void removeIdenticalRows(PlayerHandModel hand, DefausseModel discardPile, PlayerModel joueur){
         for (int row = 0; row < hand.getRows(); row++) {
             CardModel firstCard = hand.getCard(row, 0);
             //permet de sauter si une ligne est vide
@@ -107,6 +118,9 @@ public class GameRuleModel {
                 for (int col = 0; col < hand.getColumns(); col++) {
                     CardModel removedCard = hand.getCard(row, col);
                     discardPile.addCardAtTop(removedCard);
+                    if (joueur != null && GameManager.isStarCard(removedCard)) {
+                        joueur.subStarsScore();
+                    }
                     hand.replaceCard(row, col, null);
                 }
             }

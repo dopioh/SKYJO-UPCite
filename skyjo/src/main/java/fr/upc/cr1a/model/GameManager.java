@@ -282,6 +282,10 @@ public class GameManager {
         return currentDrawCard;
     }
 
+    public static boolean isStarCard(CardModel card) {
+        return (card instanceof NumberCardModel numberCard && numberCard.isStar());
+    }
+
     public boolean withActionCard() {
         return this.gameWithAction;
     } 
@@ -435,22 +439,24 @@ public class GameManager {
         ensureFaceUp(cardInHand);
         hand.replaceCard(row, col, currentDrawCard);
         discardPile.addCardAtTop(cardInHand);
+
+        if (isStarCard(cardInHand)) {
+            currentPlayer.subStarsScore();
+        }
         //montrer la nouvelle carte
         if(currentDrawCard.isFaceDown()) currentDrawCard.returnCard();
         if (currentDrawCard.isFaceDown()) {
             currentDrawCard.returnCard();
         }
-        // si la carte est une etoile on +1 le starsScore
-        if (currentDrawCard instanceof NumberCardModel numberCard) {
-            if (numberCard.isStar()) {
-                currentPlayer.addStarsScore();
-            }        
+
+        if (isStarCard(currentDrawCard)) {
+            currentPlayer.addStarsScore();
         }
         currentDrawCard = null;
         
         //vérifier les colonnes/lignes identiques
-        GameRuleModel.removeIdenticalColumns(hand, discardPile);
-        GameRuleModel.removeIdenticalRows(hand, discardPile);
+        GameRuleModel.removeIdenticalColumns(hand, discardPile, currentPlayer);
+        GameRuleModel.removeIdenticalRows(hand, discardPile, currentPlayer);
         //vérifier si fin de manche
         if (GameRuleModel.checkEndOfRound(players)) {
             gameState = GameState.LAST_ROUND;
@@ -477,8 +483,8 @@ public class GameManager {
         getCurrentPlayer().getHand().revealCard(row, col);
 
         // check
-        GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile);
-        GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile);
+        GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile, getCurrentPlayer());
+        GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile, getCurrentPlayer());
         
         //vérifier si fin de manche
         if (GameRuleModel.checkEndOfRound(players)) {
@@ -576,8 +582,8 @@ public class GameManager {
         getCurrentPlayer().getHand().revealCard(row, col);
         
         //regarde et supprimer les colonnes/lignes identiques
-        GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile);
-        GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile);
+        GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile, getCurrentPlayer());
+        GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile, getCurrentPlayer());
         
         initRevealCount++;
         if (initRevealCount >= 2) {

@@ -229,8 +229,8 @@ public class GameBoardBotController {
                     botHand.revealRandomCard(1);
                     
                     //regarde et supprimer les colonnes/lignes identiques
-                    GameRuleModel.removeIdenticalColumns(botHand, gameManager.getDiscardPile());
-                    GameRuleModel.removeIdenticalRows(botHand, gameManager.getDiscardPile());
+                    GameRuleModel.removeIdenticalColumns(botHand, gameManager.getDiscardPile(), bot);
+                    GameRuleModel.removeIdenticalRows(botHand, gameManager.getDiscardPile(), bot);
                     
                     gameBoardView.showPlayerCards(bot);
                     System.out.println(bot.getName() + " révèle une carte");

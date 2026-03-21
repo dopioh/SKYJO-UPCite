@@ -46,6 +46,8 @@ public class HumanTurnController {
     private int tradeTargetPlayerIndex = -1;
     private final ArrayList<Integer> allPlayersDropPendingTargets = new ArrayList<>();
     private int allPlayersDropCurrentTargetIndex = -1;
+
+    private boolean starDrawPendingPlacement = false;
     // fin du stuff actions
 
     public HumanTurnController(GameBoardView gameBoardView,GameManager gameManager,GameBoardController mainController,GameLoop gameLoop) {
@@ -79,6 +81,7 @@ public class HumanTurnController {
             if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) return;
             if (mainController.isWaitingNextTurn()) return;
             if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
+            starDrawPendingPlacement = false;
 
             CardModel drawn = gameManager.drawDeck();
             if (drawn.isFaceDown()) drawn.returnCard();
@@ -89,6 +92,26 @@ public class HumanTurnController {
             gameBoardView.updateDiscardOnly(
                 gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard()
             );
+
+            PlayerModel player = gameManager.getCurrentPlayer();
+            if (player != null && GameManager.isStarCard(drawn)) {
+                player.addStarsScore();
+
+                boolean canDrawActionNow = gameManager.withActionCard()
+                    && gameManager.getActionDeck() != null
+                    && gameManager.getActionDeck().stackSize() > 0
+                    && player.getStarsScore() >= 1;
+
+                starDrawPendingPlacement = true;
+                gameBoardView.showPlayerCards(player);
+                if (canDrawActionNow) {
+                    gameBoardView.setActionGuide("ETOILE : clique Pioche A (coût 1 étoile) ou place l'étoile dans ta main");
+                } else {
+                    gameBoardView.setActionGuide("ETOILE : clique une carte de ta main pour la placer");
+                }
+                return;
+            }
+
             mainController.refreshGuide();
         });
 
@@ -109,6 +132,10 @@ public class HumanTurnController {
             }
 
             if (gameManager.getTurnPhase() == GameManager.TurnPhase.CARD_DRAW_FROM_DECK) {
+                if (starDrawPendingPlacement) {
+                    gameBoardView.setActionGuide("ETOILE : tu dois la placer dans ta main");
+                    return;
+                }
                 gameManager.discardDrawCard();
                 waitingReveal = true;
                 gameBoardView.hideCursorCard();
@@ -121,10 +148,33 @@ public class HumanTurnController {
         gameBoardView.getBtnPiocheAction().addActionListener(e -> {
             if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) return;
             if (mainController.isWaitingNextTurn()) return;
-            if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
             if (!gameManager.withActionCard()) return;
 
             PlayerModel player = gameManager.getCurrentPlayer();
+            if (player == null) return;
+
+            if (starDrawPendingPlacement) { // l'étoile piochée va en défausse puis on prend une action
+                gameManager.discardDrawCard();
+                player.subStarsScore();
+
+                CardModel drawnAction = gameManager.drawActionDeck();
+                if (drawnAction != null && drawnAction.isFaceDown()) drawnAction.returnCard();
+                if (drawnAction instanceof ActionCardModel actionCard) {
+                    player.getActionHand().add(actionCard.getType());
+                    System.out.println("Carte action piochée : " + actionCard.getType());
+                }
+
+                starDrawPendingPlacement = false;
+                gameBoardView.hideCursorCard();
+                gameBoardView.showPlayerCards(player);
+                mainController.updateAllDecksDisplay();
+                gameManager.setTurnPhase(GameManager.TurnPhase.TURN_ENDED);
+                mainController.refreshGuide();
+                gameLoop.proceedAfterAction();
+                return;
+            }
+
+            if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
             if (player.getStarsScore() <= 0) {
                 System.out.println("Pas assez d'étoiles pour piocher une action !");
                 return;
@@ -211,8 +261,8 @@ public class HumanTurnController {
                         if (card == null || !card.isFaceDown()) return;
 
                         currentPlayer.getHand().revealCard(r, c);
-                        GameRuleModel.removeIdenticalColumns(currentPlayer.getHand(), gameManager.getDiscardPile());
-                        GameRuleModel.removeIdenticalRows(currentPlayer.getHand(), gameManager.getDiscardPile());
+                        GameRuleModel.removeIdenticalColumns(currentPlayer.getHand(), gameManager.getDiscardPile(), currentPlayer);
+                        GameRuleModel.removeIdenticalRows(currentPlayer.getHand(), gameManager.getDiscardPile(), currentPlayer);
 
                         gameBoardView.showPlayerCards(currentPlayer);
 
@@ -227,6 +277,7 @@ public class HumanTurnController {
                             || gameManager.getTurnPhase() == GameManager.TurnPhase.CARD_TAKE_FROM_DISCARD) {
 
                         gameManager.exchangeCardInHand(c, r);
+                        starDrawPendingPlacement = false;
                         gameBoardView.hideCursorCard();
                         gameBoardView.showPlayerCards(currentPlayer);
 
@@ -544,13 +595,24 @@ public class HumanTurnController {
             return;
         }
 
+        // update compteurs d'étoiles s'il y a un vol/perte d'étoile durant le trade
+        boolean myCardIsStar = GameManager.isStarCard(myCard);
+        boolean targetCardIsStar = GameManager.isStarCard(targetCard);
+        if (myCardIsStar && !targetCardIsStar) {
+            currentPlayer.subStarsScore();
+            targetPlayer.addStarsScore();
+        } else if (!myCardIsStar && targetCardIsStar) {
+            currentPlayer.addStarsScore();
+            targetPlayer.subStarsScore();
+        }
+
         currentPlayer.getHand().replaceCard(tradeOwnRow, tradeOwnCol, targetCard);
         targetPlayer.getHand().replaceCard(targetRow, targetCol, myCard);
 
-        GameRuleModel.removeIdenticalColumns(currentPlayer.getHand(), gameManager.getDiscardPile());
-        GameRuleModel.removeIdenticalRows(currentPlayer.getHand(), gameManager.getDiscardPile());
-        GameRuleModel.removeIdenticalColumns(targetPlayer.getHand(), gameManager.getDiscardPile());
-        GameRuleModel.removeIdenticalRows(targetPlayer.getHand(), gameManager.getDiscardPile());
+        GameRuleModel.removeIdenticalColumns(currentPlayer.getHand(), gameManager.getDiscardPile(), currentPlayer);
+        GameRuleModel.removeIdenticalRows(currentPlayer.getHand(), gameManager.getDiscardPile(), currentPlayer);
+        GameRuleModel.removeIdenticalColumns(targetPlayer.getHand(), gameManager.getDiscardPile(), targetPlayer);
+        GameRuleModel.removeIdenticalRows(targetPlayer.getHand(), gameManager.getDiscardPile(), targetPlayer);
 
         actionMode = ActionMode.NONE;
         resetTradeSelection();
@@ -636,11 +698,19 @@ public class HumanTurnController {
             targetCard.returnCard();
         }
 
+        if (GameManager.isStarCard(targetCard)) {
+            targetPlayer.subStarsScore();
+        }
+
+        if (GameManager.isStarCard(drawnCard)) {
+            targetPlayer.addStarsScore();
+        }
+
         targetPlayer.getHand().replaceCard(row, col, drawnCard);
         gameManager.getDiscardPile().addCardAtTop(targetCard);
 
-        GameRuleModel.removeIdenticalColumns(targetPlayer.getHand(), gameManager.getDiscardPile());
-        GameRuleModel.removeIdenticalRows(targetPlayer.getHand(), gameManager.getDiscardPile());
+        GameRuleModel.removeIdenticalColumns(targetPlayer.getHand(), gameManager.getDiscardPile(), targetPlayer);
+        GameRuleModel.removeIdenticalRows(targetPlayer.getHand(), gameManager.getDiscardPile(), targetPlayer);
 
         allPlayersDropPendingTargets.remove(Integer.valueOf(allPlayersDropCurrentTargetIndex));
         allPlayersDropCurrentTargetIndex = -1;
@@ -675,6 +745,7 @@ public class HumanTurnController {
 
     public void resetTurnState() {
         waitingReveal = false;
+        starDrawPendingPlacement = false;
         actionMode = ActionMode.NONE;
         replaceFirstRow = -1;
         replaceFirstCol = -1;

@@ -125,8 +125,8 @@ public class GameTerminalModel {
                 hand.revealRandomCard(2);
                 
                 //regarde et supprimer les colonnes/lignes identiques
-                GameRuleModel.removeIdenticalColumns(hand, gameManager.getDiscardPile());
-                GameRuleModel.removeIdenticalRows(hand, gameManager.getDiscardPile());
+                GameRuleModel.removeIdenticalColumns(hand, gameManager.getDiscardPile(), player);
+                GameRuleModel.removeIdenticalRows(hand, gameManager.getDiscardPile(), player);
                 
                 System.out.println("\n" + player.getName() + " a révelé 2 cartes\n");
                 showHand(player, false);
@@ -161,13 +161,9 @@ public class GameTerminalModel {
                     
                     hand.revealCard(row, col);
 
-                    // si l'etoile retournée est une carte etoile
-                    NumberCardModel cardDrawn = (NumberCardModel) hand.getCard(row, col);
-                    if (cardDrawn.isStar()) player.addStarsScore();
-                    
                     // Vérifier et supprimer les colonnes/lignes identiques
-                    GameRuleModel.removeIdenticalColumns(hand, gameManager.getDiscardPile());
-                    GameRuleModel.removeIdenticalRows(hand, gameManager.getDiscardPile());
+                    GameRuleModel.removeIdenticalColumns(hand, gameManager.getDiscardPile(), player);
+                    GameRuleModel.removeIdenticalRows(hand, gameManager.getDiscardPile(), player);
                     
                     System.out.println("\nCarte révélée : " + hand.getCard(row, col).getCardValue());
                     showHand(player, false);
@@ -437,8 +433,8 @@ public class GameTerminalModel {
                 player.getHand().revealCard(row, col);
                 
                 //regarde et supprimer les colonnes/lignes identiques
-                GameRuleModel.removeIdenticalColumns(player.getHand(), gameManager.getDiscardPile());
-                GameRuleModel.removeIdenticalRows(player.getHand(), gameManager.getDiscardPile());
+                GameRuleModel.removeIdenticalColumns(player.getHand(), gameManager.getDiscardPile(), player);
+                GameRuleModel.removeIdenticalRows(player.getHand(), gameManager.getDiscardPile(), player);
                 
                 System.out.println("----------------------------------------------------------");
                 System.out.println("\nCarte révélée : " + player.getHand().getCard(row, col).getCardValue());
@@ -534,8 +530,8 @@ public class GameTerminalModel {
                 botHand.revealRandomCard(1);
                 
                 //regarde et supprimer les colonnes/lignes identiques
-                GameRuleModel.removeIdenticalColumns(botHand, gameManager.getDiscardPile());
-                GameRuleModel.removeIdenticalRows(botHand, gameManager.getDiscardPile());
+                GameRuleModel.removeIdenticalColumns(botHand, gameManager.getDiscardPile(), bot);
+                GameRuleModel.removeIdenticalRows(botHand, gameManager.getDiscardPile(), bot);
                 
                 System.out.println(bot.getName() + " révèle une carte");
             }
