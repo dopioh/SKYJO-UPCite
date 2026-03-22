@@ -583,8 +583,9 @@ public class GameManager {
         if (initRevealCount >= 2) {
             initRevealCount = 0;
             currentPlayerIndex++;
-            if (currentPlayerIndex >= players.size()) currentPlayerIndex = 0; 
-            if (currentPlayerIndex == firstPlayerToPlayIndex) {
+            if (currentPlayerIndex >= players.size()) {
+                currentPlayerIndex = GameRuleModel.getFirstPlayerIndex(players);
+                firstPlayerToPlayIndex = currentPlayerIndex;
                 startTurn(); // passe à DRAW_DECISION
             }
             gameBoardModel.getGameBoardController().nextPlayerSound();
