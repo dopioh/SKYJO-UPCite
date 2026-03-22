@@ -1,4 +1,4 @@
-package fr.upc.cr1a.controller.Data;
+package fr.upc.cr1a.controller.data;
 
 //import java.lang.Thread.State;
 import java.net.URI;
