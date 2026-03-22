@@ -22,8 +22,7 @@ public class ConnexionController {
     public void listener(){
         connexionPanel.getbtnSubmitInscription().addActionListener(e -> sendCreate());
         connexionPanel.getbtnSubmitConnexion().addActionListener(e -> sendLogin());
-        
-        // boutob invité
+        // bouton invité
         connexionPanel.getBtnGuest().addActionListener(e -> sendGuest());
     }
 

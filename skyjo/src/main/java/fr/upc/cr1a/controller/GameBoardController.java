@@ -23,18 +23,16 @@ public class GameBoardController {
 
     GameBoardModel gameBoardModel;
     GameBoardView gameBoardView;
-    NextRoundPanel nextRoundPanel;
     GameManager gameManager;
 
     private GameLoop gameLoop;
     private HumanTurnController humanTurnController;
-    
+
     private GameBoardBotController botController;
-    
+
     private boolean waitingNextTurn = false; // empeche de cliquer pendant l'attente
     // pour fixer le clique du playerpreview
     private boolean isPinned = false;
-    private AudioManager audio;
     // panel de fin de manche
     RoundEndPanel currentRoundEndPanel = null;
 
@@ -45,8 +43,6 @@ public class GameBoardController {
         this.gameBoardModel = gameBoardModel;
         this.gameBoardView = gameBoardView;
         this.gameManager = gameManager;
-        this.audio = new AudioManager();
-        this.nextRoundPanel = gameBoardView.getNextRoundPanel();
         this.botController = new GameBoardBotController(gameBoardView, gameManager, this);
 
         this.gameLoop = new GameLoop(gameManager, gameBoardView);
@@ -223,19 +219,6 @@ public class GameBoardController {
             case INIT_REVEAL -> gameBoardView.setActionGuide(gameManager.getCurrentPlayer().getName()
                     + " doit réveler 2 cartes (" + gameManager.getInitRevealCount() + ")");
         }
-    }
-
-    public void nextPlayerSound() {
-        audio.playSfx("/sfx/round.wav"); //je trouve le son bizzare hmm j'ai mis un alternatif ou juste avec ce son c'est bizzare d'etre accompagné d'un fade
-        nextRoundPanel.setCurrentPlayer(gameManager.getCurrentPlayer());
-        // nextRoundPanel.fade(true);
-        // waitingNextTurn = true;
-        // Timer waitTimer = new Timer(2500, e -> {
-        //     nextRoundPanel.fade(false);
-        //     waitingNextTurn = false;
-        // });
-        // waitTimer.setRepeats(false);
-        // waitTimer.start();
     }
 
     /**
