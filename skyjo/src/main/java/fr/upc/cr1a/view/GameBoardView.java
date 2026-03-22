@@ -2,6 +2,7 @@ package fr.upc.cr1a.view;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -11,6 +12,7 @@ import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.PlayerHandModel;
 import fr.upc.cr1a.model.PlayerModel;
+import fr.upc.cr1a.utils.ImageCache;
 
 /**
  * Vue graphique du plateau de jeu avec affichage des cartes et boutons joueurs
@@ -47,6 +49,34 @@ public class GameBoardView extends JPanel {
     private CursorCardView cursorCardView;
     private ActionDescriptionOverlayPanel actionDescriptionOverlay;
 
+    // 3 couleurs pour l'instant peut etre 8 un jour mais la pas le temps
+    private static final Color[] PLAYER_COLORS = {
+        new Color(218, 113, 72),   // rouge
+        new Color(103, 187, 93),   // vert
+        new Color(241, 192, 31),  // jaune
+    };
+
+    private static final String[] TOPBAR_IMAGES = {
+        "/plateau/red_topbar.png",
+        "/plateau/green_topbar.png",
+        "/plateau/yellow_topbar.png",
+    };
+
+    private static final String[] BG_IMAGES = {
+        "/plateau/red_bg.png",
+        "/plateau/green_bg.png",
+        "/plateau/yellow_bg.png",
+    };
+
+    private Image backgroundImage;
+    private Image topBarImage;
+    private Font patrickFont;
+
+    // cache du fond redimensionné pour éviter le rescale BICUBIC à chaque repaint
+    private BufferedImage cachedBackground;
+    private int cachedBgWidth;
+    private int cachedBgHeight;
+
     // Affichage de la main des cartes action du joueur
     private static final int MAX_ACTION_CARDS = 8;
     private JPanel actionHandPanel;
@@ -57,6 +87,10 @@ public class GameBoardView extends JPanel {
     // Affichage des cartes pilées
     private CardButton btnPioche;
     private CardButton btnDefausse;
+
+    // Top bar label
+    private JLabel mancheLabel;
+    private JLabel pointsLabel;
 
     private CardButton btnPiocheAction;
     private CardButton btnDefausseAction;
@@ -75,6 +109,9 @@ public class GameBoardView extends JPanel {
     // Panel de l'entre round
     NextRoundPanel nextRoundPanel;
 
+    // Panel de transition lors du changement de joueur
+    private PlayerTransitionPanel transitionPanel;
+
     public GameBoardView(ArrayList<PlayerModel> listPlayerModels) {
         this.listPlayer = listPlayerModels;
         this.buttonlistPlayer = new ArrayList<JButton>();
@@ -85,7 +122,20 @@ public class GameBoardView extends JPanel {
         setOpaque(true);
         setVisible(true);
 
-        layeredPane = new JLayeredPane(); // gestionnaire de couche (doc :
+        // Charger la police
+        try {
+            var stream = getClass().getResourceAsStream("/PatrickHandSC.ttf");
+            if (stream != null) {
+                patrickFont = Font.createFont(Font.TRUETYPE_FONT, stream);
+            } else {
+                patrickFont = new Font("Arial", Font.BOLD, 1);
+            }
+        } catch (Exception e) {
+            patrickFont = new Font("Arial", Font.BOLD, 1);
+        }
+
+        layeredPane = new JLayeredPane();
+        layeredPane.setOpaque(false); // gestionnaire de couche (doc :
                                           // https://docs.oracle.com/javase/8/docs/api/javax/swing/JLayeredPane.html)
         add(layeredPane, BorderLayout.CENTER);
 
@@ -113,17 +163,57 @@ public class GameBoardView extends JPanel {
     public void initComponents() {
         // System.out.println("initComponents Called");
 
-        // PANEL PLATEAU :
+        // PANEL PLATEAU:
         JPanel plateauPanel = new JPanel();
-        plateauPanel.setOpaque(true);
-        plateauPanel.setLayout(new GridBagLayout());
+        plateauPanel.setOpaque(false);
+        plateauPanel.setLayout(new BorderLayout());
 
         layeredPane.add(plateauPanel, JLayeredPane.DEFAULT_LAYER);
+
+        // ============================ TOP BAR ========================== (<- Pas IA c'est juste plus lisible)
+        JPanel topBar = new JPanel(new BorderLayout()) {
+
+            //fond topBar en image
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (topBarImage != null) {
+                    g.drawImage(topBarImage, 0, 0, getWidth(), getHeight(), this);
+                }
+            }
+        };
+        topBar.setOpaque(false);
+        topBar.setPreferredSize(new Dimension(0, 70));
+        topBar.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
+
+        mancheLabel = new JLabel("Manche 0");
+        mancheLabel.setFont(patrickFont.deriveFont(Font.BOLD, 34f));
+        mancheLabel.setForeground(Color.WHITE);
+        mancheLabel.setHorizontalAlignment(SwingConstants.LEFT);
+
+        actionGuide = new JLabel("Instruction ici", SwingConstants.CENTER);
+        actionGuide.setFont(patrickFont.deriveFont(Font.BOLD, 34f));
+        actionGuide.setForeground(Color.WHITE);
+
+        pointsLabel = new JLabel("0 P");
+        pointsLabel.setFont(patrickFont.deriveFont(Font.BOLD, 34f));
+        pointsLabel.setForeground(Color.WHITE);
+        pointsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        topBar.add(mancheLabel, BorderLayout.WEST);
+        topBar.add(actionGuide, BorderLayout.CENTER);
+        topBar.add(pointsLabel, BorderLayout.EAST);
+
+        plateauPanel.add(topBar, BorderLayout.NORTH);
+
+        // panel du bas(millieu en gros) qui contient zonePlayer + zonePlateau
+        JPanel gameArea = new JPanel(new GridBagLayout());
+        gameArea.setOpaque(false);
 
         // ZONE PLAYER ( a gauche de l'ecran, la ou y'a les boutons)
         this.zonePlayer = new JPanel();
         zonePlayer.setLayout(new GridBagLayout());
-        zonePlayer.setBackground(Color.WHITE);
+        zonePlayer.setOpaque(false);
         zonePlayer.setPreferredSize(new Dimension(50, 0));
 
         GridBagConstraints gbcZonePlayer = new GridBagConstraints();
@@ -136,13 +226,13 @@ public class GameBoardView extends JPanel {
         gbcZonePlayer.anchor = GridBagConstraints.WEST;
         gbcZonePlayer.fill = GridBagConstraints.BOTH;
 
-        plateauPanel.add(zonePlayer, gbcZonePlayer);
+        gameArea.add(zonePlayer, gbcZonePlayer);
 
         // ZONE PLATEAU ( 3/4 de l'ecran a partir de la droite, les
         // cartes,pioches,defausses et score seront ici)
         this.zonePlateau = new JPanel();
         zonePlateau.setLayout(new BorderLayout());
-        zonePlateau.setBackground(Color.WHITE);
+        zonePlateau.setOpaque(false);
 
         GridBagConstraints gbcZonePlateau = new GridBagConstraints();
         gbcZonePlateau.gridx = 2;
@@ -154,51 +244,33 @@ public class GameBoardView extends JPanel {
         gbcZonePlateau.anchor = GridBagConstraints.EAST;
         gbcZonePlateau.fill = GridBagConstraints.BOTH;
 
-        plateauPanel.add(zonePlateau, gbcZonePlateau);
+        gameArea.add(zonePlateau, gbcZonePlateau);
+
+        plateauPanel.add(gameArea, BorderLayout.CENTER);
 
         // panel grille pour les cartes
         JPanel cardsGrid = new JPanel(new GridBagLayout());
-        cardsGrid.setOpaque(true);
-        cardsGrid.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        cardsGrid.setOpaque(false);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(cardSpacing, cardSpacing, cardSpacing, cardSpacing);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        actionGuide = new JLabel("PLACEHOLDER", SwingConstants.CENTER);
-        actionGuide.setFont(new Font("Arial", Font.BOLD, 14));
-        actionGuide.setBorder(BorderFactory.createEmptyBorder(6, 0, 6, 0));
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 4;
-        cardsGrid.add(actionGuide, gbc);
-
-        gbc.gridwidth = 1;
         gbc.fill = GridBagConstraints.NONE;
 
-        // Container vertical pour message + cartes
+        // Container vertical pour les cartes
         JPanel cardsContainer = new JPanel();
         cardsContainer.setLayout(new BorderLayout());
         cardsContainer.setOpaque(false);
 
-        // %essage d'action
-        playerName = new JLabel("PLACEHOLDER", SwingConstants.CENTER);
-        playerName.setFont(new Font("Arial", Font.BOLD, 16));
-        playerName.setForeground(Color.BLACK);
-        playerName.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-
-        cardsContainer.add(playerName, BorderLayout.NORTH);
         cardsContainer.add(cardsGrid, BorderLayout.CENTER);
 
         // Panel des cartes actions dans la main du joueur
         actionHandPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 2));
         actionHandPanel.setOpaque(false);
-        // pre-creation des cartes actions
+        // pre-creation des boutons action — animation désactivée pour ne pas surcharger l'AnimLoop
         for (int i = 0; i < MAX_ACTION_CARDS; i++) {
             CardButton btn = new CardButton();
-            btn.setAnimationEnabled(EnableHandCardAnimations);
-            btn.setCardSize(75, 100);
+            btn.setAnimationEnabled(false);
+            btn.setCardSize(65, 90);
             btn.setVisible(false);
             actionCardButtons[i] = btn;
             actionHandPanel.add(btn);
@@ -208,7 +280,7 @@ public class GameBoardView extends JPanel {
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 4; col++) {
                 gbc.gridx = col;
-                gbc.gridy = row + 1;
+                gbc.gridy = row;
                 CardButton btn = new CardButton();
                 btn.setAnimationEnabled(EnableHandCardAnimations);
                 cardButtons[row][col] = btn;
@@ -333,6 +405,9 @@ public class GameBoardView extends JPanel {
         this.nextRoundPanel = new NextRoundPanel(currentPlayer);
         layeredPane.add(nextRoundPanel, JLayeredPane.PALETTE_LAYER);
 
+        transitionPanel = new PlayerTransitionPanel();
+        layeredPane.add(transitionPanel, JLayeredPane.POPUP_LAYER);
+
         cursorCardView = new CursorCardView(this);
         cursorCardView.setOverlayBounds(getWidth(), getHeight());
         layeredPane.add(cursorCardView.getOverlay(), JLayeredPane.DRAG_LAYER);
@@ -349,9 +424,11 @@ public class GameBoardView extends JPanel {
      */
     public void showPlayerCards(PlayerModel player) {
         this.currentPlayer = player;
-        int score = player.getHand().getVisibleCardScore();
-        int total = player.getTotalScore();
-        playerName.setText("Main de " + player.getName() + " - Manche : " + score + " | Total : " + total);
+        int colorIndex = listPlayer.indexOf(player) % PLAYER_COLORS.length; // parce que on a que 3 couleurs pour l'instant
+        topBarImage = ImageCache.get(TOPBAR_IMAGES[colorIndex]);
+        backgroundImage = ImageCache.get(BG_IMAGES[colorIndex]);
+        cachedBackground = null; // rendre invalide le cache quand fond change
+        updatePoints();
         PlayerHandModel hand = player.getHand();
 
         for (int row = 0; row < 3; row++) {
@@ -377,10 +454,11 @@ public class GameBoardView extends JPanel {
 
         zonePlateau.revalidate();
         zonePlateau.repaint();
+        repaint(); // met a jour la topbar et le fond
     }
 
     /**
-     * maj les boutons carte action
+     * Met à jour les boutons carte action visibles sans recréer de composants
      */
     public void showActionHand(PlayerModel player) {
         ArrayList<ActionCardModel.ActionType> actions = player.getActionHand();
@@ -468,30 +546,28 @@ public class GameBoardView extends JPanel {
         gbcPlayerButton.gridy = 0;
         gbcPlayerButton.weightx = 1;
         gbcPlayerButton.weighty = 1;
+        int colorIndex = 0;
         for (PlayerModel pm : listPlayer) {
+            Color playerColor = PLAYER_COLORS[colorIndex % PLAYER_COLORS.length];
+            colorIndex++;
+
             JButton p = new JButton(pm.getName());
-            // p.setOpaque(true);
-            // p.setBorderPainted(false);
-            p.setBackground(Color.WHITE);
-            p.setForeground(Color.BLACK);
+            p.setOpaque(true);
+            p.setBorderPainted(false);
+            p.setBackground(playerColor);
+            p.setForeground(Color.WHITE);
             p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            //////////// un listner dans viewwwwwwwwww // c'est un listener pour modifier
-            //////////// des couleurs, faut le laisser la
             p.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
-                    p.setBackground(new Color(242, 242, 242)); // ne marche pas sur MacOS sans modifier la nature du bouton // ah bon
-                    // p.setForeground(new Color(73, 134, 196));
-                    // showOtherPlayerMain(true);
+                    p.setBackground(playerColor.brighter());
                     isPinned = false;
                 }
 
                 @Override
                 public void mouseExited(MouseEvent e) {
                     if (!isPinned) {
-                        p.setBackground(Color.WHITE);
-                        p.setForeground(Color.BLACK);
-                        // showOtherPlayerMain(false);
+                        p.setBackground(playerColor);
                     }
                 }
             });
@@ -531,13 +607,17 @@ public class GameBoardView extends JPanel {
             c.setBounds(size.width / 6, size.height / 10, size.width - size.width / 3, size.height - size.height / 5);
         }
 
-        Component[] compsPopup = layeredPane.getComponentsInLayer(JLayeredPane.POPUP_LAYER); // description action
+        Component[] compsPopup = layeredPane.getComponentsInLayer(JLayeredPane.POPUP_LAYER);
         int popupW = Math.min((int) (size.width * 0.50), 520);
         int popupH = Math.min((int) (size.height * 0.26), 220);
         int popupX = (size.width - popupW) / 2;
         int popupY = (size.height - popupH) / 2;
         for (Component c : compsPopup) {
-            c.setBounds(popupX, popupY, popupW, popupH);
+            if (c == actionDescriptionOverlay) { // le transitionPanel et le actionDescriptionOverlay sont dans le meme layer (POPUP)
+                c.setBounds(popupX, popupY, popupW, popupH);
+            } else {
+                c.setBounds(0, 0, size.width, size.height);
+            }
         }
 
         if (cursorCardView != null) {
@@ -604,8 +684,30 @@ public class GameBoardView extends JPanel {
         actionGuide.setText(message);
     }
 
+    public void setMancheLabel(int roundNumber) {
+        mancheLabel.setText("Manche " + roundNumber);
+    }
+
+    public void updatePoints() {
+        if (currentPlayer != null) {
+            int liveScore = currentPlayer.getHand().getVisibleCardScore();
+            int totalWithLive = currentPlayer.getTotalScore() + liveScore;
+            pointsLabel.setText(totalWithLive + " P");
+        }
+    }
+
     public NextRoundPanel getNextRoundPanel() {
         return this.nextRoundPanel;
+    }
+
+    /**
+     * Lance l'animation de transition entre les tours de joueurs
+     * @param player  Le joueur dont c'est le tour
+     * @param onDone  appelé en fin d'animation
+     */
+    public void showPlayerTransition(PlayerModel player, Runnable onDone) {
+        int colorIndex = listPlayer.indexOf(player) % PLAYER_COLORS.length;
+        transitionPanel.showTransition(player.getName(), PLAYER_COLORS[colorIndex], onDone);
     }
 
     /**
@@ -799,5 +901,25 @@ public class GameBoardView extends JPanel {
 
     public PlayerPreviewPanel getPlayerPreviewPanel() {
         return this.previewPanel;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (backgroundImage != null) {
+            int w = getWidth();
+            int h = getHeight();
+            if (cachedBackground == null || cachedBgWidth != w || cachedBgHeight != h) {
+                cachedBackground = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D bg = cachedBackground.createGraphics();
+                bg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                bg.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                bg.drawImage(backgroundImage, 0, 0, w, h, null);
+                bg.dispose();
+                cachedBgWidth = w;
+                cachedBgHeight = h;
+            }
+            g.drawImage(cachedBackground, 0, 0, null);
+        }
     }
 }

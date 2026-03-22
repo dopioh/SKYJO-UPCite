@@ -119,7 +119,7 @@ public class PlayersSetupController {
                 btn.onMouseExit();
             }
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 audio.playSfx("/sfx/UIclick.wav");
                 action.run();
             }

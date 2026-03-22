@@ -35,6 +35,7 @@ public class GameManager {
 
     private GameBoardModel gameBoardModel;
     private int initRevealCount = 0;
+    private int roundNumber = 0; // numero de la manche actuelle
 
     private boolean gameWithAction = false; // true si on utilise les actions
     
@@ -580,6 +581,7 @@ public class GameManager {
      * Recommence une nouvelle manche, le joueur avec le plus grand score commence
      */
     public void startNewGame() {
+        roundNumber++;
         currentPlayerIndex = GameRuleModel.getBiggestScorePlayerIndex(players);
         currentDrawCard = null;
         discardPile = new DefausseModel();
@@ -607,6 +609,10 @@ public class GameManager {
         return initRevealCount;
     }
 
+    public int getRoundNumber(){
+        return roundNumber;
+    }
+
     public boolean revealInitCard(int col, int row){
         if (turnPhase != TurnPhase.INIT_REVEAL) return false;
         CardModel card = getCurrentPlayer().getHand().getCard(row, col);
@@ -621,11 +627,10 @@ public class GameManager {
         if (initRevealCount >= 2) {
             initRevealCount = 0;
             currentPlayerIndex++;
-            if (currentPlayerIndex >= players.size()) currentPlayerIndex = 0; 
+            if (currentPlayerIndex >= players.size()) currentPlayerIndex = 0;
             if (currentPlayerIndex == firstPlayerToPlayIndex) {
                 startTurn(); // passe à DRAW_DECISION
             }
-            gameBoardModel.getGameBoardController().nextPlayerSound();
         }
         return true;
     }

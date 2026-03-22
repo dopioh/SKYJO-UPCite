@@ -110,27 +110,13 @@ public class GameBoardBotController {
                     mainController.updateAllDecksDisplay();
                     mainController.refreshGuide();
                     mainController.setWaitingNextTurn(false);
-
-                    //afficher la main suivante
-                    Timer switchTimer = new Timer(300, evt -> { // fluidité
-                        PlayerModel nextPlayer = gameManager.getCurrentPlayer();
-                        gameBoardView.showPlayerCards(nextPlayer);
-                        mainController.refreshGuide();
-                        //continue avec un bot si le prochain est un bot
-                        handleBotTurn();
-                    });
-                    switchTimer.setRepeats(false);
-                    switchTimer.start();
+                    mainController.requestEndTurnFromBot();
                 });
                 secondCardTimer.setRepeats(false);
                 secondCardTimer.start();
             } else {
                 mainController.setWaitingNextTurn(false);
-                //montre la main du joueur qui suit
-                PlayerModel nextPlayer = gameManager.getCurrentPlayer();
-                gameBoardView.showPlayerCards(nextPlayer);
-                mainController.refreshGuide();
-                handleBotTurn();
+                mainController.requestEndTurnFromBot();
             }
         });
         firstCardTimer.setRepeats(false);

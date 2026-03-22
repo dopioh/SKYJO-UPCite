@@ -11,7 +11,7 @@ public class ConnexionPanel extends JPanel {
     private CardLayout cardLayout;
     private JPanel cardsContainer;
 
-    // Pour la connexion : 
+    // Pour la connexion :
     private JTextField loginIdentifierField; // anciennement que pour le mail "loginEmailField"
     private JPasswordField loginPasswordField;
     private JButton btnSubmitConnexion;

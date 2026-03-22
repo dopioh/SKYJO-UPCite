@@ -211,6 +211,18 @@
     - Pas besoin de toucher au code de AnimLoop pour l'utiliser, contrairement a Gameloop de worms avec un utilisation simple:
       - `AnimLoop.add(this, animation)` / `AnimLoop.remove(this)` (voir le javadoc dans AnimLoop pour l'utilisation)
 
+- Top bar au dessus du plateau de jeu
+    - Image de fond
+    - Numéro de manche à gauche (`Manche X`)
+    - Instruction au centre
+    - nouveau system de calcul de score du joueur courant à droite (`X P`)
+
+- Système de couleur par joueur
+    - 3 sets d'images : rouge / vert / jaune pour la top bar et le fond
+    - Tourne si plus de 3 joueurs
+    - Fond et top bar changent automatiquement à chaque changement de joueur
+    - Boutons joueurs à gauche colorés selon la couleur du joueur (temporaire)
+
 - Interface simple au lancement du jeu pour se connecter ou creer un compte (obliger de se connecter pour acceder au jeu)
 
 - Lors de la creation du compte, ses statistiques sont defini automatiquement dans la database
@@ -226,9 +238,20 @@
 
 - Vitesse de fade pour l'écran "prochaine joueur" accéléré pour plus de fluidité
 
+- Suppression du label "Main de ..." au dessus des cartes
+
+- Suppression du rectangle/bordure noire autour de la grille de cartes
+
+- Suppression des code en double/nettoyage
+
 ### Fixed
 
 - Fluidité globale : Le jeu ne lag plus sur Windows en passant de 12 repaint a un seul pour l'animation carte flottante ainsi que tout les autres animations qui sont maintenant geré avec `AnimLoop`
+
+- Repaint intelligent : seules les zones nécessaires sont redessinées (ancienne et nouvelle position de la carte curseur) au lieu de tout l'écran -> carte curseur plus fluide
+
+- Plus de lignes/artefacts visibles lors du survol des cartes ou de la preview de la main des autres joueurs
+
 - Selection du mode de jeu (vanilla ou action) dans le menu de selection
 
 - Affichage de la pioche et de la defausse action en jeu
@@ -246,34 +269,64 @@
 - affichage de la main action du joueur
 
 ## v.0.7: SPRINT 7
+---
 
 ### Added
 
 - Fin du recode des cartes action pour le mode graphique
+- Bouton invitée pour accéder au jeu sans identifiants
 
 ### Modified
 
 - Le système de tour se passe désormais dans `GameLoop.java`
 - Toutes les actions joueurs Swing sont gérées par `HumanTurnController`
 - Main des cartes actions sous les cartes numéro
-- Bouton invitee pour acceder au jeu sans identifiants
 - Connexion par username dans l'interface
 
 ### Fixed
 
+- Optimisation :
+    - Le jeu ne lag enfin plus
+    - fix de lag quand on clique sur lancer le jeu et au premier changement de joueur
+    - transition changement de joueur / preview carte beaucoup plus fluide
+    - Et bien plus
 - PLAY_TWO_TURN joue 2 tours (contre 3 avant)
 
 ## v.0.8: SPRINT 8
 
 ### Added
 - Systeme d'overlay quand on passe la souris sur une carte action
+
 - Description des cartes action
+
 - Les etoiles dans la main se comportent comme des jokers
+
 - Les etoiles peuvent se faire voler par des adversaires
+
 - Si on pioche une carte etoile :
     - soit on la joue directement et piocher une action
     - soit on peut la met dans notre main et piocher une action aux prochains tours
 
+- Transition au changement de joueur (`PlayerTransitionPanel`)
+    - Bande colorée en couleur du joueur avec le nom du joueur
+
+- Mailmap
+
 ### Modified
 - Refactor des checks lignes/colonnes
+
 - Ajout du cas wildcard (joker etoile) dans les checks lignes/colonnes
+
+- Quelques modif sur les fonctions de jeu pour le nouveau système d'étoiles
+
+- Fusion des comportements du POPUP_Layer pour paneltransitionPanel et actionDescriptionOverlay
+
+### Fixed
+
+- Le joueur qui commence après l'init reveal est maintenant correctement déterminé par le score des cartes révélées (`firstPlayer`)
+
+- L'index du joueur de départ n'est plus avancé en double à la fin de l'init reveal
+
+- Linux : Si le jeu détecte qu'elle tourne sous linux, elle désactive automatiquement l'animation carte flottante qui lag, mais en laissant l'effet scale (hover) car elle ne lag pas
+
+- Fix boutons qui ne répondaient pas au premier clic quand la souris arrivait trop vite (`mouseClicked` -> `mousePressed`)
