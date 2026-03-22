@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import fr.upc.cr1a.model.PlayerData;
+
 public class ClientHandler implements Runnable{
 
     private Socket clientSocket;
@@ -18,6 +20,10 @@ public class ClientHandler implements Runnable{
         this.gameHost = gameHost;
     }
 
+    public void sendMessage(String msg){
+        out.println(msg);
+    }
+
 
     @Override
     public void run(){
@@ -29,15 +35,38 @@ public class ClientHandler implements Runnable{
             String message;
 
             while ((message = in.readLine()) != null){
-                System.out.println("[SERVEUR a entendu] : " + message);
+                System.out.println("[SERVEUR a entendu] = " + message);
 
-                if (message.startsWith("[JOIN]")) {
-                    out.println("[LOBBY_UPDATE] Tu es bien connecté au serveur !");
+                if (message.startsWith("JOIN")) {
+                    System.out.println("[SYSTEM] message start with \"JOIN\"");
+                    String[] parts = message.split(":");
+
+                    for ( int i = 0 ; i < parts.length ; i++){
+                        System.out.println("[SYSTEM] parts[" + i + "] = " + parts[i]);
+                    }
+                
+                    if (parts.length == 3){
+                        System.out.println("[SYSTEM] parts has lenght 3");
+                        String username = parts[1];
+                        String id = parts[2];
+                     
+                        gameHost.addPlayerToLobby(id, username);
+                        out.println("[LOBBY_UPDATE] Tu es bien connecté au serveur !");
+                    }
                 }
             }
 
         } catch (Exception e) {
             System.out.println("[CLIENT] Déconnecté du serveur.");
+            e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) {
+        PlayerData player = new PlayerData("POPOPO");
+
+        GameClient gameClient = new GameClient(player);
+
+        gameClient.connect("localhost", 1234);
     }
 }

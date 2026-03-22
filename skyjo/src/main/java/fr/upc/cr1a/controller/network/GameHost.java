@@ -3,6 +3,7 @@ package fr.upc.cr1a.controller.network;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import fr.upc.cr1a.model.PlayerData;
 
@@ -17,7 +18,7 @@ public class GameHost implements Runnable{ // GameServer au lieu de GameHost ?
 
     private ArrayList<ClientHandler> connectedClient = new ArrayList<>(); // pour garder une trace des joueurs connectés 
 
-    private ArrayList<PlayerData> lobbyPlayers = new ArrayList<>(); // on stock les info des joueurs connectés
+    private HashMap<String, String> lobbyPlayers = new HashMap<>();
 
     public GameHost(int port){
         this.port = port;
@@ -52,8 +53,28 @@ public class GameHost implements Runnable{ // GameServer au lieu de GameHost ?
         }
     }
 
+    public void addPlayerToLobby(String id, String username){  
+        lobbyPlayers.put(id, username);
+        System.out.println("[LOBBY] " + username + " a rejoint la salle d'attente !");
+
+        broadcastLobbyUpdate();
+    }
+
+    public synchronized void broadcastLobbyUpdate() { // synchronised pour gerer les appels de fonctions sur du multi-thread -> modele file d'attente
+
+        StringBuilder message = new StringBuilder("[LOBBY_UPDATE] Players in : ");
+        for (String pseudo : lobbyPlayers.values()) {
+            message.append(pseudo).append(",");
+        }
+
+        // On l'envoie à tous les ClientHandlers
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message.toString());
+        }
+    }
+
     public static void main(String[] args) {
-        PlayerData player = new PlayerData("aza_dev");
+        PlayerData player = new PlayerData("9846220");
 
         GameClient gameClient = new GameClient(player);
 
