@@ -61,7 +61,7 @@ public class MainMenuController {
 
     private void clicPlay() {
         //audio.playBgm("/music/calmbgm.wav");
-        frame.showPanel("PLAYERS");
+        frame.showPanel("GAME_MODE");
     }
 
     private void clicSettings() {

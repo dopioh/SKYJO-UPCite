@@ -6,6 +6,7 @@ import javax.swing.JPanel;
 
 import fr.upc.cr1a.controller.AccountController;
 import fr.upc.cr1a.controller.ConnexionController;
+import fr.upc.cr1a.controller.GameModeSelectionController;
 import fr.upc.cr1a.controller.MainMenuController;
 import fr.upc.cr1a.controller.PlayersSetupController;
 import fr.upc.cr1a.controller.SettingsOverlayController;
@@ -23,6 +24,7 @@ public class Frame extends JFrame{
     
     private CardLayout cardLayout;
     private MainMenuPanel mainMenuPanel;
+    private GameModeSelectionPanel gameModeSelectionPanel;
     private SettingsOverlay settingsOverlay;
     private boolean fullscreen = false;
     private Rectangle windowedBounds;
@@ -30,7 +32,7 @@ public class Frame extends JFrame{
     private PlayersSetupPanel playersSetupPanel;
     private ConnexionPanel connexionPanel;
 
-    // Controller 
+    // Controller
     private AccountController account; // sert a rien pour le moment
     private ConnexionController connexionController;
 
@@ -52,7 +54,10 @@ public class Frame extends JFrame{
 
         mainMenuPanel = new MainMenuPanel();
         add(mainMenuPanel, "MENU");
-        
+
+        gameModeSelectionPanel = new GameModeSelectionPanel();
+        add(gameModeSelectionPanel, "GAME_MODE");
+
         playersSetupPanel = new PlayersSetupPanel();
         add(playersSetupPanel, "PLAYERS");
 
@@ -64,6 +69,7 @@ public class Frame extends JFrame{
         audioManager = new AudioManager();
         new SettingsOverlayController(settingsOverlay, this, audioManager);
         new MainMenuController(this, mainMenuPanel);
+        new GameModeSelectionController(this, gameModeSelectionPanel);
         new PlayersSetupController(this, playersSetupPanel);
 
         this.connexionController = new ConnexionController(this, connexionPanel);
