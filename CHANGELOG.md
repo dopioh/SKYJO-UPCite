@@ -302,6 +302,8 @@
 
 - Mailmap
 
+- Possibilité de Host et Join un serveur dans le terminal
+
 ### Fixed
 
 - Le joueur qui commence après l'init reveal est maintenant correctement déterminé par le score des cartes révélées (`firstPlayer`)

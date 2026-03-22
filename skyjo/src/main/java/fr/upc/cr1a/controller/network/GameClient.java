@@ -59,9 +59,11 @@ public class GameClient {
         }
     }
 
+    /* // test host
     public static void main(String[] args) {
         GameHost gm = new GameHost(1234);
         gm.startServer();
     }
+    */
 
 }

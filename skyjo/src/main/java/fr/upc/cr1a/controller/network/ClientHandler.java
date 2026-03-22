@@ -7,6 +7,11 @@ import java.net.Socket;
 
 import fr.upc.cr1a.model.PlayerData;
 
+/**
+ * Classe Runnable qui gère la connexion entre le host (server) et le client
+ * 
+ * @author Mei
+ */
 public class ClientHandler implements Runnable{
 
     private Socket clientSocket;
@@ -62,6 +67,7 @@ public class ClientHandler implements Runnable{
         }
     }
 
+    /* // Classe test client ( ne marche que si y'a un host correspondant)
     public static void main(String[] args) {
         PlayerData player = new PlayerData("POPOPO");
 
@@ -69,4 +75,5 @@ public class ClientHandler implements Runnable{
 
         gameClient.connect("localhost", 1234);
     }
+    */
 }

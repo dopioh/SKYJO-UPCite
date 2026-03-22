@@ -9,6 +9,8 @@ import fr.upc.cr1a.model.PlayerData;
 
 /**
  * Sert à heberger un serveur sur le pc d'un joueur
+ * 
+ * @author Mei
  */
 public class GameHost implements Runnable{ // GameServer au lieu de GameHost ? 
     
@@ -73,6 +75,7 @@ public class GameHost implements Runnable{ // GameServer au lieu de GameHost ?
         }
     }
 
+    /* // second test client simultané ( faut un host compatible )
     public static void main(String[] args) {
         PlayerData player = new PlayerData("9846220");
 
@@ -80,4 +83,5 @@ public class GameHost implements Runnable{ // GameServer au lieu de GameHost ?
 
         gameClient.connect("localhost", 1234);
     }
+    */
 }
