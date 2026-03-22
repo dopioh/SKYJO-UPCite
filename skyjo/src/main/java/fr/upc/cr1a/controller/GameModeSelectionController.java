@@ -41,13 +41,8 @@ public class GameModeSelectionController {
     }
 
     private void clicMulti() {
-        //affiche un message
-        javax.swing.JOptionPane.showMessageDialog(
-            frame,
-            "Le mode Multiplayer sera bientôt disponible !\nVous pourrez rejoindre ou créer des salons de jeu.",
-            "Multi",
-            javax.swing.JOptionPane.INFORMATION_MESSAGE
-        );
+        //redirige vers le navigateur de salons P2P
+        frame.showPanel("LOBBY_BROWSER");
     }
 
     private void clicRetour() {
