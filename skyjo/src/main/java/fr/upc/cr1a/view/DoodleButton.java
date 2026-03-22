@@ -63,7 +63,7 @@ public class DoodleButton extends JComponent {
     private void loadResources() {
         // police
         try {
-            var stream = getClass().getResourceAsStream("/Button/PatrickHandSC.ttf");
+            var stream = getClass().getResourceAsStream("/PatrickHandSC.ttf");
             if (stream != null) {
                 font = Font.createFont(Font.TRUETYPE_FONT, stream).deriveFont(Font.BOLD, 48f);
             } else {
