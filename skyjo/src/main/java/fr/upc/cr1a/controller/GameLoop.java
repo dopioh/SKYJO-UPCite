@@ -11,7 +11,7 @@ import javax.swing.Timer;
  * 
  */
 public class GameLoop {
-    
+
     private static final int ACTION_DELAY_MS = 1200;
 
     private final GameManager gameManager;
@@ -19,6 +19,8 @@ public class GameLoop {
 
     private GameBoardController humanController;
     private GameBoardBotController botController;
+
+    private boolean initRevealJustFinished = false;
 
     public GameLoop(GameManager gameManager, GameBoardView gameBoardView) {
         this.gameManager = gameManager;
@@ -34,6 +36,7 @@ public class GameLoop {
     }
 
     public void startGameLoop() {
+        initRevealJustFinished = true;
         startCurrentFlow();
     }
 
@@ -53,23 +56,33 @@ public class GameLoop {
 
     private void continueFlow() {
         if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) {
+            initRevealJustFinished = true;
             continueInitRevealFlow();
+            return;
+        }
+        if (initRevealJustFinished) {
+            initRevealJustFinished = false;
+            gameManager.firstPlayer();
+            PlayerModel firstPlayer = gameManager.getCurrentPlayer();
+            gameBoardView.showPlayerTransition(firstPlayer, () -> startCurrentFlow());
             return;
         }
         finishNormalTurnFlow();
     }
 
     private void continueInitRevealFlow() {
-        if (humanController != null) {
-            humanController.refreshGuide();
-        }
         PlayerModel currentPlayer = gameManager.getCurrentPlayer();
-        gameBoardView.showPlayerCards(currentPlayer);
-        if (currentPlayer instanceof BotModel) {
-            if (botController != null) {
-                botController.handleBotTurn();
+        gameBoardView.showPlayerTransition(currentPlayer, () -> {
+            if (humanController != null) {
+                humanController.refreshGuide();
             }
-        }
+            gameBoardView.showPlayerCards(currentPlayer);
+            if (currentPlayer instanceof BotModel) {
+                if (botController != null) {
+                    botController.handleBotTurn();
+                }
+            }
+        });
     }
     
     private void finishNormalTurnFlow() {
@@ -81,7 +94,8 @@ public class GameLoop {
             }
             return;
         }
-        startCurrentFlow();
+        PlayerModel nextPlayer = gameManager.getCurrentPlayer();
+        gameBoardView.showPlayerTransition(nextPlayer, () -> startCurrentFlow());
     }
 
     public void startCurrentFlow() {
