@@ -12,7 +12,7 @@ import javax.swing.Timer;
  */
 public class GameLoop {
     
-    private static final int TURN_DURATION_SECONDS = 20;
+    private static final int TURN_DURATION_SECONDS = 5;
 
     private Timer turnCountdownTimer;
     private int remainingSeconds;
@@ -75,17 +75,21 @@ public class GameLoop {
         finishNormalTurnFlow();
     }
 
-    private void continueInitRevealFlow(){
+    private void continueInitRevealFlow() {
         if (!gameActive) return;
+        PlayerModel currentPlayer = gameManager.getCurrentPlayer();
+        gameBoardView.showPlayerCards(currentPlayer);
         if (humanController != null) {
             humanController.refreshGuide();
         }
-        PlayerModel currentPlayer = gameManager.getCurrentPlayer();
-        gameBoardView.showPlayerCards(currentPlayer);
         if (currentPlayer instanceof BotModel) {
+            stopTurnCountdown();
+            gameBoardView.setTurnTimerText("--");
             if (botController != null) {
                 botController.handleBotTurn();
             }
+        } else {
+            startTurnCountdown();
         }
     }
     
