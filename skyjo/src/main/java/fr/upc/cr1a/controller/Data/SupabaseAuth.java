@@ -1,4 +1,4 @@
-package fr.upc.cr1a.controller.Data;
+package fr.upc.cr1a.controller.data;
 
 import java.net.URI;
 import java.net.http.HttpClient;
