@@ -70,6 +70,8 @@ public class PlayerPreviewPanel extends JPanel{
                 if (card == null) {
                     btn.clearImage();
                     btn.setText("vide");
+                    btn.setCardImage("/cartes/carteVide.png");
+                    btn.setEnabled(false);
                 } else {
                     btn.setText("");
                     String imgPath = getCardImagePath(card);
