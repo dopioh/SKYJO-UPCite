@@ -10,6 +10,7 @@ import javax.swing.*;
 import fr.upc.cr1a.model.ActionCardModel;
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.CardModel;
+import fr.upc.cr1a.model.NumberCardModel;
 import fr.upc.cr1a.model.PlayerHandModel;
 import fr.upc.cr1a.model.PlayerModel;
 import fr.upc.cr1a.utils.ImageCache;
@@ -47,6 +48,7 @@ public class GameBoardView extends JPanel {
     private JLayeredPane layeredPane; // gestion des couches
 
     private CursorCardView cursorCardView;
+    private ActionDescriptionOverlayPanel actionDescriptionOverlay;
 
     // 3 couleurs pour l'instant peut etre 8 un jour mais la pas le temps
     private static final Color[] PLAYER_COLORS = {
@@ -397,6 +399,10 @@ public class GameBoardView extends JPanel {
         // previewPanel.setBounds(400, 200, 500, 500); // taille fix pour le test
         layeredPane.add(previewPanel, JLayeredPane.MODAL_LAYER);
 
+        actionDescriptionOverlay = new ActionDescriptionOverlayPanel();
+        actionDescriptionOverlay.setVisible(false);
+        layeredPane.add(actionDescriptionOverlay, JLayeredPane.POPUP_LAYER);
+
         this.nextRoundPanel = new NextRoundPanel(currentPlayer);
         layeredPane.add(nextRoundPanel, JLayeredPane.PALETTE_LAYER);
 
@@ -497,6 +503,10 @@ public class GameBoardView extends JPanel {
     public String getCardImagePath(CardModel card) {
         if (card.isFaceDown()) {
             return "/cartes/carteDos.png";
+        }
+
+        if (card instanceof NumberCardModel numberCard && numberCard.isStar()) {
+            return "/cartes/carteEtoile.png";
         }
 
         if (card instanceof ActionCardModel) {
@@ -602,9 +612,17 @@ public class GameBoardView extends JPanel {
             c.setBounds(size.width / 6, size.height / 10, size.width - size.width / 3, size.height - size.height / 5);
         }
 
-        Component[] compsPopup = layeredPane.getComponentsInLayer(JLayeredPane.POPUP_LAYER); // transition
+        Component[] compsPopup = layeredPane.getComponentsInLayer(JLayeredPane.POPUP_LAYER);
+        int popupW = Math.min((int) (size.width * 0.50), 520);
+        int popupH = Math.min((int) (size.height * 0.26), 220);
+        int popupX = (size.width - popupW) / 2;
+        int popupY = (size.height - popupH) / 2;
         for (Component c : compsPopup) {
-            c.setBounds(0, 0, size.width, size.height);
+            if (c == actionDescriptionOverlay) { // le transitionPanel et le actionDescriptionOverlay sont dans le meme layer (POPUP)
+                c.setBounds(popupX, popupY, popupW, popupH);
+            } else {
+                c.setBounds(0, 0, size.width, size.height);
+            }
         }
 
         if (cursorCardView != null) {
@@ -711,6 +729,58 @@ public class GameBoardView extends JPanel {
      */
     public void hideCursorCard() {
         cursorCardView.hideCard();
+    }
+
+    /**
+     * Overlay Popup d'une carte action
+     * @param actionType type de la carte action
+     */
+    public void showActionDescription(ActionType actionType) {
+        if (actionType == null) {
+            hideActionDescription();
+            return;
+        }
+        actionDescriptionOverlay.showDescription(
+            getActionTitle(actionType),
+            getActionDescription(actionType)
+        );
+    }
+
+    public void hideActionDescription() {
+        actionDescriptionOverlay.hideDescription();
+    }
+
+    private String getActionTitle(ActionType actionType) {
+        switch (actionType) {
+            case TRADE_CARD_WITH_PLAYER: return "ECHANGE";
+            case REPLACE_CARD_IN_HAND: return "REPLACE";
+            case PLAY_TWO_TURN: return "JOUE 2 FOIS";
+            case DRAW_THREE_CARD: return "DRAW_THREE_CARD"; //jamais utilisé
+            case PLAY_LAST_ACTION_IN_DEFAUSSE: return "REJOUE";
+            case ALL_PLAYERS_DROP_CARD: return "CHAQUE JOUEUR DEFAUSSE";
+            case SPY_ONE_COLUMN: return "REGARDE";
+            default: return "";
+        }
+    }
+
+    private String getActionDescription(ActionType actionType) {
+        switch (actionType) {
+            case TRADE_CARD_WITH_PLAYER:
+                return "Echange une carte de ta main avec une carte d'un autre joueur.";
+            case REPLACE_CARD_IN_HAND:
+                return "Echange la position de 2 cartes dans ta main.";
+            case PLAY_TWO_TURN:
+                return "Tu gagnes un tour supplémentaire à la fin de ce tour.";
+            case DRAW_THREE_CARD:
+                return "hein? t'es pas censé voir ça";
+            case PLAY_LAST_ACTION_IN_DEFAUSSE:
+                return "Rejoue la dernière action de la défausse action.";
+            case ALL_PLAYERS_DROP_CARD:
+                return "Pour chaque autre joueur, choisis une carte à défausser: elle est remplacée par la première carte de la pioche.";
+            case SPY_ONE_COLUMN:
+                return "Révèle pendant 3s toutes les cartes d'une colonne de ta main.";
+            default: return "";
+        }
     }
 
     /**

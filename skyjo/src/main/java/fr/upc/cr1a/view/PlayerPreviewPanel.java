@@ -2,6 +2,7 @@ package fr.upc.cr1a.view;
 
 import fr.upc.cr1a.model.AnimLoop;
 import fr.upc.cr1a.model.CardModel;
+import fr.upc.cr1a.model.NumberCardModel;
 import fr.upc.cr1a.model.PlayerHandModel;
 import fr.upc.cr1a.model.PlayerModel;
 
@@ -90,6 +91,9 @@ public class PlayerPreviewPanel extends JPanel{
         //System.out.println("getCardImagePath called"); // est called
         if (card.isFaceDown()) {
             return "/cartes/carteDos.png";
+        }
+        if (card instanceof NumberCardModel numberCard && numberCard.isStar()) {
+            return "/cartes/carteEtoile.png";
         }
         int val = card.getCardValue();
         if (val == -2) return "/cartes/carteMoins2.png";

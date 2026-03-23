@@ -172,6 +172,10 @@ public class GameManager {
         ensureFaceUp(firstDiscard);
         discardPile.addCardAtTop(firstDiscard);
 
+        // premiere carte de la pioche est une etoile, juste pour showcase
+
+        deck.addCardAtTop(new NumberCardModel(false, 0, null, true));
+
         this.turnPhase = TurnPhase.INIT_REVEAL;
         this.currentPlayerIndex = 0;    
 
@@ -281,6 +285,10 @@ public class GameManager {
     
     public CardModel getCurrentDrawCard(){
         return currentDrawCard;
+    }
+
+    public static boolean isStarCard(CardModel card) {
+        return (card instanceof NumberCardModel numberCard && numberCard.isStar());
     }
 
     public boolean withActionCard() {
@@ -400,6 +408,46 @@ public class GameManager {
         return currentDrawCard;
     }
 
+    /**
+     * pioche une action recompense automatiquement apres reveal d'une etoile
+     * sans modif les etats ingame
+     */
+    public ActionCardModel drawActionRewardCard(){
+        if (actionDeck == null) {
+            return null;
+        }
+        if (actionDeck.stackSize() == 0) {
+            actionDeck.DefausseInPioche(discardActionPile);
+        }
+        if (actionDeck.stackSize() == 0) {
+            return null;
+        }
+        CardModel card = actionDeck.getTopCard();
+        actionDeck.removeCardAtTop();
+        ensureFaceUp(card);
+        if (card instanceof ActionCardModel actionCard) {
+            return actionCard;
+        }
+        return null;
+    }
+
+    /**
+     * applique l'effet etoile sur un joueur : gagne une carte action
+     * @param player joueur qui gagne l'action
+     * @return la carte action gagnée ou null si indisponible
+     */
+    public ActionCardModel grantActionForStar(PlayerModel player) {
+        if (player == null || !gameWithAction) {
+            return null;
+        }
+        ActionCardModel actionCard = drawActionRewardCard();
+        if (actionCard == null) {
+            return null;
+        }
+        player.getActionHand().add(actionCard.getType());
+        return actionCard;
+    }
+
     /*
     *prendre la carte de la défausse
     *@return la carte prise
@@ -441,17 +489,12 @@ public class GameManager {
         if (currentDrawCard.isFaceDown()) {
             currentDrawCard.returnCard();
         }
-        // si la carte est une etoile on +1 le starsScore
-        if (currentDrawCard instanceof NumberCardModel numberCard) {
-            if (numberCard.isStar()) {
-                currentPlayer.addStarsScore();
-            }        
-        }
         currentDrawCard = null;
         
         //vérifier les colonnes/lignes identiques
-        GameRuleModel.removeIdenticalColumns(hand, discardPile);
-        GameRuleModel.removeIdenticalRows(hand, discardPile);
+        GameRuleModel.removeIdenticalColumns(hand, discardPile, currentPlayer);
+        GameRuleModel.removeIdenticalRows(hand, discardPile, currentPlayer);
+
         //vérifier si fin de manche (ne déclencher qu'une seule fois, un seul joueur peut déclencher)
         if (gameState != GameState.LAST_ROUND && lastRoundPlayer == -1 && GameRuleModel.checkEndOfRound(players)) {
             gameState = GameState.LAST_ROUND;
@@ -478,8 +521,8 @@ public class GameManager {
         getCurrentPlayer().getHand().revealCard(row, col);
 
         // check
-        GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile);
-        GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile);
+        GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile, getCurrentPlayer());
+        GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile, getCurrentPlayer());
 
         //vérifier si fin de manche (ne déclencher qu'une seule fois, un seul joueur peut déclencher)
         if (gameState != GameState.LAST_ROUND && lastRoundPlayer == -1 && GameRuleModel.checkEndOfRound(players)) {
@@ -584,8 +627,8 @@ public class GameManager {
         getCurrentPlayer().getHand().revealCard(row, col);
         
         //regarde et supprimer les colonnes/lignes identiques
-        GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile);
-        GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile);
+        GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile, getCurrentPlayer());
+        GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile, getCurrentPlayer());
 
         // vérifie si après suppression de colonnes/lignes, toutes les cartes sont révélées (ne déclencher qu'une seule fois, un seul joueur peut déclencher)
         if (gameState != GameState.LAST_ROUND && lastRoundPlayer == -1 && GameRuleModel.checkEndOfRound(players)) {

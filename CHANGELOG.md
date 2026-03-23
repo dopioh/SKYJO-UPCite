@@ -293,14 +293,33 @@
 - PLAY_TWO_TURN joue 2 tours (contre 3 avant)
 
 ## v.0.8: SPRINT 8
----
 
 ### Added
+- Systeme d'overlay quand on passe la souris sur une carte action
+
+- Description des cartes action
+
+- Les etoiles dans la main se comportent comme des jokers
+
+- Les etoiles peuvent se faire voler par des adversaires
+
+- Si on pioche une carte etoile :
+    - soit on la joue directement et piocher une action
+    - soit on peut la met dans notre main et piocher une action aux prochains tours
 
 - Transition au changement de joueur (`PlayerTransitionPanel`)
     - Bande colorée en couleur du joueur avec le nom du joueur
 
 - Mailmap
+
+### Modified
+- Refactor des checks lignes/colonnes
+
+- Ajout du cas wildcard (joker etoile) dans les checks lignes/colonnes
+
+- Quelques modif sur les fonctions de jeu pour le nouveau système d'étoiles
+
+- Fusion des comportements du POPUP_Layer pour paneltransitionPanel et actionDescriptionOverlay
 
 - Possibilité de Host et Join un serveur dans le terminal
 
