@@ -10,6 +10,7 @@ import javax.swing.*;
 import fr.upc.cr1a.model.ActionCardModel;
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.CardModel;
+import fr.upc.cr1a.model.NumberCardModel;
 import fr.upc.cr1a.model.PlayerHandModel;
 import fr.upc.cr1a.model.PlayerModel;
 import fr.upc.cr1a.utils.ImageCache;
@@ -502,6 +503,10 @@ public class GameBoardView extends JPanel {
     public String getCardImagePath(CardModel card) {
         if (card.isFaceDown()) {
             return "/cartes/carteDos.png";
+        }
+
+        if (card instanceof NumberCardModel numberCard && numberCard.isStar()) {
+            return "/cartes/carteEtoile.png";
         }
 
         if (card instanceof ActionCardModel) {
