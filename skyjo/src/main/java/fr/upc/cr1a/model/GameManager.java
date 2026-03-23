@@ -172,10 +172,6 @@ public class GameManager {
         ensureFaceUp(firstDiscard);
         discardPile.addCardAtTop(firstDiscard);
 
-        // premiere carte de la pioche est une etoile, juste pour showcase
-
-        deck.addCardAtTop(new NumberCardModel(false, 0, null, true));
-
         this.turnPhase = TurnPhase.INIT_REVEAL;
         this.currentPlayerIndex = 0;    
 
