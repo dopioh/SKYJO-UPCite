@@ -147,9 +147,15 @@ Gère la logique du jeu.
         * Méthode : **playBgm()**, **playSfx()**, **stopBgm()**, **setEnabled()**, **setVolume()**
 
 * **Plateau** :
-    * `GameBoardModel` Gere la logique du plateau  
+    * `GameBoardModel` Gere la logique du plateau
         * Elle relie `GameBoardView` et `GameBoardController`
         * Methode : **buttonPlayerCalled()** pour gerer l'affichage du `PlayerPreviewPanel`, **retourMenuCalled()**
+
+* **Multijoueur / Lobby** :
+    * `LobbyModel`: Représente un salon de jeu multijoueur P2P
+        * Attribut : lobbyId, lobbyName, hostName, currentPlayers, maxPlayers, actionMode, status
+        * Enum : **LobbyStatus** (WAITING, PLAYING, FULL)
+        * Méthode : **canJoin()**, **updateStatus()**, **getters/setters**
 
 
 ### VIEW
@@ -157,16 +163,27 @@ Gère la logique du jeu.
 Gère l'affichage 
 
 * **Frame** : Fenêtre principale du jeu (JFrame)
-    * Attribut : cardLayout (CardLayout), mainMenuPanel, settingsOverlay, fullscreen, windowedBounds, audioManager
-    * Méthode : **showSettingsOverlay()**, **hideSettingsOverlay()**, **toggleFullscreen()**, **ge        * **refreshGuide()** - Met à jour le guide d'action selon la phase du jeu
-tAudioManager()**
+    * Attribut : cardLayout (CardLayout), mainMenuPanel, gameModeSelectionPanel, lobbyBrowserPanel, settingsOverlay, fullscreen, windowedBounds, audioManager
+    * Méthode : **showSettingsOverlay()**, **hideSettingsOverlay()**, **toggleFullscreen()**, **refreshGuide()**, **getAudioManager()**
 
 * **Panels** :
     * `MainMenuPanel`: Panel du menu principal
         * Attribut : shopButton, playButton, settingsButton
         * Méthode : **getShopButton()**, **getPlayButton()**, **getSettingsButton()**
+    * `GameModeSelectionPanel`: Panel de sélection du mode de jeu (Local vs Multi P2P)
+        * Attribut : localBtn, multiBtn, backBtn, backgroundImage
+        * Méthode : **getLocalButton()**, **getMultiButton()**, **getBackButton()**
+    * `LobbyBrowserPanel`: Panel pour afficher la liste des salons multijoueur disponibles
+        * Attribut : backBtn, createLobbyBtn, refreshBtn, lobbiesListPanel, scrollPane, backgroundImage, lobbyItems
+        * Méthode : **addLobby()**, **clearLobbies()**, **refreshLobbies()**, **showNoLobbiesMessage()**, **getBackButton()**, **getCreateLobbyButton()**, **getRefreshButton()**
+    * `LobbyItemPanel`: Composant représentant un salon dans la liste
+        * Attribut : lobby (LobbyModel), joinBtn, nameLabel, hostLabel, playersLabel, modeLabel
+        * Méthode : **getJoinButton()**, **getLobby()**, **updateLobbyInfo()**, **getPlayerCountColor()**
+    * `CreateLobbyDialog`: Dialogue pour créer un nouveau salon multijoueur
+        * Attribut : lobbyNameField, maxPlayersSpinner, actionModeCheckbox, createBtn, cancelBtn, confirmed
+        * Méthode : **getLobbyName()**, **getMaxPlayers()**, **isActionMode()**, **isConfirmed()**, **setConfirmed()**, **validateInput()**, **getCreateButton()**, **getCancelButton()**
     * `SettingsOverlay`: Overlay des paramètres (JComponent)
-        * Attribut : card (JPanel), backBtroontroller pour les botsutton, contentPanel, tabJeu, tabAudio, tabAutres
+        * Attribut : card (JPanel), backButton, contentPanel, tabJeu, tabAudio, tabAutres
         * Méthode : **getBackButton()**, **getTabJeu()**, **getTabAudio()**, **getTabAutres()**, **createTabButton()**, **createCardPanel()**
 
 * **GameBoardView** : Panel pour afficher le plateau de jeu
@@ -189,7 +206,16 @@ Gère toutes les entrées du joueur avec l'ordinateur
 
 * **MainMenuController** : Contrôleur du menu principal
     * Attribut : frame (Frame), view (MainMenuPanel), audio (AudioManager)
-    * Méthode : **ActionListener pour playButton, settingsButton, shopButton**
+    * Méthode : **ActionListener pour playButton** → redirige vers GameModeSelectionPanel, **settingsButton, shopButton**
+
+* **GameModeSelectionController** : Contrôleur du panel de sélection de mode de jeu
+    * Attribut : frame (Frame), view (GameModeSelectionPanel)
+    * Méthode : **ajouterListeners()**, **clicLocal()** → redirige vers PlayersSetupPanel, **clicMulti()** → redirige vers LobbyBrowserPanel, **clicRetour()** → retour au menu
+
+* **LobbyBrowserController** : Contrôleur du navigateur de salons multijoueur
+    * Attribut : frame (Frame), view (LobbyBrowserPanel), availableLobbies (List<LobbyModel>)
+    * Méthode : **ajouterListeners()**, **clicRetour()**, **clicCreerSalon()**, **clicRafraichir()**, **createLobby()**, **loadLobbies()**, **refreshView()**, **joinLobby()**, **generateTestLobbies()**
+    * Note : Les méthodes createLobby(), loadLobbies() et joinLobby() sont à connecter au système P2P
 
 * **SettingsOverlayController** : Contrôleur de l'overlay paramètres
     * Attribut : frame (Frame), audioManager (AudioManager)
@@ -217,8 +243,26 @@ Gère toutes les entrées du joueur avec l'ordinateur
     * Méthodes : **installListeners()**, **handlePlayerButtonClicked()**, listeners des pioches/mains/actions
     * Méthodes (actions) : **onActionCardClicked()**, **handleActionModeClick()**, **selectTradeTargetPlayer()**, **completeTrade()**, **startAllPlayersDropAction()**, **selectAllPlayersDropTarget()**, **applyAllPlayersDropOnSelectedCard()**, **resetTurnState()**
 
-* **ConnexionController** : Gere le `ConnexionPanel` et redirige vers `SupabaseAuth` pour lancer des requetes d'auth.  
-    * Methodes : **sendCreate()**, **sendLogin()**  
+* **ConnexionController** : Gere le `ConnexionPanel` et redirige vers `SupabaseAuth` pour lancer des requetes d'auth.
+    * Methodes : **sendCreate()**, **sendLogin()**
+
+## 3. Flow de Navigation
+
+Architecture de navigation du jeu :
+
+```
+ConnexionPanel
+    ↓
+MainMenuPanel
+    ↓ (bouton Jouer)
+GameModeSelectionPanel
+    ├─→ (Local) PlayersSetupPanel → GameBoardView
+    └─→ (Multi P2P) LobbyBrowserPanel
+                    ├─→ (Créer salon) CreateLobbyDialog → Configuration → [Attente intégration P2P]
+                    └─→ (Rejoindre) Sélection d'un salon → [Attente intégration P2P]
+```
+
+**Note** : Le système multijoueur P2P est préparé au niveau de l'interface utilisateur. Les appels réseau vers le système P2P doivent être implémentés dans `LobbyBrowserController` aux emplacements marqués TODO.
 
 #### DATA :
 
