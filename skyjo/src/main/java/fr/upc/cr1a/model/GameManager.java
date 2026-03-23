@@ -172,6 +172,10 @@ public class GameManager {
         ensureFaceUp(firstDiscard);
         discardPile.addCardAtTop(firstDiscard);
 
+        // premiere carte de la pioche est une etoile, juste pour showcase
+
+        deck.addCardAtTop(new NumberCardModel(false, 0, null, true));
+
         this.turnPhase = TurnPhase.INIT_REVEAL;
         this.currentPlayerIndex = 0;    
 
@@ -299,8 +303,7 @@ public class GameManager {
         //deck = new PiocheModel(); // on a deja un deck initalisé dans le constructeur !
         
         firstPlayerToPlayIndex = currentPlayerIndex;
-        int lastRoundPlayer = -1;  //variable pour savoir qui a lancé la dernière manche
-        
+
         for (PlayerModel player : players) {
             player.resetHand();
             //distribue les cartes
@@ -350,12 +353,6 @@ public class GameManager {
     *passe au joueur suivant
     */
     public void nextPlayer() {
-        // si le joueur a des tours supplémentaires
-        if (extraTurnsRemaining > 0) {
-            extraTurnsRemaining--;
-            return;
-        }
-        
         currentPlayerIndex++;
         //revenir au premier si le dernier joueur a joué
         if (currentPlayerIndex >= players.size()) {
@@ -364,6 +361,13 @@ public class GameManager {
         //regarde si on est sur le dernier tour et si on est revenu au joueur qui a déclenché la fin
         if (gameState == GameState.LAST_ROUND && currentPlayerIndex == lastRoundPlayer) {
             endRound();
+            return;
+        }
+
+        // si le joueur a des tours supplémentaires (mais pas pour le joueur qui a déclenché LAST_ROUND)
+        if (extraTurnsRemaining > 0) {
+            extraTurnsRemaining--;
+            return;
         }
     }
 
@@ -490,8 +494,9 @@ public class GameManager {
         //vérifier les colonnes/lignes identiques
         GameRuleModel.removeIdenticalColumns(hand, discardPile, currentPlayer);
         GameRuleModel.removeIdenticalRows(hand, discardPile, currentPlayer);
-        //vérifier si fin de manche
-        if (GameRuleModel.checkEndOfRound(players)) {
+
+        //vérifier si fin de manche (ne déclencher qu'une seule fois, un seul joueur peut déclencher)
+        if (gameState != GameState.LAST_ROUND && lastRoundPlayer == -1 && GameRuleModel.checkEndOfRound(players)) {
             gameState = GameState.LAST_ROUND;
             lastRoundPlayer = currentPlayerIndex;  // stocker le joueur qui déclenche le dernier tour
         }
@@ -518,9 +523,9 @@ public class GameManager {
         // check
         GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile, getCurrentPlayer());
         GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile, getCurrentPlayer());
-        
-        //vérifier si fin de manche
-        if (GameRuleModel.checkEndOfRound(players)) {
+
+        //vérifier si fin de manche (ne déclencher qu'une seule fois, un seul joueur peut déclencher)
+        if (gameState != GameState.LAST_ROUND && lastRoundPlayer == -1 && GameRuleModel.checkEndOfRound(players)) {
             gameState = GameState.LAST_ROUND;
             lastRoundPlayer = currentPlayerIndex;  // stocker le joueur qui déclenche le dernier tour
         }
@@ -584,6 +589,8 @@ public class GameManager {
         roundNumber++;
         currentPlayerIndex = GameRuleModel.getBiggestScorePlayerIndex(players);
         currentDrawCard = null;
+        lastRoundPlayer = -1;  // réinitialiser le déclencheur du dernier tour
+        extraTurnsRemaining = 0;  // réinitialiser les tours supplémentaires
         discardPile = new DefausseModel();
         initializeGame();
         ensureFaceUp(discardPile.getTopCard());
@@ -622,7 +629,13 @@ public class GameManager {
         //regarde et supprimer les colonnes/lignes identiques
         GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile, getCurrentPlayer());
         GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile, getCurrentPlayer());
-        
+
+        // vérifie si après suppression de colonnes/lignes, toutes les cartes sont révélées (ne déclencher qu'une seule fois, un seul joueur peut déclencher)
+        if (gameState != GameState.LAST_ROUND && lastRoundPlayer == -1 && GameRuleModel.checkEndOfRound(players)) {
+            gameState = GameState.LAST_ROUND;
+            lastRoundPlayer = currentPlayerIndex;
+        }
+
         initRevealCount++;
         if (initRevealCount >= 2) {
             initRevealCount = 0;

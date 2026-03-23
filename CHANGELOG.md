@@ -321,6 +321,12 @@
 
 - Fusion des comportements du POPUP_Layer pour paneltransitionPanel et actionDescriptionOverlay
 
+- Possibilité de Host et Join un serveur dans le terminal
+
+- INTEFACE GRAPHIQUE POUR LES LOBBY
+
+
+
 ### Fixed
 
 - Le joueur qui commence après l'init reveal est maintenant correctement déterminé par le score des cartes révélées (`firstPlayer`)
@@ -330,3 +336,7 @@
 - Linux : Si le jeu détecte qu'elle tourne sous linux, elle désactive automatiquement l'animation carte flottante qui lag, mais en laissant l'effet scale (hover) car elle ne lag pas
 
 - Fix boutons qui ne répondaient pas au premier clic quand la souris arrivait trop vite (`mouseClicked` -> `mousePressed`)
+
+- LAST ROUND
+
+
