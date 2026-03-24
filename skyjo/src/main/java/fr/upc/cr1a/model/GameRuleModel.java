@@ -61,20 +61,12 @@ public class GameRuleModel {
      * @param discardPile la pile de défausse où les cartes seront placées
      */
     public static void removeIdenticalColumns(PlayerHandModel hand, DefausseModel discardPile){
-        for (int col = 0; col < hand.getColumns(); col++) {
-            CardModel firstCard = hand.getCard(0, col);
-            //permet de sauter si une colonne est vide
-            if (firstCard == null || firstCard.isFaceDown()) continue;
+        removeIdenticalColumns(hand, discardPile, null);
+    }
 
-            boolean sameCard = true;
-            for (int row = 1; row < hand.getRows(); row++) {
-                CardModel card = hand.getCard(row, col);
-                 if (card == null || card.isFaceDown() || card.getCardValue() != firstCard.getCardValue()) {
-                    sameCard = false;
-                    break;
-                }
-            }
-            if (sameCard) {
+    public static void removeIdenticalColumns(PlayerHandModel hand, DefausseModel discardPile, PlayerModel joueur){
+        for (int col = 0; col < hand.getColumns(); col++) {
+            if (isWildcardColumn(hand, col)) {
                 for (int row = 0; row < hand.getRows(); row++) {
                     CardModel removedCard = hand.getCard(row, col);
                     discardPile.addCardAtTop(removedCard);
@@ -90,20 +82,12 @@ public class GameRuleModel {
      * @param discardPile la pile de défausse où les cartes seront placées
      */
     public static void removeIdenticalRows(PlayerHandModel hand, DefausseModel discardPile){
-        for (int row = 0; row < hand.getRows(); row++) {
-            CardModel firstCard = hand.getCard(row, 0);
-            //permet de sauter si une ligne est vide
-            if (firstCard == null || firstCard.isFaceDown()) continue;
+        removeIdenticalRows(hand, discardPile, null);
+    }
 
-            boolean sameCard = true;
-            for (int col = 1; col < hand.getColumns(); col++) {
-                CardModel card = hand.getCard(row, col);
-                 if (card == null || card.isFaceDown() || card.getCardValue() != firstCard.getCardValue()) {
-                    sameCard = false;
-                    break;
-                }
-            }
-            if (sameCard) {
+    public static void removeIdenticalRows(PlayerHandModel hand, DefausseModel discardPile, PlayerModel joueur){
+        for (int row = 0; row < hand.getRows(); row++) {
+            if (isWildcardRow(hand, row)) {
                 for (int col = 0; col < hand.getColumns(); col++) {
                     CardModel removedCard = hand.getCard(row, col);
                     discardPile.addCardAtTop(removedCard);
@@ -111,6 +95,58 @@ public class GameRuleModel {
                 }
             }
         }
+    }
+
+    /**
+     * check si une colonne est composée des memes cartes
+     * avec la règle joker pour les étoiles
+     */
+    private static boolean isWildcardColumn(PlayerHandModel hand, int col) {
+        Integer targetValue = null;
+
+        for (int row = 0; row < hand.getRows(); row++) {
+            CardModel card = hand.getCard(row, col);
+            if (card == null || card.isFaceDown()) {
+                return false;
+            }
+            if (GameManager.isStarCard(card)) {
+                continue;
+            }
+
+            if (targetValue == null) {
+                targetValue = card.getCardValue();
+            } else if (card.getCardValue() != targetValue) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * check si la ligne est composée des memes cartes
+     * avec la règle joker pour les étoiles
+     */
+    private static boolean isWildcardRow(PlayerHandModel hand, int row) {
+        Integer targetValue = null;
+
+        for (int col = 0; col < hand.getColumns(); col++) {
+            CardModel card = hand.getCard(row, col);
+            if (card == null || card.isFaceDown()) {
+                return false;
+            }
+            if (GameManager.isStarCard(card)) {
+                continue;
+            }
+
+            if (targetValue == null) {
+                targetValue = card.getCardValue();
+            } else if (card.getCardValue() != targetValue) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

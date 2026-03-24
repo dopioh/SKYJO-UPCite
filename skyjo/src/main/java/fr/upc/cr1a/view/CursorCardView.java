@@ -63,14 +63,17 @@ public class CursorCardView {
         this.visible = true;
         updatePosition();
         AnimLoop.add(this, dt -> updatePosition());
-        overlay.repaint();
     }
 
     public void hideCard() {
         visible = false;
         image = null;
         AnimLoop.remove(this);
-        overlay.repaint();
+        repaintCardArea(x, y);
+    }
+
+    private void repaintCardArea(int px, int py) {
+        overlay.repaint(px - 2, py - 2, CARD_WIDTH + 4, CARD_HEIGHT + 4); // au cas ou on repaint un plus grand zone
     }
 
     private void updatePosition() {
@@ -80,9 +83,14 @@ public class CursorCardView {
         }
         Point p = pointerInfo.getLocation();
         SwingUtilities.convertPointFromScreen(p, gameboardview);
-        x = p.x + CURSOR_OFFSET_X;
-        y = p.y + CURSOR_OFFSET_Y;
-        overlay.repaint();
+        int newX = p.x + CURSOR_OFFSET_X;
+        int newY = p.y + CURSOR_OFFSET_Y;
+        if (newX == x && newY == y) return; //si la souris n'a pas bougé depuis le dernier tick pas de repaint inutile
+        repaintCardArea(x, y);
+        x = newX;
+        y = newY;
+        repaintCardArea(x, y);
+        // repaint l'ancien area, repaint le nouveau area (aulieu de tout l'ecran)
     }
 
     private BufferedImage getCroppedCardImage(String imgPath) {

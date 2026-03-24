@@ -1,6 +1,6 @@
 package fr.upc.cr1a.controller;
 
-import fr.upc.cr1a.controller.Data.SupabaseAuth;
+import fr.upc.cr1a.controller.data.SupabaseAuth;
 import fr.upc.cr1a.view.ConnexionPanel;
 import fr.upc.cr1a.view.Frame;
 
@@ -22,8 +22,7 @@ public class ConnexionController {
     public void listener(){
         connexionPanel.getbtnSubmitInscription().addActionListener(e -> sendCreate());
         connexionPanel.getbtnSubmitConnexion().addActionListener(e -> sendLogin());
-        
-        // boutob invité
+        // bouton invité
         connexionPanel.getBtnGuest().addActionListener(e -> sendGuest());
     }
 

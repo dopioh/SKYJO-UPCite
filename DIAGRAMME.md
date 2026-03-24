@@ -18,6 +18,7 @@ Des classes qui permette d'éxécuter le jeu.
     * Méthode :
         * **initializeGame()**, **startTurn()**, **nextPlayer()**
         * **drawDeck()**, **takeDiscard()**, **drawActionDeck()**, **takeActionDiscard()**
+        * **drawActionRewardCard()**, **grantActionForStar()**
         * **exchangeCardInHand()**, **discardDrawCard()**, **revealCardInHand()**
         * **firstPlayer()**, **startNewGame()**, **endRound()**
         * **getGameState()**, **getTurnPhase()**, **getPlayers()**, **getDiscardPile()**, **getDeck()**, **getCurrentPlayer()**, **getCurrentDrawCard()**
@@ -35,9 +36,11 @@ Des classes qui permette d'éxécuter le jeu.
         * **showHand()** - Affichage de la main d'un joueur dans le terminal
         * **displayRoundResults()**, **displayWinner()**, **displayNewRound()** - Affichages des résultats
         * **useAction()** - Permet aux joueurs d'utiliser une carte d'action
+        * **grantActionForStar()** - Applique l'effet étoile (gagne une action)
+        * **revealRandomFaceDownCard()** - Révèle une carte cachée aléatoire (utilisé pour les bots)
         * **closeScanner()** - Fermeture du scanner
         * **Support du mode action pour les bots** :
-            * **botUseActionRandom()** - Permet au bot de jouer une action aléatoirement (50% de chance)
+            * **botUseActionRandom()** - Permet au bot de jouer une action aléatoirement
             * **botTradeCardWithPlayer()** - Version bot de TRADE_CARD_WITH_PLAYER
             * **botReplaceCardInHand()** - Version bot de REPLACE_CARD_IN_HAND
             * **botDrawThreeCard()** - Version bot de DRAW_THREE_CARD
@@ -85,8 +88,8 @@ Gère la logique du jeu.
 
 * **Joueur** :
     * `PlayerModel`: Représente un joueur
-        * Attribut : name, hand (PlayerHandModel), totalScore, starsScore
-        * Méthode : **getName()**, **getHand()**, **getTotalScore()**, **addScore()**, **resetHand()**, **showActionHand()**, **getStarsScore**, **addStarsScore**, **subStarsScore**
+        * Attribut : name, hand (PlayerHandModel), totalScore
+        * Méthode : **getName()**, **getHand()**, **getTotalScore()**, **addScore()**, **resetHand()**, **showActionHand()**
     * `PlayerHandModel`: Grille 4x3 de cartes du joueur
         * Attribut : grid (CardModel[][]), rows=3, columns=4
         * Méthode : **placeCard()**, **getCard()**, **isAvailable()**, **getVisibleCardScore()**, **révéler cartes**, **détecter colonnes complètes**
@@ -129,6 +132,8 @@ Gère la logique du jeu.
             * **canTakeFromDiscard()**, **canDrawFromDeck()**, **mustExchangeCard()**
             * **checkEndOfRound()** - Vérifie si la manche est terminée
             * **removeIdenticalColumns()**, **removeIdenticalRows()** - Supprime les colonnes/lignes identiques
+            * **isWildcardColumn** retourne Vrai si une colonne doit etre supprimée (avec joker)
+            * **isWildcardRow** retourne Vrai si une ligne doit etre supprimée (avec joker)
             * **findLowestScorePlayer()**, **findRoundEndPlayer()** - Trouve les joueurs spécifiques
             * **applyRoundScores()** - Applique les scores de la manche selon les règles
             * **isGameOver()** - Vérifie si un joueur a atteint 100 points
@@ -139,7 +144,7 @@ Gère la logique du jeu.
     * `Rank`: Enum des rangs (OQTF, NOPAPER, A4, NEWSPAPAER, PLASTIC, PAPYRUS, PARCHEMIN, BULLETIN, CESTLACARTE, DEGREES, BLACKCARD, WORMS)
         * Méthode : **findRankByElo()**
     * `ActionSkills` Implémente les capacités des cartes actions
-        - **Methode** : tradeCardWithPlayer(), replaceCardInHand(), drawThreeCard(), playLastActionInDefausse(), spyOneColumn(), allPlayersDropCard(), playTwoTurn(), askCardPos()
+        - **Methode** : tradeCardWithPlayer(), replaceCardInHand(), drawThreeCard(), playLastActionInDefausse(), spyOneColumn(), allPlayersDropCard(), playTwoTurn(), askCardPos(), grantActionForStar()
 
 * **Audio** :
     * `AudioManager`: Gère la musique et les effets sonores
@@ -147,9 +152,15 @@ Gère la logique du jeu.
         * Méthode : **playBgm()**, **playSfx()**, **stopBgm()**, **setEnabled()**, **setVolume()**
 
 * **Plateau** :
-    * `GameBoardModel` Gere la logique du plateau  
+    * `GameBoardModel` Gere la logique du plateau
         * Elle relie `GameBoardView` et `GameBoardController`
         * Methode : **buttonPlayerCalled()** pour gerer l'affichage du `PlayerPreviewPanel`, **retourMenuCalled()**
+
+* **Multijoueur / Lobby** :
+    * `LobbyModel`: Représente un salon de jeu multijoueur P2P
+        * Attribut : lobbyId, lobbyName, hostName, currentPlayers, maxPlayers, actionMode, status
+        * Enum : **LobbyStatus** (WAITING, PLAYING, FULL)
+        * Méthode : **canJoin()**, **updateStatus()**, **getters/setters**
 
 
 ### VIEW
@@ -157,23 +168,40 @@ Gère la logique du jeu.
 Gère l'affichage 
 
 * **Frame** : Fenêtre principale du jeu (JFrame)
-    * Attribut : cardLayout (CardLayout), mainMenuPanel, settingsOverlay, fullscreen, windowedBounds, audioManager
-    * Méthode : **showSettingsOverlay()**, **hideSettingsOverlay()**, **toggleFullscreen()**, **ge        * **refreshGuide()** - Met à jour le guide d'action selon la phase du jeu
-tAudioManager()**
+    * Attribut : cardLayout (CardLayout), mainMenuPanel, gameModeSelectionPanel, lobbyBrowserPanel, settingsOverlay, fullscreen, windowedBounds, audioManager
+    * Méthode : **showSettingsOverlay()**, **hideSettingsOverlay()**, **toggleFullscreen()**, **refreshGuide()**, **getAudioManager()**
 
 * **Panels** :
     * `MainMenuPanel`: Panel du menu principal
         * Attribut : shopButton, playButton, settingsButton
         * Méthode : **getShopButton()**, **getPlayButton()**, **getSettingsButton()**
+    * `GameModeSelectionPanel`: Panel de sélection du mode de jeu (Local vs Multi P2P)
+        * Attribut : localBtn, multiBtn, backBtn, backgroundImage
+        * Méthode : **getLocalButton()**, **getMultiButton()**, **getBackButton()**
+    * `LobbyBrowserPanel`: Panel pour afficher la liste des salons multijoueur disponibles
+        * Attribut : backBtn, createLobbyBtn, refreshBtn, lobbiesListPanel, scrollPane, backgroundImage, lobbyItems
+        * Méthode : **addLobby()**, **clearLobbies()**, **refreshLobbies()**, **showNoLobbiesMessage()**, **getBackButton()**, **getCreateLobbyButton()**, **getRefreshButton()**
+    * `LobbyItemPanel`: Composant représentant un salon dans la liste
+        * Attribut : lobby (LobbyModel), joinBtn, nameLabel, hostLabel, playersLabel, modeLabel
+        * Méthode : **getJoinButton()**, **getLobby()**, **updateLobbyInfo()**, **getPlayerCountColor()**
+    * `CreateLobbyDialog`: Dialogue pour créer un nouveau salon multijoueur
+        * Attribut : lobbyNameField, maxPlayersSpinner, actionModeCheckbox, createBtn, cancelBtn, confirmed
+        * Méthode : **getLobbyName()**, **getMaxPlayers()**, **isActionMode()**, **isConfirmed()**, **setConfirmed()**, **validateInput()**, **getCreateButton()**, **getCancelButton()**
     * `SettingsOverlay`: Overlay des paramètres (JComponent)
-        * Attribut : card (JPanel), backBtroontroller pour les botsutton, contentPanel, tabJeu, tabAudio, tabAutres
+        * Attribut : card (JPanel), backButton, contentPanel, tabJeu, tabAudio, tabAutres
         * Méthode : **getBackButton()**, **getTabJeu()**, **getTabAudio()**, **getTabAutres()**, **createTabButton()**, **createCardPanel()**
 
 * **GameBoardView** : Panel pour afficher le plateau de jeu
     * Méthode : **initComponents()**, **showPlayerscards()**, **getCardImagePath()**, **resizeLayers()**, **showCursorCard()**, **hideCursorCard()**, **updateCardDisplay()**, **updateDiscardOnly()**, **updateActionCardDisplay()**, **updateActionDiscardOnly()**
+    * **showActionDescription**
+    * **hideActionDescription**
+    * **getActionTitle**
+    * **getActionDescription**
 
 * **PlayerPreviewPanel** : Panel pour afficher les cartes des autres joueurs
     * Méthode : **showOtherPlayerHand**, **getCardImagePath()**
+
+* **ActionDescriptionOverlayPanel** : système d'overlay qui affiche les détails d'une carte action quand le curseur se trouve au dessus (hover)
 
 * **CursorCardView** : Vue pour la petite carte sous le curseur
 
@@ -189,7 +217,16 @@ Gère toutes les entrées du joueur avec l'ordinateur
 
 * **MainMenuController** : Contrôleur du menu principal
     * Attribut : frame (Frame), view (MainMenuPanel), audio (AudioManager)
-    * Méthode : **ActionListener pour playButton, settingsButton, shopButton**
+    * Méthode : **ActionListener pour playButton** → redirige vers GameModeSelectionPanel, **settingsButton, shopButton**
+
+* **GameModeSelectionController** : Contrôleur du panel de sélection de mode de jeu
+    * Attribut : frame (Frame), view (GameModeSelectionPanel)
+    * Méthode : **ajouterListeners()**, **clicLocal()** → redirige vers PlayersSetupPanel, **clicMulti()** → redirige vers LobbyBrowserPanel, **clicRetour()** → retour au menu
+
+* **LobbyBrowserController** : Contrôleur du navigateur de salons multijoueur
+    * Attribut : frame (Frame), view (LobbyBrowserPanel), availableLobbies (List<LobbyModel>)
+    * Méthode : **ajouterListeners()**, **clicRetour()**, **clicCreerSalon()**, **clicRafraichir()**, **createLobby()**, **loadLobbies()**, **refreshView()**, **joinLobby()**, **generateTestLobbies()**
+    * Note : Les méthodes createLobby(), loadLobbies() et joinLobby() sont à connecter au système P2P
 
 * **SettingsOverlayController** : Contrôleur de l'overlay paramètres
     * Attribut : frame (Frame), audioManager (AudioManager)
@@ -210,15 +247,45 @@ Gère toutes les entrées du joueur avec l'ordinateur
         * **handleBotDrawDecision()**
         * **handleBotAfterDraw()**
         * **handleBotAfterTakeDiscard()**
+        * **revealRandomFaceDownCard()**
+        * **grantActionForStar()**
 
 * **GameLoop** : Boucle du jeu (Les actions des autres controllers seront acceptés par ce fichier)
 
 * **HumanTurnController** : Toutes les actions joueurs sur le gameBoard
-    * Méthodes : **installListeners()**, **handlePlayerButtonClicked()**, listeners des pioches/mains/actions
-    * Méthodes (actions) : **onActionCardClicked()**, **handleActionModeClick()**, **selectTradeTargetPlayer()**, **completeTrade()**, **startAllPlayersDropAction()**, **selectAllPlayersDropTarget()**, **applyAllPlayersDropOnSelectedCard()**, **resetTurnState()**
+    * Méthode : **installListeners()**, **handlePlayerButtonClicked()**, listeners des pioches/mains/actions
+    * Méthodes (actions) : 
+        * **onActionCardClicked()** - Gestion du clic sur une carte action
+        * **handleActionModeClick()** - Gestion des clics en mode action
+        * **selectTradeTargetPlayer()** - Sélection du joueur cible pour l'échange
+        * **completeTrade()** - Finalisation de l'échange
+        * **startAllPlayersDropAction()** - Initiation de l'action "drop" pour tous
+        * **selectAllPlayersDropTarget()** - Sélection de la cible pour le drop
+        * **applyAllPlayersDropOnSelectedCard()** - Application du drop sur la carte sélectionnée
+        * **grantActionForStar()** - Applique l'effet étoile côté
+        * **resetTurnState()** - Réinitialisation de l'état du tour
+        * **Listeners** pour savoir si le curseur est sur une carte action 
 
-* **ConnexionController** : Gere le `ConnexionPanel` et redirige vers `SupabaseAuth` pour lancer des requetes d'auth.  
-    * Methodes : **sendCreate()**, **sendLogin()**  
+* **ConnexionController** : Gere le `ConnexionPanel` et redirige vers `SupabaseAuth` pour lancer des requetes d'auth.
+    * Methodes : **sendCreate()**, **sendLogin()**
+
+## 3. Flow de Navigation
+
+Architecture de navigation du jeu :
+
+```
+ConnexionPanel
+    ↓
+MainMenuPanel
+    ↓ (bouton Jouer)
+GameModeSelectionPanel
+    ├─→ (Local) PlayersSetupPanel → GameBoardView
+    └─→ (Multi P2P) LobbyBrowserPanel
+                    ├─→ (Créer salon) CreateLobbyDialog → Configuration → [Attente intégration P2P]
+                    └─→ (Rejoindre) Sélection d'un salon → [Attente intégration P2P]
+```
+
+**Note** : Le système multijoueur P2P est préparé au niveau de l'interface utilisateur. Les appels réseau vers le système P2P doivent être implémentés dans `LobbyBrowserController` aux emplacements marqués TODO.
 
 #### DATA :
 

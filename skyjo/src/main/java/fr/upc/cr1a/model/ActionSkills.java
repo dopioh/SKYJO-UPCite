@@ -94,6 +94,10 @@ public class ActionSkills {
         secondDrawnCard.returnCard();
         thirdDrawnCard.returnCard();
 
+        grantActionForStar(gameManager, player, firstDrawnCard);
+        grantActionForStar(gameManager, player, secondDrawnCard);
+        grantActionForStar(gameManager, player, thirdDrawnCard);
+
         System.out.println("Cartes disponibles : " + firstDrawnCard.getCardValue() + " | " + secondDrawnCard.getCardValue() + " | " +  thirdDrawnCard.getCardValue());
 
         int chosedCard = -1;
@@ -236,6 +240,7 @@ public class ActionSkills {
                 CardModel drawnCardFromPioche = gameManager.drawDeck();
                 drawnCardFromPioche.returnCard();
                 joueur.getHand().replaceCard(cardRow, cardCol, drawnCardFromPioche);
+                grantActionForStar(gameManager, joueur, drawnCardFromPioche);
 
                 System.out.println(joueur.getName() + " remplace son " + cardToDropValue + " par un " + drawnCardFromPioche.getCardValue());
                 gameManager.getDiscardPile().addCardAtTop(new NumberCardModel(false, cardToDropValue, null, false));
@@ -275,5 +280,15 @@ public class ActionSkills {
             }
         } while (value < min || value > max);
         return value;
+    }
+
+    private static void grantActionForStar(GameManager gameManager, PlayerModel player, CardModel card) {
+        if (player == null || card == null || !gameManager.withActionCard() || !GameManager.isStarCard(card)) {
+            return;
+        }
+        ActionCardModel actionCard = gameManager.grantActionForStar(player);
+        if (actionCard == null) {
+            return;
+        }
     }
 }

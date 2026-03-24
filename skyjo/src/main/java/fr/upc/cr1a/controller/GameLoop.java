@@ -32,6 +32,7 @@ public class GameLoop {
     public void setTimeoutController(TimeoutTurnController timeoutController) {
         this.timeoutController = timeoutController;
     }
+    private boolean initRevealJustFinished = false;
 
     public GameLoop(GameManager gameManager, GameBoardView gameBoardView) {
         this.gameManager = gameManager;
@@ -47,6 +48,7 @@ public class GameLoop {
     }
 
     public void startGameLoop() {
+        initRevealJustFinished = true;
         startCurrentFlow();
     }
 
@@ -69,7 +71,15 @@ public class GameLoop {
     private void continueFlow() {
         if (!gameActive) return;
         if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) {
+            initRevealJustFinished = true;
             continueInitRevealFlow();
+            return;
+        }
+        if (initRevealJustFinished) {
+            initRevealJustFinished = false;
+            gameManager.firstPlayer();
+            PlayerModel firstPlayer = gameManager.getCurrentPlayer();
+            gameBoardView.showPlayerTransition(firstPlayer, () -> startCurrentFlow());
             return;
         }
         finishNormalTurnFlow();
@@ -78,19 +88,25 @@ public class GameLoop {
     private void continueInitRevealFlow() {
         if (!gameActive) return;
         PlayerModel currentPlayer = gameManager.getCurrentPlayer();
-        gameBoardView.showPlayerCards(currentPlayer);
-        if (humanController != null) {
-            humanController.refreshGuide();
-        }
-        if (currentPlayer instanceof BotModel) {
-            stopTurnCountdown();
-            gameBoardView.setTurnTimerText("--");
-            if (botController != null) {
-                botController.handleBotTurn();
+        gameBoardView.showPlayerTransition(currentPlayer, () -> {
+            if (!gameActive) return;
+
+            if (humanController != null) {
+                humanController.refreshGuide();
             }
-        } else {
-            startTurnCountdown();
-        }
+
+            gameBoardView.showPlayerCards(currentPlayer);
+
+            if (currentPlayer instanceof BotModel) {
+                stopTurnCountdown();
+                gameBoardView.setTurnTimerText("--");
+                if (botController != null) {
+                    botController.handleBotTurn();
+                }
+            } else {
+                startTurnCountdown();
+            }
+        });
     }
     
     private void finishNormalTurnFlow() {
@@ -103,7 +119,8 @@ public class GameLoop {
             }
             return;
         }
-        startCurrentFlow();
+        PlayerModel nextPlayer = gameManager.getCurrentPlayer();
+        gameBoardView.showPlayerTransition(nextPlayer, () -> startCurrentFlow());
     }
 
     public void startCurrentFlow() {

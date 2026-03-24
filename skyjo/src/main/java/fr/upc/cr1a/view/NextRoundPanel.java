@@ -35,7 +35,7 @@ public class NextRoundPanel extends JPanel {
                     opaque = 1;
                     AnimLoop.remove(this);
                 }
-                repaint();
+                getParent().repaint(getX(), getY(), getWidth(), getHeight());
             });
         } else {
             AnimLoop.add(this, dt -> {
@@ -45,7 +45,7 @@ public class NextRoundPanel extends JPanel {
                     AnimLoop.remove(this);
                     setVisible(false);
                 }
-                repaint();
+                getParent().repaint(getX(), getY(), getWidth(), getHeight());
             });
         }
     }
