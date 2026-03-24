@@ -197,10 +197,8 @@ public class PlayersSetupPanel extends JPanel {
         JPanel bottom = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
         bottom.setOpaque(false);
 
-        btnBack = new DoodleButton("Retour", ButtonColor.RED, 220, 80, null); 
-        btnBack.setBgImage("/Button/button_red.png");
-        btnLaunch = new DoodleButton("Lancer",ButtonColor.GREEN,220,80,"/Button/Play.png"); //Faudrait mettre un triangle du style 
-        btnLaunch.setBgImage("/Button/button_green.png");
+        btnBack = new DoodleButton("Retour", ButtonColor.RED, 220, 80, null);
+        btnLaunch = new DoodleButton("Lancer", ButtonColor.GREEN, 220, 80, "/Button/Play.png"); //Faudrait mettre un triangle du style
 
         bottom.add(btnBack);
         bottom.add(btnLaunch);

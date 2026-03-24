@@ -339,4 +339,14 @@
 
 - LAST ROUND
 
+## v.0.9: SPRINT 9
+---
+
+### Modified
+
+- `DoodleButton`
+    - ajout du système de positionnement d'icône
+        - `setIconSide(IconSide.RIGHT ou LEFT)` : icône collée au bord et texte centré indépendamment
+        - Par défaut : comportement inchangé
+    - suppression de l'ancien version sans image et nettoyage du code + remplacé les appel vers l'ancien button
 

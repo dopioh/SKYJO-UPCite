@@ -49,10 +49,7 @@ public class GameModeSelectionPanel extends JPanel {
         buttonsPanel.setOpaque(false);
 
         localBtn = new DoodleButton("Local", ButtonColor.YELLOW, 350, 150, "/Button/Play.png");
-        localBtn.setBgImage("/Button/button_yellow.png");
-
         multiBtn = new DoodleButton("Multiplayer", ButtonColor.GREEN, 350, 150, "/Button/Settings.png"); //a changer
-        multiBtn.setBgImage("/Button/button_green.png");
 
         buttonsPanel.add(localBtn);
         buttonsPanel.add(multiBtn);
