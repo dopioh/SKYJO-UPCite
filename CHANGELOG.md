@@ -349,4 +349,7 @@
         - `setIconSide(IconSide.RIGHT ou LEFT)` : icône collée au bord et texte centré indépendamment
         - Par défaut : comportement inchangé
     - suppression de l'ancien version sans image et nettoyage du code + remplacé les appel vers l'ancien button
+    - possibilité de changer la taille de police
 
+- Page multijoueur
+    - correction des doodle button, espacement, couleur, font

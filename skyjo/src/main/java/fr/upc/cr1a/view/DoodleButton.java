@@ -37,6 +37,7 @@ public class DoodleButton extends JComponent {
     private float hoverScale = 1f;
     private boolean animRunning = false;
     private IconSide iconSide = null; // null = groupé avec le texte (truc par défaut)
+    private float fontSize = 48f;
 
     // juste texte
     public DoodleButton(String text) {
@@ -75,12 +76,12 @@ public class DoodleButton extends JComponent {
         try {
             var stream = getClass().getResourceAsStream("/PatrickHandSC.ttf");
             if (stream != null) {
-                font = Font.createFont(Font.TRUETYPE_FONT, stream).deriveFont(Font.BOLD, 48f);
+                font = Font.createFont(Font.TRUETYPE_FONT, stream).deriveFont(Font.BOLD, fontSize);
             } else {
-                font = new Font("Arial", Font.BOLD, 48);
+                font = new Font("Arial", Font.BOLD, (int) fontSize);
             }
         } catch (Exception e) {
-            font = new Font("Arial", Font.BOLD, 48);
+            font = new Font("Arial", Font.BOLD, (int) fontSize);
         }
 
         // fond selon couleur
@@ -223,4 +224,5 @@ public class DoodleButton extends JComponent {
     public void setText(String t) { model.setText(t); repaint(); }
     public void setImage(String path) { model.setImagePath(path); loadIcon(path); repaint(); }
     public void setIconSide(IconSide side) { this.iconSide = side; repaint(); }
+    public void setFontSize(float size) { this.fontSize = size; loadResources(); repaint(); }
 }

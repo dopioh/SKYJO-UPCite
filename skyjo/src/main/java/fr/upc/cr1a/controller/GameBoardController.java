@@ -95,7 +95,7 @@ public class GameBoardController {
                 }
 
                 @Override
-                public void mouseClicked(MouseEvent e) {
+                public void mousePressed(MouseEvent e) {
                     if (humanTurnController != null && humanTurnController.handlePlayerButtonClicked(tmp)) {
                         return;
                     }

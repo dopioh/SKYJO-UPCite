@@ -23,9 +23,12 @@ public class GameModeSelectionPanel extends JPanel {
         backgroundImage = ImageCache.get("/background.png");
 
         //bouton retour
-        JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 8));
+        JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         topBar.setOpaque(false);
-        backBtn = new DoodleButton("Retour", ButtonColor.RED, 200, 60);
+        topBar.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        backBtn = new DoodleButton("Retour", ButtonColor.RED, 220, 60, "/Button/retour.png");
+        backBtn.setFontSize(32f);
+        backBtn.setIconSide(DoodleButton.IconSide.LEFT);
         topBar.add(backBtn);
         add(topBar, BorderLayout.NORTH);
 
