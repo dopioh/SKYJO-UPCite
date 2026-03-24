@@ -35,7 +35,7 @@ public class PlayersSetupController {
         this.audio = frame.getAudioManager();
         addRowHoverEffect();
 
-        addListeners(view.getBtnBack(), () -> frame.showPanel("MENU"));
+        addListeners(view.getBtnBack(), () -> frame.showPanel("GAME_MODE"));
         addListeners(view.getBtnLaunch(), () -> lancerPartie());
 
         view.getActionModeToggle().addActionListener(e -> {
