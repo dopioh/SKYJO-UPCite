@@ -164,9 +164,9 @@ public class PlayersSetupController {
                 players.add(new PlayerData(name));
             }
         }
-
         
         boolean actionMode = view.isSkyjoActionEnabled();
-        new GameManager(frame, players, actionMode);
+        GameManager game = new GameManager(frame, players, actionMode);
+        frame.setCurrentGame(game);
     }
 }

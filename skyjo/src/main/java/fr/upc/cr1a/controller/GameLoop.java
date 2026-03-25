@@ -12,7 +12,7 @@ import javax.swing.Timer;
  */
 public class GameLoop {
     
-    private static final int TURN_DURATION_SECONDS = 30;
+    private static final int TURN_DURATION_SECONDS = 5;
 
     private Timer turnCountdownTimer;
     private int remainingSeconds;
