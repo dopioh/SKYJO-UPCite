@@ -35,7 +35,12 @@ public class PlayersSetupController {
         this.audio = frame.getAudioManager();
         addRowHoverEffect();
 
-        addListeners(view.getBtnBack(), () -> frame.showPanel("GAME_MODE"));
+        DoodleButton back = view.getBtnBack();
+        back.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) { back.onMouseEnter(); }
+            @Override public void mouseExited(MouseEvent e)  { back.onMouseExit(); }
+            @Override public void mousePressed(MouseEvent e) { frame.showPanel("GAME_MODE"); }
+        });
         addListeners(view.getBtnLaunch(), () -> lancerPartie());
 
         view.getActionModeToggle().addActionListener(e -> {
@@ -77,17 +82,17 @@ public class PlayersSetupController {
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     if (finalBotCheck.isSelected()) {
-                        row.setBackground(new Color(170, 205, 255)); // hover bot
+                        row.setBackground(new Color(220, 235, 255)); // hover bot
                     } else {
-                        row.setBackground(new Color(230, 230, 230)); // hover joueur
+                        row.setBackground(new Color(240, 240, 240)); // hover joueur
                     }
                 }
                 @Override
                 public void mouseExited(MouseEvent e) {
                     if (finalBotCheck.isSelected()) {
-                        row.setBackground(new Color(200, 220, 255)); // bot
+                        row.setBackground(new Color(230, 242, 255)); // bot
                     } else {
-                        row.setBackground(new Color(245, 245, 245)); // joueur
+                        row.setBackground(new Color(255, 255, 255, 220)); // joueur
                     }
                 }
             });
@@ -100,9 +105,9 @@ public class PlayersSetupController {
                 int value = Integer.parseInt(button.getActionCommand());
 
                 if (value == selectedValue) {
-                    button.setBackground(new Color(200, 220, 255));
+                    button.setBackground(new Color(76, 175, 80));
                 } else {
-                    button.setBackground(new Color(235, 235, 235));
+                    button.setBackground(new Color(255, 255, 255, 80));
                 }
             }
         }
