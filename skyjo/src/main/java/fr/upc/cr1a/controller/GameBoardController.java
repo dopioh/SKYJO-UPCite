@@ -1,5 +1,7 @@
 package fr.upc.cr1a.controller;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -36,6 +38,7 @@ public class GameBoardController {
     // panel de fin de manche
     RoundEndPanel currentRoundEndPanel = null;
 
+    private boolean pauseOpen = false;
     private TimeoutTurnController timeoutTurnController;
 
     /**
@@ -57,6 +60,31 @@ public class GameBoardController {
         this.humanTurnController = new HumanTurnController(gameBoardView, gameManager, this, gameLoop);
         humanTurnController.installListeners();
         
+        InputMap im = gameBoardView.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap am = gameBoardView.getActionMap();
+
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "togglePause");
+        am.put("togglePause", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                togglePauseOverlay();
+            }
+        });
+
+        gameBoardView.getPauseOverlay().getBtnResume().addActionListener(e -> closePauseOverlay());
+
+        gameBoardView.getPauseOverlay().getBtnQuit().addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(gameBoardModel.getFrame(),"Voulez-vous quitter la partie ?","Retour au menu",JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                closePauseOverlay();
+                gameBoardModel.retourMenuCalled();
+            }
+        });
+
+        gameBoardView.getPauseOverlay().getBtnSettings().addActionListener(e -> {
+            gameBoardModel.getFrame().showSettingsOverlay();
+        });
+
         listener();
         refreshGuide();
         
@@ -281,5 +309,18 @@ public class GameBoardController {
         }
         AnimLoop.clearAll();
         setWaitingNextTurn(true);
+    }
+
+    private void togglePauseOverlay() {
+        if(currentRoundEndPanel != null && currentRoundEndPanel.isShowing()) return;
+        pauseOpen = !pauseOpen;
+        gameBoardView.showPauseOverlay(pauseOpen);
+        setWaitingNextTurn(pauseOpen);
+    }
+
+    private void closePauseOverlay() {
+        pauseOpen = false;
+        gameBoardView.showPauseOverlay(false);
+        setWaitingNextTurn(false);
     }
 }

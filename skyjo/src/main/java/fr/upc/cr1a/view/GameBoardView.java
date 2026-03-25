@@ -18,8 +18,6 @@ import fr.upc.cr1a.utils.ImageCache;
 
 /**
  * Vue graphique du plateau de jeu avec affichage des cartes et boutons joueurs
- * 
- * @author Mei, Ian, Hugo, Nassim
  */
 public class GameBoardView extends JPanel {
 
@@ -35,6 +33,7 @@ public class GameBoardView extends JPanel {
     // panel :
     private JPanel zonePlayer;
     private JPanel zonePlateau;
+    private PauseOverlayPanel pauseOverlay;
 
     // grille de boutons cartes
     private CardButton[][] cardButtons;
@@ -174,6 +173,10 @@ public class GameBoardView extends JPanel {
         plateauPanel.setLayout(new BorderLayout());
 
         layeredPane.add(plateauPanel, JLayeredPane.DEFAULT_LAYER);
+
+        pauseOverlay = new PauseOverlayPanel();
+        pauseOverlay.setVisible(false);
+        layeredPane.add(pauseOverlay, JLayeredPane.POPUP_LAYER);
 
         // ============================ TOP BAR ========================== (<- Pas IA c'est juste plus lisible)
         JPanel topBar = new JPanel(new BorderLayout()) {
@@ -952,6 +955,15 @@ public class GameBoardView extends JPanel {
         transitionPanel.setVisible(false);
         nextRoundPanel.setVisible(false);
         actionDescriptionOverlay.setVisible(false);
+    }
+
+    public PauseOverlayPanel getPauseOverlay() {
+        return pauseOverlay;
+    }
+
+    public void showPauseOverlay(boolean visible) {
+        pauseOverlay.setVisible(visible);
+        pauseOverlay.repaint();
     }
 
     @Override
