@@ -59,15 +59,7 @@ public class AnimLoop {
             timer.stop();
         }
     }
-
-    /** enleve tous les tasks et arrete le timer */
-    public static void clearAll() {
-        tasks.clear();
-        if (timer.isRunning()) {
-            timer.stop();
-        }
-    }
-
+    
     /**
      * Appelé à chaque tick du timer
      */
