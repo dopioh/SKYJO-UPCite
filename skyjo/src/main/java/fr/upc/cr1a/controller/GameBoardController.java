@@ -82,8 +82,10 @@ public class GameBoardController {
 
         JButton retour = gameBoardView.getBtnRetour();
         retour.addActionListener(e -> {
-            gameLoop.stopGame();
-            gameBoardModel.retourMenuCalled();
+            int confirm = JOptionPane.showConfirmDialog(gameBoardModel.getFrame(),"Voulez-vous quitter la partie ?","Retour au menu",JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                gameBoardModel.retourMenuCalled();
+            }
         });
 
         // Pour le survol et le ckick des preview player
@@ -265,5 +267,19 @@ public class GameBoardController {
 
     public void showRoundEndScreenFromLoop() {
         showRoundEndScreen();
+    }
+
+    public void stopGame() {
+        if (gameLoop != null) {
+            gameLoop.stopGame();
+        }
+        if (humanTurnController != null) {
+            humanTurnController.removeAllListeners();
+        }
+        if (gameBoardView != null) {
+            gameBoardView.cleanup();
+        }
+        AnimLoop.clearAll(); // Emergency cleanup for any remaining animation tasks
+        setWaitingNextTurn(true);
     }
 }

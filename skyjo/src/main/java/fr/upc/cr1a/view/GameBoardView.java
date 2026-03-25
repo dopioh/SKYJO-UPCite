@@ -928,6 +928,40 @@ public class GameBoardView extends JPanel {
         }
     }
 
+    /**
+     * Nettoie les animations et overlays lorsque le jeu s'arrête
+     * Désactive les animations des cartes et supprime les tâches AnimLoop
+     */
+    public void cleanup() {
+        // Disable all CardButton animations in the hand
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 4; col++) {
+                if (cardButtons[row][col] != null) {
+                    cardButtons[row][col].setAnimationEnabled(false);
+                }
+            }
+        }
+
+        // Disable all action card animations
+        for (int i = 0; i < actionCardButtons.length; i++) {
+            if (actionCardButtons[i] != null) {
+                actionCardButtons[i].setAnimationEnabled(false);
+            }
+        }
+
+        // Remove AnimLoop tasks for animated panels
+        fr.upc.cr1a.model.AnimLoop.remove(playerPreviewPanel);
+        fr.upc.cr1a.model.AnimLoop.remove(nextRoundPanel);
+        fr.upc.cr1a.model.AnimLoop.remove(transitionPanel);
+        fr.upc.cr1a.model.AnimLoop.remove(actionDescriptionOverlay);
+        fr.upc.cr1a.model.AnimLoop.remove(cursorCardView);
+
+        // Hide overlay panels
+        transitionPanel.setVisible(false);
+        nextRoundPanel.setVisible(false);
+        actionDescriptionOverlay.setVisible(false);
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);

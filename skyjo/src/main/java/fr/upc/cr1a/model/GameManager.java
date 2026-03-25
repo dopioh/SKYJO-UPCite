@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.swing.Timer;
 
+import fr.upc.cr1a.controller.GameBoardController;
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
 import fr.upc.cr1a.view.Frame;
@@ -648,4 +649,13 @@ public class GameManager {
     public void setTurnPhase(TurnPhase phase){
         this.turnPhase = phase;
     }
+
+    public void stopGame() {
+        if (gameBoardModel != null) {
+            GameBoardController controller = gameBoardModel.getGameBoardController();
+            if (controller != null) {
+                controller.stopGame();
+            }
+        }
+    }   
 }

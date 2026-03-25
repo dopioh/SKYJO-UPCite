@@ -62,6 +62,73 @@ public class HumanTurnController {
         installActionCardListeners();
     }
 
+    /**
+     * Nettoie les listeners et réinitialise l'état du contrôleur
+     * Appelé lors de l'arrêt du jeu pour éviter les fuites mémoire et les interactions résiduelles
+     */
+    public void removeAllListeners() {
+        // Réinitialise l'état interne pour éviter les interactions résiduelles
+        waitingReveal = false;
+        actionMode = ActionMode.NONE;
+        replaceFirstRow = -1;
+        replaceFirstCol = -1;
+        tradeOwnRow = -1;
+        tradeOwnCol = -1;
+        tradeTargetPlayerIndex = -1;
+        allPlayersDropPendingTargets.clear();
+        allPlayersDropCurrentTargetIndex = -1;
+
+        // Retire les listeners des boutons deck
+        // Note: Les listeners lambda n'ont pas de méthode remove directe en Swing,
+        // mais la GameBoardView.cleanup() désactivera les animations et les composants seront cachés
+        java.awt.event.ActionListener[] piocheListeners = gameBoardView.getBtnPioche().getActionListeners();
+        for (java.awt.event.ActionListener listener : piocheListeners) {
+            gameBoardView.getBtnPioche().removeActionListener(listener);
+        }
+
+        java.awt.event.ActionListener[] defausseListeners = gameBoardView.getBtnDefausse().getActionListeners();
+        for (java.awt.event.ActionListener listener : defausseListeners) {
+            gameBoardView.getBtnDefausse().removeActionListener(listener);
+        }
+
+        java.awt.event.ActionListener[] piocheActionListeners = gameBoardView.getBtnPiocheAction().getActionListeners();
+        for (java.awt.event.ActionListener listener : piocheActionListeners) {
+            gameBoardView.getBtnPiocheAction().removeActionListener(listener);
+        }
+
+        java.awt.event.MouseListener[] defausseActionListeners = gameBoardView.getBtnDefausseAction().getMouseListeners();
+        for (java.awt.event.MouseListener listener : defausseActionListeners) {
+            gameBoardView.getBtnDefausseAction().removeMouseListener(listener);
+        }
+
+        // Retire les listeners des cartes de main (3x4 grid)
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 4; col++) {
+                var btn = gameBoardView.getCardButtons()[row][col];
+                java.awt.event.ActionListener[] cardListeners = btn.getActionListeners();
+                for (java.awt.event.ActionListener listener : cardListeners) {
+                    btn.removeActionListener(listener);
+                }
+            }
+        }
+
+        // Retire les listeners des cartes action
+        for (int i = 0; i < gameBoardView.getActionCardButtons().length; i++) {
+            var btn = gameBoardView.getActionCardButtons()[i];
+            if (btn != null) {
+                java.awt.event.ActionListener[] actionListeners = btn.getActionListeners();
+                for (java.awt.event.ActionListener listener : actionListeners) {
+                    btn.removeActionListener(listener);
+                }
+
+                java.awt.event.MouseListener[] mouseListeners = btn.getMouseListeners();
+                for (java.awt.event.MouseListener listener : mouseListeners) {
+                    btn.removeMouseListener(listener);
+                }
+            }
+        }
+    }
+
     // pour selectionner un joueur cible
     public boolean handlePlayerButtonClicked(int targetIndex) {
         if (actionMode == ActionMode.TRADE_SELECT_TARGET_PLAYER || actionMode == ActionMode.TRADE_SELECT_TARGET_CARD) {
