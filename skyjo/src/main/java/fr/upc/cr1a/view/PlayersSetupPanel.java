@@ -110,7 +110,43 @@ public class PlayersSetupPanel extends JPanel {
         playersSubtitle.setForeground(new Color(255, 255, 255, 180));
         playersSubtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        playersHeader.add(playersTitle);
+        JLabel helpLabel = new JLabel("?", SwingConstants.CENTER);
+        helpLabel.setFont(doodle.deriveFont(Font.BOLD, 22f));
+        helpLabel.setForeground(Color.WHITE);
+
+        JPanel helpBtn = new JPanel(new BorderLayout()) {
+            @Override protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(255, 255, 255, 80));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 14, 14);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        helpBtn.setOpaque(false);
+        helpBtn.setPreferredSize(new Dimension(36, 34));
+        helpBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        helpBtn.add(helpLabel, BorderLayout.CENTER);
+        helpBtn.addMouseListener(new MouseAdapter() {
+            @Override public void mousePressed(MouseEvent e) {
+                JOptionPane.showMessageDialog(PlayersSetupPanel.this,
+                        "bot               : blabla\n" +
+                        "botRow         : abcddddd\n" +
+                        "botLow         : bonjour\n" +
+                        "botCounting : je laisse le fondateur des bots remplir",
+                        "Types de bots", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        JPanel titleRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        titleRow.setOpaque(false);
+        titleRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        titleRow.add(playersTitle);
+        titleRow.add(helpBtn);
+
+        playersHeader.add(titleRow);
         // playersHeader.add(Box.createVerticalStrut(4));
         // playersHeader.add(playersSubtitle);
 
@@ -330,7 +366,7 @@ public class PlayersSetupPanel extends JPanel {
      */
     public void rebuildPlayerRows(int count) {
         playersContainer.removeAll();
-        Color textColor = new Color(40, 40, 40);
+        Color textColor = Color.WHITE;
         for (int i = 1; i <= count; i++) {
             final int playerIndex = i;
             JPanel row = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 11)) {
@@ -348,21 +384,29 @@ public class PlayersSetupPanel extends JPanel {
             row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
             row.setAlignmentX(Component.LEFT_ALIGNMENT);
             row.setOpaque(false);
-            row.setBackground(new Color(255, 255, 255, 220));
+            row.setBackground(new Color(76, 175, 80));
 
             JLabel label = new JLabel("Joueur " + playerIndex + " : ");
             label.setFont(doodle.deriveFont(Font.BOLD, 22f));
             label.setForeground(textColor);
 
-            JTextField nameField = new JTextField(12);
+            JTextField nameField = new JTextField(12) {
+                @Override protected void paintComponent(Graphics g) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setColor(new Color(255, 255, 255, 80));
+                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 14, 14);
+                    g2.dispose();
+                    super.paintComponent(g);
+                }
+            };
+            nameField.setOpaque(false);
             nameField.setPreferredSize(new Dimension(120, 30));
             nameField.setFont(doodle.deriveFont(Font.PLAIN, 20f));
-            nameField.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(200,200,200)),
-                    BorderFactory.createEmptyBorder(4,8,4,8)
-            ));
+            nameField.setBorder(BorderFactory.createEmptyBorder(4,8,4,8));
             nameField.setText("Joueur " + playerIndex);
             nameField.setForeground(textColor);
+            nameField.setCaretColor(Color.WHITE);
             nameField.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
@@ -378,8 +422,10 @@ public class PlayersSetupPanel extends JPanel {
             botCheck.setFont(doodle.deriveFont(Font.BOLD, 20f));
             botCheck.setForeground(textColor);
             botCheck.setOpaque(false);
+            botCheck.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
             JComboBox<String> botType = new JComboBox<>(new String[]{"bot", "botRow", "botLow", "botCounting"});
+            botType.setFont(doodle.deriveFont(Font.BOLD, 16f));
             botType.setEnabled(false);
 
             botCheck.addActionListener(e -> {
@@ -388,10 +434,10 @@ public class PlayersSetupPanel extends JPanel {
                 botType.setEnabled(isBot);
                 if (isBot) {
                     nameField.setText("Bot" + playerIndex);
-                    row.setBackground(new Color(230, 242, 255));
+                    row.setBackground(new Color(195, 197, 64));
                 } else {
                     nameField.setText("Joueur " + playerIndex);
-                    row.setBackground(new Color(255, 255, 255, 220));
+                    row.setBackground(new Color(76, 175, 80));
                 }
             });
             row.add(label);

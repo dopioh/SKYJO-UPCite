@@ -62,41 +62,41 @@ public class PlayersSetupController {
     }
 
     private void addRowHoverEffect() {
-        Component[] rows = view.getPlayersContainer().getComponents();
-        for (Component comp : rows) {
-            if (!(comp instanceof JPanel row)) {
-                continue;
-            }
-            JCheckBox botCheck = null;
-            for (Component c : row.getComponents()) {
-                if (c instanceof JCheckBox) {
-                    botCheck = (JCheckBox) c;
-                    break;
-                }
-            }
-            if (botCheck == null) {
-                continue;
-            }
-            JCheckBox finalBotCheck = botCheck;
-            row.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    if (finalBotCheck.isSelected()) {
-                        row.setBackground(new Color(220, 235, 255)); // hover bot
-                    } else {
-                        row.setBackground(new Color(240, 240, 240)); // hover joueur
-                    }
-                }
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    if (finalBotCheck.isSelected()) {
-                        row.setBackground(new Color(230, 242, 255)); // bot
-                    } else {
-                        row.setBackground(new Color(255, 255, 255, 220)); // joueur
-                    }
-                }
-            });
-        }
+        // Component[] rows = view.getPlayersContainer().getComponents();
+        // for (Component comp : rows) {
+        //     if (!(comp instanceof JPanel row)) {
+        //         continue;
+        //     }
+        //     JCheckBox botCheck = null;
+        //     for (Component c : row.getComponents()) {
+        //         if (c instanceof JCheckBox) {
+        //             botCheck = (JCheckBox) c;
+        //             break;
+        //         }
+        //     }
+        //     if (botCheck == null) {
+        //         continue;
+        //     }
+        //     JCheckBox finalBotCheck = botCheck;
+        //     row.addMouseListener(new MouseAdapter() {
+        //         @Override 
+        //         public void mouseEntered(MouseEvent e) {
+        //             if (finalBotCheck.isSelected()) {
+        //                 row.setBackground(new Color(255, 200, 0)); // hover bot
+        //             } else {
+        //                 row.setBackground(new Color(60, 160, 65)); // hover joueur
+        //             }
+        //         }
+        //         @Override 
+        //         public void mouseExited(MouseEvent e) {
+        //             if (finalBotCheck.isSelected()) {
+        //                 row.setBackground(new Color(195, 197, 64)); // bot
+        //             } else {
+        //                 row.setBackground(new Color(76, 175, 80)); // joueur
+        //             }
+        //         }
+        //     });
+        // }
     }
 
     private void updatePlayerCountButtonsStyle(int selectedValue) {
