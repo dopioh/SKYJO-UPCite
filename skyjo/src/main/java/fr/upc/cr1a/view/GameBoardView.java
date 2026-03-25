@@ -38,9 +38,6 @@ public class GameBoardView extends JPanel {
     // grille de boutons cartes
     private CardButton[][] cardButtons;
 
-    // bouton retour vers le menu
-    private JButton btnRetour;
-
     // joueur actuellement affiche
     private PlayerModel currentPlayer;
 
@@ -402,14 +399,6 @@ public class GameBoardView extends JPanel {
 
         zonePlateau.add(rightPanel, BorderLayout.EAST);
 
-        // bouton retour en bas temporaire
-        btnRetour = new JButton("Retour");
-        btnRetour.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        bottomPanel.setOpaque(false);
-        bottomPanel.add(btnRetour);
-        zonePlateau.add(bottomPanel, BorderLayout.SOUTH);
-
         // ZONE PREVIEW OTHER PLAYERS ( apparait au dessus de tous les autres panels
         // quand on hover ou clique sur un button)
         previewPanel = new PlayerPreviewPanel();
@@ -656,10 +645,6 @@ public class GameBoardView extends JPanel {
 
     public ArrayList<JButton> getListPlayerButton() {
         return this.buttonlistPlayer;
-    }
-
-    public JButton getBtnRetour() {
-        return this.btnRetour;
     }
 
     public CardButton[][] getCardButtons() {

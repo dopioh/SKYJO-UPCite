@@ -108,14 +108,6 @@ public class GameBoardController {
      */
     public void listener() {
 
-        JButton retour = gameBoardView.getBtnRetour();
-        retour.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(gameBoardModel.getFrame(),"Voulez-vous quitter la partie ?","Retour au menu",JOptionPane.YES_NO_OPTION);
-            if (confirm == JOptionPane.YES_OPTION) {
-                gameBoardModel.retourMenuCalled();
-            }
-        });
-
         // Pour le survol et le ckick des preview player
         // y'a un soucis pour les pinned ici -> bug mineur
         int s = 0;
@@ -316,11 +308,13 @@ public class GameBoardController {
         pauseOpen = !pauseOpen;
         gameBoardView.showPauseOverlay(pauseOpen);
         setWaitingNextTurn(pauseOpen);
+        gameLoop.setPaused(pauseOpen);
     }
 
     private void closePauseOverlay() {
         pauseOpen = false;
         gameBoardView.showPauseOverlay(false);
         setWaitingNextTurn(false);
+        gameLoop.setPaused(false);
     }
 }

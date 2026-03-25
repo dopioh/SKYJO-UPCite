@@ -29,9 +29,8 @@ public class GameLoop {
 
     private TimeoutTurnController timeoutController;
 
-    public void setTimeoutController(TimeoutTurnController timeoutController) {
-        this.timeoutController = timeoutController;
-    }
+    private boolean paused = false;
+
     private boolean initRevealJustFinished = false;
 
     public GameLoop(GameManager gameManager, GameBoardView gameBoardView) {
@@ -69,6 +68,7 @@ public class GameLoop {
     }
 
     private void continueFlow() {
+        if (paused) return;
         if (!gameActive) return;
         if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) {
             initRevealJustFinished = true;
@@ -124,6 +124,7 @@ public class GameLoop {
     }
 
     public void startCurrentFlow() {
+        if (paused) return;
         if (!gameActive) return;
         if (gameManager.getTurnPhase() != GameManager.TurnPhase.INIT_REVEAL) {
             gameManager.startTurn();
@@ -180,6 +181,7 @@ public class GameLoop {
     }
 
     private void handleTurnTimeout() {
+        if (paused) return;
         if (!isGameActive()) return;
         stopTurnCountdown();
         if (humanController != null) {
@@ -195,5 +197,18 @@ public class GameLoop {
         if (timeoutController != null) {
             timeoutController.handleTimeoutForCurrentPlayer();
         }
+    }
+
+    public void setPaused(boolean paused) {
+        this.paused = paused;
+        if (paused) {
+            stopTurnCountdown();
+        } else {
+            startTurnCountdown();
+        }
+    }
+
+    public void setTimeoutController(TimeoutTurnController timeoutController) {
+        this.timeoutController = timeoutController;
     }
 }
