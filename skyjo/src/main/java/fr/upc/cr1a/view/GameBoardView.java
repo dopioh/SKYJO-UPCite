@@ -9,6 +9,7 @@ import javax.swing.*;
 
 import fr.upc.cr1a.model.ActionCardModel;
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
+import fr.upc.cr1a.model.AnimLoop;
 import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.NumberCardModel;
 import fr.upc.cr1a.model.PlayerHandModel;
@@ -926,6 +927,31 @@ public class GameBoardView extends JPanel {
         if (turnTimerLabel != null) {
             turnTimerLabel.setText("Temps restant : " + text + " s");
         }
+    }
+
+    /**
+     * Sert à entierement supprimer les instances des cartes animées
+     */
+    public void cleanup() {
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 4; col++) {
+                if (cardButtons[row][col] != null) {
+                    cardButtons[row][col].setAnimationEnabled(false);
+                }
+            }
+        }
+        for (int i = 0; i < actionCardButtons.length; i++) {
+            if (actionCardButtons[i] != null) {
+                actionCardButtons[i].setAnimationEnabled(false);
+            }
+        }
+        AnimLoop.remove(nextRoundPanel);
+        AnimLoop.remove(transitionPanel);
+        AnimLoop.remove(actionDescriptionOverlay);
+        AnimLoop.remove(cursorCardView);
+        transitionPanel.setVisible(false);
+        nextRoundPanel.setVisible(false);
+        actionDescriptionOverlay.setVisible(false);
     }
 
     @Override

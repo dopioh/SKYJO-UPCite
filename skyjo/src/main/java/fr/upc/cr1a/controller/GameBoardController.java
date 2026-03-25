@@ -273,6 +273,13 @@ public class GameBoardController {
         if (gameLoop != null) {
             gameLoop.stopGame();
         }
+        if (humanTurnController != null) {
+            humanTurnController.removeAllListeners();
+        }
+        if (gameBoardView != null) {
+            gameBoardView.cleanup();
+        }
+        AnimLoop.clearAll();
         setWaitingNextTurn(true);
     }
 }

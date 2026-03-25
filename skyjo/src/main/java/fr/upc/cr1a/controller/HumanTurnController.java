@@ -2,6 +2,8 @@ package fr.upc.cr1a.controller;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import javax.swing.Timer;
 
@@ -293,6 +295,67 @@ public class HumanTurnController {
                 gameBoardView.hideActionDescription();
                 onActionCardClicked(type, id);
             });
+        }
+    }
+
+    public void removeAllListeners() {
+        //réinitialise tout les états
+        waitingReveal = false;
+        actionMode = ActionMode.NONE;
+        replaceFirstRow = -1;
+        replaceFirstCol = -1;
+        tradeOwnRow = -1;
+        tradeOwnCol = -1;
+        tradeTargetPlayerIndex = -1;
+        allPlayersDropPendingTargets.clear();
+        allPlayersDropCurrentTargetIndex = -1;
+
+        // Retire les listeners des boutons deck
+        ActionListener[] piocheListeners = gameBoardView.getBtnPioche().getActionListeners();
+        for (ActionListener listener : piocheListeners) {
+            gameBoardView.getBtnPioche().removeActionListener(listener);
+        }
+
+        ActionListener[] defausseListeners = gameBoardView.getBtnDefausse().getActionListeners();
+        for (ActionListener listener : defausseListeners) {
+            gameBoardView.getBtnDefausse().removeActionListener(listener);
+        }
+
+        ActionListener[] piocheActionListeners = gameBoardView.getBtnPiocheAction().getActionListeners();
+        for (ActionListener listener : piocheActionListeners) {
+            gameBoardView.getBtnPiocheAction().removeActionListener(listener);
+        }
+
+        MouseListener[] defausseActionListeners = gameBoardView.getBtnDefausseAction().getMouseListeners();
+        for (MouseListener listener : defausseActionListeners) {
+            gameBoardView.getBtnDefausseAction().removeMouseListener(listener);
+        }
+
+        // Retire les listeners des cartes de main
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 4; col++) {
+                var btn = gameBoardView.getCardButtons()[row][col];
+                ActionListener[] cardListeners = btn.getActionListeners();
+                for (ActionListener listener : cardListeners) {
+                    btn.removeActionListener(listener);
+                }
+            }
+        }
+
+        // Retire les listeners des cartes action
+        for (int i = 0; i < gameBoardView.getActionCardButtons().length; i++) {
+            var btn = gameBoardView.getActionCardButtons()[i];
+            if (btn != null) {
+                ActionListener[] actionListeners = btn.getActionListeners();
+                for (ActionListener listener : actionListeners) {
+                    btn.removeActionListener(listener);
+                }
+
+                MouseListener[] mouseListeners = btn.getMouseListeners();
+                for (MouseListener listener : mouseListeners) {
+                    btn.removeMouseListener(listener);
+                }
+            }
         }
     }
 
