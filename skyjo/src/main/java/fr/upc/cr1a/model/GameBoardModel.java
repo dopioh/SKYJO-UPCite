@@ -68,7 +68,6 @@ public class GameBoardModel {
                 game.stopGame();
             }
             frame.clearCurrentGame();
-            frame.getMainMenuPanel().resetMenu();
             frame.showPanel("MENU");
         }
     }

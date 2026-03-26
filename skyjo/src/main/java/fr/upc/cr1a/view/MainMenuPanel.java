@@ -1,7 +1,6 @@
 package fr.upc.cr1a.view;
 
 import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
-import fr.upc.cr1a.model.AnimLoop;
 import fr.upc.cr1a.utils.ImageCache;
 
 import javax.swing.*;
@@ -87,15 +86,4 @@ public class MainMenuPanel extends JPanel {
     public DoodleButton getPlayButton() { return playBtn; }
     public DoodleButton getSettingsButton() { return settingsBtn; }
     public JButton getAccountButton() { return accountBtn; }
-
-    public void cleanup() {
-        AnimLoop.remove(shopBtn);
-        AnimLoop.remove(playBtn);
-        AnimLoop.remove(settingsBtn);
-    }
-
-    public void resetMenu() {
-        cleanup();
-        repaint();
-    }
 }
