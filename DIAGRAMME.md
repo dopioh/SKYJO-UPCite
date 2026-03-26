@@ -15,6 +15,8 @@ Des classes qui permette d'éxécuter le jeu.
         * actionDeck / discardActionPile (pioche & défausse actions)
         * currentPlayerIndex, gameState, turnPhase, currentDrawCard
         * gameBoardModel (pour la version graphique)
+        * firstPlayerToPlayIndex, lastRoundPlayer, extraTurnsRemaining, roundNumber
+        * afkCounts, autoControlledPlayers (gestion AFK)
     * Méthode :
         * **initializeGame()**, **startTurn()**, **nextPlayer()**
         * **drawDeck()**, **takeDiscard()**, **drawActionDeck()**, **takeActionDiscard()**
@@ -23,6 +25,11 @@ Des classes qui permette d'éxécuter le jeu.
         * **firstPlayer()**, **startNewGame()**, **endRound()**
         * **getGameState()**, **getTurnPhase()**, **getPlayers()**, **getDiscardPile()**, **getDeck()**, **getCurrentPlayer()**, **getCurrentDrawCard()**
         * **revealInitCard()**
+        * **grantExtraTurn()**, **getCurrentPlayerIndex()**, **getInitRevealCount()**, **getRoundNumber()**
+        * **setTurnPhase()**, **stopGame()**
+        * **getAfkCount()**, **registerAfkTurn()**, **resetAfkCount()**
+        * **isAutoControlled()**, **setAutoControlled()**
+        * **isStarCard()** (static), **withActionCard()**, **getDiscardActionPile()**, **getActionDeck()**
 * **GameTerminalModel** : Gère toutes les interactions du jeu via le terminal (séparé du GameManager)
     * Attribut :
         * scanner (Scanner)
@@ -48,6 +55,9 @@ Des classes qui permette d'éxécuter le jeu.
             * **botSpyOneColumn()** - Version bot de SPY_ONE_COLUMN
             * **botAllPlayersDropCard()** - Version bot de ALL_PLAYERS_DROP_CARD
 * **GameLoop** : Gère le foncitonnement des cycles du jeu; les updates() et les repaint()
+    * **proceedAfterAction()**, **continueFlow()**, **continueInitRevealFlow()**, **finishNormalTurnFlow()**, **startCurrentFlow()**
+    * **startTurnCountdown()**, **stopTurnCountdown()**, **isGameActive()**, **stopGame()**, **handleTurnTimeout()**
+    * **setPaused()**, **setTimeoutController()**, **setTimerEnabled()**
 
 ## 2. MVC 
 
@@ -70,6 +80,7 @@ Gère la logique du jeu.
     * `CardStackModel` : Classe qui créer les piles de cartes vient de l'interface *CardStackInterface*
         * Méthode : 
             * **stackSize()**, **getCardAt(int indice)**,**getTopCard()**, **getUnderCard()**,**addCardAtTop()**, **removeCardAtTop()**, **replaceCardAt()**, **isEmpty()**
+            * **getStack()**, **afficheStack()**
 
 
 * **Piles de cartes** :
@@ -89,10 +100,11 @@ Gère la logique du jeu.
 * **Joueur** :
     * `PlayerModel`: Représente un joueur
         * Attribut : name, hand (PlayerHandModel), totalScore
-        * Méthode : **getName()**, **getHand()**, **getTotalScore()**, **addScore()**, **resetHand()**, **showActionHand()**
+        * Méthode : **getName()**, **getHand()**, **getTotalScore()**, **addScore()**, **resetHand()**, **showActionHand()**, **getActionHand()**
     * `PlayerHandModel`: Grille 4x3 de cartes du joueur
         * Attribut : grid (CardModel[][]), rows=3, columns=4
         * Méthode : **placeCard()**, **getCard()**, **isAvailable()**, **getVisibleCardScore()**, **révéler cartes**, **détecter colonnes complètes**
+        * **replaceCard()**, **revealCard()**, **allCardsRevealed()**, **countRevealedCards()**, **checkRows()**, **removeRow()**, **calculateScore()**, **revealCardsTemp()**
     * `PlayerData`: Données persistantes du joueur
         * Attribut : id, rank (Rank), elo, xp, money, skins (ArrayList)
         * Méthode : **getters/setters pour toutes les données**
@@ -104,6 +116,7 @@ Gère la logique du jeu.
     * `BotHandModel`: Grille 4x3 de cartes du bot
         * Super-classe : **PlayerHandModel**
         * Méthodess supplémentaires : **revealRandomCard()**, **sameCardInHandPosition()**, **tradeInHand()**, **isAcceptableCard()**
+        * **countVisibleCardsInColumn()**
     * `BotStrategyInterface`: Interface définissant les stratégies de bot
         * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **getSeuil()**
     * `BotTerminalModel`: Stratégie de bot basique (implémente BotStrategyInterface)
@@ -139,8 +152,10 @@ Gère la logique du jeu.
             * **isGameOver()** - Vérifie si un joueur a atteint 100 points
             * **determineWinner()** - Détermine le gagnant
             * **getFirstPlayerIndex()**, **getBiggestScorePlayerIndex()** - Gestion des indices joueurs
+            * **canDiscardCard()**
     * `ScoreCalculator`: Calcule les scores
         * Méthode : **calculateHandScore()**, **détection colonnes identiques**
+        * **calculateRoundScores()**, **getLowestScorePlayer()**, **applyEndGamePenalty()**
     * `Rank`: Enum des rangs (OQTF, NOPAPER, A4, NEWSPAPAER, PLASTIC, PAPYRUS, PARCHEMIN, BULLETIN, CESTLACARTE, DEGREES, BLACKCARD, WORMS)
         * Méthode : **findRankByElo()**
     * `ActionSkills` Implémente les capacités des cartes actions
@@ -150,17 +165,20 @@ Gère la logique du jeu.
     * `AudioManager`: Gère la musique et les effets sonores
         * Attribut : bgmClip (Clip), enabled (boolean), volume (int)
         * Méthode : **playBgm()**, **playSfx()**, **stopBgm()**, **setEnabled()**, **setVolume()**
+        * **applyToClip()**, **percentToDb()**
 
 * **Plateau** :
     * `GameBoardModel` Gere la logique du plateau
         * Elle relie `GameBoardView` et `GameBoardController`
         * Methode : **buttonPlayerCalled()** pour gerer l'affichage du `PlayerPreviewPanel`, **retourMenuCalled()**
+        * **getGameBoardController()**, **getFrame()**
 
 * **Multijoueur / Lobby** :
     * `LobbyModel`: Représente un salon de jeu multijoueur P2P
         * Attribut : lobbyId, lobbyName, hostName, currentPlayers, maxPlayers, actionMode, status
         * Enum : **LobbyStatus** (WAITING, PLAYING, FULL)
         * Méthode : **canJoin()**, **updateStatus()**, **getters/setters**
+        * **setCurrentPlayers()**, **setStatus()**, **toString()**
 
 
 ### VIEW
@@ -218,10 +236,14 @@ Gère toutes les entrées du joueur avec l'ordinateur
 * **MainMenuController** : Contrôleur du menu principal
     * Attribut : frame (Frame), view (MainMenuPanel), audio (AudioManager)
     * Méthode : **ActionListener pour playButton** → redirige vers GameModeSelectionPanel, **settingsButton, shopButton**
+    * **clicShop()**, **clicSettings()**, **clicAccount()**
 
 * **GameModeSelectionController** : Contrôleur du panel de sélection de mode de jeu
     * Attribut : frame (Frame), view (GameModeSelectionPanel)
     * Méthode : **ajouterListeners()**, **clicLocal()** → redirige vers PlayersSetupPanel, **clicMulti()** → redirige vers LobbyBrowserPanel, **clicRetour()** → retour au menu
+
+* **PlayersSetupController** : Contrôleur pour la configuration des joueurs
+    * Méthode : **addRowHoverEffect()**, **updatePlayerCountButtonsStyle()**, **lancerPartie()**
 
 * **LobbyBrowserController** : Contrôleur du navigateur de salons multijoueur
     * Attribut : frame (Frame), view (LobbyBrowserPanel), availableLobbies (List<LobbyModel>)
@@ -235,6 +257,7 @@ Gère toutes les entrées du joueur avec l'ordinateur
 * **GameBoardController** : Controller pour le Plateau de jeu (la partie)
     * Méthode : **listener()**, **nextPlayerSound()**, **showRoundEndScreen()**, **ContinueRound()**, **refreshGuide()**, **updateAllDecksDisplay()**
     * Méthode (boucle de jeu) : **requestEndTurnFromBot()**, **showRoundEndScreenFromLoop()**
+    * **setWaitingNextTurn()**, **isWaitingNextTurn()**, **togglePauseOverlay()**
 
 * **GameBoardBotController** : controller pour les bots
     * Attribut :
@@ -249,6 +272,18 @@ Gère toutes les entrées du joueur avec l'ordinateur
         * **handleBotAfterTakeDiscard()**
         * **revealRandomFaceDownCard()**
         * **grantActionForStar()**
+
+* **TimeoutTurnController** : Gère les joueurs AFK et les timeouts
+    * Méthode :
+        * **handleTimeoutForCurrentPlayer()**
+        * **copyToBotHand()**
+        * **handleTimeoutInitReveal()**
+        * **handleTimeoutDrawDecision()**
+        * **handleTimeoutAfterDraw()**
+        * **handleTimeoutAfterTakeDiscard()**
+        * **handleTimeoutRevealAfterDiscard()**
+        * **findRandomHiddenCard()**
+        * **runLater()**
 
 * **GameLoop** : Boucle du jeu (Les actions des autres controllers seront acceptés par ce fichier)
 
@@ -265,9 +300,10 @@ Gère toutes les entrées du joueur avec l'ordinateur
         * **grantActionForStar()** - Applique l'effet étoile côté
         * **resetTurnState()** - Réinitialisation de l'état du tour
         * **Listeners** pour savoir si le curseur est sur une carte action 
+    * **removeAllListeners()**, **getLastReplayableActionInDiscard()** 
 
-* **ConnexionController** : Gere le `ConnexionPanel` et redirige vers `SupabaseAuth` pour lancer des requetes d'auth.
-    * Methodes : **sendCreate()**, **sendLogin()**
+* **AccountController** : Contrôleur pour la gestion des comptes
+    * Méthode : Principales méthodes de gestion des comptes
 
 ## 3. Flow de Navigation
 
