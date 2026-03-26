@@ -152,6 +152,8 @@ public class HumanTurnController {
 
             gameManager.setTurnPhase(GameManager.TurnPhase.TURN_ENDED);
             mainController.refreshGuide();
+            gameManager.resetAfkCount(gameManager.getCurrentPlayer());
+            gameManager.setAutoControlled(gameManager.getCurrentPlayer(), false);
             gameLoop.proceedAfterAction();
         });
 
@@ -235,6 +237,8 @@ public class HumanTurnController {
                         waitingReveal = false;
                         gameManager.setTurnPhase(GameManager.TurnPhase.TURN_ENDED);
                         mainController.refreshGuide();
+                        gameManager.resetAfkCount(gameManager.getCurrentPlayer());
+                        gameManager.setAutoControlled(gameManager.getCurrentPlayer(), false);
                         gameLoop.proceedAfterAction();
                         return;
                     }
@@ -248,6 +252,8 @@ public class HumanTurnController {
 
                         mainController.updateAllDecksDisplay();
                         mainController.refreshGuide();
+                        gameManager.resetAfkCount(gameManager.getCurrentPlayer());
+                        gameManager.setAutoControlled(gameManager.getCurrentPlayer(), false);
                         gameLoop.proceedAfterAction();
                         return;
                     }
@@ -501,6 +507,8 @@ public class HumanTurnController {
                     }
                     gameBoardView.showPlayerCards(player);
                     mainController.refreshGuide();
+                    gameManager.resetAfkCount(gameManager.getCurrentPlayer());
+                    gameManager.setAutoControlled(gameManager.getCurrentPlayer(), false);
                     gameLoop.proceedAfterAction();
                 });
                 hideTimer.setRepeats(false);
@@ -535,6 +543,8 @@ public class HumanTurnController {
                 replaceFirstRow = -1;
                 replaceFirstCol = -1;
 
+                gameManager.resetAfkCount(gameManager.getCurrentPlayer());
+                gameManager.setAutoControlled(gameManager.getCurrentPlayer(), false);
                 gameLoop.proceedAfterAction();
                 break;
 
@@ -637,6 +647,8 @@ public class HumanTurnController {
         gameBoardView.showPlayerCards(currentPlayer);
         mainController.updateAllDecksDisplay();
         gameBoardView.setActionGuide("TRADE terminé !");
+        gameManager.resetAfkCount(gameManager.getCurrentPlayer());
+        gameManager.setAutoControlled(gameManager.getCurrentPlayer(), false);
         gameLoop.proceedAfterAction();
     }
 
@@ -652,6 +664,8 @@ public class HumanTurnController {
             actionMode = ActionMode.NONE;
             gameBoardView.showPlayerCards(currentPlayer);
             gameBoardView.setActionGuide("DROP : aucun joueur");
+            gameManager.resetAfkCount(gameManager.getCurrentPlayer());
+            gameManager.setAutoControlled(gameManager.getCurrentPlayer(), false);
             gameLoop.proceedAfterAction();
             return;
         }
@@ -734,6 +748,8 @@ public class HumanTurnController {
             gameBoardView.showOtherPlayerMain(false);
             gameBoardView.showPlayerCards(currentPlayer);
             gameBoardView.setActionGuide("DROP : tous les joueurs ont été affectés");
+            gameManager.resetAfkCount(gameManager.getCurrentPlayer());
+            gameManager.setAutoControlled(gameManager.getCurrentPlayer(), false);
             gameLoop.proceedAfterAction();
             return;
         }

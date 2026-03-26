@@ -27,6 +27,7 @@ public class GameBoardController {
     GameBoardView gameBoardView;
     GameManager gameManager;
 
+    private boolean timerEnabled = false;
     private GameLoop gameLoop;
     private HumanTurnController humanTurnController;
 
@@ -56,10 +57,13 @@ public class GameBoardController {
 
         this.timeoutTurnController = new TimeoutTurnController(gameBoardView, gameManager, this, gameLoop);
         this.gameLoop.setTimeoutController(timeoutTurnController);
-
+        
         this.humanTurnController = new HumanTurnController(gameBoardView, gameManager, this, gameLoop);
         humanTurnController.installListeners();
         
+        gameBoardView.setTimerVisible(timerEnabled);
+        gameLoop.setTimerEnabled(timerEnabled);
+
         InputMap im = gameBoardView.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap am = gameBoardView.getActionMap();
 

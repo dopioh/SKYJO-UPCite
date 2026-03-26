@@ -1,7 +1,7 @@
 package fr.upc.cr1a.model;
 
 import java.util.List;
-
+import java.util.HashMap;
 import javax.swing.Timer;
 
 import fr.upc.cr1a.controller.GameBoardController;
@@ -40,6 +40,9 @@ public class GameManager {
 
     private boolean gameWithAction = false; // true si on utilise les actions
     
+    private HashMap<PlayerModel, Integer> afkCounts = new HashMap<>();
+    private HashMap<PlayerModel, Boolean> autoControlledPlayers = new HashMap<>();
+
     /*
     *classe local enum pour gérer les états du jeu
     */
@@ -658,4 +661,24 @@ public class GameManager {
             }
         }
     }   
+
+    public int getAfkCount(PlayerModel player) {
+        return afkCounts.getOrDefault(player, 0);
+    }
+
+    public void registerAfkTurn(PlayerModel player) {
+        afkCounts.put(player, getAfkCount(player) + 1);
+    }
+
+    public void resetAfkCount(PlayerModel player) {
+        afkCounts.put(player, 0);
+    }
+
+    public boolean isAutoControlled(PlayerModel player) {
+        return autoControlledPlayers.getOrDefault(player, false);
+    }
+
+    public void setAutoControlled(PlayerModel player, boolean value) {
+        autoControlledPlayers.put(player, value);
+    }
 }

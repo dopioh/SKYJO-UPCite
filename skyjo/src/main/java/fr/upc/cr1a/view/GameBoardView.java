@@ -951,6 +951,12 @@ public class GameBoardView extends JPanel {
         pauseOverlay.repaint();
     }
 
+    public void setTimerVisible(boolean visible) {
+        if (turnTimerLabel != null) {
+            turnTimerLabel.setVisible(visible);
+        }
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);

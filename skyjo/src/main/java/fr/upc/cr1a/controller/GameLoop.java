@@ -12,7 +12,8 @@ import javax.swing.Timer;
  */
 public class GameLoop {
     
-    private static final int TURN_DURATION_SECONDS = 45;
+    private static final int TURN_DURATION_SECONDS = 5; // Test de Timer ICI
+    private boolean timerEnabled; 
 
     private Timer turnCountdownTimer;
     private int remainingSeconds;
@@ -132,7 +133,19 @@ public class GameLoop {
         
         PlayerModel currentPlayer = gameManager.getCurrentPlayer();
         gameBoardView.showPlayerCards(currentPlayer);
-
+        if (!(currentPlayer instanceof BotModel) && gameManager.isAutoControlled(currentPlayer)) {
+            stopTurnCountdown();
+            gameBoardView.setTurnTimerText("--");
+            Timer autoPlayDelay = new Timer(800, e -> {
+                if (!gameActive || paused) return;
+                if (timeoutController != null) {
+                    timeoutController.handleTimeoutForCurrentPlayer();
+                }
+            });
+            autoPlayDelay.setRepeats(false);
+            autoPlayDelay.start();
+            return;
+        }
         if (humanController != null) {
             humanController.refreshGuide();
         }
@@ -149,6 +162,10 @@ public class GameLoop {
     }
 
     private void startTurnCountdown() {
+        if (!timerEnabled) {
+            gameBoardView.setTurnTimerText("--");
+            return;
+        }
         stopTurnCountdown();
         remainingSeconds = TURN_DURATION_SECONDS;
         gameBoardView.setTurnTimerText(""+remainingSeconds);
@@ -181,6 +198,7 @@ public class GameLoop {
     }
 
     private void handleTurnTimeout() {
+        if (!timerEnabled) return;
         if (paused) return;
         if (!isGameActive()) return;
         stopTurnCountdown();
@@ -194,7 +212,11 @@ public class GameLoop {
             }
             return;
         }
-        if (timeoutController != null) {
+        gameManager.registerAfkTurn(currentPlayer);       
+        if (gameManager.getAfkCount(currentPlayer) >= 2) {
+            gameManager.setAutoControlled(currentPlayer, true);
+        }
+        if(timeoutController != null) {
             timeoutController.handleTimeoutForCurrentPlayer();
         }
     }
@@ -204,11 +226,26 @@ public class GameLoop {
         if (paused) {
             stopTurnCountdown();
         } else {
-            startTurnCountdown();
+            PlayerModel currentPlayer = gameManager.getCurrentPlayer();
+            if (currentPlayer != null && !(currentPlayer instanceof BotModel) && !gameManager.isAutoControlled(currentPlayer)) {
+                startTurnCountdown();
+            } else {
+                gameBoardView.setTurnTimerText("--");
+            }
         }
     }
 
     public void setTimeoutController(TimeoutTurnController timeoutController) {
         this.timeoutController = timeoutController;
+    }
+
+    public void setTimerEnabled(boolean enabled) {
+        this.timerEnabled = enabled;
+        if (!enabled) {
+            stopTurnCountdown();
+            gameBoardView.setTurnTimerText("--");
+        } else {
+            startTurnCountdown();
+        }
     }
 }
