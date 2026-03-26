@@ -60,7 +60,7 @@ public class MainMenuController {
     }
 
     private void clicPlay() {
-        //audio.playBgm("/music/calmbgm.wav");
+        view.cleanup();
         frame.showPanel("GAME_MODE");
     }
 

@@ -108,7 +108,9 @@ public class DoodleButton extends JComponent {
 
     private void stopAnim() {
         scribbleProgress = 0f;
-        startAnimationTimer();
+        animRunning = false;
+        AnimLoop.remove(this);
+        repaint();
     }
 
     @Override
