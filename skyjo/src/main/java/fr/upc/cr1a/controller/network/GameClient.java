@@ -3,9 +3,9 @@ package fr.upc.cr1a.controller.network;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
+//import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 
 import fr.upc.cr1a.model.PlayerData;
 import java.io.*;
@@ -42,6 +42,21 @@ public class GameClient {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+
+        }
+    }
+
+    public void disconnect(){
+        try {
+            if (socket != null && !socket.isClosed()){
+                socket.close();
+            }
+
+            if (in != null) in.close();
+            if (out != null) out.close();
+            System.out.println("[CLIENT] Déconnecté du serveur");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -55,15 +70,22 @@ public class GameClient {
             }
         } catch (Exception e) {
             System.out.println("[CLIENT] Déconnecté du serveur.");
-            //e.printStackTrace();
+            e.printStackTrace();
+        } finally {
+            disconnect();
         }
     }
 
-    /* // test host
+    // test host
     public static void main(String[] args) {
         GameHost gm = new GameHost(1234);
         gm.startServer();
-    }
-    */
 
+        double deltaTime = System.currentTimeMillis();
+
+        while (System.currentTimeMillis() - deltaTime < 20000 ){} 
+
+        //System.out.println("[SERVEUR] Fermerture du serveur et deconnexion de tous les clients.");
+        gm.stopServer();
+    }
 }

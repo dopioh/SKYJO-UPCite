@@ -22,13 +22,37 @@ public class GameHost implements Runnable{ // GameServer au lieu de GameHost ?
 
     private HashMap<String, String> lobbyPlayers = new HashMap<>();
 
+    private Thread thread;
+
     public GameHost(int port){
         this.port = port;
+        this.thread = new Thread(this);
     }
 
     public void startServer(){
         isRunning = true;
-        new Thread(this).start();
+        thread.start();
+    }
+
+    // methode pour fermer un serveur ( GameHost ) et kick tous les membres dedans
+    public void stopServer(){
+        isRunning = false;
+        try {
+            if (serverSocket != null && !serverSocket.isClosed() ){
+                serverSocket.close();
+            }
+
+            for (ClientHandler clientHandler : connectedClient){
+                clientHandler.closeClient();
+            }
+            //connectedClient.clear(); la trace des clients connecté on la garde non ? 
+            lobbyPlayers.clear();
+            System.out.println("[SERVEUR] Fermerture du serveur et deconnexion de tous les clients.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        thread.interrupt(); // ça stop/detruit completement contrairement à sleep // pas vrmt..? isInterrupt()
     }
 
     @Override
@@ -50,8 +74,14 @@ public class GameHost implements Runnable{ // GameServer au lieu de GameHost ?
             }
 
         } catch (Exception e) {
-            isRunning = false;
-            e.printStackTrace();
+
+            if (isRunning) { // erreur imprevu
+                isRunning = false;
+                e.printStackTrace();
+
+            } else { // erreur prevu
+                System.out.println("[SERVEUR] Le thread du serveur s'est arrêté proprement.");
+            }
         }
     }
 
@@ -75,7 +105,40 @@ public class GameHost implements Runnable{ // GameServer au lieu de GameHost ?
         }
     }
 
-    /* // second test client simultané ( faut un host compatible )
+    public void kickPlayer(String id){ // plus sécu avec l'id que l'username
+        for ( ClientHandler client : connectedClient ){
+            if (client.getID().equals(id)){
+                String username = client.getUsername();
+                removeClient(client, id, username);
+                client.closeClient();
+
+                System.out.println("[SERVEUR] Expulsion du joueur : " + username);
+
+                break; // ça sert à rien de parcourir le reste
+            }
+        }
+    }
+
+    // 
+    /**
+     * Methode auxillaire pour disconnect qqln avec que son username
+     * Mais appelé en methode principale dans le finally de ClientHandler.run()
+     * @param clientHandler
+     * @param id
+     * @param username
+     */
+    public void removeClient(ClientHandler clientHandler, String id, String username){
+       connectedClient.remove(clientHandler);
+
+       if (id != null){
+        lobbyPlayers.remove(id); // faut mettre la key
+        System.out.println("[SERVEUR] " + username + " a quitté le salon");
+
+        broadcastLobbyUpdate();
+       }
+    }
+
+    // second test client simultané ( faut un host compatible )
     public static void main(String[] args) {
         PlayerData player = new PlayerData("9846220");
 
@@ -83,5 +146,4 @@ public class GameHost implements Runnable{ // GameServer au lieu de GameHost ?
 
         gameClient.connect("localhost", 1234);
     }
-    */
 }

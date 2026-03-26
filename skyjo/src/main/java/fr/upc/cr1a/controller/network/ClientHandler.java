@@ -20,6 +20,9 @@ public class ClientHandler implements Runnable{
     private PrintWriter out;
     private BufferedReader in;
 
+    private String id;
+    private String username;
+
     public ClientHandler(Socket clientSocket,GameHost gameHost){
         this.clientSocket = clientSocket;
         this.gameHost = gameHost;
@@ -46,14 +49,14 @@ public class ClientHandler implements Runnable{
                     System.out.println("[SYSTEM] message start with \"JOIN\"");
                     String[] parts = message.split(":");
 
-                    for ( int i = 0 ; i < parts.length ; i++){
-                        System.out.println("[SYSTEM] parts[" + i + "] = " + parts[i]);
-                    }
+                    //for ( int i = 0 ; i < parts.length ; i++){
+                    //    System.out.println("[SYSTEM] parts[" + i + "] = " + parts[i]);
+                    //}
                 
                     if (parts.length == 3){
                         System.out.println("[SYSTEM] parts has lenght 3");
-                        String username = parts[1];
-                        String id = parts[2];
+                        this.username = parts[1];
+                        this.id = parts[2];
                      
                         gameHost.addPlayerToLobby(id, username);
                         out.println("[LOBBY_UPDATE] Tu es bien connecté au serveur !");
@@ -63,11 +66,34 @@ public class ClientHandler implements Runnable{
 
         } catch (Exception e) {
             System.out.println("[CLIENT] Déconnecté du serveur.");
+            //e.printStackTrace();
+        } finally {
+            gameHost.removeClient(this, id, username);
+        }
+    }
+
+    public void closeClient(){
+        try {
+            if (clientSocket != null && !clientSocket.isClosed()){
+                clientSocket.close();
+            }
+            if (in != null) in.close();
+            if (out != null) out.close();
+            System.out.println("[SERVEUR] ClientHandler fermé -- deconnexion du Client");
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    /* // Classe test client ( ne marche que si y'a un host correspondant)
+    public String getID(){
+        return this.id;
+    }
+
+    public String getUsername(){
+        return this.username;
+    }
+
+    // test client ( ne marche que si y'a un host correspondant)
     public static void main(String[] args) {
         PlayerData player = new PlayerData("POPOPO");
 
@@ -75,5 +101,4 @@ public class ClientHandler implements Runnable{
 
         gameClient.connect("localhost", 1234);
     }
-    */
 }
