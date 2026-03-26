@@ -321,4 +321,9 @@ public class GameBoardController {
         setWaitingNextTurn(false);
         gameLoop.setPaused(false);
     }
+
+    public void toggleTimer(boolean enabled) { /// IMPORTANT ICI ICI ICI ICI plus tard pour les différents type de parties
+        gameBoardView.setTimerVisible(enabled);
+        gameLoop.setTimerEnabled(enabled);
+    }
 }

@@ -255,7 +255,7 @@ Gère toutes les entrées du joueur avec l'ordinateur
     * Méthode : **ActionListener pour backButton, tabJeu, tabAudio, tabAutres, fullscreenButton, soundButton, volumeButtons**
 
 * **GameBoardController** : Controller pour le Plateau de jeu (la partie)
-    * Méthode : **listener()**, **nextPlayerSound()**, **showRoundEndScreen()**, **ContinueRound()**, **refreshGuide()**, **updateAllDecksDisplay()**
+    * Méthode : **listener()**, **nextPlayerSound()**, **showRoundEndScreen()**, **ContinueRound()**, **refreshGuide()**, **updateAllDecksDisplay()** , **toggleTimer()**
     * Méthode (boucle de jeu) : **requestEndTurnFromBot()**, **showRoundEndScreenFromLoop()**
     * **setWaitingNextTurn()**, **isWaitingNextTurn()**, **togglePauseOverlay()**
 
