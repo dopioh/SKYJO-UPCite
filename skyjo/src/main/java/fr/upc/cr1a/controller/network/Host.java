@@ -3,12 +3,7 @@ package fr.upc.cr1a.controller.network;
 import fr.upc.cr1a.controller.network.UDP.UDPBroadcaster;
 //import fr.upc.cr1a.controller.network.connexion.GameClient;
 import fr.upc.cr1a.controller.network.connexion.GameHost;
-/*
-port unique pour ceux qui veulent (donc pour se connecter à un salon privé)
-mais sinon ça sera un port unique du genre 1234 pour tout le monde ? 
-
-mettre cette classe dans model ? 
- */
+import fr.upc.cr1a.model.player.PlayerAccount;
 
 /**
  * Classe appelé lorqu'un joueur crée un salon
@@ -16,9 +11,9 @@ mettre cette classe dans model ?
  */
 public class Host {
     private GameHost gameHost;
-    private static final int port = 1234;
+    private static final int port = 1234; // c'est 1234 dans Client aussi, au cas on modif ici faut modif la bas aussi
 
-    //private GameClient gameClient; normalement un host est un client aussi ? 
+    private Client client; //normalement un host est un client aussi ? 
 
     // viens de l'interface user
 
@@ -31,6 +26,12 @@ public class Host {
     private Thread threadBroadcast;
 
 
+    /**
+     * Ce constructeur doit etre appelé lorsque un joueur creer un salon ( avec tous les parametres renseignés )
+     * @param nbrPlayers max 8 mais le joueur peux decider entre 2 et 8 inclus
+     * @param modeAction 
+     * @param lobbyName nom du lobby (exp "Salon de Mei")
+     */
     public Host( int nbrPlayers, boolean modeAction, String lobbyName){
         //this.port = port;
         this.gameHost = new GameHost(port);
@@ -42,12 +43,14 @@ public class Host {
 
         this.gameHost.startServer();
 
+        this.client = new Client(PlayerAccount.actuelAccount);
+        client.connect("localhost"); // l'host va se connecter sur son propre pc donc localhost
+
         startBroadcasting();
     }
 
     /**
      * Envoie un msg sur toutes les cartes reseaux de l'Host pour dire qu'il y'a un serveur dispo
-     * 
      * Methode qui envoie un signal en boucle automatiquement
      */
     public void startBroadcasting(){
@@ -62,7 +65,7 @@ public class Host {
                 UDPBroadcaster.broadcast(port, message);
                 
                 try {
-                    Thread.sleep(1500);  // on attend 1.5 sec avant de relancer ( le signe est lancé pdt une minute en continue)
+                    Thread.sleep(1500);  // on attend 1.5 sec avant de relancer
                 } catch (InterruptedException e) {
                     // fermeture du salon ( ou lancement d'une partie)
                     isBroadcasting = false;
@@ -75,6 +78,10 @@ public class Host {
 
     }
 
+    /**
+     * Lorsque l'hote lance la partie, il faut arreter le Broadcast puisqu'il ne cherche plus de joueur pour son salon
+     * Risque d'excptions si on stop pas le BroadCast quand l'hote est en game
+     */
     public void stopBroadcasting(){
         if (isBroadcasting){
             threadBroadcast.interrupt();
@@ -82,10 +89,18 @@ public class Host {
         }
     }
 
+    /**
+     * Quand l'hote se deconnecte ( avec la methode ici),
+     * Alors ça deconnecte egalement tous les joueurs du lobby proprement
+     */
     public void quit(){
         gameHost.stopServer();
     }
 
+    /**
+     * L'hote peut kick un joueur en particulier de son lobby en ayant juste son ID
+     * @param id
+     */
     public void kickPlayer(String id){
         gameHost.kickPlayer(id);
     }

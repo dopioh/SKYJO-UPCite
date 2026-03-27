@@ -5,7 +5,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import fr.upc.cr1a.model.PlayerData;
+import fr.upc.cr1a.model.player.PlayerData;
 
 /**
  * Sert à heberger un serveur sur le pc d'un joueur

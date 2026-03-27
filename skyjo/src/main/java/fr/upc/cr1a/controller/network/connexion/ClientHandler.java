@@ -9,7 +9,7 @@ import java.util.HashSet;
 
 import fr.upc.cr1a.controller.network.UDP.ServerListener;
 import fr.upc.cr1a.controller.network.UDP.UDPReceiver;
-import fr.upc.cr1a.model.PlayerData;
+import fr.upc.cr1a.model.player.PlayerData;
 
 /**
  * Classe Runnable qui gère la connexion entre le host (server) et le client

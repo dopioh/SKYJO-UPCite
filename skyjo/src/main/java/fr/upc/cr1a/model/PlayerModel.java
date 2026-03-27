@@ -3,6 +3,7 @@ package fr.upc.cr1a.model;
 import java.util.ArrayList;
 
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
+import fr.upc.cr1a.model.player.PlayerData;
 
 /**
  * Modèle représentant un joueur

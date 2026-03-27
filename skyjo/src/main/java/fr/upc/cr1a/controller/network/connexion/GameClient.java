@@ -8,7 +8,8 @@ import java.net.Socket;
 //import java.util.ArrayList;
 
 import fr.upc.cr1a.controller.network.UDP.UDPBroadcaster;
-import fr.upc.cr1a.model.PlayerData;
+import fr.upc.cr1a.model.player.PlayerData;
+
 import java.io.*;
 
 /**

@@ -18,7 +18,7 @@ import javax.swing.JTextField;
 
 import fr.upc.cr1a.model.AudioManager;
 import fr.upc.cr1a.model.GameManager;
-import fr.upc.cr1a.model.PlayerData;
+import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.view.DoodleButton;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.PlayersSetupPanel;

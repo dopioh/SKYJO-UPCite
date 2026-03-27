@@ -6,6 +6,7 @@ import javax.swing.Timer;
 
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
+import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
 
