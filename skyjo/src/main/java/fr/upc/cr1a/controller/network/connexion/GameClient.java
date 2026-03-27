@@ -35,7 +35,7 @@ public class GameClient {
             this.out = new PrintWriter(socket.getOutputStream(), true); 
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            out.println("JOIN : " + playerData.getUsername() +" : "+ playerData.getID()); // on envoie une requete de connexion
+            out.println("JOIN :" + playerData.getUsername() +":"+ playerData.getID()); // on envoie une requete de connexion
             // System.out.println(); -> print console alors que l'autre est envoyé au receveur
 
             new Thread(this::listenerToServer).start();

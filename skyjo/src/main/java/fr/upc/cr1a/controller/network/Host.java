@@ -16,7 +16,7 @@ mettre cette classe dans model ?
  */
 public class Host {
     private GameHost gameHost;
-    private int port;
+    private static final int port = 1234;
 
     //private GameClient gameClient; normalement un host est un client aussi ? 
 
@@ -27,24 +27,58 @@ public class Host {
 
     private final String lobbyName; // ça ça bouge pas par contre
 
+    private boolean isBroadcasting = false;
+    private Thread threadBroadcast;
 
-    public Host(int port, int nbrPlayers, boolean modeAction, String lobbyName){
-        this.port = port;
+
+    public Host( int nbrPlayers, boolean modeAction, String lobbyName){
+        //this.port = port;
         this.gameHost = new GameHost(port);
         
         this.nunmberPlayersMax = nbrPlayers;
         this.modeAction = modeAction;
 
         this.lobbyName = lobbyName;
+
+        this.gameHost.startServer();
+
+        startBroadcasting();
     }
 
     /**
      * Envoie un msg sur toutes les cartes reseaux de l'Host pour dire qu'il y'a un serveur dispo
      * 
-     * sendSignals devra etre appelé à chaque fois qu'un parametre aura changé
+     * Methode qui envoie un signal en boucle automatiquement
      */
-    public void sendSignals(){
-        UDPBroadcaster.broadcast(this.port, lobbyName);
+    public void startBroadcasting(){
+        isBroadcasting = true;
+
+        //UDPBroadcaster.broadcast(this.port, lobbyName);
+        this.threadBroadcast = new Thread(() -> {
+            while (isBroadcasting) {
+                
+                String message = lobbyName + ":" + nunmberPlayersMax + ":" + modeAction;
+                
+                UDPBroadcaster.broadcast(port, message);
+                
+                try {
+                    Thread.sleep(1500);  // on attend 1.5 sec avant de relancer ( le signe est lancé pdt une minute en continue)
+                } catch (InterruptedException e) {
+                    // fermeture du salon ( ou lancement d'une partie)
+                    isBroadcasting = false;
+                    break;
+                }
+            }
+        });
+
+    }
+
+    public void quit(){
+        gameHost.stopServer();
+    }
+
+    public void kickPlayer(String id){
+        gameHost.kickPlayer(id);
     }
 
     // getter 
@@ -66,9 +100,10 @@ public class Host {
 
     public void setNbrPlayer(int nbrPlayers){
         this.nunmberPlayersMax = nbrPlayers;
-        sendSignals();
     }
 
-    //public void 
+    public void setModeAction(boolean isModeAction){
+        this.modeAction = isModeAction;
+    }
 
 }

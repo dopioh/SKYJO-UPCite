@@ -45,7 +45,7 @@ public class GameHost implements Runnable{ // GameServer au lieu de GameHost ?
             for (ClientHandler clientHandler : connectedClient){
                 clientHandler.closeClient();
             }
-            //connectedClient.clear(); la trace des clients connecté on la garde non ? 
+            connectedClient.clear(); //la trace des clients connecté on la garde non ? 
             lobbyPlayers.clear();
             System.out.println("[SERVEUR] Fermerture du serveur et deconnexion de tous les clients.");
         } catch (Exception e) {
