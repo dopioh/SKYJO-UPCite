@@ -1,4 +1,4 @@
-package fr.upc.cr1a.controller.network;
+package fr.upc.cr1a.controller.network.UDP;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -13,14 +13,26 @@ public class UDPReceiver implements Runnable{
 
     // volatile protection de variable en multithreads comme synchronised pour les fonctions
     private volatile boolean isListening = true;
+    private Thread thread;
+    private ServerListener serverListener;
 
-    public UDPReceiver(int listenPort){
+    public UDPReceiver(int listenPort, ServerListener serverListener){
         this.listenPort = listenPort;
+        this.serverListener = serverListener;
+        this.thread = new Thread(this);
     }
 
-    public void stopListening() {
-        isListening = false;
+    public void start(){
+        isListening = true;
+        thread.start();
     }
+
+    public void stop(){
+        isListening = false;
+        thread.interrupt();
+    }
+
+
 
     @Override
     public void run(){
@@ -46,7 +58,10 @@ public class UDPReceiver implements Runnable{
                     
                     System.out.println("[UDP CLIENT] Serveur trouvé à l'IP : " + serverIp + " | Message : " + message);
                     
-                    // CALL UNE METHODE QUI PREVIENT QU'ON A TROUVER UN SERVEUR ICI ICI ICI
+                    // CALL UNE METHODE QUI PREVIENT QU'ON A TROUVER UN SERVEUR ICI ICI ICI ET QU'ON SE CONNECTTE ICI
+                    if (serverListener != null) {
+                        serverListener.foundServer(message,serverIp);
+                    }
                     
                 } catch (SocketTimeoutException e) {
                     // rien à catch, les exceptions sont normals

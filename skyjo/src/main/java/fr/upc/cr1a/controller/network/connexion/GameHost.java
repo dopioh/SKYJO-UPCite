@@ -1,4 +1,4 @@
-package fr.upc.cr1a.controller.network;
+package fr.upc.cr1a.controller.network.connexion;
 
 import java.net.ServerSocket;
 import java.net.Socket;

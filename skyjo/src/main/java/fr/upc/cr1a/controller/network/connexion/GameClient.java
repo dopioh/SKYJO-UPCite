@@ -1,4 +1,4 @@
-package fr.upc.cr1a.controller.network;
+package fr.upc.cr1a.controller.network.connexion;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 //import java.util.ArrayList;
 
+import fr.upc.cr1a.controller.network.UDP.UDPBroadcaster;
 import fr.upc.cr1a.model.PlayerData;
 import java.io.*;
 
@@ -80,6 +81,8 @@ public class GameClient {
     public static void main(String[] args) {
         GameHost gm = new GameHost(1234);
         gm.startServer();
+        
+        UDPBroadcaster.broadcast(1234, "SALEMMMM");
 
         double deltaTime = System.currentTimeMillis();
 
@@ -87,5 +90,6 @@ public class GameClient {
 
         //System.out.println("[SERVEUR] Fermerture du serveur et deconnexion de tous les clients.");
         gm.stopServer();
+        
     }
 }

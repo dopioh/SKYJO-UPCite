@@ -1,10 +1,14 @@
-package fr.upc.cr1a.controller.network;
+package fr.upc.cr1a.controller.network.connexion;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.Socket; 
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.HashSet;
 
+import fr.upc.cr1a.controller.network.UDP.ServerListener;
+import fr.upc.cr1a.controller.network.UDP.UDPReceiver;
 import fr.upc.cr1a.model.PlayerData;
 
 /**
@@ -95,10 +99,26 @@ public class ClientHandler implements Runnable{
 
     // test client ( ne marche que si y'a un host correspondant)
     public static void main(String[] args) {
-        PlayerData player = new PlayerData("POPOPO");
+        //PlayerData player = new PlayerData("POPOPO");
 
-        GameClient gameClient = new GameClient(player);
+        //GameClient gameClient = new GameClient(player);
 
-        gameClient.connect("localhost", 1234);
+        //gameClient.connect("localhost", 1234);
+
+        HashMap<String,String> lobbyfound = new HashMap<>();
+
+        System.out.println("[MAIN] Lancement du test Récepteur...");
+
+        UDPReceiver receiver = new UDPReceiver(1234, new ServerListener() { // pq -> ça marche pas ??? c'est une interface fonctionnel pourtant
+            @Override
+            public void foundServer(String msg, String ip) {
+                if (!lobbyfound.containsKey(ip)){
+                    lobbyfound.put(ip, msg);
+                }
+            }
+        });
+        receiver.start();
+
+        System.out.println("[MAIN] Thread lancé. Le programme doit rester ouvert en écoutant.");
     }
 }
