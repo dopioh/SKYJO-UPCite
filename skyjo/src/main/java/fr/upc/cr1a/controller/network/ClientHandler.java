@@ -3,7 +3,7 @@ package fr.upc.cr1a.controller.network;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.Socket; 
+import java.net.Socket;
 
 import fr.upc.cr1a.model.PlayerData;
 
