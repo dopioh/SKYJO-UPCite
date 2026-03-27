@@ -75,6 +75,13 @@ public class Host {
 
     }
 
+    public void stopBroadcasting(){
+        if (isBroadcasting){
+            threadBroadcast.interrupt();
+            isBroadcasting = false;
+        }
+    }
+
     public void quit(){
         gameHost.stopServer();
     }

@@ -32,13 +32,13 @@ public class Client {
                 if (!lobbyfound.containsKey(ip)){
                     lobbyfound.put(ip, msg);
 
-                    System.out.println("[INFO] NOUVEAU SALON : " + msg + " (IP: " + ip + ")");
+                    //System.out.println("[INFO] NOUVEAU SALON : " + msg + " (IP: " + ip + ")"); // pas besoin de le mettre ici, ca print deja a partir de l'UDPCLIENT
                 }
             }
         });
         receiver.start();
         double deltaTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - deltaTime < 2000 ){} 
+        while (System.currentTimeMillis() - deltaTime < 2000 ){} // cherche pdt 2 secondes et apres arrete, on peut modif la valeur si on se rends compte qu'il galere a trouver tous les serveur en 2 secondes
         receiver.stop();
     }
 
@@ -48,5 +48,16 @@ public class Client {
 
     public void disconnect(){
         gameClient.disconnect();
+    }
+
+    public HashMap<String,String> getLobbyAvailable(){
+        return this.lobbyfound;
+    }
+
+
+    public static void main(String[] args) {
+        Client client = new Client(new PlayerData("testID"));
+        
+        client.getLobbyAvailable().forEach((ip,info) -> System.out.println("Serveur a l'adresse " + ip + " : " + info));
     }
 }
