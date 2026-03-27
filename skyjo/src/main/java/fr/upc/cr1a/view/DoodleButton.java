@@ -97,6 +97,13 @@ public class DoodleButton extends JComponent {
             if (model.isHovered() && scribbleProgress < 1f) {
                 scribbleProgress = Math.min(scribbleProgress + 0.15f * (float) dt, 1f);
             }
+
+            // Arrête l'animation quand tout est revenu à l'état normal
+            if (!model.isHovered() && scribbleProgress == 0f && Math.abs(hoverScale - 1.0f) < 0.001f) {
+                animRunning = false;
+                AnimLoop.remove(this);
+            }
+
             repaint();
         });
     }
@@ -108,7 +115,6 @@ public class DoodleButton extends JComponent {
 
     private void stopAnim() {
         scribbleProgress = 0f;
-        startAnimationTimer();
     }
 
     @Override

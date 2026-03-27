@@ -63,6 +63,11 @@ public class GameBoardModel {
     public void retourMenuCalled(){
         System.out.println("Retour au menu");
         if (frame != null) {
+            GameManager  game = frame.getCurrentGame();
+            if (game != null) {
+                game.stopGame();
+            }
+            frame.clearCurrentGame();
             frame.showPanel("MENU");
         }
     }

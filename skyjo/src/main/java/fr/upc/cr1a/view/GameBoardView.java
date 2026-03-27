@@ -9,6 +9,7 @@ import javax.swing.*;
 
 import fr.upc.cr1a.model.ActionCardModel;
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
+import fr.upc.cr1a.model.AnimLoop;
 import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.NumberCardModel;
 import fr.upc.cr1a.model.PlayerHandModel;
@@ -17,8 +18,6 @@ import fr.upc.cr1a.utils.ImageCache;
 
 /**
  * Vue graphique du plateau de jeu avec affichage des cartes et boutons joueurs
- * 
- * @author Mei, Ian, Hugo, Nassim
  */
 public class GameBoardView extends JPanel {
 
@@ -34,12 +33,10 @@ public class GameBoardView extends JPanel {
     // panel :
     private JPanel zonePlayer;
     private JPanel zonePlateau;
+    private PauseOverlayPanel pauseOverlay;
 
     // grille de boutons cartes
     private CardButton[][] cardButtons;
-
-    // bouton retour vers le menu
-    private JButton btnRetour;
 
     // joueur actuellement affiche
     private PlayerModel currentPlayer;
@@ -110,6 +107,9 @@ public class GameBoardView extends JPanel {
     // Panel de l'entre round
     NextRoundPanel nextRoundPanel;
 
+    // Temps pour les tours
+    private JLabel turnTimerLabel;
+
     // Panel de transition lors du changement de joueur
     private PlayerTransitionPanel transitionPanel;
 
@@ -170,6 +170,10 @@ public class GameBoardView extends JPanel {
         plateauPanel.setLayout(new BorderLayout());
 
         layeredPane.add(plateauPanel, JLayeredPane.DEFAULT_LAYER);
+
+        pauseOverlay = new PauseOverlayPanel();
+        pauseOverlay.setVisible(false);
+        layeredPane.add(pauseOverlay, JLayeredPane.POPUP_LAYER);
 
         // ============================ TOP BAR ========================== (<- Pas IA c'est juste plus lisible)
         JPanel topBar = new JPanel(new BorderLayout()) {
@@ -382,15 +386,18 @@ public class GameBoardView extends JPanel {
         labPiocheAction.setVisible(false);
         labDefausseAction.setVisible(false);
 
-        zonePlateau.add(cardStack, BorderLayout.EAST);
 
-        // bouton retour en bas temporaire
-        btnRetour = new JButton("Retour");
-        btnRetour.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        bottomPanel.setOpaque(false);
-        bottomPanel.add(btnRetour);
-        zonePlateau.add(bottomPanel, BorderLayout.SOUTH);
+        JPanel rightPanel = new JPanel(new BorderLayout());
+        rightPanel.setOpaque(false);
+
+        turnTimerLabel = new JLabel("Temps restant : -- s", SwingConstants.CENTER);
+        turnTimerLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        turnTimerLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        rightPanel.add(turnTimerLabel, BorderLayout.NORTH);
+        rightPanel.add(cardStack, BorderLayout.CENTER);
+
+        zonePlateau.add(rightPanel, BorderLayout.EAST);
 
         // ZONE PREVIEW OTHER PLAYERS ( apparait au dessus de tous les autres panels
         // quand on hover ou clique sur un button)
@@ -638,10 +645,6 @@ public class GameBoardView extends JPanel {
 
     public ArrayList<JButton> getListPlayerButton() {
         return this.buttonlistPlayer;
-    }
-
-    public JButton getBtnRetour() {
-        return this.btnRetour;
     }
 
     public CardButton[][] getCardButtons() {
@@ -906,6 +909,52 @@ public class GameBoardView extends JPanel {
 
     public PlayerPreviewPanel getPlayerPreviewPanel() {
         return this.previewPanel;
+    }
+
+    public void setTurnTimerText(String text) {
+        if (turnTimerLabel != null) {
+            turnTimerLabel.setText("Temps restant : " + text + " s");
+        }
+    }
+
+    /**
+     * Sert à entierement supprimer les instances des cartes animées
+     */
+    public void cleanup() {
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 4; col++) {
+                if (cardButtons[row][col] != null) {
+                    cardButtons[row][col].setAnimationEnabled(false);
+                }
+            }
+        }
+        for (int i = 0; i < actionCardButtons.length; i++) {
+            if (actionCardButtons[i] != null) {
+                actionCardButtons[i].setAnimationEnabled(false);
+            }
+        }
+        AnimLoop.remove(nextRoundPanel);
+        AnimLoop.remove(transitionPanel);
+        AnimLoop.remove(actionDescriptionOverlay);
+        AnimLoop.remove(cursorCardView);
+        transitionPanel.setVisible(false);
+        nextRoundPanel.setVisible(false);
+        actionDescriptionOverlay.setVisible(false);
+    }
+
+    public PauseOverlayPanel getPauseOverlay() {
+        return pauseOverlay;
+    }
+
+    public void showPauseOverlay(boolean visible) {
+        pauseOverlay.setVisible(visible);
+        pauseOverlay.repaint();
+    }
+
+    public void setTimerVisible(boolean visible) {
+        if (turnTimerLabel != null) {
+            turnTimerLabel.setVisible(visible);
+        }
     }
 
     @Override
