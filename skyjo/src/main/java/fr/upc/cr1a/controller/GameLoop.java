@@ -18,6 +18,8 @@ public class GameLoop {
     private Timer turnCountdownTimer;
     private int remainingSeconds;
 
+    private boolean pendingContinueAfterPause = false;
+
     private static final int ACTION_DELAY_MS = 1200;
 
     private final GameManager gameManager;
@@ -59,6 +61,12 @@ public class GameLoop {
             humanController.setWaitingNextTurn(true);
         }
         Timer timer = new Timer(ACTION_DELAY_MS, e -> {
+            if (!gameActive) return;
+            if (paused) {
+                pendingContinueAfterPause = true;
+                return;
+            }
+            pendingContinueAfterPause = false;
             if (humanController != null) {
                 humanController.setWaitingNextTurn(false);
             }
@@ -225,13 +233,24 @@ public class GameLoop {
         this.paused = paused;
         if (paused) {
             stopTurnCountdown();
-        } else {
-            PlayerModel currentPlayer = gameManager.getCurrentPlayer();
-            if (currentPlayer != null && !(currentPlayer instanceof BotModel) && !gameManager.isAutoControlled(currentPlayer)) {
-                startTurnCountdown();
-            } else {
-                gameBoardView.setTurnTimerText("--");
+            return;
+        }
+        if (pendingContinueAfterPause) {
+            pendingContinueAfterPause = false;
+            if (humanController != null) {
+                humanController.setWaitingNextTurn(false);
             }
+            continueFlow();
+            return;
+        }
+        PlayerModel currentPlayer = gameManager.getCurrentPlayer();
+        if (currentPlayer != null && !(currentPlayer instanceof BotModel) && !gameManager.isAutoControlled(currentPlayer)) {
+            if (humanController != null) {
+                humanController.setWaitingNextTurn(false);
+            }
+            startTurnCountdown();
+        } else {
+            gameBoardView.setTurnTimerText("--");
         }
     }
 

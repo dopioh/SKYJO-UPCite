@@ -318,7 +318,6 @@ public class GameBoardController {
     private void closePauseOverlay() {
         pauseOpen = false;
         gameBoardView.showPauseOverlay(false);
-        setWaitingNextTurn(false);
         gameLoop.setPaused(false);
     }
 
