@@ -71,6 +71,8 @@ public class Host {
             }
         });
 
+        this.threadBroadcast.start();
+
     }
 
     public void quit(){
@@ -104,6 +106,11 @@ public class Host {
 
     public void setModeAction(boolean isModeAction){
         this.modeAction = isModeAction;
+    }
+
+    public static void main(String[] args) {
+        Host host = new Host(4, false, "MEI DOMINATION");
+
     }
 
 }

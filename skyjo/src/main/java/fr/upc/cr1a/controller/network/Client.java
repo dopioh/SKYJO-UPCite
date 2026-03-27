@@ -31,10 +31,15 @@ public class Client {
             public void foundServer(String msg, String ip) {
                 if (!lobbyfound.containsKey(ip)){
                     lobbyfound.put(ip, msg);
+
+                    System.out.println("[INFO] NOUVEAU SALON : " + msg + " (IP: " + ip + ")");
                 }
             }
         });
         receiver.start();
+        double deltaTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - deltaTime < 2000 ){} 
+        receiver.stop();
     }
 
     public void connect(String ip){
