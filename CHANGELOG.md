@@ -312,6 +312,8 @@
 
 - Mailmap
 
+-Bouton multiplayer qui va ensuite faire un panel, où sont les salons et pouvoir créer un salon
+
 ### Modified
 - Refactor des checks lignes/colonnes
 
@@ -338,5 +340,12 @@
 - Fix boutons qui ne répondaient pas au premier clic quand la souris arrivait trop vite (`mouseClicked` -> `mousePressed`)
 
 - LAST ROUND
+
+## v.0.9: SPRINT 9
+
+### Added
+
+- les Salons pour le multiplayer
+
 
 
