@@ -347,4 +347,27 @@
 
 - LAST ROUND
 
+## v.0.9: SPRINT 9
+---
 
+### Modified
+
+- `DoodleButton`
+    - ajout du système de positionnement d'icône
+        - `setIconSide(IconSide.RIGHT ou LEFT)` : icône collée au bord
+    - suppression de l'ancien version sans image et nettoyage du code + remplacé les appel vers l'ancien button
+    - possibilité de changer la taille de police
+
+- Page lobby / game mode selection
+    - icone, correction des doodle button, espacement, couleur, font...
+    - fix double clic
+
+- Page PlayersSetup panel
+    - Fond d'écran, police, couleur, espacement...
+    - Bouton Retour et Lancer en haut comme les autres panel
+    - mode Skyjo Action et Boutons nb de joueurs : vert si actif, transparent sinon
+    - Bouton `?` avec popup d'explication des bots
+
+- Page connexion panel
+    - font, couleur, fond, espacement, doodle button
+    - JTextField/mdp plus beau
