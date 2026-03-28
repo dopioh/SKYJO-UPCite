@@ -340,3 +340,15 @@
 - LAST ROUND
 
 
+## v.0.9: SPRINT 9
+
+### Added
+- Boutique avec 3 packs de skins disponibles avec raretés differentes
+
+- Classeur pour voir les skins débloqués
+
+- Equipement des skins dans le classeur
+
+- Système de debloquage de skins v1
+
+- Plusieurs skins
