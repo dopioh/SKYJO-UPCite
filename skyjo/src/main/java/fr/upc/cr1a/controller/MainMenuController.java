@@ -56,7 +56,7 @@ public class MainMenuController {
     }
 
     private void clicShop() {
-        // ici mettreeeee
+        frame.showPanel("SHOP");
     }
 
     private void clicPlay() {

@@ -11,6 +11,7 @@ import fr.upc.cr1a.controller.LobbyBrowserController;
 import fr.upc.cr1a.controller.MainMenuController;
 import fr.upc.cr1a.controller.PlayersSetupController;
 import fr.upc.cr1a.controller.SettingsOverlayController;
+import fr.upc.cr1a.controller.ShopController;
 import fr.upc.cr1a.model.AudioManager;
 import fr.upc.cr1a.utils.ImageCache;
 
@@ -29,6 +30,7 @@ public class Frame extends JFrame{
     private GameModeSelectionPanel gameModeSelectionPanel;
     private LobbyBrowserPanel lobbyBrowserPanel;
     private SettingsOverlay settingsOverlay;
+    private ShopPanel shopPanel;
     private boolean fullscreen = false;
     private Rectangle windowedBounds;
     private final AudioManager audioManager;
@@ -58,6 +60,9 @@ public class Frame extends JFrame{
         mainMenuPanel = new MainMenuPanel();
         add(mainMenuPanel, "MENU");
 
+        shopPanel = new ShopPanel();
+        add(shopPanel, "SHOP");
+
         gameModeSelectionPanel = new GameModeSelectionPanel();
         add(gameModeSelectionPanel, "GAME_MODE");
 
@@ -75,6 +80,7 @@ public class Frame extends JFrame{
         audioManager = new AudioManager();
         new SettingsOverlayController(settingsOverlay, this, audioManager);
         new MainMenuController(this, mainMenuPanel);
+        new ShopController(this, shopPanel);
         new GameModeSelectionController(this, gameModeSelectionPanel);
         new LobbyBrowserController(this, lobbyBrowserPanel);
         new PlayersSetupController(this, playersSetupPanel);
@@ -104,6 +110,9 @@ public class Frame extends JFrame{
             ImageCache.preload(
                 "/plateau/red_bg.png", "/plateau/green_bg.png", "/plateau/yellow_bg.png",
                 "/plateau/red_topbar.png", "/plateau/green_topbar.png", "/plateau/yellow_topbar.png"
+            );
+            ImageCache.preload(
+                "/boutique/nul.png", "/boutique/bof.png", "/boutique/bien.png", "/boutique/GOLDGOLDGOLD.png"
             );
             // son : ouvre et ferme chaque clip pour que Java initialise le mixer audio
             try {
