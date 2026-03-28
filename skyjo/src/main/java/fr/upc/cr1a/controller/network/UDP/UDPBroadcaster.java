@@ -1,4 +1,4 @@
-package fr.upc.cr1a.controller.network;
+package fr.upc.cr1a.controller.network.UDP;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -26,7 +26,7 @@ public class UDPBroadcaster {
             while (interfaces.hasMoreElements()){
                 NetworkInterface singleInterface = interfaces.nextElement();
                 
-                if ( singleInterface.isLoopback() || ! singleInterface.isUp()){ // verifie que la carte reseau est pas localhost ou eteinte 
+                if ( ! singleInterface.isUp()){ // verifie que la carte reseau est pas localhost ou eteinte 
                     continue; // passe à la pro iteration en n'executant pas ce qui se passe apres ça
                 }
 

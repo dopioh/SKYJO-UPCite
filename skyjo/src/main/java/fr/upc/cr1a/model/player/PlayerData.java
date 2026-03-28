@@ -1,4 +1,4 @@
-package fr.upc.cr1a.model;
+package fr.upc.cr1a.model.player;
 
 import java.util.ArrayList;
 

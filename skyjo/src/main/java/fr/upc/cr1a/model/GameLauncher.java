@@ -1,5 +1,6 @@
 package fr.upc.cr1a.model;
 
+import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.view.Frame;
 import java.util.ArrayList;
 import java.util.List;
