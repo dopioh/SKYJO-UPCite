@@ -21,6 +21,9 @@ import java.util.Random;
  */
 public class CaseOpeningOverlayPanel extends JPanel {
 
+    private static ArrayList<String> unlockedSkinPaths = new ArrayList<>();
+    private static String selectedSkinPath = "/cartes/carteDos.png";
+
     private static final int[][] PACK_CHANCES = {
         {80, 15, 5}, // pack 1: 80% commun, 15% rare, 5% legendaire
         {65, 25, 10}, // pack 2: 65% commun, 25% rare, 10% legendaire
@@ -40,8 +43,15 @@ public class CaseOpeningOverlayPanel extends JPanel {
     private static final Color CARD_BORDER_COLOR = new Color(54, 45, 34, 215);
     private static final Color TITLE_COLOR = new Color(46, 38, 26);
     private static final Color RESULT_TEXT_COLOR = new Color(50, 40, 28);
-    private static final Color TILE_BORDER_COLOR = new Color(54, 45, 34, 200);
+    private static final Color TILE_UNLOCKED_COLOR = new Color(58, 150, 83, 230);
+    private static final Color EQUIP_BUTTON_COLOR = new Color(43, 104, 62, 235);
+    private static final Color EQUIP_BUTTON_SELECTED_COLOR = new Color(218, 113, 72, 240);
+    private static final Color EQUIP_BUTTON_BORDER_COLOR = new Color(18, 47, 29, 230);
     private static final Color TILE_NAME_COLOR = Color.WHITE;
+
+    private static final int EQUIP_BUTTON_HEIGHT = 22;
+    private static final int EQUIP_BUTTON_MARGIN_X = 8;
+    private static final int EQUIP_BUTTON_BOTTOM_PADDING = 8;
 
     private final DoodleButton closeButton;
     private final Font titleFont;
@@ -77,21 +87,23 @@ public class CaseOpeningOverlayPanel extends JPanel {
     private static final class SkinItem {
         private final String name;
         private final String description;
+        private final String path;
         private final BufferedImage image;
         private final Rarity rarity;
 
-        private SkinItem(String name, String description, BufferedImage image, Rarity rarity) {
+        private SkinItem(String name, String description, String path, BufferedImage image, Rarity rarity) {
             this.name = name;
             this.description = description;
+            this.path = path;
             this.image = image;
             this.rarity = rarity;
         }
     }
 
-    private final List<SkinItem> allSkins = new ArrayList<>();
-    private final List<SkinItem> communList = new ArrayList<>(); // liste des skins communs dans le tirage
-    private final List<SkinItem> rareList = new ArrayList<>(); // liste des skins rares dans le tirage
-    private final List<SkinItem> legendaireList = new ArrayList<>(); // liste des skins legendaires dans le tirage
+    private List<SkinItem> allSkins = new ArrayList<>();
+    private List<SkinItem> communList = new ArrayList<>(); // liste des skins communs dans le tirage
+    private List<SkinItem> rareList = new ArrayList<>(); // liste des skins rares dans le tirage
+    private List<SkinItem> legendaireList = new ArrayList<>(); // liste des skins legendaires dans le tirage
     private final Random random = new Random();
 
     private int currentPack;
@@ -99,6 +111,8 @@ public class CaseOpeningOverlayPanel extends JPanel {
     private DisplayMode mode = DisplayMode.BOUTIQUE;
 
     public CaseOpeningOverlayPanel() {
+        unlockSkin("/cartes/carteDos.png");
+
         setOpaque(false);
         setLayout(null);
         setVisible(false);
@@ -131,6 +145,13 @@ public class CaseOpeningOverlayPanel extends JPanel {
         });
         add(closeButton);
 
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                handleClasseurClick(e.getPoint());
+            }
+        });
+
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -154,6 +175,9 @@ public class CaseOpeningOverlayPanel extends JPanel {
         mode = DisplayMode.BOUTIQUE;
         currentPack = packNumber;
         winSkin = rollWinSkin(currentPack);
+        if (winSkin != null) {
+            unlockSkin(winSkin.path);
+        }
 
         closeButton.setEnabled(true);
         closeButton.onMouseExit();
@@ -251,7 +275,10 @@ public class CaseOpeningOverlayPanel extends JPanel {
 
     // dessine un skin dans le classeur ou dans l'ouverture
     private void drawSkinBox(Graphics2D g2, SkinItem item, int x, int y, int width, int height, boolean showDescription) {
-        drawTileBackground(g2, item, x, y, width, height);
+        boolean inClasseur = !showDescription;
+        boolean isUnlocked = isSkinUnlocked(item.path);
+        boolean isSelected = item.path.equals(getSelectedSkinPath());
+        drawTileBackground(g2, item, x, y, width, height, inClasseur && isUnlocked, inClasseur && isSelected);
 
         if (showDescription) { // dans le classeur on affiche pas la description
             g2.setFont(tileNameLargeFont);
@@ -279,21 +306,88 @@ public class CaseOpeningOverlayPanel extends JPanel {
         }
 
         int imageTopPadding = 8;
-        int imageBottomMargin = 32;
+        int imageBottomMargin = isUnlocked ? 62 : 34;
         int imageAvailableH = Math.max(30, height - imageTopPadding - imageBottomMargin);
         Rectangle imageBounds = computeImageBounds(item.image, x + 8, y + imageTopPadding, width - 16, imageAvailableH);
         g2.drawImage(item.image, imageBounds.x, imageBounds.y, imageBounds.width, imageBounds.height, null);
 
-        int textY = y + height - 10;
+        int textY = isUnlocked ? y + height - EQUIP_BUTTON_HEIGHT - EQUIP_BUTTON_BOTTOM_PADDING - 8 : y + height - 10;
         drawTileName(g2, item.name, x, width, textY, false);
+
+        if (isUnlocked) {
+            Rectangle buttonBounds = getEquipButtonBounds(x, y, width, height);
+            drawEquipButton(g2, buttonBounds, isSelected);
+        }
     }
 
-    private void drawTileBackground(Graphics2D g2, SkinItem item, int x, int y, int width, int height) {
-        g2.setColor(getRarityColor(item.rarity));
+    private void drawTileBackground(Graphics2D g2, SkinItem item, int x, int y, int width, int height, boolean unlockedInClasseur, boolean selectedInClasseur) {
+        g2.setColor(unlockedInClasseur ? TILE_UNLOCKED_COLOR : getRarityColor(item.rarity));
         g2.fillRoundRect(x, y, width, height, TILE_ARC, TILE_ARC);
-        g2.setColor(TILE_BORDER_COLOR);
-        g2.setStroke(new BasicStroke(3f));
-        g2.drawRoundRect(x, y, width - 1, height - 1, TILE_ARC, TILE_ARC);
+    }
+
+    private void handleClasseurClick(Point clickPoint) {
+        if (!isVisible() || mode != DisplayMode.CLASSEUR) {
+            return;
+        }
+
+        Rectangle card = getCardBounds();
+        int count = allSkins.size();
+        int outerPadding = 22;
+        int gap = 10;
+
+        int contentLeft = card.x + outerPadding;
+        int contentWidth = Math.max(1, card.width - outerPadding * 2);
+        int contentTop = card.y + CLASSEUR_TOP_PADDING;
+        int contentHeight = Math.max(1, card.height - CLASSEUR_TOP_PADDING - 22);
+
+        int maxAllowedWidth = 140;
+        int minAllowedWidth = 72;
+        int tileWidth = (contentWidth - (count - 1) * gap) / count;
+        tileWidth = Math.max(minAllowedWidth, Math.min(maxAllowedWidth, tileWidth));
+        int tileHeight = Math.max(100, (int) Math.round(tileWidth * 1.35));
+
+        int totalRowWidth = count * tileWidth + (count - 1) * gap;
+        int startX = contentLeft + (contentWidth - totalRowWidth) / 2;
+        int startY = contentTop + (contentHeight - tileHeight) / 2;
+
+        for (int i = 0; i < count; i++) {
+            int x = startX + i * (tileWidth + gap);
+            Rectangle bounds = new Rectangle(x, startY, tileWidth, tileHeight);
+            SkinItem clickedSkin = allSkins.get(i);
+            if (!isSkinUnlocked(clickedSkin.path)) {
+                continue;
+            }
+
+            Rectangle buttonBounds = getEquipButtonBounds(bounds.x, bounds.y, bounds.width, bounds.height);
+            if (buttonBounds.contains(clickPoint)) {
+                setSelectedSkinPath(clickedSkin.path);
+                repaint();
+                return;
+            }
+        }
+    }
+
+    private Rectangle getEquipButtonBounds(int x, int y, int width, int height) {
+        int buttonWidth = Math.max(24, width - EQUIP_BUTTON_MARGIN_X * 2);
+        int buttonX = x + (width - buttonWidth) / 2;
+        int buttonY = y + height - EQUIP_BUTTON_BOTTOM_PADDING - EQUIP_BUTTON_HEIGHT;
+        return new Rectangle(buttonX, buttonY, buttonWidth, EQUIP_BUTTON_HEIGHT);
+    }
+
+    private void drawEquipButton(Graphics2D g2, Rectangle bounds, boolean isSelected) {
+        g2.setColor(isSelected ? EQUIP_BUTTON_SELECTED_COLOR : EQUIP_BUTTON_COLOR);
+        g2.fillRoundRect(bounds.x, bounds.y, bounds.width, bounds.height, 12, 12);
+        g2.setColor(EQUIP_BUTTON_BORDER_COLOR);
+        g2.setStroke(new BasicStroke(2f));
+        g2.drawRoundRect(bounds.x, bounds.y, bounds.width - 1, bounds.height - 1, 12, 12);
+
+        String label = isSelected ? "Equipe" : "Equiper";
+        g2.setFont(tileNameSmallFont);
+        g2.setColor(Color.WHITE);
+        FontMetrics fm = g2.getFontMetrics();
+        int tx = bounds.x + (bounds.width - fm.stringWidth(label)) / 2;
+        int ty = bounds.y + (bounds.height - fm.getHeight()) / 2 + fm.getAscent();
+        g2.drawString(label, tx, ty);
     }
 
     private Rectangle computeImageBounds(BufferedImage image, int x, int y, int width, int height) {
@@ -405,12 +499,26 @@ public class CaseOpeningOverlayPanel extends JPanel {
         int roll = random.nextInt(100);
 
         if (roll < chances[0]) {
-            return communList.get(random.nextInt(communList.size()));
+            SkinItem item = communList.get(random.nextInt(communList.size()));
+            if (item.name.equals("OG")) {
+                return rollWinSkin(packNumber);
+            }
+            return item;
         }
         if (roll < chances[0] + chances[1]) {
-            return rareList.get(random.nextInt(rareList.size()));
+            SkinItem item = rareList.get(random.nextInt(rareList.size()));
+            if (item.name.equals("OG")) {
+                return rollWinSkin(packNumber);
+            }
+            return item;
         }
-        return legendaireList.get(random.nextInt(legendaireList.size()));
+        else {
+            SkinItem item = legendaireList.get(random.nextInt(legendaireList.size()));
+            if (item.name.equals("OG")) {
+                return rollWinSkin(packNumber);
+            }
+            return item;
+        }
     }
 
     private Rectangle getCardBounds() {
@@ -445,6 +553,7 @@ public class CaseOpeningOverlayPanel extends JPanel {
         addSkin("SKYJOPINK", "Un skin basique, pas rare du tout.", "/boutique/skins/skyjopink.png", Rarity.COMMUN);
         addSkin("SKYJOVERT", "Un skin simple, pas rare du tout.", "/boutique/skins/skyjovert.png", Rarity.COMMUN);
         addSkin("SOLEIL", "Il fait chaud maintenant...", "/boutique/skins/sun.png", Rarity.RARE);
+        addSkin("OG", "Le tout premier skin", "/cartes/carteDos.png", Rarity.COMMUN);
 
     }
 
@@ -454,7 +563,7 @@ public class CaseOpeningOverlayPanel extends JPanel {
             return;
         }
 
-        SkinItem item = new SkinItem(name, description, image, rarity);
+        SkinItem item = new SkinItem(name, description, path, image, rarity);
         allSkins.add(item);
         switch (rarity) {
             case COMMUN:
@@ -478,5 +587,43 @@ public class CaseOpeningOverlayPanel extends JPanel {
         } catch (FontFormatException | IOException ignored) {
             return new Font("Arial", style, Math.round(size));
         }
+    }
+
+    // TEMPORAIRE 
+    public static ArrayList<String> getUnlockedSkinPaths() {
+        return new ArrayList<>(unlockedSkinPaths);
+    }
+
+    public static boolean unlockSkin(String skinPath) {
+        if (skinPath == null) {
+            return false;
+        }
+        if (unlockedSkinPaths.contains(skinPath)) {
+            return false;
+        }
+        unlockedSkinPaths.add(skinPath);
+        return true;
+    }
+
+    public static boolean isSkinUnlocked(String skinPath) {
+        if (skinPath == null) {
+            return false;
+        }
+        return unlockedSkinPaths.contains(skinPath);
+    }
+
+    public static String getSelectedSkinPath() {
+        if (selectedSkinPath == null) {
+            selectedSkinPath = "/cartes/carteDos.png";
+        }
+        return selectedSkinPath;
+    }
+
+    public static void setSelectedSkinPath(String skinPath) {
+        if (skinPath == null) {
+            return;
+        }
+        selectedSkinPath = skinPath;
+        unlockSkin(skinPath);
     }
 }
