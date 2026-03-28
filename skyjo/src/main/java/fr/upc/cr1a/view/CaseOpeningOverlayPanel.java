@@ -28,10 +28,12 @@ public class CaseOpeningOverlayPanel extends JPanel {
     };
 
     // constantes pour le front
+
     private static final int RESULT_TILE_WIDTH = 240;
     private static final int RESULT_TILE_HEIGHT = 320;
     private static final int TILE_ARC = 16;
     private static final int CARD_ARC = 24;
+    private static final int CLASSEUR_TOP_PADDING = 92;
 
     private static final Color OVERLAY_COLOR = new Color(0, 0, 0, 140);
     private static final Color CARD_COLOR = new Color(248, 243, 226, 255);
@@ -40,26 +42,24 @@ public class CaseOpeningOverlayPanel extends JPanel {
     private static final Color RESULT_TEXT_COLOR = new Color(50, 40, 28);
     private static final Color TILE_BORDER_COLOR = new Color(54, 45, 34, 200);
     private static final Color TILE_NAME_COLOR = Color.WHITE;
-    private static final Color TILE_DESCRIPTION_COLOR = new Color(255, 255, 255, 235);
 
     private final DoodleButton closeButton;
     private final Font titleFont;
     private final Font textFont;
     private final Font tileNameLargeFont;
     private final Font tileNameSmallFont;
-    private final Font tileDescriptionFont;
     private final Font resultDescriptionFont;
 
     private Color getRarityColor(Rarity rarity) {
         switch (rarity) {
             case COMMUN:
-                return new Color(88, 143, 208);
+                return new Color(46, 38, 26);
             case RARE:
-                return new Color(92, 174, 90);
+                return new Color(46, 38, 26);
             case LEGENDAIRE:
-                return new Color(221, 145, 55);
+                return new Color(46, 38, 26);
             default:
-                return new Color(88, 143, 208);
+                return new Color(46, 38, 26);
         }
     }
 
@@ -107,7 +107,6 @@ public class CaseOpeningOverlayPanel extends JPanel {
         textFont = loadFont(26, Font.BOLD);
         tileNameLargeFont = loadFont(24, Font.BOLD);
         tileNameSmallFont = loadFont(16, Font.BOLD);
-        tileDescriptionFont = loadFont(12, Font.PLAIN);
         resultDescriptionFont = textFont.deriveFont(22f);
 
         closeButton = new DoodleButton("Fermer", ButtonColor.RED, 180, 58);
@@ -153,7 +152,8 @@ public class CaseOpeningOverlayPanel extends JPanel {
         }
 
         mode = DisplayMode.BOUTIQUE;
-        winSkin = rollWinSkin(packNumber);
+        currentPack = packNumber;
+        winSkin = rollWinSkin(currentPack);
 
         closeButton.setEnabled(true);
         closeButton.onMouseExit();
@@ -220,41 +220,72 @@ public class CaseOpeningOverlayPanel extends JPanel {
     }
 
     private void drawClasseur(Graphics2D g2, Rectangle card) {
-        int columns = 3;
-        int tileWidth = 220;
-        int tileHeight = 250;
-        int gapX = 24;
-        int gapY = 20;
+        if (allSkins.isEmpty()) {
+            return;
+        }
 
-        int maxColumns = Math.max(1, Math.min(columns, allSkins.size()));
-        int gridWidth = maxColumns * tileWidth + (maxColumns - 1) * gapX;
-        int startX = card.x + (card.width - gridWidth) / 2;
-        int startY = card.y + 92;
+        int count = allSkins.size();
+        int outerPadding = 22;
+        int gap = 10;
 
-        for (int i = 0; i < allSkins.size(); i++) {
-            int row = i / columns;
-            int col = i % columns;
-            int x = startX + col * (tileWidth + gapX);
-            int y = startY + row * (tileHeight + gapY);
-            drawSkinBox(g2, allSkins.get(i), x, y, tileWidth, tileHeight, false);
+        int contentLeft = card.x + outerPadding;
+        int contentWidth = Math.max(1, card.width - outerPadding * 2);
+        int contentTop = card.y + CLASSEUR_TOP_PADDING;
+        int contentHeight = Math.max(1, card.height - CLASSEUR_TOP_PADDING - 22);
+
+        int maxAllowedWidth = 140;
+        int minAllowedWidth = 72;
+        int tileWidth = (contentWidth - (count - 1) * gap) / count;
+        tileWidth = Math.max(minAllowedWidth, Math.min(maxAllowedWidth, tileWidth));
+        int tileHeight = Math.max(100, (int) Math.round(tileWidth * 1.35));
+
+        int totalRowWidth = count * tileWidth + (count - 1) * gap;
+        int startX = contentLeft + (contentWidth - totalRowWidth) / 2;
+        int startY = contentTop + (contentHeight - tileHeight) / 2;
+
+        for (int i = 0; i < count; i++) {
+            int x = startX + i * (tileWidth + gap);
+            drawSkinBox(g2, allSkins.get(i), x, startY, tileWidth, tileHeight, false);
         }
     }
 
     // dessine un skin dans le classeur ou dans l'ouverture
     private void drawSkinBox(Graphics2D g2, SkinItem item, int x, int y, int width, int height, boolean showDescription) {
-        int imageMaxH = showDescription ? 180 : 150;
-
         drawTileBackground(g2, item, x, y, width, height);
 
-        Rectangle imageBounds = computeImageBounds(item.image, x, y, width, imageMaxH);
+        if (showDescription) { // dans le classeur on affiche pas la description
+            g2.setFont(tileNameLargeFont);
+            FontMetrics nameMetrics = g2.getFontMetrics();
+
+            int horizontalPadding = 10;
+            int verticalPadding = 18;
+            int nameGap = 10;
+
+            int imageAreaW = Math.max(1, width - horizontalPadding * 2);
+            int imageAreaH = Math.max(40, height - verticalPadding * 2 - nameGap - nameMetrics.getHeight());
+
+            Rectangle scaledImage = computeImageBounds(item.image, 0, 0, imageAreaW, imageAreaH);
+
+            int blockHeight = scaledImage.height + nameGap + nameMetrics.getHeight();
+            int blockTop = y + (height - blockHeight) / 2;
+
+            int imageX = x + (width - scaledImage.width) / 2;
+            int imageY = blockTop;
+            g2.drawImage(item.image, imageX, imageY, scaledImage.width, scaledImage.height, null);
+
+            int titleBaseline = imageY + scaledImage.height + nameGap + nameMetrics.getAscent();
+            drawTileName(g2, item.name, x, width, titleBaseline, true);
+            return;
+        }
+
+        int imageTopPadding = 8;
+        int imageBottomMargin = 32;
+        int imageAvailableH = Math.max(30, height - imageTopPadding - imageBottomMargin);
+        Rectangle imageBounds = computeImageBounds(item.image, x + 8, y + imageTopPadding, width - 16, imageAvailableH);
         g2.drawImage(item.image, imageBounds.x, imageBounds.y, imageBounds.width, imageBounds.height, null);
 
-        int textY = y + imageMaxH + 34;
-        drawTileName(g2, item.name, x, width, textY, showDescription);
-
-        if (!showDescription) {
-            drawTileDescription(g2, item.description, x, width, textY + 22);
-        }
+        int textY = y + height - 10;
+        drawTileName(g2, item.name, x, width, textY, false);
     }
 
     private void drawTileBackground(Graphics2D g2, SkinItem item, int x, int y, int width, int height) {
@@ -265,8 +296,9 @@ public class CaseOpeningOverlayPanel extends JPanel {
         g2.drawRoundRect(x, y, width - 1, height - 1, TILE_ARC, TILE_ARC);
     }
 
-    private Rectangle computeImageBounds(BufferedImage image, int x, int y, int width, int imageMaxH) {
-        int imageMaxW = width - 20;
+    private Rectangle computeImageBounds(BufferedImage image, int x, int y, int width, int height) {
+        int imageMaxW = Math.max(1, width);
+        int imageMaxH = Math.max(1, height);
         int drawW = imageMaxW;
         int drawH = (int) Math.round(drawW * (image.getHeight() / (double) image.getWidth()));
         if (drawH > imageMaxH) {
@@ -275,7 +307,7 @@ public class CaseOpeningOverlayPanel extends JPanel {
         }
 
         int imageX = x + (width - drawW) / 2;
-        int imageY = y + 8 + (imageMaxH - drawH) / 2;
+        int imageY = y + (height - drawH) / 2;
         return new Rectangle(imageX, imageY, drawW, drawH);
     }
 
@@ -285,12 +317,6 @@ public class CaseOpeningOverlayPanel extends JPanel {
         FontMetrics metrics = g2.getFontMetrics();
         int textX = x + (width - metrics.stringWidth(name)) / 2;
         g2.drawString(name, textX, baselineY);
-    }
-
-    private void drawTileDescription(Graphics2D g2, String description, int x, int width, int baselineY) {
-        g2.setFont(tileDescriptionFont);
-        g2.setColor(TILE_DESCRIPTION_COLOR);
-        drawCenteredText(g2, description, x + 12, width - 24, baselineY);
     }
 
     private void drawCenteredText(Graphics2D g2, String text, int x, int width, int baselineY) {
@@ -410,10 +436,16 @@ public class CaseOpeningOverlayPanel extends JPanel {
     }
 
     private void initSkins() { // on met les skins qu'on veut dans le tirage ici, chacun dans sa liste de rarete
-        addSkin("NUL", "Basique et sans effet special.", "/boutique/nul.png", Rarity.COMMUN);
-        addSkin("BOF", "Un skin correct, mais encore commun.", "/boutique/bof.png", Rarity.COMMUN);
-        addSkin("BIEN", "Un style propre qui sort du lot.", "/boutique/bien.png", Rarity.RARE);
-        addSkin("GOLDGOLDGOLD", "Jackpot legendaire. Tres difficile a obtenir.", "/boutique/GOLDGOLDGOLD.png", Rarity.LEGENDAIRE);
+        addSkin("HEUREUX", "On pense qu'il est heureux.", "/boutique/skins/heureux.png", Rarity.LEGENDAIRE);
+        addSkin("CLOWN", "haha.", "/boutique/skins/clown.png", Rarity.LEGENDAIRE);
+        addSkin("POKEMON", "Tous droits réservés à The Pokémon Company (on a pas les droits)", "/boutique/skins/pokemon.png", Rarity.RARE);
+        addSkin("YUGIOH", "Tous droits réservés à Konami (on a pas les droits)", "/boutique/skins/yugioh.png", Rarity.RARE);
+        addSkin("SKYJOBLEU", "Un skin basique, pas rare du tout.", "/boutique/skins/skyjobleu.png", Rarity.COMMUN);
+        addSkin("SKYOJOYELLOW", "Un skin simple, pas rare du tout.", "/boutique/skins/skyjoyellow.png", Rarity.COMMUN);
+        addSkin("SKYJOPINK", "Un skin basique, pas rare du tout.", "/boutique/skins/skyjopink.png", Rarity.COMMUN);
+        addSkin("SKYJOVERT", "Un skin simple, pas rare du tout.", "/boutique/skins/skyjovert.png", Rarity.COMMUN);
+        addSkin("SOLEIL", "Il fait chaud maintenant...", "/boutique/skins/sun.png", Rarity.RARE);
+
     }
 
     private void addSkin(String name, String description, String path, Rarity rarity) {
