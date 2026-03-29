@@ -62,7 +62,11 @@ public class ShopController {
     }
 
     private void clicAcheter(int packNumber) {
+        if (view.getMoney() < packNumber * 100 || view.isCaseOpeningVisible()) {
+            return;
+        }
         view.startCaseOpening(packNumber);
+        view.setMoney(view.getMoney() - packNumber * 100);
         view.refreshMoneyButton();
     }
 

@@ -130,7 +130,7 @@ public class ShopPanel extends JPanel {
             } else if (i == 1) {
                 buyButtons[i] = new DoodleButton("200$", ButtonColor.GREEN, 220, 70, "/Button/Shop.png");
             } else {
-                buyButtons[i] = new DoodleButton("500$", ButtonColor.GREEN, 220, 70, "/Button/Shop.png");
+                buyButtons[i] = new DoodleButton("300$", ButtonColor.GREEN, 220, 70, "/Button/Shop.png");
             }
 
             buyButtons[i].setBgImage("/Button/button_green.png");
