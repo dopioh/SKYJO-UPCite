@@ -52,13 +52,11 @@ public class ShopPanel extends JPanel {
         leftColumn.setLayout(new BoxLayout(leftColumn, BoxLayout.Y_AXIS));
 
         backBtn = new DoodleButton("Retour", ButtonColor.RED, 200, 60);
-        backBtn.setBgImage("/Button/button_red.png");
         backBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         leftColumn.add(backBtn);
         leftColumn.add(Box.createVerticalStrut(8));
 
-        moneyBtn = new DoodleButton("", ButtonColor.RED, 200, 60);
-        moneyBtn.setBgImage("/Button/button_yellow.png");
+        moneyBtn = new DoodleButton("", ButtonColor.YELLOW, 200, 60);
         moneyBtn.setCursor(Cursor.getDefaultCursor());
         moneyBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         refreshMoneyButton();
@@ -69,7 +67,6 @@ public class ShopPanel extends JPanel {
         JPanel centerTopPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
         centerTopPanel.setOpaque(false);
         classeurBtn = new DoodleButton("Classeur", ButtonColor.YELLOW, 200, 60);
-        classeurBtn.setBgImage("/Button/button_yellow.png");
         centerTopPanel.add(classeurBtn);
 
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
@@ -133,7 +130,6 @@ public class ShopPanel extends JPanel {
                 buyButtons[i] = new DoodleButton("300$", ButtonColor.GREEN, 220, 70, "/Button/Shop.png");
             }
 
-            buyButtons[i].setBgImage("/Button/button_green.png");
             buyButtons[i].setAlignmentX(Component.CENTER_ALIGNMENT);
 
             column.add(packImages[i]);

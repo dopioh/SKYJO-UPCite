@@ -125,7 +125,6 @@ public class CaseOpeningOverlayPanel extends JPanel {
         resultDescriptionFont = textFont.deriveFont(22f);
 
         closeButton = new DoodleButton("Fermer", ButtonColor.RED, 180, 58);
-        closeButton.setBgImage("/Button/button_red.png");
         closeButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
