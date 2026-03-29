@@ -347,6 +347,10 @@
 
 - LAST ROUND
 
+- Cartes dos des 5 devs pour la boutique
+
+- BroadCast en continue du Host (marche sur toutes les cartes reseaux (VLAN y compris)) + ajouts methodes kickPlayer et Quit
+
 ## v.0.9: SPRINT 9
 ---
 
