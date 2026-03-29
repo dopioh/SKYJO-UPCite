@@ -35,7 +35,7 @@ public class PlayerData {
         this.rank = 1; // ou on commence unranked ?
         this.elo = 0;
         this.xp = 0;
-        this.money = 0;
+        this.money = 1000;
         this.isBot = false;
         this.botType = null;
         this.skins = null; // a modif plus tard

@@ -193,6 +193,9 @@ Gère l'affichage
     * `MainMenuPanel`: Panel du menu principal
         * Attribut : shopButton, playButton, settingsButton
         * Méthode : **getShopButton()**, **getPlayButton()**, **getSettingsButton()**
+    * `ShopPanel`: Panel de la boutique
+        * Attribut : backBtn, classeurBtn, buyButtons, packImages, topBar, chanceContainer, chanceLabel, cardsRow, caseOpeningOverlay
+        * Méthode : **getBackButton()**, **getBuyButtons()**, **getClasseurButton()**, **startCaseOpening()**, **openClasseur()**, **isCaseOpeningVisible()**
     * `GameModeSelectionPanel`: Panel de sélection du mode de jeu (Local vs Multi P2P)
         * Attribut : localBtn, multiBtn, backBtn, backgroundImage
         * Méthode : **getLocalButton()**, **getMultiButton()**, **getBackButton()**
@@ -208,6 +211,10 @@ Gère l'affichage
     * `SettingsOverlay`: Overlay des paramètres (JComponent)
         * Attribut : card (JPanel), backButton, contentPanel, tabJeu, tabAudio, tabAutres
         * Méthode : **getBackButton()**, **getTabJeu()**, **getTabAudio()**, **getTabAutres()**, **createTabButton()**, **createCardPanel()**
+    * `CaseOpeningOverlayPanel`: Overlay boutique & classeur
+        * Attributs (tempo) : unlockedSkinPaths (ArrayList<String>), selectedSkinPath (String)
+        * Méthodes : **startOpening()**, **openClasseur()**, **drawClasseur()**, **drawSkinBox()**, **handleClasseurClick()**, **getEquipButtonBounds()**, **drawEquipButton()**
+        * Méthodes tempo : **getUnlockedSkinPaths()**, **unlockSkin()**, **isSkinUnlocked()**, **getSelectedSkinPath()**, **setSelectedSkinPath()**
 
 * **GameBoardView** : Panel pour afficher le plateau de jeu
     * Méthode : **initComponents()**, **showPlayerscards()**, **getCardImagePath()**, **resizeLayers()**, **showCursorCard()**, **hideCursorCard()**, **updateCardDisplay()**, **updateDiscardOnly()**, **updateActionCardDisplay()**, **updateActionDiscardOnly()**

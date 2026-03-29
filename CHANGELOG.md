@@ -347,12 +347,22 @@
 
 - LAST ROUND
 
+## v.0.9: SPRINT 9
+
+### Added
+
+- Boutique avec 3 packs de skins disponibles avec raretés differentes
+    - Plusieurs skins
+    - Logique d'achat
+    - Système de debloquage de skins (version temporaire)
+
+- Classeur de skins
+    - Classeur permettant de voir les skins du jeu, debloqués en non debloqués
+    - Possibilité d'equiper un skin debloqué dans le classeur
+
 - Cartes dos des 5 devs pour la boutique
 
 - BroadCast en continue du Host (marche sur toutes les cartes reseaux (VLAN y compris)) + ajouts methodes kickPlayer et Quit
-
-## v.0.9: SPRINT 9
----
 
 ### Modified
 

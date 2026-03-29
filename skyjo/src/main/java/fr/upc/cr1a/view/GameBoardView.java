@@ -509,7 +509,7 @@ public class GameBoardView extends JPanel {
      */
     public String getCardImagePath(CardModel card) {
         if (card.isFaceDown()) {
-            return "/cartes/carteDos.png";
+            return CaseOpeningOverlayPanel.getSelectedSkinPath(); // temporaire
         }
 
         if (card instanceof NumberCardModel numberCard && numberCard.isStar()) {
@@ -534,7 +534,7 @@ public class GameBoardView extends JPanel {
                 case SPY_ONE_COLUMN:
                     return "/cartes/carteActionSpy.png";
                 default:
-                    return "/cartes/carteDos.png";
+                    return CaseOpeningOverlayPanel.getSelectedSkinPath(); // temporaire
             }
         }
         
@@ -796,7 +796,7 @@ public class GameBoardView extends JPanel {
         // Pioche
         if (drawHasCards) {
             btnPioche.setText("");
-            btnPioche.setCardImage("/cartes/carteDos.png");
+            btnPioche.setCardImage(CaseOpeningOverlayPanel.getSelectedSkinPath()); // temporaire
         } else {
             btnPioche.clearImage();
             btnPioche.setText("vide");

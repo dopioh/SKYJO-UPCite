@@ -100,6 +100,14 @@ public class CardButton extends JButton {
             int cropW = original.getWidth() - CropLeft - CropRight;
             int cropH = original.getHeight() - CropTop - CropBottom;
 
+            // c'est tempo pour les skins qui n'ont pas la taille correcte on les crop pas 
+            if (cropW <= 0 || cropH <= 0) {
+                this.cardImage = original;
+                imageCache.put(imgPath, this.cardImage);
+                repaint();
+                return;
+            }
+
             // nouvelle image cropée
             BufferedImage cropped = new BufferedImage(cropW, cropH, BufferedImage.TYPE_INT_ARGB);
             Graphics2D g2 = cropped.createGraphics();
