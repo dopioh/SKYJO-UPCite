@@ -312,6 +312,12 @@
 
 - Mailmap
 
+- Système de Timer (Si le joueur ne joue pas avant la fin du temps 2 fois il est "remplacé par un bot")
+
+- Toggle Timer
+
+- PauseOverlay (appuyez sur ESC pendant la partie pour voir le menu Pause qui contient (retour + paramètres))
+
 ### Modified
 - Refactor des checks lignes/colonnes
 
@@ -323,9 +329,11 @@
 
 - Possibilité de Host et Join un serveur dans le terminal
 
-- INTEFACE GRAPHIQUE POUR LES LOBBY
+- INTERFACE GRAPHIQUE POUR LES LOBBY
 
+- Animations des cartes cleared à chaque fois qu'on quitte la partie
 
+- Bouton retour déplacé dans le PauseOverlay
 
 ### Fixed
 
@@ -339,16 +347,40 @@
 
 - LAST ROUND
 
+## v.0.9: SPRINT 9
+---
 
 ## v.0.9: SPRINT 9
 
 ### Added
+
 - Boutique avec 3 packs de skins disponibles avec raretés differentes
+    - Plusieurs skins
+    - Logique d'achat
+    - Système de debloquage de skins (version temporaire)
 
-- Classeur pour voir les skins débloqués
+- Classeur de skins
+    - Classeur permettant de voir les skins du jeu, debloqués en non debloqués
+    - Possibilité d'equiper un skin debloqué dans le classeur
 
-- Equipement des skins dans le classeur
+### Modified
 
-- Système de debloquage de skins v1
+- `DoodleButton`
+    - ajout du système de positionnement d'icône
+        - `setIconSide(IconSide.RIGHT ou LEFT)` : icône collée au bord
+    - suppression de l'ancien version sans image et nettoyage du code + remplacé les appel vers l'ancien button
+    - possibilité de changer la taille de police
 
-- Plusieurs skins
+- Page lobby / game mode selection
+    - icone, correction des doodle button, espacement, couleur, font...
+    - fix double clic
+
+- Page PlayersSetup panel
+    - Fond d'écran, police, couleur, espacement...
+    - Bouton Retour et Lancer en haut comme les autres panel
+    - mode Skyjo Action et Boutons nb de joueurs : vert si actif, transparent sinon
+    - Bouton `?` avec popup d'explication des bots
+
+- Page connexion panel
+    - font, couleur, fond, espacement, doodle button
+    - JTextField/mdp plus beau

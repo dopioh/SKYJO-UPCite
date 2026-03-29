@@ -57,9 +57,6 @@ public class MainMenuPanel extends JPanel {
         shopBtn = new DoodleButton("Boutique", ButtonColor.RED, 300, 100, "/Button/Shop.png");
         playBtn = new DoodleButton("Jouer", ButtonColor.YELLOW, 300, 100, "/Button/Play.png");
         settingsBtn = new DoodleButton("Réglages", ButtonColor.GREEN, 300, 100, "/Button/Settings.png");
-        shopBtn.setBgImage("/Button/button_red.png");
-        playBtn.setBgImage("/Button/button_yellow.png");
-        settingsBtn.setBgImage("/Button/button_green.png");
 
         panel.add(shopBtn);
         panel.add(playBtn);

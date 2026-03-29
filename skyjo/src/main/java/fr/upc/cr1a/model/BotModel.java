@@ -1,6 +1,7 @@
 package fr.upc.cr1a.model;
 
 import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
+import fr.upc.cr1a.model.player.PlayerData;
 
 /**
  * Modèle qui représente un bot
