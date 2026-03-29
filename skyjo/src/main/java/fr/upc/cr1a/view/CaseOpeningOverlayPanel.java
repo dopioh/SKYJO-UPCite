@@ -28,7 +28,7 @@ public class CaseOpeningOverlayPanel extends JPanel {
     private static final int[][] PACK_CHANCES = {
         {80, 15, 5}, // pack 1: 80% commun, 15% rare, 5% legendaire
         {65, 25, 10}, // pack 2: 65% commun, 25% rare, 10% legendaire
-        {0, 0, 100} // pack 3: 55% commun, 30% rare, 15% legendaire
+        {50, 30, 20} // pack 3: 50% commun, 30% rare, 20% legendaire
     };
 
     // constantes pour le front
