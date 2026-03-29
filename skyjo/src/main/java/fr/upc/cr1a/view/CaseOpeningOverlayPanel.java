@@ -28,7 +28,7 @@ public class CaseOpeningOverlayPanel extends JPanel {
     private static final int[][] PACK_CHANCES = {
         {80, 15, 5}, // pack 1: 80% commun, 15% rare, 5% legendaire
         {65, 25, 10}, // pack 2: 65% commun, 25% rare, 10% legendaire
-        {55, 30, 15} // pack 3: 55% commun, 30% rare, 15% legendaire
+        {0, 0, 100} // pack 3: 55% commun, 30% rare, 15% legendaire
     };
 
     // constantes pour le front
@@ -38,6 +38,13 @@ public class CaseOpeningOverlayPanel extends JPanel {
     private static final int TILE_ARC = 16;
     private static final int CARD_ARC = 24;
     private static final int CLASSEUR_TOP_PADDING = 92;
+    private static final int CLASSEUR_SKINS_PER_ROW = 8;
+    private static final int CLASSEUR_TILE_WIDTH = 108;
+    private static final int CLASSEUR_TILE_HEIGHT = 152;
+    private static final int CLASSEUR_TILE_GAP_X = 10;
+    private static final int CLASSEUR_TILE_GAP_Y = 12;
+    private static final int CLASSEUR_START_OFFSET_X = 22;
+    private static final int CLASSEUR_START_OFFSET_Y = CLASSEUR_TOP_PADDING + 12;
 
     private static final Color OVERLAY_COLOR = new Color(0, 0, 0, 140);
     private static final Color CARD_COLOR = new Color(248, 243, 226, 255);
@@ -248,28 +255,13 @@ public class CaseOpeningOverlayPanel extends JPanel {
             return;
         }
 
-        int count = allSkins.size();
-        int outerPadding = 22;
-        int gap = 10;
+        for (int i = 0; i < allSkins.size(); i++) {
+            int row = i / CLASSEUR_SKINS_PER_ROW;
+            int col = i % CLASSEUR_SKINS_PER_ROW;
 
-        int contentLeft = card.x + outerPadding;
-        int contentWidth = Math.max(1, card.width - outerPadding * 2);
-        int contentTop = card.y + CLASSEUR_TOP_PADDING;
-        int contentHeight = Math.max(1, card.height - CLASSEUR_TOP_PADDING - 22);
-
-        int maxAllowedWidth = 140;
-        int minAllowedWidth = 72;
-        int tileWidth = (contentWidth - (count - 1) * gap) / count;
-        tileWidth = Math.max(minAllowedWidth, Math.min(maxAllowedWidth, tileWidth));
-        int tileHeight = Math.max(100, (int) Math.round(tileWidth * 1.35));
-
-        int totalRowWidth = count * tileWidth + (count - 1) * gap;
-        int startX = contentLeft + (contentWidth - totalRowWidth) / 2;
-        int startY = contentTop + (contentHeight - tileHeight) / 2;
-
-        for (int i = 0; i < count; i++) {
-            int x = startX + i * (tileWidth + gap);
-            drawSkinBox(g2, allSkins.get(i), x, startY, tileWidth, tileHeight, false);
+            int x = card.x + CLASSEUR_START_OFFSET_X + col * (CLASSEUR_TILE_WIDTH + CLASSEUR_TILE_GAP_X);
+            int y = card.y + CLASSEUR_START_OFFSET_Y + row * (CLASSEUR_TILE_HEIGHT + CLASSEUR_TILE_GAP_Y);
+            drawSkinBox(g2, allSkins.get(i), x, y, CLASSEUR_TILE_WIDTH, CLASSEUR_TILE_HEIGHT, false);
         }
     }
 
@@ -331,34 +323,18 @@ public class CaseOpeningOverlayPanel extends JPanel {
         }
 
         Rectangle card = getCardBounds();
-        int count = allSkins.size();
-        int outerPadding = 22;
-        int gap = 10;
+        for (int i = 0; i < allSkins.size(); i++) {
+            int row = i / CLASSEUR_SKINS_PER_ROW;
+            int col = i % CLASSEUR_SKINS_PER_ROW;
+            int x = card.x + CLASSEUR_START_OFFSET_X + col * (CLASSEUR_TILE_WIDTH + CLASSEUR_TILE_GAP_X);
+            int y = card.y + CLASSEUR_START_OFFSET_Y + row * (CLASSEUR_TILE_HEIGHT + CLASSEUR_TILE_GAP_Y);
 
-        int contentLeft = card.x + outerPadding;
-        int contentWidth = Math.max(1, card.width - outerPadding * 2);
-        int contentTop = card.y + CLASSEUR_TOP_PADDING;
-        int contentHeight = Math.max(1, card.height - CLASSEUR_TOP_PADDING - 22);
-
-        int maxAllowedWidth = 140;
-        int minAllowedWidth = 72;
-        int tileWidth = (contentWidth - (count - 1) * gap) / count;
-        tileWidth = Math.max(minAllowedWidth, Math.min(maxAllowedWidth, tileWidth));
-        int tileHeight = Math.max(100, (int) Math.round(tileWidth * 1.35));
-
-        int totalRowWidth = count * tileWidth + (count - 1) * gap;
-        int startX = contentLeft + (contentWidth - totalRowWidth) / 2;
-        int startY = contentTop + (contentHeight - tileHeight) / 2;
-
-        for (int i = 0; i < count; i++) {
-            int x = startX + i * (tileWidth + gap);
-            Rectangle bounds = new Rectangle(x, startY, tileWidth, tileHeight);
             SkinItem clickedSkin = allSkins.get(i);
             if (!isSkinUnlocked(clickedSkin.path)) {
                 continue;
             }
 
-            Rectangle buttonBounds = getEquipButtonBounds(bounds.x, bounds.y, bounds.width, bounds.height);
+            Rectangle buttonBounds = getEquipButtonBounds(x, y, CLASSEUR_TILE_WIDTH, CLASSEUR_TILE_HEIGHT);
             if (buttonBounds.contains(clickPoint)) {
                 setSelectedSkinPath(clickedSkin.path);
                 repaint();
@@ -544,8 +520,8 @@ public class CaseOpeningOverlayPanel extends JPanel {
     }
 
     private void initSkins() { // on met les skins qu'on veut dans le tirage ici, chacun dans sa liste de rarete
-        addSkin("HEUREUX", "On pense qu'il est heureux. (LEGENDAIRE)", "/boutique/skins/heureux.png", Rarity.LEGENDAIRE);
-        addSkin("CLOWN", "haha. (LEGENDAIRE)", "/boutique/skins/clown.png", Rarity.LEGENDAIRE);
+        addSkin("HEUREUX", "On pense qu'il est heureux. (LEGENDAIRE)", "/boutique/skins/heureux.png", Rarity.RARE);
+        addSkin("CLOWN", "haha. (LEGENDAIRE)", "/boutique/skins/clown.png", Rarity.RARE);
         addSkin("POKEMON", "Tous droits réservés à The Pokémon Company (on a pas les droits)", "/boutique/skins/pokemon.png", Rarity.RARE);
         addSkin("YUGIOH", "Tous droits réservés à Konami (on a pas les droits)", "/boutique/skins/yugioh.png", Rarity.RARE);
         addSkin("SKYJOBLEU", "Un skin basique, pas rare du tout. (COMMUN)", "/boutique/skins/skyjobleu.png", Rarity.COMMUN);
@@ -554,8 +530,14 @@ public class CaseOpeningOverlayPanel extends JPanel {
         addSkin("SKYJOVERT", "Un skin simple, pas rare du tout. (COMMUN)", "/boutique/skins/skyjovert.png", Rarity.COMMUN);
         addSkin("SOLEIL", "Il fait chaud maintenant... (RARE)", "/boutique/skins/sun.png", Rarity.RARE);
         addSkin("OG", "Le tout premier skin. (COMMUN)", "/cartes/carteDos.png", Rarity.COMMUN);
-
+        addSkin("Nassim", "Ressemble étrangement à quelqu'un... (LEGENDAIRE)", "/boutique/skins/nassim.png", Rarity.LEGENDAIRE);
+        addSkin("Mei", "Ressemble étrangement à quelqu'un... (LEGENDAIRE)", "/boutique/skins/mei.png", Rarity.LEGENDAIRE);
+        addSkin("billy", "ressemble étrangement à quelqu'un... (LEGENDAIRE)", "/boutique/skins/billy.png", Rarity.LEGENDAIRE);
+        addSkin("Hugo", "ressemble étrangement à quelqu'un... (LEGENDAIRE)", "/boutique/skins/hugo.png", Rarity.LEGENDAIRE);
+        addSkin("Ian", "ressemble étrangement à quelqu'un... (LEGENDAIRE)", "/boutique/skins/ian.png", Rarity.LEGENDAIRE);
+        addSkin("Billy", "ressemble étrangement à quelqu'un... (LEGENDAIRE)", "/boutique/skins/billy.png", Rarity.LEGENDAIRE);
     }
+
 
     private void addSkin(String name, String description, String path, Rarity rarity) {
         BufferedImage image = ImageCache.get(path);

@@ -15,7 +15,7 @@ import java.awt.image.BufferedImage;
 public class ShopPanel extends JPanel {
 
     private static final int PACK_HEIGHT = 320;
-    private static int money = 1000;
+    private static int money = 1000000;
     
     private final DoodleButton backBtn;
     private final DoodleButton moneyBtn;

@@ -347,13 +347,6 @@
 
 - LAST ROUND
 
-- Cartes dos des 5 devs pour la boutique
-
-- BroadCast en continue du Host (marche sur toutes les cartes reseaux (VLAN y compris)) + ajouts methodes kickPlayer et Quit
-
-## v.0.9: SPRINT 9
----
-
 ## v.0.9: SPRINT 9
 
 ### Added
@@ -366,6 +359,10 @@
 - Classeur de skins
     - Classeur permettant de voir les skins du jeu, debloqués en non debloqués
     - Possibilité d'equiper un skin debloqué dans le classeur
+
+- Cartes dos des 5 devs pour la boutique
+
+- BroadCast en continue du Host (marche sur toutes les cartes reseaux (VLAN y compris)) + ajouts methodes kickPlayer et Quit
 
 ### Modified
 
