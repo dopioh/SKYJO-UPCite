@@ -63,6 +63,7 @@ public class ShopController {
 
     private void clicAcheter(int packNumber) {
         view.startCaseOpening(packNumber);
+        view.refreshMoneyButton();
     }
 
     private void clicClasseur() {

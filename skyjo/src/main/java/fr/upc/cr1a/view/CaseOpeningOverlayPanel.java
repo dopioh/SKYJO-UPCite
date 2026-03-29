@@ -23,6 +23,7 @@ public class CaseOpeningOverlayPanel extends JPanel {
 
     private static ArrayList<String> unlockedSkinPaths = new ArrayList<>();
     private static String selectedSkinPath = "/cartes/carteDos.png";
+    
 
     private static final int[][] PACK_CHANCES = {
         {80, 15, 5}, // pack 1: 80% commun, 15% rare, 5% legendaire
@@ -544,16 +545,16 @@ public class CaseOpeningOverlayPanel extends JPanel {
     }
 
     private void initSkins() { // on met les skins qu'on veut dans le tirage ici, chacun dans sa liste de rarete
-        addSkin("HEUREUX", "On pense qu'il est heureux.", "/boutique/skins/heureux.png", Rarity.LEGENDAIRE);
-        addSkin("CLOWN", "haha.", "/boutique/skins/clown.png", Rarity.LEGENDAIRE);
+        addSkin("HEUREUX", "On pense qu'il est heureux. (LEGENDAIRE)", "/boutique/skins/heureux.png", Rarity.LEGENDAIRE);
+        addSkin("CLOWN", "haha. (LEGENDAIRE)", "/boutique/skins/clown.png", Rarity.LEGENDAIRE);
         addSkin("POKEMON", "Tous droits réservés à The Pokémon Company (on a pas les droits)", "/boutique/skins/pokemon.png", Rarity.RARE);
         addSkin("YUGIOH", "Tous droits réservés à Konami (on a pas les droits)", "/boutique/skins/yugioh.png", Rarity.RARE);
-        addSkin("SKYJOBLEU", "Un skin basique, pas rare du tout.", "/boutique/skins/skyjobleu.png", Rarity.COMMUN);
-        addSkin("SKYOJOYELLOW", "Un skin simple, pas rare du tout.", "/boutique/skins/skyjoyellow.png", Rarity.COMMUN);
-        addSkin("SKYJOPINK", "Un skin basique, pas rare du tout.", "/boutique/skins/skyjopink.png", Rarity.COMMUN);
-        addSkin("SKYJOVERT", "Un skin simple, pas rare du tout.", "/boutique/skins/skyjovert.png", Rarity.COMMUN);
-        addSkin("SOLEIL", "Il fait chaud maintenant...", "/boutique/skins/sun.png", Rarity.RARE);
-        addSkin("OG", "Le tout premier skin", "/cartes/carteDos.png", Rarity.COMMUN);
+        addSkin("SKYJOBLEU", "Un skin basique, pas rare du tout. (COMMUN)", "/boutique/skins/skyjobleu.png", Rarity.COMMUN);
+        addSkin("SKYOJOYELLOW", "Un skin simple, pas rare du tout. (COMMUN)", "/boutique/skins/skyjoyellow.png", Rarity.COMMUN);
+        addSkin("SKYJOPINK", "Un skin basique, pas rare du tout. (COMMUN)", "/boutique/skins/skyjopink.png", Rarity.COMMUN);
+        addSkin("SKYJOVERT", "Un skin simple, pas rare du tout. (COMMUN)", "/boutique/skins/skyjovert.png", Rarity.COMMUN);
+        addSkin("SOLEIL", "Il fait chaud maintenant... (RARE)", "/boutique/skins/sun.png", Rarity.RARE);
+        addSkin("OG", "Le tout premier skin. (COMMUN)", "/cartes/carteDos.png", Rarity.COMMUN);
 
     }
 

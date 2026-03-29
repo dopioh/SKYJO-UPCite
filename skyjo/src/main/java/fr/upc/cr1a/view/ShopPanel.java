@@ -15,8 +15,10 @@ import java.awt.image.BufferedImage;
 public class ShopPanel extends JPanel {
 
     private static final int PACK_HEIGHT = 320;
-
+    private static int money = 1000;
+    
     private final DoodleButton backBtn;
+    private final DoodleButton moneyBtn;
     private final DoodleButton classeurBtn;
     private final DoodleButton[] buyButtons = new DoodleButton[3];
     private final JLabel[] packImages = new JLabel[3];
@@ -44,9 +46,25 @@ public class ShopPanel extends JPanel {
 
         JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         leftPanel.setOpaque(false);
+
+        JPanel leftColumn = new JPanel();
+        leftColumn.setOpaque(false);
+        leftColumn.setLayout(new BoxLayout(leftColumn, BoxLayout.Y_AXIS));
+
         backBtn = new DoodleButton("Retour", ButtonColor.RED, 200, 60);
         backBtn.setBgImage("/Button/button_red.png");
-        leftPanel.add(backBtn);
+        backBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        leftColumn.add(backBtn);
+        leftColumn.add(Box.createVerticalStrut(8));
+
+        moneyBtn = new DoodleButton("", ButtonColor.RED, 200, 60);
+        moneyBtn.setBgImage("/Button/button_yellow.png");
+        moneyBtn.setCursor(Cursor.getDefaultCursor());
+        moneyBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        refreshMoneyButton();
+        leftColumn.add(moneyBtn);
+
+        leftPanel.add(leftColumn);
 
         JPanel centerTopPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
         centerTopPanel.setOpaque(false);
@@ -107,7 +125,14 @@ public class ShopPanel extends JPanel {
                 packImages[i].setPreferredSize(new Dimension(packWidth, PACK_HEIGHT));
             }
 
-            buyButtons[i] = new DoodleButton("Acheter", ButtonColor.GREEN, 220, 70, "/Button/Shop.png");
+            if (i == 0) {
+                buyButtons[i] = new DoodleButton("100$", ButtonColor.GREEN, 220, 70, "/Button/Shop.png");
+            } else if (i == 1) {
+                buyButtons[i] = new DoodleButton("200$", ButtonColor.GREEN, 220, 70, "/Button/Shop.png");
+            } else {
+                buyButtons[i] = new DoodleButton("500$", ButtonColor.GREEN, 220, 70, "/Button/Shop.png");
+            }
+
             buyButtons[i].setBgImage("/Button/button_green.png");
             buyButtons[i].setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -116,6 +141,7 @@ public class ShopPanel extends JPanel {
             column.add(buyButtons[i]);
             cardsRow.add(column);
         }
+        
 
         topBar.setBorder(BorderFactory.createEmptyBorder(12, 14, 12, 14));
         chanceLabel.setFont(new Font("Arial", Font.BOLD, 15));
@@ -202,5 +228,23 @@ public class ShopPanel extends JPanel {
         for (DoodleButton buyButton : buyButtons) {
             buyButton.onMouseExit();
         }
+    }
+
+    // TEMPORAIRE
+    public void setMoney(int amount) {
+        if (amount < 0) {
+            money = 0;
+        } else {
+            money = amount;
+        }
+        refreshMoneyButton();
+    }
+
+    public int getMoney() {
+        return money;
+    }
+
+    public void refreshMoneyButton() {
+        moneyBtn.setText(money + " $");
     }
 }
