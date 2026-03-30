@@ -4,6 +4,9 @@ import fr.upc.cr1a.controller.data.SupabaseAuth;
 import fr.upc.cr1a.view.ConnexionPanel;
 import fr.upc.cr1a.view.Frame;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 /**
  * Classe pour gerer les boutons de ConnexionPanel
  * Appels les fonctions pour se conneter à la base de donnees
@@ -20,16 +23,22 @@ public class ConnexionController {
     }
 
     public void listener(){
-        connexionPanel.getbtnSubmitInscription().addActionListener(e -> sendCreate());
-        connexionPanel.getbtnSubmitConnexion().addActionListener(e -> sendLogin());
+        connexionPanel.getbtnSubmitInscription().addMouseListener(new MouseAdapter() {
+            @Override public void mousePressed(MouseEvent e) { sendCreate(); }
+        });
+        connexionPanel.getbtnSubmitConnexion().addMouseListener(new MouseAdapter() {
+            @Override public void mousePressed(MouseEvent e) { sendLogin(); }
+        });
         // bouton invité
-        connexionPanel.getBtnGuest().addActionListener(e -> sendGuest());
+        connexionPanel.getBtnGuest().addMouseListener(new MouseAdapter() {
+            @Override public void mousePressed(MouseEvent e) { sendGuest(); }
+        });
     }
 
     public void sendCreate(){
         System.out.println("BOUTON VALIDER INSCRIPTION CALLED");
         String email = connexionPanel.getInscriptionEmail();
-        String username = connexionPanel.getInscriptionpUsername();
+        String username = connexionPanel.getInscriptionUsername();
         String password = connexionPanel.getInscriptionPassword();
 
         boolean create = SupabaseAuth.createAccount(email, username, password);

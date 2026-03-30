@@ -82,8 +82,10 @@ public class CreateLobbyDialog extends JDialog {
         buttonsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         buttonsPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
 
-        cancelBtn = new DoodleButton("Annuler", ButtonColor.RED, 150, 60);
-        createBtn = new DoodleButton("Créer", ButtonColor.GREEN, 150, 60);
+        cancelBtn = new DoodleButton("Annuler", ButtonColor.RED, 180, 60);
+        cancelBtn.setFontSize(32f);
+        createBtn = new DoodleButton("Créer", ButtonColor.GREEN, 180, 60);
+        createBtn.setFontSize(32f);
 
         buttonsPanel.add(cancelBtn);
         buttonsPanel.add(createBtn);

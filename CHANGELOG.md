@@ -355,5 +355,39 @@
 
 - les Salons pour le multiplayer
 
+### Added
 
+- Boutique avec 3 packs de skins disponibles avec raretés differentes
+    - Plusieurs skins
+    - Logique d'achat
+    - Système de debloquage de skins (version temporaire)
 
+- Classeur de skins
+    - Classeur permettant de voir les skins du jeu, debloqués en non debloqués
+    - Possibilité d'equiper un skin debloqué dans le classeur
+
+- Cartes dos des 5 devs pour la boutique
+
+- BroadCast en continue du Host (marche sur toutes les cartes reseaux (VLAN y compris)) + ajouts methodes kickPlayer et Quit
+
+### Modified
+
+- `DoodleButton`
+    - ajout du système de positionnement d'icône
+        - `setIconSide(IconSide.RIGHT ou LEFT)` : icône collée au bord
+    - suppression de l'ancien version sans image et nettoyage du code + remplacé les appel vers l'ancien button
+    - possibilité de changer la taille de police
+
+- Page lobby / game mode selection
+    - icone, correction des doodle button, espacement, couleur, font...
+    - fix double clic
+
+- Page PlayersSetup panel
+    - Fond d'écran, police, couleur, espacement...
+    - Bouton Retour et Lancer en haut comme les autres panel
+    - mode Skyjo Action et Boutons nb de joueurs : vert si actif, transparent sinon
+    - Bouton `?` avec popup d'explication des bots
+
+- Page connexion panel
+    - font, couleur, fond, espacement, doodle button
+    - JTextField/mdp plus beau

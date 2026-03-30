@@ -7,9 +7,9 @@ import java.net.http.HttpResponse;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
+//import com.google.gson.JsonObject;
 
-import fr.upc.cr1a.model.PlayerData;
+import fr.upc.cr1a.model.player.PlayerData;
 
 /**
  * Ancienne classe abstraite qui passe en static 
@@ -49,7 +49,7 @@ public class SendAPI {
      * Methode pour creer ou actualiser les stats du player en local
      * Enregistre dans PlayeDataModel avec gson
      */
-    public static void getStats(String token, String uuid){
+    public static PlayerData getStats(String token, String uuid){
         try {
             HttpRequest request = HttpRequest.newBuilder().uri(URI.create(urlAPI + "/api/player/stats?uuidStr=" + uuid)).header("Content-Type", "application/json").header("Authorization", "Bearer " + token).GET().build();
 
@@ -68,11 +68,14 @@ public class SendAPI {
                 System.out.println("xp : " + playerData.getXp());
                 System.out.println("money : " + playerData.getMoney());
                 // le mail ne s'affiche pas psq on le recupere que temporerement si on se co avec l'username
+                return playerData;
             } else {
                 System.out.println("Code HTTP HORS 200 : " + response.statusCode());
+                return null;
             }
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
     }
 }
