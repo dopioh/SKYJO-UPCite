@@ -836,7 +836,7 @@ public class GameBoardView extends JPanel {
         // Pioche Action
         if (drawActionHasCards) {
             btnPiocheAction.setText("");
-            btnPiocheAction.setCardImage("/cartes/carteDos.png");
+            btnPiocheAction.setCardImage(CaseOpeningOverlayPanel.getSelectedSkinPath());
         } else {
             btnPiocheAction.clearImage();
             btnPiocheAction.setText("vide");

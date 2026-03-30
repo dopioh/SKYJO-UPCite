@@ -520,8 +520,8 @@ public class CaseOpeningOverlayPanel extends JPanel {
     }
 
     private void initSkins() { // on met les skins qu'on veut dans le tirage ici, chacun dans sa liste de rarete
-        addSkin("HEUREUX", "On pense qu'il est heureux. (LEGENDAIRE)", "/boutique/skins/heureux.png", Rarity.RARE);
-        addSkin("CLOWN", "haha. (LEGENDAIRE)", "/boutique/skins/clown.png", Rarity.RARE);
+        addSkin("HEUREUX", "On pense qu'il est heureux. (RARE)", "/boutique/skins/heureux.png", Rarity.RARE);
+        addSkin("CLOWN", "haha. (RARE)", "/boutique/skins/clown.png", Rarity.RARE);
         addSkin("POKEMON", "Tous droits réservés à The Pokémon Company (on a pas les droits)", "/boutique/skins/pokemon.png", Rarity.RARE);
         addSkin("YUGIOH", "Tous droits réservés à Konami (on a pas les droits)", "/boutique/skins/yugioh.png", Rarity.RARE);
         addSkin("SKYJOBLEU", "Un skin basique, pas rare du tout. (COMMUN)", "/boutique/skins/skyjobleu.png", Rarity.COMMUN);
@@ -532,10 +532,9 @@ public class CaseOpeningOverlayPanel extends JPanel {
         addSkin("OG", "Le tout premier skin. (COMMUN)", "/cartes/carteDos.png", Rarity.COMMUN);
         addSkin("Nassim", "Ressemble étrangement à quelqu'un... (LEGENDAIRE)", "/boutique/skins/nassim.png", Rarity.LEGENDAIRE);
         addSkin("Mei", "Ressemble étrangement à quelqu'un... (LEGENDAIRE)", "/boutique/skins/mei.png", Rarity.LEGENDAIRE);
-        addSkin("billy", "ressemble étrangement à quelqu'un... (LEGENDAIRE)", "/boutique/skins/billy.png", Rarity.LEGENDAIRE);
+        addSkin("Billy", "ressemble étrangement à quelqu'un... (LEGENDAIRE)", "/boutique/skins/billy.png", Rarity.COMMUN);
         addSkin("Hugo", "ressemble étrangement à quelqu'un... (LEGENDAIRE)", "/boutique/skins/hugo.png", Rarity.LEGENDAIRE);
         addSkin("Ian", "ressemble étrangement à quelqu'un... (LEGENDAIRE)", "/boutique/skins/ian.png", Rarity.LEGENDAIRE);
-        addSkin("Billy", "ressemble étrangement à quelqu'un... (LEGENDAIRE)", "/boutique/skins/billy.png", Rarity.LEGENDAIRE);
     }
 
 
