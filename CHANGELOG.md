@@ -312,7 +312,13 @@
 
 - Mailmap
 
--Bouton multiplayer qui va ensuite faire un panel, où sont les salons et pouvoir créer un salon
+- Bouton multiplayer qui va ensuite faire un panel, où sont les salons et pouvoir créer un salon
+
+- Système de Timer (Si le joueur ne joue pas avant la fin du temps 2 fois il est "remplacé par un bot")
+
+- Toggle Timer
+
+- PauseOverlay (appuyez sur ESC pendant la partie pour voir le menu Pause qui contient (retour + paramètres))
 
 ### Modified
 - Refactor des checks lignes/colonnes
@@ -325,9 +331,11 @@
 
 - Possibilité de Host et Join un serveur dans le terminal
 
-- INTEFACE GRAPHIQUE POUR LES LOBBY
+- INTERFACE GRAPHIQUE POUR LES LOBBY
 
+- Animations des cartes cleared à chaque fois qu'on quitte la partie
 
+- Bouton retour déplacé dans le PauseOverlay
 
 ### Fixed
 

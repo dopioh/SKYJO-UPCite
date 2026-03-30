@@ -13,6 +13,7 @@ import fr.upc.cr1a.controller.MainMenuController;
 import fr.upc.cr1a.controller.PlayersSetupController;
 import fr.upc.cr1a.controller.SettingsOverlayController;
 import fr.upc.cr1a.model.AudioManager;
+import fr.upc.cr1a.model.GameManager;
 import fr.upc.cr1a.utils.ImageCache;
 
 import java.awt.CardLayout;
@@ -36,6 +37,7 @@ public class Frame extends JFrame{
     private final AudioManager audioManager;
     private PlayersSetupPanel playersSetupPanel;
     private ConnexionPanel connexionPanel;
+    private GameManager currentGame;
 
     // Controller
     private AccountController account; // sert a rien pour le moment
@@ -200,5 +202,18 @@ public class Frame extends JFrame{
 
     public LobbyRoomController getLobbyRoomController(){
         return this.lobbyRoomController;
+
+    }
+
+    public void setCurrentGame(GameManager game) {
+        this.currentGame = game;
+    }
+
+    public GameManager getCurrentGame() {
+        return currentGame;
+    }
+
+    public void clearCurrentGame() {
+        this.currentGame = null;
     }
 }

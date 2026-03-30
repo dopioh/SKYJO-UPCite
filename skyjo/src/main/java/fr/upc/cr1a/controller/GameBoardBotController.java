@@ -1,9 +1,12 @@
 package fr.upc.cr1a.controller;
 
 import javax.swing.Timer;
+import java.util.ArrayList;
+import java.util.List;
 
 import fr.upc.cr1a.model.ActionCardModel;
 import fr.upc.cr1a.model.BotHandModel;
+import fr.upc.cr1a.model.BotLow;
 import fr.upc.cr1a.model.BotModel;
 import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.GameManager;
@@ -14,7 +17,7 @@ import fr.upc.cr1a.view.GameBoardView;
 
 /**
  * gere les actions automatiques des bots
- * 
+ *
  * @author Billy
  */
 public class GameBoardBotController {
@@ -23,10 +26,33 @@ public class GameBoardBotController {
     private GameManager gameManager;
     private GameBoardController mainController;
 
+    private List<Timer> activeTimers = new ArrayList<>();
+    private boolean pausedState = false;
+
     public GameBoardBotController(GameBoardView gameBoardView, GameManager gameManager, GameBoardController mainController) {
         this.gameBoardView = gameBoardView;
         this.gameManager = gameManager;
         this.mainController = mainController;
+    }
+
+    /**
+     *arrête toutes les actions des bots en cours
+     */
+    public void stopAllBotActions() {
+        for (Timer timer : activeTimers) {
+            if (timer != null && timer.isRunning()) {
+                timer.stop();
+            }
+        }
+        activeTimers.clear();
+        pausedState = true;
+    }
+
+    /**
+     *reprend les actions des bots
+     */
+    public void resumeBotActions() {
+        pausedState = false;
     }
 
     /**
@@ -70,10 +96,14 @@ public class GameBoardBotController {
      *initialisation du bot, montrer 2 cartes
      */
     private void handleBotInit(BotModel bot) {
+        if (pausedState) return;
+
         mainController.setWaitingNextTurn(true);
 
         //montre la 1ère carte
-        Timer firstCardTimer = new Timer(800, e -> { // timer pour plus de fluidité
+        Timer firstCardTimer = new Timer(800, e -> {
+            if (pausedState) return;
+
             BotHandModel hand = bot.getHand();
 
             //retourner une carte aléatoire
@@ -90,11 +120,14 @@ public class GameBoardBotController {
                 mainController.updateAllDecksDisplay();
             }
             gameBoardView.showPlayerCards(bot);
+            mainController.updateAllDecksDisplay();
             mainController.refreshGuide();
 
             //revéler la 2ème
             if (gameManager.getInitRevealCount() < 2) {
-                Timer secondCardTimer = new Timer(800, ev -> { // fluidité
+                Timer secondCardTimer = new Timer(800, ev -> {
+                    if (pausedState) return;
+
                     int row2, col2;
                     do {
                         row2 = (int) (Math.random() * 3);
@@ -113,6 +146,7 @@ public class GameBoardBotController {
                     mainController.requestEndTurnFromBot();
                 });
                 secondCardTimer.setRepeats(false);
+                activeTimers.add(secondCardTimer);
                 secondCardTimer.start();
             } else {
                 mainController.setWaitingNextTurn(false);
@@ -120,6 +154,7 @@ public class GameBoardBotController {
             }
         });
         firstCardTimer.setRepeats(false);
+        activeTimers.add(firstCardTimer);
         firstCardTimer.start();
     }
 
@@ -127,9 +162,13 @@ public class GameBoardBotController {
      * Le bot décide s'il pioche ou prend de la défausse
      */
     private void handleBotDrawDecision(BotModel bot) {
+        if (pausedState) return;
+
         mainController.setWaitingNextTurn(true);
 
-        Timer decisionTimer = new Timer(800, e -> { // fluidité
+        Timer decisionTimer = new Timer(800, e -> {
+            if (pausedState) return;
+
             BotHandModel botHand = bot.getHand();
             BotStrategyInterface strategy = bot.getStrategy();
 
@@ -173,14 +212,17 @@ public class GameBoardBotController {
                 mainController.setWaitingNextTurn(false);
 
                 //décide d'échanger ou défausser
-                Timer showCardTimer = new Timer(1000, ev -> { // fluidité
+                Timer showCardTimer = new Timer(1000, ev -> {
+                    if (pausedState) return;
                     handleBotTurn();
                 });
                 showCardTimer.setRepeats(false);
+                activeTimers.add(showCardTimer);
                 showCardTimer.start();
             }
         });
         decisionTimer.setRepeats(false);
+        activeTimers.add(decisionTimer);
         decisionTimer.start();
     }
 
@@ -188,9 +230,13 @@ public class GameBoardBotController {
      * Le bot décide d'échanger ou de défausser après avoir pioché
      */
     private void handleBotAfterDraw(BotModel bot) {
+        if (pausedState) return;
+
         mainController.setWaitingNextTurn(true);
 
-        Timer exchangeTimer = new Timer(600, e -> { // fluidité
+        Timer exchangeTimer = new Timer(600, e -> {
+            if (pausedState) return;
+
             BotHandModel botHand = bot.getHand();
             BotStrategyInterface strategy = bot.getStrategy();
             CardModel drawCard = gameManager.getCurrentDrawCard();
@@ -222,16 +268,18 @@ public class GameBoardBotController {
                 mainController.refreshGuide();
 
                 //revele une carte aléatoire de sa main
-                Timer revealTimer = new Timer(800, ev -> { // fluidité
+                Timer revealTimer = new Timer(800, ev -> {
+                    if (pausedState) return;
+
                     CardModel revealedCard = revealRandomFaceDownCard(botHand);
                     if (GameManager.isStarCard(revealedCard)) {
                         grantActionForStar(bot);
                     }
-                    
+
                     //regarde et supprimer les colonnes/lignes identiques
                     GameRuleModel.removeIdenticalColumns(botHand, gameManager.getDiscardPile(), bot);
                     GameRuleModel.removeIdenticalRows(botHand, gameManager.getDiscardPile(), bot);
-                    
+
                     gameBoardView.showPlayerCards(bot);
                     mainController.updateAllDecksDisplay();
                     System.out.println(bot.getName() + " révèle une carte");
@@ -239,10 +287,12 @@ public class GameBoardBotController {
                     mainController.requestEndTurnFromBot();
                 });
                 revealTimer.setRepeats(false);
+                activeTimers.add(revealTimer);
                 revealTimer.start();
             }
         });
         exchangeTimer.setRepeats(false);
+        activeTimers.add(exchangeTimer);
         exchangeTimer.start();
     }
 
@@ -250,9 +300,13 @@ public class GameBoardBotController {
      * Le bot échange une carte après avoir pris de la défausse
      */
     private void handleBotAfterTakeDiscard(BotModel bot) {
+        if (pausedState) return;
+
         mainController.setWaitingNextTurn(true);
 
         Timer exchangeTimer = new Timer(800, e -> {
+            if (pausedState) return;
+
             BotHandModel botHand = bot.getHand();
             BotStrategyInterface strategy = bot.getStrategy();
             CardModel drawCard = gameManager.getCurrentDrawCard();
@@ -273,6 +327,7 @@ public class GameBoardBotController {
             mainController.requestEndTurnFromBot();
         });
         exchangeTimer.setRepeats(false);
+        activeTimers.add(exchangeTimer);
         exchangeTimer.start();
     }
 
