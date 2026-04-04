@@ -3,6 +3,10 @@ package fr.upc.cr1a.model;
 /**
  * Classe Enum qui gère les rank pré-defini
  * 
+ * CLASSE OBSELETE 
+ * 
+ * Va etre modifié pendant le sprint de la gestion des stats
+ * 
  * @author Mei
  */
 public enum Rank {
