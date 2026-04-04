@@ -70,7 +70,151 @@ public class SendAPI {
         }
     }
 
-    //public static void BuyInShop(); // fera baisser la money et give un skin au joueur A FAIRE PLUS TARD
+    /**
+     * commande API removeMoney qui retire de l'argent a un utilisateur dans la DB
+     */
+    public static PlayerData removeMoney(String uuid, int amount){
+        try {
+            String jsonBody = "{" + "\"uuidStr\": \"" + uuid + "\"," + "\"amount\": " + amount + "}";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlAPI + "/api/player/removeMoney"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("CODE HTTP REMOVEMONEY : " + response.statusCode());
+            System.out.println("API REPOND REMOVEMONEY : " + response.body());
+
+            if (response.statusCode() == 200) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                return gson.fromJson(response.body(), PlayerData.class);
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * commande API addElo qui ajoute de l'elo a un utilisateur dans la DB
+     */
+    public static PlayerData addElo(String uuid, int amount){
+        try {
+            String jsonBody = "{" + "\"uuidStr\": \"" + uuid + "\"," + "\"amount\": " + amount + "}";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlAPI + "/api/player/addElo"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("CODE HTTP ADDELO : " + response.statusCode());
+            System.out.println("API REPOND ADDELO : " + response.body());
+
+            if (response.statusCode() == 200) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                return gson.fromJson(response.body(), PlayerData.class);
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * commande API removeElo qui retire de l'elo a un utilisateur dans la DB
+     */
+    public static PlayerData removeElo(String uuid, int amount){
+        try {
+            String jsonBody = "{" + "\"uuidStr\": \"" + uuid + "\"," + "\"amount\": " + amount + "}";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlAPI + "/api/player/removeElo"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("CODE HTTP REMOVEELO : " + response.statusCode());
+            System.out.println("API REPOND REMOVEELO : " + response.body());
+
+            if (response.statusCode() == 200) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                return gson.fromJson(response.body(), PlayerData.class);
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * commande API addXP qui ajoute de l'xp a un utilisateur dans la DB
+     */
+    public static PlayerData addXP(String uuid, int amount){
+        try {
+            String jsonBody = "{" + "\"uuidStr\": \"" + uuid + "\"," + "\"amount\": " + amount + "}";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlAPI + "/api/player/addXP"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("CODE HTTP ADDXP : " + response.statusCode());
+            System.out.println("API REPOND ADDXP : " + response.body());
+
+            if (response.statusCode() == 200) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                return gson.fromJson(response.body(), PlayerData.class);
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * commande API removeXP qui retire de l'xp a un utilisateur dans la DB
+     */
+    public static PlayerData removeXP(String uuid, int amount){
+        try {
+            String jsonBody = "{" + "\"uuidStr\": \"" + uuid + "\"," + "\"amount\": " + amount + "}";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlAPI + "/api/player/removeXP"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("CODE HTTP REMOVEXP : " + response.statusCode());
+            System.out.println("API REPOND REMOVEXP : " + response.body());
+
+            if (response.statusCode() == 200) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                return gson.fromJson(response.body(), PlayerData.class);
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     // Quoi d'autres comme requetes possible ? 
 

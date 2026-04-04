@@ -1,6 +1,7 @@
 package fr.upc.cr1a.controller;
 
 import fr.upc.cr1a.controller.data.SupabaseAuth;
+import fr.upc.cr1a.model.player.PlayerAccount;
 import fr.upc.cr1a.view.ConnexionPanel;
 import fr.upc.cr1a.view.Frame;
 
@@ -44,6 +45,7 @@ public class ConnexionController {
         boolean create = SupabaseAuth.createAccount(email, username, password);
 
         if (!create){
+            PlayerAccount.actuelAccount = null;
             System.out.println("Erreur lors de l'envoi à la base de données (email/pseudo peut être déjà utilisé)"); 
         } else {
             System.out.println("CONNECTERRRRRRRRRRRR");
@@ -65,6 +67,7 @@ public class ConnexionController {
         }
 
         if (!connexion){
+            PlayerAccount.actuelAccount = null;
             System.out.println("ERREUR DE CONNEXION : Surement Mot de Passe Errones"); 
         } else {
             System.out.println("CONNNNNNNNECCTERRRRRRRRRRRRRRRRRRRRRRRRRRR");
@@ -75,6 +78,7 @@ public class ConnexionController {
 
     public void sendGuest(){
         // give un PlayerData vide ? ou rjt un attribut "isInvited" et tout le reste en nul ?
+        PlayerAccount.actuelAccount = null;
         System.out.println("CONNNNNNNNECCTERRRRRRRRRRRRRRRRRRRRRRRRRRR en tant au'invite");
         frame.showPanel("MENU");
     }

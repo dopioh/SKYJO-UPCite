@@ -60,6 +60,10 @@ public class MainMenuController {
     }
 
     private void clicShop() {
+
+        if (PlayerAccount.actuelAccount != null) {
+            frame.getShopPanel().setMoney(PlayerAccount.actuelAccount.getMoney());
+        }
         frame.showPanel("SHOP");
     }
 
