@@ -41,6 +41,35 @@ public class SendAPI {
         
     }
 
+    /**
+     * commande API addMoney qui ajoute de l'argent a un utilisateur dans la DB
+     */
+    public static PlayerData addMoney(String uuid, int amount){
+        try {
+            String jsonBody = "{" + "\"uuidStr\": \"" + uuid + "\"," + "\"amount\": " + amount + "}";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlAPI + "/api/player/addMoney"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("CODE HTTP ADDMONEY : " + response.statusCode());
+            System.out.println("API REPOND ADDMONEY : " + response.body());
+
+            if (response.statusCode() == 200) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                return gson.fromJson(response.body(), PlayerData.class);
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     //public static void BuyInShop(); // fera baisser la money et give un skin au joueur A FAIRE PLUS TARD
 
     // Quoi d'autres comme requetes possible ? 
@@ -71,6 +100,7 @@ public class SendAPI {
                 return playerData;
             } else {
                 System.out.println("Code HTTP HORS 200 : " + response.statusCode());
+                System.out.println("Body HORS 200 : " + response.body());
                 return null;
             }
         } catch (Exception e) {

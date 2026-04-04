@@ -1,12 +1,16 @@
 package fr.upc.cr1a.controller;
 
+import fr.upc.cr1a.controller.data.SendAPI;
 import fr.upc.cr1a.model.AudioManager;
 //import fr.upc.cr1a.model.GameManager;
-//import fr.upc.cr1a.model.player.PlayerData;
+import fr.upc.cr1a.model.player.PlayerAccount;
+import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.view.DoodleButton;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.MainMenuPanel;
 
+
+import javax.swing.SwingUtilities;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 //import java.util.ArrayList;
