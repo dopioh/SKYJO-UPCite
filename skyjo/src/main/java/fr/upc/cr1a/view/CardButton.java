@@ -120,10 +120,13 @@ public class CardButton extends JButton {
                 return;
             }
 
-            // nouvelle image cropée
-            BufferedImage cropped = new BufferedImage(cropW, cropH, BufferedImage.TYPE_INT_ARGB);
+            // nouvelle image cropée et réduite pour la perf
+            int targetW = 300;
+            int targetH = 433; // ratio : 1217/1754
+            BufferedImage cropped = new BufferedImage(targetW, targetH, BufferedImage.TYPE_INT_ARGB);
             Graphics2D g2 = cropped.createGraphics();
-            g2.drawImage(original.getSubimage(CropLeft, CropTop, cropW, cropH), 0, 0, null);
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g2.drawImage(original.getSubimage(CropLeft, CropTop, cropW, cropH), 0, 0, targetW, targetH, null);
             g2.dispose();
 
             this.cardImage = cropped;
