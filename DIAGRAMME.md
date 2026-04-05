@@ -393,7 +393,69 @@ Marqués avec `// MEI` ou `// TODO` dans le code :
 - **LobbyRoomController.java:69,70,147,148** : Synchronisation P2P des états joueurs
 - **LobbyRoomPanel.java:215** : Note d'aide pour les hôtes (bouton kick avec "X" désormais affiché correctement)
 
+## 6. Modifications Affichage des Cartes Action (Avril 2026)
+
+### Problème résolu
+**Symptôme** : Quand trop de cartes action s'acumulaient, il y avait un décalage avec les cartes de main affichées en FlowLayout qui prenait trop de place horizontalement.
+
+**Solution implémentée** :
+
+#### Architecture avant
+- `GameBoardView` : utilisait `actionHandPanel` (FlowLayout) qui affichait toutes les cartes action visibles en ligne
+- Problème : prenait beaucoup d'espace et créait un décalage visuel
+
+#### Architecture après
+1. **Nouveau composant `ActionCardOverlayPanel`** (fr.upc.cr1a.view.ActionCardOverlayPanel)
+   - Panel d'overlay affichant les cartes action comme un modal semi-transparent
+   - Gère la sélection des cartes avec un contour vert
+   - Affiche un bouton "Valider" pour confirmer l'action
+   - Se ferme au clic en dehors ou avec le bouton Fermer
+   - Inclut le hover avec description des cartes action
+   - Attributs :
+     * `actionCardButtons[]` : 8 boutons pour les cartes action
+     * `cardWrappers[]` : panels wrapper pour gérer les contours de sélection
+     * `selectedCardIndex` : index de la carte sélectionnée
+     * `validateButton` : bouton de validation
+   - Méthodes principales :
+     * **showActionHand()** : affiche l'overlay avec les cartes du joueur
+     * **selectCard()** : sélectionne une carte et affiche le contour
+     * **playSelectedCard()** : valide et joue la carte sélectionnée
+     * **closeOverlay()** : ferme l'overlay avec animation fade
+
+2. **Modification de `GameBoardView`**
+   - Remplacement de `actionHandPanel` (FlowLayout avec 8 CardButtons) par :
+     * `deckActionButton` : un seul bouton affichant le premier type de carte action
+     * `actionDeckCountLabel` : étiquette affichant le nombre total de cartes action
+   - Placement : 4e ligne de la grille (entre les cartes main et les pioches)
+   - Nouvelles méthodes :
+     * **openActionCardOverlay()** : ouvre l'overlay avec la main d'action
+     * **closeActionCardOverlay()** : ferme l'overlay
+     * **getSelectedActionCardIndex()** : récupère l'index de la carte sélectionnée
+     * **setActionCardSelectionCallback()** : définit le callback de validation
+
+3. **Layout du Plateau**
+   ```
+   Ligne 1-3 : Grille 3x4 des cartes normales
+   Ligne 4   : Deck Action Button + Label compteur (remplace actionHandPanel)
+   Droite    : Pioches et Défausses (normales et actions)
+   ```
+
+4. **Intégration Overlay**
+   - L'overlay est ajouté au `JLayeredPane` en couche `PALETTE_LAYER`
+   - Au clic sur le deck button → `openActionCardOverlay()` affiche toutes les cartes
+   - L'utilisateur sélectionne une carte (contour vert) et valide
+   - Le callback exécute l'action via `HumanTurnController`
+
+5. **Avantages de cette approche**
+   - Plus compact : 1 bouton au lieu de 8
+   - Pas de décalage des cartes de main
+   - Interface modale et claire
+   - Sélection explicite avec validation
+   - Overlay réutilisable pour d'autres contextes
+
 #### DATA :
+
+
 
 * **SendAPI** : Classe qui regroupes des methodes static pour envoyer des donnees a l'API
     * Variables gloabales : **urlAPI (String)**, **client (HttpClient)**

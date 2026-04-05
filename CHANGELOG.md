@@ -421,3 +421,15 @@
 - Fix de l'animation hover du `DoodleButton` qui grossisait si le dernier hover datais (reset tick de deltatime)
 
 - Fix du `PlayerPreviewPanel` qui ne s'affichait plus en fin de manche/partie
+
+- Décalage lorsqu'il y a trop de carte action
+
+- Reset des cartes action après une manche
+
+- le comptage des pts des cartes actions 
+
+- délié entre le deck de la première manche et des suivantes
+
+- désactivation des listener lors d'un bot vs bot 
+
+
