@@ -235,6 +235,7 @@ public class GameRuleModel {
     /**
      * Applique les scores de fin de manche selon les règles Skyjo
      * Si le joueur qui termine n'a pas le meilleur score, son score est doublé
+     * Ajoute 10 points par carte action non jouée
      * @param players la liste des joueurs
      * @param roundEndPlayer le joueur qui a terminé la manche
      * @param lowestPlayer le joueur avec le score le plus bas
@@ -243,13 +244,24 @@ public class GameRuleModel {
         //Applique le score à tout le monde
         for (PlayerModel player : players) {
             int score = player.getHand().calculateScore();
+
+            //ajoute 10 points par carte action non jouée
+            int unplayedActionCards = player.getActionHand().size();
+            int actionPenalty = unplayedActionCards * 10;
+            score += actionPenalty;
+
             player.addScore(score);
         }
-        
+
         //Double le score du joueur qui a lancé la fin de la manche s'il n'a pas le meilleur score
         if (roundEndPlayer != null && roundEndPlayer != lowestPlayer) {
             int roundEndPlayerScore = roundEndPlayer.getHand().calculateScore();
-            roundEndPlayer.addScore(roundEndPlayerScore); 
+            //ajoute aussi la pénalité des cartes actions au score doublé
+            int unplayedActionCards = roundEndPlayer.getActionHand().size();
+            int actionPenalty = unplayedActionCards * 10;
+            roundEndPlayerScore += actionPenalty;
+
+            roundEndPlayer.addScore(roundEndPlayerScore);
         }
     }
 
