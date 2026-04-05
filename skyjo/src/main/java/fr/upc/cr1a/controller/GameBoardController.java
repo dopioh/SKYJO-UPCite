@@ -173,8 +173,10 @@ public class GameBoardController {
         }
 
         boolean isGameOver = gameManager.getGameState() == GameManager.GameState.GAME_ENDED;
+        PlayerModel roundEndPlayer = gameManager.getRoundEndPlayer();
+
         currentRoundEndPanel = new RoundEndPanel(
-            new ArrayList<>(gameManager.getPlayers()), isGameOver
+            new ArrayList<>(gameManager.getPlayers()), isGameOver, roundEndPlayer
         );
 
         frame.add(currentRoundEndPanel, "ROUND_END");
@@ -232,7 +234,14 @@ public class GameBoardController {
         gameManager.startNewGame();
         waitingNextTurn = false;
         humanTurnController.resetTurnState();
-        gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
+
+        // Rafraîchir l'affichage du joueur actuel (y compris ses cartes actions)
+        PlayerModel currentPlayer = gameManager.getCurrentPlayer();
+        gameBoardView.showPlayerCards(currentPlayer);
+
+        // Forcer la mise à jour de l'affichage des cartes actions
+        gameBoardView.showActionHand(currentPlayer);
+
         updateAllDecksDisplay();
         Frame frame = gameBoardModel.getFrame();
         frame.showPanel("GAME");

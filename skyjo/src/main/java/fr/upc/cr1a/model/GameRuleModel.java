@@ -214,18 +214,22 @@ public class GameRuleModel {
     }
 
     /**
-     * Trouve le joueur avec le score de manche le plus bas
+     * Trouve le joueur avec le score de manche le plus bas (main + pénalité cartes actions)
      * @param players la liste des joueurs
      * @return le joueur avec le score le plus bas
      */
     public static PlayerModel findLowestScorePlayer(ArrayList<PlayerModel> players) {
         PlayerModel lowestPlayer = null;
         int lowestScore = Integer.MAX_VALUE;
-        
+
         for (PlayerModel player : players) {
-            int score = player.getHand().calculateScore();
-            if (score < lowestScore) {
-                lowestScore = score;
+            // Calculer le score total : main + pénalité des cartes actions
+            int handScore = player.getHand().calculateScore();
+            int actionPenalty = player.getActionHand().size() * 10;
+            int totalScore = handScore + actionPenalty;
+
+            if (totalScore < lowestScore) {
+                lowestScore = totalScore;
                 lowestPlayer = player;
             }
         }
@@ -243,12 +247,13 @@ public class GameRuleModel {
     public static void applyRoundScores(ArrayList<PlayerModel> players, PlayerModel roundEndPlayer, PlayerModel lowestPlayer) {
         //Applique le score à tout le monde
         for (PlayerModel player : players) {
-            int score = player.getHand().calculateScore();
-
-            //ajoute 10 points par carte action non jouée
+            int handScore = player.getHand().calculateScore();
             int unplayedActionCards = player.getActionHand().size();
             int actionPenalty = unplayedActionCards * 10;
-            score += actionPenalty;
+            int score = handScore + actionPenalty;
+
+            // Stocker les détails de la manche
+            player.setLastRoundScore(new PlayerModel.RoundScore(handScore, actionPenalty, score, false));
 
             player.addScore(score);
         }
@@ -256,10 +261,17 @@ public class GameRuleModel {
         //Double le score du joueur qui a lancé la fin de la manche s'il n'a pas le meilleur score
         if (roundEndPlayer != null && roundEndPlayer != lowestPlayer) {
             int roundEndPlayerScore = roundEndPlayer.getHand().calculateScore();
-            //ajoute aussi la pénalité des cartes actions au score doublé
             int unplayedActionCards = roundEndPlayer.getActionHand().size();
             int actionPenalty = unplayedActionCards * 10;
             roundEndPlayerScore += actionPenalty;
+
+            // Mettre à jour le RoundScore pour refléter le doublement
+            roundEndPlayer.setLastRoundScore(new PlayerModel.RoundScore(
+                roundEndPlayer.getHand().calculateScore(),
+                actionPenalty,
+                roundEndPlayerScore * 2,  // Le score total est doublé
+                true  // Marquer que le score a été doublé
+            ));
 
             roundEndPlayer.addScore(roundEndPlayerScore);
         }

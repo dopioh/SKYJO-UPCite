@@ -7,16 +7,41 @@ import fr.upc.cr1a.model.player.PlayerData;
 
 /**
  * Modèle représentant un joueur
- * 
+ *
  * @author Billy
  */
 
 public class PlayerModel {
 
+    /**
+     * Stocke les détails du score de la dernière manche
+     */
+    public static class RoundScore {
+        public int handScore;
+        public int actionPenalty;
+        public int totalAdded;
+        public boolean wasDoubled;  // Indique si le score a été doublé
+
+        public RoundScore(int handScore, int actionPenalty, int totalAdded) {
+            this.handScore = handScore;
+            this.actionPenalty = actionPenalty;
+            this.totalAdded = totalAdded;
+            this.wasDoubled = false;
+        }
+
+        public RoundScore(int handScore, int actionPenalty, int totalAdded, boolean wasDoubled) {
+            this.handScore = handScore;
+            this.actionPenalty = actionPenalty;
+            this.totalAdded = totalAdded;
+            this.wasDoubled = wasDoubled;
+        }
+    }
+
     private final String name; // id unique qui permettra de retrouver le player dans la db
     private PlayerHandModel hand;
     private ArrayList<ActionType> actionHand;
     private int totalScore;
+    private RoundScore lastRoundScore; // Détails de la dernière manche
     
     
     //constructeur
@@ -58,7 +83,15 @@ public class PlayerModel {
 
     public void resetHand(){
         this.hand = new PlayerHandModel();
-        this.actionHand.clear(); 
+        this.actionHand.clear();
+    }
+
+    public RoundScore getLastRoundScore() {
+        return lastRoundScore;
+    }
+
+    public void setLastRoundScore(RoundScore score) {
+        this.lastRoundScore = score;
     }
 
     public static PlayerModel getPlayerModel(int nbr, ArrayList<PlayerModel> listPlayerModel){

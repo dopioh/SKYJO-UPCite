@@ -24,9 +24,11 @@ public class RoundEndPanel extends JPanel {
     private boolean gameOver;
     private List<JLabel> playerLabels = new ArrayList<>();
     private List<PlayerModel> sortedPlayers;
+    private PlayerModel roundEndPlayer;
 
-    public RoundEndPanel(List<PlayerModel> players, boolean gameOver) {
+    public RoundEndPanel(List<PlayerModel> players, boolean gameOver, PlayerModel roundEndPlayer) {
         this.gameOver = gameOver;
+        this.roundEndPlayer = roundEndPlayer;
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
 
@@ -55,12 +57,29 @@ public class RoundEndPanel extends JPanel {
             layeredPane.repaint();
         });
 
-        // Titre
+        // Titre avec information du déclencheur
+        JPanel titlePanel = new JPanel();
+        titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.Y_AXIS));
+        titlePanel.setBackground(Color.WHITE);
+        titlePanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 0));
+
         String title = gameOver ? "Partie terminée" : "Fin de la manche";
         JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 0));
-        contentPanel.add(titleLabel, BorderLayout.NORTH);
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        titlePanel.add(titleLabel);
+
+        // Ajouter le nom du joueur qui a déclenché la fin
+        if (!gameOver && roundEndPlayer != null) {
+            JLabel roundEndInfo = new JLabel("Déclenchée par : " + roundEndPlayer.getName(), SwingConstants.CENTER);
+            roundEndInfo.setFont(new Font("Arial", Font.ITALIC, 16));
+            roundEndInfo.setForeground(new Color(100, 100, 100));
+            roundEndInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
+            titlePanel.add(Box.createVerticalStrut(5));
+            titlePanel.add(roundEndInfo);
+        }
+
+        contentPanel.add(titlePanel, BorderLayout.NORTH);
 
         // gauche : liste des joueurs trié par score
         sortedPlayers = new ArrayList<>(players);
@@ -73,9 +92,32 @@ public class RoundEndPanel extends JPanel {
 
         for (int i = 0; i < sortedPlayers.size(); i++) {
             PlayerModel p = sortedPlayers.get(i);
-            String text = (i + 1) + " - " + p.getName() + "  " + p.getTotalScore() + "p";
-            JLabel label = new JLabel(text);
-            label.setFont(new Font("Arial", Font.PLAIN, 20));
+
+            // Construction du texte avec détails
+            StringBuilder text = new StringBuilder();
+            text.append(i + 1).append(" - ").append(p.getName()).append("  ");
+
+            // Afficher les détails de la manche si disponibles
+            if (!gameOver && p.getLastRoundScore() != null) {
+                PlayerModel.RoundScore roundScore = p.getLastRoundScore();
+                text.append("(Main: ").append(roundScore.handScore).append("p");
+
+                if (roundScore.actionPenalty > 0) {
+                    text.append(" + Actions: ").append(roundScore.actionPenalty).append("p");
+                }
+
+                // Afficher le doublement si applicable
+                if (roundScore.wasDoubled) {
+                    text.append(" × 2 = +").append(roundScore.totalAdded).append("p) ");
+                } else {
+                    text.append(" = +").append(roundScore.totalAdded).append("p) ");
+                }
+            }
+
+            text.append("Total: ").append(p.getTotalScore()).append("p");
+
+            JLabel label = new JLabel(text.toString());
+            label.setFont(new Font("Arial", Font.PLAIN, 18));
             label.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
             label.setOpaque(true);
             label.setBackground(Color.WHITE);
