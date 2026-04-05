@@ -38,6 +38,8 @@ public class GameManager {
     private GameBoardModel gameBoardModel;
     private int initRevealCount = 0;
     private int roundNumber = 0; // numero de la manche actuelle
+    private boolean initRevealStarted = false;
+    private boolean initRevealJustFinished = false;
 
     private boolean gameWithAction = false; // true si on utilise les actions
     
