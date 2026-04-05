@@ -8,6 +8,7 @@ import java.net.Socket;
 //import java.util.ArrayList;
 
 import fr.upc.cr1a.controller.network.UDP.UDPBroadcaster;
+import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolClient;
 import fr.upc.cr1a.model.player.PlayerData;
 
 import java.io.*;
@@ -17,7 +18,7 @@ import java.io.*;
  * 
  * @author Mei
  */
-public class GameClient {
+public class GameClient implements NetworkProtocolClient{
 
     private Socket socket;
     private PrintWriter out;
@@ -76,6 +77,45 @@ public class GameClient {
         } finally {
             disconnect();
         }
+    }
+
+    // implementation de l'interface pour send les requests in game 
+    // faut dire qu'on peut les envoyer que si on est bien connecté a un host et que une game est en cours
+
+    /**
+     * Request pour retourner une carte
+     * STUCTURE = id:protocol:col:row
+     */
+    @Override
+    public void sendFlipCardRequest(String id, int col, int row){
+        out.println(id +":"+NetworkProtocolClient.REQ_FLIP_CARD+":"+col +":" + row);
+    }
+
+    /**
+     * Request pour piocher une carte
+     * STRUCTURE = id:protocol
+     */
+    @Override
+    public void sendPickPiocheRequest(String id){
+        out.println(id + ":" + NetworkProtocolClient.REQ_PICK_PIOCHE);
+    }
+
+    /**
+     * Request pour prendre une carte de la defausse
+     * STRUCTURE = id:protocol
+     */
+    @Override
+    public void sendPickDefausseRequest(String id){
+        out.println(id + ":" + NetworkProtocolClient.REQ_PICK_DEFAUSSE);
+    }
+
+    /**
+     * Request pour jeter une carte dans la defausse
+     * STRUCTURE = id:protocol:col:row
+     */
+    @Override
+    public void sendDisquardRequest(String id, int col, int row){
+        out.println(id +":"+NetworkProtocolClient.REQ_DISCARD+":"+col +":" + row);
     }
 
     // test host

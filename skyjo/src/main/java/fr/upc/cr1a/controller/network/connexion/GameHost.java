@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolServer;
 import fr.upc.cr1a.model.player.PlayerData;
 
 /**
@@ -12,7 +13,7 @@ import fr.upc.cr1a.model.player.PlayerData;
  * 
  * @author Mei
  */
-public class GameHost implements Runnable{ // GameServer au lieu de GameHost ? 
+public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer au lieu de GameHost ? 
     
     private int port; // pour se connecter, en ipv4 ou ipv6 ? jsp encore // non c'est un port d'acces de meme type que entre Render et l'api 
     private ServerSocket serverSocket; // permet de se recup des requests
@@ -89,20 +90,7 @@ public class GameHost implements Runnable{ // GameServer au lieu de GameHost ?
         lobbyPlayers.put(id, username);
         System.out.println("[LOBBY] " + username + " a rejoint la salle d'attente !");
 
-        broadcastLobbyUpdate();
-    }
-
-    public synchronized void broadcastLobbyUpdate() { // synchronised pour gerer les appels de fonctions sur du multi-thread -> modele file d'attente
-
-        StringBuilder message = new StringBuilder("[LOBBY_UPDATE] Players in : ");
-        for (String pseudo : lobbyPlayers.values()) {
-            message.append(pseudo).append(",");
-        }
-
-        // On l'envoie à tous les ClientHandlers
-        for (ClientHandler client : connectedClient) {
-            client.sendMessage(message.toString());
-        }
+        broadcastUpdateLobby();
     }
 
     public void kickPlayer(String id){ // plus sécu avec l'id que l'username
@@ -134,8 +122,52 @@ public class GameHost implements Runnable{ // GameServer au lieu de GameHost ?
         lobbyPlayers.remove(id); // faut mettre la key
         System.out.println("[SERVEUR] " + username + " a quitté le salon");
 
-        broadcastLobbyUpdate();
+        broadcastUpdateLobby();
        }
+    }
+
+
+    // PARTI PROTOCOL SERVER
+
+    @Override
+    public synchronized void broadcastStartGame(){
+        String message = NetworkProtocolServer.UPDATE_START_GAME;
+
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message.toString());
+        }
+    }
+
+    @Override
+    public synchronized void broadcastUpdateLobby(){
+
+        StringBuilder message = new StringBuilder("[LOBBY_UPDATE] Players in lobby : ");
+        for (String pseudo : lobbyPlayers.values()) {
+            message.append(pseudo).append(",");
+        }
+
+        // On l'envoie à tous les ClientHandlers
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message.toString());
+        }
+    }
+
+    @Override
+    public synchronized void broadcastCardFlipped(String id, int col, int row, int valeur){
+        String message = NetworkProtocolServer.UPDATE_CARD_FLIPPED + ":" + id + ":" + col + ":" + row + ":" +valeur;
+
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message.toString());
+        }
+    }
+
+    @Override
+    public synchronized void broadcastTurnChanged(String id){
+        String message = NetworkProtocolServer.UPDATE_TURN_CHANGED + ":" + id;
+
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message.toString());
+        }
     }
 
     // second test client simultané ( faut un host compatible )
