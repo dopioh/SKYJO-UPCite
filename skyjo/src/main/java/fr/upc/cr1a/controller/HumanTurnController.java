@@ -89,9 +89,7 @@ public class HumanTurnController {
             String drawnPath = gameBoardView.getCardImagePath(drawn);
             gameBoardView.getBtnPioche().setCardImage(drawnPath);
             gameBoardView.showCursorCard(drawnPath);
-            gameBoardView.updateDiscardOnly(
-                gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard()
-            );
+            mainController.updateAllDecksDisplay();
 
             PlayerModel player = gameManager.getCurrentPlayer();
             if (player != null && GameManager.isStarCard(drawn)) {
