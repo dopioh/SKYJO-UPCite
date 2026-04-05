@@ -7,6 +7,7 @@ import fr.upc.cr1a.model.AnimLoop;
 import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -33,7 +34,6 @@ public class ActionCardOverlayPanel extends JPanel {
     private ActionType[] actionCardTypes;
     private int visibleActionCount = 0;
     private int selectedCardIndex = -1;
-    private int hoveredCardIndex = -1;
     private GameBoardView gameBoardView;
 
     private float opaque = 0.0f;
@@ -61,15 +61,19 @@ public class ActionCardOverlayPanel extends JPanel {
         for (int i = 0; i < MAX_ACTION_CARDS; i++) {
             final int cardIndex = i;
 
-            // Créer le wrapper panel
+            // Créer le wrapper panel avec une taille fixe
             JPanel wrapper = new JPanel(new BorderLayout());
             wrapper.setOpaque(false);
             wrapper.setVisible(false);
+            wrapper.setPreferredSize(new Dimension(120, 160));
+            wrapper.setMaximumSize(new Dimension(120, 160));
 
             CardButton btn = new CardButton();
             btn.setAnimationEnabled(false);
             btn.setCardSize(100, 140);
             btn.setVisible(false);
+
+            // Ajouter listener pour sélection ET hover
             btn.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
@@ -81,24 +85,16 @@ public class ActionCardOverlayPanel extends JPanel {
                     if (cardIndex >= visibleActionCount) {
                         return;
                     }
-                    // Ne montrer la description qu'une seule fois à l'entrée
-                    if (hoveredCardIndex != cardIndex) {
-                        hoveredCardIndex = cardIndex;
-                        ActionType type = actionCardTypes[cardIndex];
-                        if (gameBoardView != null) {
-                            gameBoardView.showActionDescription(type);
-                        }
+                    ActionType type = actionCardTypes[cardIndex];
+                    if (gameBoardView != null) {
+                        gameBoardView.showActionDescription(type);
                     }
                 }
 
                 @Override
                 public void mouseExited(MouseEvent e) {
-                    // Cacher la description seulement si on sort vraiment
-                    if (hoveredCardIndex == cardIndex) {
-                        hoveredCardIndex = -1;
-                        if (gameBoardView != null) {
-                            gameBoardView.hideActionDescription();
-                        }
+                    if (gameBoardView != null) {
+                        gameBoardView.hideActionDescription();
                     }
                 }
             });
@@ -213,7 +209,6 @@ public class ActionCardOverlayPanel extends JPanel {
         this.gameBoardView = gameBoardView;
         visibleActionCount = (actions == null) ? 0 : actions.size();
         selectedCardIndex = -1;
-        hoveredCardIndex = -1;
 
         for (int i = 0; i < MAX_ACTION_CARDS; i++) {
             if (i < visibleActionCount) {
@@ -262,7 +257,6 @@ public class ActionCardOverlayPanel extends JPanel {
      * Ferme l'overlay avec animation
      */
     public void closeOverlay() {
-        hoveredCardIndex = -1;
         AnimLoop.remove(this);
         AnimLoop.add(this, dt -> {
             opaque -= 0.12f * (float) dt;
