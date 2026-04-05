@@ -119,7 +119,7 @@ public class GameBoardBotController {
                 grantActionForStar(bot);
                 mainController.updateAllDecksDisplay();
             }
-            gameBoardView.showPlayerCards(bot);
+            gameBoardView.flipCardAt(row, col, () -> gameBoardView.showPlayerCards(bot));
             mainController.updateAllDecksDisplay();
             mainController.refreshGuide();
 
@@ -139,7 +139,7 @@ public class GameBoardBotController {
                     if (GameManager.isStarCard(secondRevealed)) {
                         grantActionForStar(bot);
                     }
-                    gameBoardView.showPlayerCards(bot);
+                    gameBoardView.flipCardAt(row2, col2, () -> gameBoardView.showPlayerCards(bot));
                     mainController.updateAllDecksDisplay();
                     mainController.refreshGuide();
                     mainController.setWaitingNextTurn(false);
@@ -185,12 +185,11 @@ public class GameBoardBotController {
 
             if (takeDiscard && discardCard != null) {
                 //prend de la défausse
+                gameBoardView.getBtnDefausse().lift();
                 CardModel taken = gameManager.takeDiscard();
-                gameBoardView.getBtnDefausse().setCardImage(gameBoardView.getCardImagePath(taken));
                 if (GameManager.isStarCard(taken)) {
                     grantActionForStar(bot);
                 }
-                mainController.updateAllDecksDisplay();
                 System.out.println(bot.getName() + " prend la défausse : " + taken.getCardValue());
                 mainController.refreshGuide();
                 mainController.setWaitingNextTurn(false);
@@ -205,7 +204,8 @@ public class GameBoardBotController {
                 if (GameManager.isStarCard(drawn)) {
                     grantActionForStar(bot);
                 }
-                gameBoardView.getBtnPioche().setCardImage(gameBoardView.getCardImagePath(drawn));
+                String drawnPath = gameBoardView.getCardImagePath(drawn);
+                gameBoardView.getBtnPioche().flip(() -> gameBoardView.getBtnPioche().setCardImage(drawnPath));
                 mainController.updateAllDecksDisplay();
                 System.out.println(bot.getName() + " pioche : " + drawn.getCardValue());
                 mainController.refreshGuide();
@@ -251,6 +251,7 @@ public class GameBoardBotController {
                     System.out.println(bot.getName() + " échange [" + position[1] + "," + position[0] + "]");
 
                     gameBoardView.showPlayerCards(bot);
+                    gameBoardView.animatePressAt(position[1], position[0]);
                     gameBoardView.updateCardDisplay(
                             gameManager.getDiscardPile().getTopCard(),
                             gameManager.getDeck().stackSize() > 0);
@@ -261,6 +262,7 @@ public class GameBoardBotController {
             } else {
                 //jeter la carte piochée puis révéler une carte
                 gameManager.discardDrawCard();
+                gameBoardView.getBtnDefausse().animatePress();
                 gameBoardView.updateCardDisplay(
                         gameManager.getDiscardPile().getTopCard(),
                         gameManager.getDeck().stackSize() > 0);
@@ -271,7 +273,8 @@ public class GameBoardBotController {
                 Timer revealTimer = new Timer(800, ev -> {
                     if (pausedState) return;
 
-                    CardModel revealedCard = revealRandomFaceDownCard(botHand);
+                    int[] pos = revealRandomFaceDownCard(botHand);
+                    CardModel revealedCard = botHand.getCard(pos[0], pos[1]);
                     if (GameManager.isStarCard(revealedCard)) {
                         grantActionForStar(bot);
                     }
@@ -280,7 +283,7 @@ public class GameBoardBotController {
                     GameRuleModel.removeIdenticalColumns(botHand, gameManager.getDiscardPile(), bot);
                     GameRuleModel.removeIdenticalRows(botHand, gameManager.getDiscardPile(), bot);
 
-                    gameBoardView.showPlayerCards(bot);
+                    gameBoardView.flipCardAt(pos[0], pos[1], () -> gameBoardView.showPlayerCards(bot));
                     mainController.updateAllDecksDisplay();
                     System.out.println(bot.getName() + " révèle une carte");
                     mainController.setWaitingNextTurn(false);
@@ -318,6 +321,8 @@ public class GameBoardBotController {
                 System.out.println(bot.getName() + " échange [" + position[1] + "," + position[0] + "]");
 
                 gameBoardView.showPlayerCards(bot);
+                gameBoardView.animatePressAt(position[1], position[0]);
+                gameBoardView.getBtnDefausse().resetLift();
                 gameBoardView.updateCardDisplay(
                         gameManager.getDiscardPile().getTopCard(),
                         gameManager.getDeck().stackSize() > 0);
@@ -331,7 +336,8 @@ public class GameBoardBotController {
         exchangeTimer.start();
     }
 
-    private CardModel revealRandomFaceDownCard(BotHandModel hand) {
+    // retourne [row, col] de la carte révélée
+    private int[] revealRandomFaceDownCard(BotHandModel hand) {
         int row;
         int col;
         do {
@@ -340,7 +346,7 @@ public class GameBoardBotController {
         } while (hand.getCard(row, col) == null || !hand.getCard(row, col).isFaceDown());
 
         hand.revealCard(row, col);
-        return hand.getCard(row, col);
+        return new int[]{ row, col };
     }
 
     private void grantActionForStar(PlayerModel player) {
