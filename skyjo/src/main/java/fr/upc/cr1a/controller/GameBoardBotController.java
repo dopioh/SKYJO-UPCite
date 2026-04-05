@@ -7,9 +7,7 @@ import java.util.List;
 import fr.upc.cr1a.model.ActionCardModel;
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.BotHandModel;
-import fr.upc.cr1a.model.BotLow;
 import fr.upc.cr1a.model.BotModel;
-import fr.upc.cr1a.model.BotTerminalModel;
 import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.GameManager;
 import fr.upc.cr1a.model.GameRuleModel;
@@ -373,11 +371,10 @@ public class GameBoardBotController {
      */
     private boolean shouldBotPlayAction(BotModel bot) {
         BotStrategyInterface strategy = bot.getStrategy();
-        if (strategy instanceof BotTerminalModel) {
-            BotTerminalModel terminalBot = (BotTerminalModel) strategy;
-            return terminalBot.shouldPlayAction();
+        if (strategy == null) {
+            return Math.random() < 0.5;
         }
-        return Math.random() < 0.5;
+        return strategy.shouldPlayAction();
     }
 
     /**

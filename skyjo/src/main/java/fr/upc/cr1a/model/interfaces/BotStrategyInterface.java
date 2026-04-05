@@ -40,4 +40,10 @@ public interface BotStrategyInterface {
      * @return le seuil (par exemple 5 pour une stratégie équilibrée)
      */
     int getSeuil();
+
+    /**
+     * décide si le bot doit jouer une carte action
+     * @return true si le bot doit jouer une action
+     */
+    boolean shouldPlayAction();
 }

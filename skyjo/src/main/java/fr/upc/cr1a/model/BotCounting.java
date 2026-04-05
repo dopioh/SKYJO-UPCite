@@ -400,4 +400,12 @@ public class BotCounting implements BotStrategyInterface {
         
         return new int[]{-1, -1};
     }
+
+    /**
+     * décide si le bot doit jouer une carte action 
+     * @return true si le bot doit jouer une action
+     */
+    public boolean shouldPlayAction() {
+        return Math.random() < 0.5;
+    }
 }
