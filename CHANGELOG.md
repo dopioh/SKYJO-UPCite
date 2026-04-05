@@ -416,6 +416,8 @@
 - Application de opti partout :
     - background qui n'étais pas en cache et redimentionnais constament sur les panel autre que GameBoardView
 
+- Liaison des bot avec le mode de jeu action
+
 ### Fixed
 
 - Fix de l'animation hover du `DoodleButton` qui grossisait si le dernier hover datais (reset tick de deltatime)
