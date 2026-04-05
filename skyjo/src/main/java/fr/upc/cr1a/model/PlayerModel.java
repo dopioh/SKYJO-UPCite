@@ -3,6 +3,7 @@ package fr.upc.cr1a.model;
 import java.util.ArrayList;
 
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
+import fr.upc.cr1a.model.player.PlayerData;
 
 /**
  * Modèle représentant un joueur
@@ -16,7 +17,6 @@ public class PlayerModel {
     private PlayerHandModel hand;
     private ArrayList<ActionType> actionHand;
     private int totalScore;
-    private int starsScore; // le nombre de carte etoile dans la main du joueur
     
     
     //constructeur
@@ -25,7 +25,6 @@ public class PlayerModel {
         this.hand = new PlayerHandModel();
         this.actionHand = new ArrayList<>();;
         this.totalScore = 0;
-        this.starsScore = 10;
     }
     
     public String getName(){
@@ -51,18 +50,6 @@ public class PlayerModel {
 
     public int getTotalScore(){
         return totalScore;
-    }
-
-    public int getStarsScore(){
-        return starsScore;
-    }
-
-    public void addStarsScore(){
-        this.starsScore++;
-    }
-
-    public void subStarsScore(){
-        this.starsScore--;
     }
 
     public void addScore(int score){

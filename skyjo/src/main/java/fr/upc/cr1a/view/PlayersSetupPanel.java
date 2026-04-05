@@ -16,92 +16,153 @@ public class PlayersSetupPanel extends JPanel {
     private int selectedPlayerCount = 2;
     private JPanel playersContainer;
     private JToggleButton actionModeToggle;
-    
+
     private JLabel cardPreview;
     private JPanel cardsPreviewPanel;
     private ImageIcon emptyCardIcon;
     private ImageIcon actionCardIcon;
 
+    private Image backgroundImage;
+    private BufferedImage cachedBackground;
+    private Font doodle;
+
     public PlayersSetupPanel() {
         setLayout(new BorderLayout());
-        setBackground(Color.WHITE);
+        setOpaque(false);
 
-        //Partie du hauit
+        backgroundImage = ImageCache.get("/background.png");
+        doodle = loadFont("/PatrickHandSC.ttf");
+
+        // haut : retour à gauche et lancer à droite
+        JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        topBar.setOpaque(false);
+        topBar.setBorder(BorderFactory.createEmptyBorder(12, 12, 0, 12));
+        btnBack = new DoodleButton("Retour", ButtonColor.RED, 220, 60, "/Button/retour.png");
+        btnBack.setFontSize(32f);
+        btnBack.setIconSide(DoodleButton.IconSide.LEFT);
+        topBar.add(btnBack);
+
+        JPanel topBarRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        topBarRight.setOpaque(false);
+        topBarRight.setBorder(BorderFactory.createEmptyBorder(12, 12, 0, 12));
+        btnLaunch = new DoodleButton("Lancer", ButtonColor.GREEN, 220, 60, "/Button/Play_vert.png");
+        btnLaunch.setFontSize(32f);
+        topBarRight.add(btnLaunch);
+
+        JPanel topRow = new JPanel(new BorderLayout());
+        topRow.setOpaque(false);
+        topRow.add(topBar, BorderLayout.WEST);
+        topRow.add(topBarRight, BorderLayout.EAST);
+
+        // Titre
         JLabel title = new JLabel("Configuration des joueurs", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 28));
-        title.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        add(title, BorderLayout.NORTH);
+        title.setFont(doodle.deriveFont(Font.BOLD, 48f));
+        title.setForeground(Color.WHITE);
+        title.setBorder(BorderFactory.createEmptyBorder(4, 0, 10, 0));
 
-        JPanel center = new JPanel();
-        center.setLayout(new BorderLayout());
+        JPanel northPanel = new JPanel(new BorderLayout());
+        northPanel.setOpaque(false);
+        northPanel.add(topRow, BorderLayout.NORTH);
+        northPanel.add(title, BorderLayout.CENTER);
+        add(northPanel, BorderLayout.NORTH);
+
+        // Partie centrale
+        JPanel center = new JPanel(new BorderLayout());
         center.setOpaque(false);
 
+        // Sélection du nombre de joueurs
         JPanel configTop = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 10));
         configTop.setOpaque(false);
-        configTop.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
+        configTop.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
 
-        JLabel playerCountLabel = new JLabel("Nombre de joueurs (2 à 8) :");
-        playerCountLabel.setFont(new Font("Arial", Font.BOLD, 15));
-
+        JLabel playerCountLabel = new JLabel("Nombre de joueurs :");
+        playerCountLabel.setFont(doodle.deriveFont(Font.BOLD, 26f));
+        playerCountLabel.setForeground(Color.WHITE);
         configTop.add(playerCountLabel);
 
         playerCountButtonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
         playerCountButtonsPanel.setOpaque(false);
 
         for (int i = 2; i <= 8; i++) {
-            JButton btn = new JButton(String.valueOf(i));
-            btn.setPreferredSize(new Dimension(42, 32));
-            btn.setFont(new Font("Arial", Font.BOLD, 14));
-            btn.setFocusPainted(false);
-            btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            btn.setBackground(i == 2 ? new Color(200, 220, 255) : new Color(235, 235, 235));
-            btn.setActionCommand(String.valueOf(i));
-            playerCountButtonsPanel.add(btn);
+            playerCountButtonsPanel.add(makeCountButton(i, i == 2));
         }
 
         configTop.add(playerCountButtonsPanel);
         center.add(configTop, BorderLayout.NORTH);
 
-        // Partie centrale
-        playersContainer = new JPanel();
-
-        // Container (gauche) 
+        // Container (gauche)
         playersContainer = new JPanel();
         playersContainer.setLayout(new BoxLayout(playersContainer, BoxLayout.Y_AXIS));
         playersContainer.setOpaque(false);
+        playersContainer.setBorder(BorderFactory.createEmptyBorder(0, 12, 12, 20));
 
         JPanel playersHeader = new JPanel();
         playersHeader.setLayout(new BoxLayout(playersHeader, BoxLayout.Y_AXIS));
-        playersHeader.setOpaque(true);
-        playersHeader.setBackground(new Color(238, 242, 250));  // COULEUR BORDURE Haut + Gauche
-        playersHeader.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200)),
-                BorderFactory.createEmptyBorder(12, 12, 12, 12)
-        ));
+        playersHeader.setOpaque(false);
+        playersHeader.setBorder(BorderFactory.createEmptyBorder(0, 12, 12, 12));
 
         JLabel playersTitle = new JLabel("Joueurs de la partie");
-        playersTitle.setFont(new Font("Arial", Font.BOLD, 18));
+        playersTitle.setFont(doodle.deriveFont(Font.BOLD, 28f));
+        playersTitle.setForeground(Color.WHITE);
         playersTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel playersSubtitle = new JLabel("Configure les participants avant le lancement");
-        playersSubtitle.setFont(new Font("Arial", Font.PLAIN, 12));
-        playersSubtitle.setForeground(new Color(100, 100, 100));
+        playersSubtitle.setFont(doodle.deriveFont(Font.PLAIN, 20f));
+        playersSubtitle.setForeground(new Color(255, 255, 255, 180));
         playersSubtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        playersHeader.add(playersTitle);
-        playersHeader.add(Box.createVerticalStrut(4));
-        playersHeader.add(playersSubtitle);
+        JLabel helpLabel = new JLabel("?", SwingConstants.CENTER);
+        helpLabel.setFont(doodle.deriveFont(Font.BOLD, 22f));
+        helpLabel.setForeground(Color.WHITE);
+
+        JPanel helpBtn = new JPanel(new BorderLayout()) {
+            @Override protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(255, 255, 255, 80));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 14, 14);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        helpBtn.setOpaque(false);
+        helpBtn.setPreferredSize(new Dimension(36, 34));
+        helpBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        helpBtn.add(helpLabel, BorderLayout.CENTER);
+        helpBtn.addMouseListener(new MouseAdapter() {
+            @Override public void mousePressed(MouseEvent e) {
+                JOptionPane.showMessageDialog(PlayersSetupPanel.this,
+                        "bot               : blabla\n" +
+                        "botRow         : abcddddd\n" +
+                        "botLow         : bonjour\n" +
+                        "botCounting : je laisse le fondateur des bots remplir",
+                        "Types de bots", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        JPanel titleRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        titleRow.setOpaque(false);
+        titleRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        titleRow.add(playersTitle);
+        titleRow.add(helpBtn);
+
+        playersHeader.add(titleRow);
+        // playersHeader.add(Box.createVerticalStrut(4));
+        // playersHeader.add(playersSubtitle);
 
         JScrollPane scroll = new JScrollPane(playersContainer);
         scroll.setBorder(null);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
         scroll.getVerticalScrollBar().setUnitIncrement(16);
         scroll.getVerticalScrollBar().setPreferredSize(new Dimension(6, 0));
         scroll.getVerticalScrollBar().setUI(new javax.swing.plaf.basic.BasicScrollBarUI() {
             protected JButton createDecreaseButton(int orientation) {
-                return createZeroButton();
+                return createZeroButton(); 
             }
             protected JButton createIncreaseButton(int orientation) {
-                return createZeroButton();
+                return createZeroButton(); 
             }
             private JButton createZeroButton() {
                 JButton button = new JButton();
@@ -112,8 +173,8 @@ public class PlayersSetupPanel extends JPanel {
             }
             @Override
             protected void configureScrollBarColors() {
-                this.thumbColor = new Color(200,200,200);
-                this.trackColor = new Color(245,245,245);
+                this.thumbColor = new Color(255, 255, 255, 120);
+                this.trackColor = new Color(0, 0, 0, 0);
             }
         });
 
@@ -125,36 +186,47 @@ public class PlayersSetupPanel extends JPanel {
         scroll.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         leftPanel.add(playersHeader);
-        leftPanel.add(Box.createVerticalStrut(10));
         leftPanel.add(scroll);
-        
-        // Panel a droite du container
+
+        // Panel options
         JPanel optionsPanel = new JPanel();
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
-        optionsPanel.setOpaque(true);
-        optionsPanel.setBackground(new Color(245, 245, 245));
-        optionsPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200,200,200)),
-                BorderFactory.createEmptyBorder(15,15,15,15)
-        ));
+        optionsPanel.setOpaque(false);
+        optionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 15, 15, 15));
 
         JLabel optionsTitle = new JLabel("Options");
-        optionsTitle.setFont(new Font("Arial", Font.BOLD, 18));
+        optionsTitle.setFont(doodle.deriveFont(Font.BOLD, 28f));
+        optionsTitle.setForeground(Color.WHITE);
         optionsTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
+
         JLabel optionsSubtitle = new JLabel("Personnalise la partie");
-        optionsSubtitle.setFont(new Font("Arial", Font.PLAIN, 16));
-        optionsSubtitle.setForeground(new Color(100, 100, 100));
+        optionsSubtitle.setFont(doodle.deriveFont(Font.PLAIN, 20f));
+        optionsSubtitle.setForeground(new Color(255, 255, 255, 180));
         optionsSubtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        actionModeToggle = new JToggleButton("Mode Skyjo Action");
+        actionModeToggle = new JToggleButton("Mode Skyjo Action") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(isSelected() ? new Color(76, 175, 80) : new Color(255, 255, 255, 80));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 14, 14);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
         actionModeToggle.setAlignmentX(Component.LEFT_ALIGNMENT);
         actionModeToggle.setFocusPainted(false);
-        actionModeToggle.setSelected(false);
+        actionModeToggle.setContentAreaFilled(false);
+        actionModeToggle.setBorderPainted(false);
+        actionModeToggle.setOpaque(false);
+        actionModeToggle.setMargin(new Insets(6, 14, 6, 14));
+        actionModeToggle.setForeground(Color.WHITE);
+        actionModeToggle.setFont(doodle.deriveFont(Font.BOLD, 22f));
 
         JLabel actionDescription = new JLabel("Ajoute des cartes spéciales et des effets supplémentaires");
-        actionDescription.setFont(new Font("Arial", Font.PLAIN, 12));
-        actionDescription.setForeground(new Color(90, 90, 90));
+        actionDescription.setFont(doodle.deriveFont(Font.PLAIN, 21f));
+        actionDescription.setForeground(new Color(255, 255, 255, 180));
         actionDescription.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         cardsPreviewPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
@@ -167,109 +239,181 @@ public class PlayersSetupPanel extends JPanel {
         cardPreview = new JLabel();
         cardPreview.setIcon(emptyCardIcon);
         cardPreview.setAlignmentX(Component.LEFT_ALIGNMENT);
-        cardPreview.setBorder(null);
-
         cardsPreviewPanel.add(cardPreview);
 
+        // Box transparent option
+        JPanel optionsContent = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(255, 255, 255, 50));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 28, 28);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        optionsContent.setLayout(new BoxLayout(optionsContent, BoxLayout.Y_AXIS));
+        optionsContent.setOpaque(false);
+        optionsContent.setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 14));
+        optionsContent.setAlignmentX(Component.LEFT_ALIGNMENT);
+        optionsContent.add(actionModeToggle);
+        optionsContent.add(Box.createVerticalStrut(8));
+        optionsContent.add(actionDescription);
+        optionsContent.add(Box.createVerticalStrut(8));
+        optionsContent.add(cardsPreviewPanel);
+
         optionsPanel.add(optionsTitle);
-        optionsPanel.add(Box.createVerticalStrut(4));
-        optionsPanel.add(optionsSubtitle);
-        optionsPanel.add(Box.createVerticalStrut(18));
-        optionsPanel.add(actionModeToggle);
-        optionsPanel.add(Box.createVerticalStrut(8));
-        optionsPanel.add(actionDescription);
-        optionsPanel.add(Box.createVerticalStrut(8));
-        optionsPanel.add(cardsPreviewPanel);
-        optionsPanel.add(Box.createVerticalGlue());
+        // optionsPanel.add(Box.createVerticalStrut(4));
+        // optionsPanel.add(optionsSubtitle);
+        optionsPanel.add(Box.createVerticalStrut(10));
+        optionsPanel.add(optionsContent);
 
         // Trait de separtation
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, optionsPanel);
-
-        splitPane.setResizeWeight(0.7);     
-        splitPane.setDividerLocation(0.5);  
+        
+        splitPane.setResizeWeight(0.7);
+        splitPane.setDividerLocation(0.5);
         splitPane.setDividerSize(2);
         splitPane.setBorder(null);
+        splitPane.setOpaque(false);
 
         center.add(splitPane, BorderLayout.CENTER);
         add(center, BorderLayout.CENTER);
 
-        // Partie du bas
-        JPanel bottom = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
-        bottom.setOpaque(false);
-
-        btnBack = new DoodleButton("Retour", ButtonColor.RED, 220, 80, null); 
-        btnBack.setBgImage("/Button/button_red.png");
-        btnLaunch = new DoodleButton("Lancer",ButtonColor.GREEN,220,80,"/Button/Play.png"); //Faudrait mettre un triangle du style 
-        btnLaunch.setBgImage("/Button/button_green.png");
-
-        bottom.add(btnBack);
-        bottom.add(btnLaunch);
-
-        add(bottom, BorderLayout.SOUTH);
-
         rebuildPlayerRows(2);
     }
 
-    public DoodleButton getBtnBack() {
-        return btnBack;
+    private JButton makeCountButton(int number, boolean selected) {
+        JButton btn = new JButton(String.valueOf(number)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 14, 14);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        btn.setPreferredSize(new Dimension(52, 38));
+        btn.setFont(doodle.deriveFont(Font.BOLD, 22f));
+        btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false);
+        btn.setOpaque(false);
+        btn.setMargin(new Insets(0, 0, 0, 0));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.setBackground(selected ? new Color(76, 175, 80) : new Color(255, 255, 255, 80));
+        btn.setForeground(Color.WHITE);
+        btn.setActionCommand(String.valueOf(number));
+        return btn;
     }
 
-    public DoodleButton getBtnLaunch() {
-        return btnLaunch;
+    private Font loadFont(String path) {
+        try {
+            var stream = getClass().getResourceAsStream(path);
+            if (stream != null) return Font.createFont(Font.TRUETYPE_FONT, stream);
+        } catch (Exception ignored) {}
+        return new Font("Arial", Font.PLAIN, 12);
     }
 
-    public JPanel getPlayerCountButtonPanel() {
-        return playerCountButtonsPanel;
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (backgroundImage != null) {
+            int w = getWidth(), h = getHeight();
+            if (cachedBackground == null || cachedBackground.getWidth() != w || cachedBackground.getHeight() != h) {
+                cachedBackground = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D bg = cachedBackground.createGraphics();
+                bg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                bg.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                bg.drawImage(backgroundImage, 0, 0, w, h, null);
+                bg.dispose();
+            }
+            g.drawImage(cachedBackground, 0, 0, null);
+        }
     }
 
-    public int getSelectedPlayerCount() {
-        return selectedPlayerCount;
+    public DoodleButton getBtnBack() { 
+        return btnBack; 
     }
 
-    public void setSelectedPlayerCount(int selectedPlayerCount) {
-        this.selectedPlayerCount = selectedPlayerCount;
-    }
-
-    public JPanel getPlayersContainer() {
-        return playersContainer;
-    }
-
-    public JToggleButton getActionModeToggle() {
-        return actionModeToggle;
-    }
-
-    public boolean isSkyjoActionEnabled() {
-        return actionModeToggle.isSelected();
+    public DoodleButton getBtnLaunch() { 
+        return btnLaunch; 
     }
     
+    public JPanel getPlayerCountButtonPanel() { 
+        return playerCountButtonsPanel; 
+    }
+
+    public int getSelectedPlayerCount() { 
+        return selectedPlayerCount; 
+    }
+
+    public void setSelectedPlayerCount(int count) { 
+        this.selectedPlayerCount = count; 
+    }
+
+    public JPanel getPlayersContainer() { 
+        return playersContainer; 
+    }
+
+    public JToggleButton getActionModeToggle() { 
+        return actionModeToggle; 
+    }
+
+    public boolean isSkyjoActionEnabled() { 
+        return actionModeToggle.isSelected(); 
+    }
+
     /**
-     * Sert a refaire le container de la partie centrale en fonction du nombre de joueurs 
+     * Sert a refaire le container de la partie centrale en fonction du nombre de joueurs
      * @param count nombre de joueurs
      */
     public void rebuildPlayerRows(int count) {
         playersContainer.removeAll();
+        Color textColor = Color.WHITE;
         for (int i = 1; i <= count; i++) {
             final int playerIndex = i;
-            JPanel row = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 11));
-            row.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(200,200,200)),
-                    BorderFactory.createEmptyBorder(8,8,8,8)
-            ));
+            JPanel row = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 11)) {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setColor(getBackground());
+                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 36, 36);
+                    g2.dispose();
+                    super.paintComponent(g);
+                }
+            };
+            row.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
             row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
-            row.setOpaque(true);
-            row.setBackground(new Color(245, 245, 245));
+            row.setAlignmentX(Component.LEFT_ALIGNMENT);
+            row.setOpaque(false);
+            row.setBackground(new Color(76, 175, 80));
 
             JLabel label = new JLabel("Joueur " + playerIndex + " : ");
-            
-            JTextField nameField = new JTextField(12);
+            label.setFont(doodle.deriveFont(Font.BOLD, 22f));
+            label.setForeground(textColor);
+
+            JTextField nameField = new JTextField(12) {
+                @Override protected void paintComponent(Graphics g) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setColor(new Color(255, 255, 255, 80));
+                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 14, 14);
+                    g2.dispose();
+                    super.paintComponent(g);
+                }
+            };
+            nameField.setOpaque(false);
             nameField.setPreferredSize(new Dimension(120, 30));
-            nameField.setFont(new Font("Arial", Font.PLAIN, 14));
-            nameField.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(200,200,200)),
-                    BorderFactory.createEmptyBorder(4,8,4,8)
-            ));
+            nameField.setFont(doodle.deriveFont(Font.PLAIN, 20f));
+            nameField.setBorder(BorderFactory.createEmptyBorder(4,8,4,8));
             nameField.setText("Joueur " + playerIndex);
-            nameField.setForeground(Color.BLACK);
+            nameField.setForeground(textColor);
+            nameField.setCaretColor(Color.WHITE);
             nameField.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
@@ -282,7 +426,13 @@ public class PlayersSetupPanel extends JPanel {
             });
 
             JCheckBox botCheck = new JCheckBox("Bot");
+            botCheck.setFont(doodle.deriveFont(Font.BOLD, 20f));
+            botCheck.setForeground(textColor);
+            botCheck.setOpaque(false);
+            botCheck.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
             JComboBox<String> botType = new JComboBox<>(new String[]{"bot", "botRow", "botLow", "botCounting"});
+            botType.setFont(doodle.deriveFont(Font.BOLD, 16f));
             botType.setEnabled(false);
 
             botCheck.addActionListener(e -> {
@@ -291,10 +441,10 @@ public class PlayersSetupPanel extends JPanel {
                 botType.setEnabled(isBot);
                 if (isBot) {
                     nameField.setText("Bot" + playerIndex);
-                    row.setBackground(new Color(225, 235, 245));
+                    row.setBackground(new Color(195, 197, 64));
                 } else {
                     nameField.setText("Joueur " + playerIndex);
-                    row.setBackground(new Color(245, 245, 245));
+                    row.setBackground(new Color(76, 175, 80));
                 }
             });
             row.add(label);
@@ -316,8 +466,7 @@ public class PlayersSetupPanel extends JPanel {
             return null;
         }
 
-        Image resized = bufferedImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        return new ImageIcon(resized);
+        return new ImageIcon(bufferedImage.getScaledInstance(width, height, Image.SCALE_SMOOTH));
     }
 
     public void updateCardPreview(boolean actionEnabled) {

@@ -15,13 +15,21 @@ Des classes qui permette d'éxécuter le jeu.
         * actionDeck / discardActionPile (pioche & défausse actions)
         * currentPlayerIndex, gameState, turnPhase, currentDrawCard
         * gameBoardModel (pour la version graphique)
+        * firstPlayerToPlayIndex, lastRoundPlayer, extraTurnsRemaining, roundNumber
+        * afkCounts, autoControlledPlayers (gestion AFK)
     * Méthode :
         * **initializeGame()**, **startTurn()**, **nextPlayer()**
         * **drawDeck()**, **takeDiscard()**, **drawActionDeck()**, **takeActionDiscard()**
+        * **drawActionRewardCard()**, **grantActionForStar()**
         * **exchangeCardInHand()**, **discardDrawCard()**, **revealCardInHand()**
         * **firstPlayer()**, **startNewGame()**, **endRound()**
         * **getGameState()**, **getTurnPhase()**, **getPlayers()**, **getDiscardPile()**, **getDeck()**, **getCurrentPlayer()**, **getCurrentDrawCard()**
         * **revealInitCard()**
+        * **grantExtraTurn()**, **getCurrentPlayerIndex()**, **getInitRevealCount()**, **getRoundNumber()**
+        * **setTurnPhase()**, **stopGame()**
+        * **getAfkCount()**, **registerAfkTurn()**, **resetAfkCount()**
+        * **isAutoControlled()**, **setAutoControlled()**
+        * **isStarCard()** (static), **withActionCard()**, **getDiscardActionPile()**, **getActionDeck()**
 * **GameTerminalModel** : Gère toutes les interactions du jeu via le terminal (séparé du GameManager)
     * Attribut :
         * scanner (Scanner)
@@ -35,9 +43,11 @@ Des classes qui permette d'éxécuter le jeu.
         * **showHand()** - Affichage de la main d'un joueur dans le terminal
         * **displayRoundResults()**, **displayWinner()**, **displayNewRound()** - Affichages des résultats
         * **useAction()** - Permet aux joueurs d'utiliser une carte d'action
+        * **grantActionForStar()** - Applique l'effet étoile (gagne une action)
+        * **revealRandomFaceDownCard()** - Révèle une carte cachée aléatoire (utilisé pour les bots)
         * **closeScanner()** - Fermeture du scanner
         * **Support du mode action pour les bots** :
-            * **botUseActionRandom()** - Permet au bot de jouer une action aléatoirement (50% de chance)
+            * **botUseActionRandom()** - Permet au bot de jouer une action aléatoirement
             * **botTradeCardWithPlayer()** - Version bot de TRADE_CARD_WITH_PLAYER
             * **botReplaceCardInHand()** - Version bot de REPLACE_CARD_IN_HAND
             * **botDrawThreeCard()** - Version bot de DRAW_THREE_CARD
@@ -45,6 +55,9 @@ Des classes qui permette d'éxécuter le jeu.
             * **botSpyOneColumn()** - Version bot de SPY_ONE_COLUMN
             * **botAllPlayersDropCard()** - Version bot de ALL_PLAYERS_DROP_CARD
 * **GameLoop** : Gère le foncitonnement des cycles du jeu; les updates() et les repaint()
+    * **proceedAfterAction()**, **continueFlow()**, **continueInitRevealFlow()**, **finishNormalTurnFlow()**, **startCurrentFlow()**
+    * **startTurnCountdown()**, **stopTurnCountdown()**, **isGameActive()**, **stopGame()**, **handleTurnTimeout()**
+    * **setPaused()**, **setTimeoutController()**, **setTimerEnabled()**
 
 ## 2. MVC 
 
@@ -67,6 +80,7 @@ Gère la logique du jeu.
     * `CardStackModel` : Classe qui créer les piles de cartes vient de l'interface *CardStackInterface*
         * Méthode : 
             * **stackSize()**, **getCardAt(int indice)**,**getTopCard()**, **getUnderCard()**,**addCardAtTop()**, **removeCardAtTop()**, **replaceCardAt()**, **isEmpty()**
+            * **getStack()**, **afficheStack()**
 
 
 * **Piles de cartes** :
@@ -85,11 +99,12 @@ Gère la logique du jeu.
 
 * **Joueur** :
     * `PlayerModel`: Représente un joueur
-        * Attribut : name, hand (PlayerHandModel), totalScore, starsScore
-        * Méthode : **getName()**, **getHand()**, **getTotalScore()**, **addScore()**, **resetHand()**, **showActionHand()**, **getStarsScore**, **addStarsScore**, **subStarsScore**
+        * Attribut : name, hand (PlayerHandModel), totalScore
+        * Méthode : **getName()**, **getHand()**, **getTotalScore()**, **addScore()**, **resetHand()**, **showActionHand()**, **getActionHand()**
     * `PlayerHandModel`: Grille 4x3 de cartes du joueur
         * Attribut : grid (CardModel[][]), rows=3, columns=4
         * Méthode : **placeCard()**, **getCard()**, **isAvailable()**, **getVisibleCardScore()**, **révéler cartes**, **détecter colonnes complètes**
+        * **replaceCard()**, **revealCard()**, **allCardsRevealed()**, **countRevealedCards()**, **checkRows()**, **removeRow()**, **calculateScore()**, **revealCardsTemp()**
     * `PlayerData`: Données persistantes du joueur
         * Attribut : id, rank (Rank), elo, xp, money, skins (ArrayList)
         * Méthode : **getters/setters pour toutes les données**
@@ -101,6 +116,7 @@ Gère la logique du jeu.
     * `BotHandModel`: Grille 4x3 de cartes du bot
         * Super-classe : **PlayerHandModel**
         * Méthodess supplémentaires : **revealRandomCard()**, **sameCardInHandPosition()**, **tradeInHand()**, **isAcceptableCard()**
+        * **countVisibleCardsInColumn()**
     * `BotStrategyInterface`: Interface définissant les stratégies de bot
         * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **getSeuil()**
     * `BotTerminalModel`: Stratégie de bot basique (implémente BotStrategyInterface)
@@ -129,27 +145,44 @@ Gère la logique du jeu.
             * **canTakeFromDiscard()**, **canDrawFromDeck()**, **mustExchangeCard()**
             * **checkEndOfRound()** - Vérifie si la manche est terminée
             * **removeIdenticalColumns()**, **removeIdenticalRows()** - Supprime les colonnes/lignes identiques
+            * **isWildcardColumn** retourne Vrai si une colonne doit etre supprimée (avec joker)
+            * **isWildcardRow** retourne Vrai si une ligne doit etre supprimée (avec joker)
             * **findLowestScorePlayer()**, **findRoundEndPlayer()** - Trouve les joueurs spécifiques
             * **applyRoundScores()** - Applique les scores de la manche selon les règles
             * **isGameOver()** - Vérifie si un joueur a atteint 100 points
             * **determineWinner()** - Détermine le gagnant
             * **getFirstPlayerIndex()**, **getBiggestScorePlayerIndex()** - Gestion des indices joueurs
+            * **canDiscardCard()**
     * `ScoreCalculator`: Calcule les scores
         * Méthode : **calculateHandScore()**, **détection colonnes identiques**
+        * **calculateRoundScores()**, **getLowestScorePlayer()**, **applyEndGamePenalty()**
     * `Rank`: Enum des rangs (OQTF, NOPAPER, A4, NEWSPAPAER, PLASTIC, PAPYRUS, PARCHEMIN, BULLETIN, CESTLACARTE, DEGREES, BLACKCARD, WORMS)
         * Méthode : **findRankByElo()**
     * `ActionSkills` Implémente les capacités des cartes actions
-        - **Methode** : tradeCardWithPlayer(), replaceCardInHand(), drawThreeCard(), playLastActionInDefausse(), spyOneColumn(), allPlayersDropCard(), playTwoTurn(), askCardPos()
+        - **Methode** : tradeCardWithPlayer(), replaceCardInHand(), drawThreeCard(), playLastActionInDefausse(), spyOneColumn(), allPlayersDropCard(), playTwoTurn(), askCardPos(), grantActionForStar()
 
 * **Audio** :
     * `AudioManager`: Gère la musique et les effets sonores
         * Attribut : bgmClip (Clip), enabled (boolean), volume (int)
         * Méthode : **playBgm()**, **playSfx()**, **stopBgm()**, **setEnabled()**, **setVolume()**
+        * **applyToClip()**, **percentToDb()**
 
 * **Plateau** :
-    * `GameBoardModel` Gere la logique du plateau  
+    * `GameBoardModel` Gere la logique du plateau
         * Elle relie `GameBoardView` et `GameBoardController`
         * Methode : **buttonPlayerCalled()** pour gerer l'affichage du `PlayerPreviewPanel`, **retourMenuCalled()**
+        * **getGameBoardController()**, **getFrame()**
+
+* **Multijoueur / Lobby** :
+    * `LobbyModel`: Représente un salon de jeu multijoueur P2P
+        * Attribut : lobbyId, lobbyName, hostName, currentPlayers, maxPlayers, actionMode, status
+        * Enum : **LobbyStatus** (WAITING, PLAYING, FULL)
+        * Méthode : **canJoin()**, **updateStatus()**, **getters/setters**
+         **setCurrentPlayers()**, **setStatus()**, **toString()**
+    * `LobbyPlayerModel`: Représente un joueur dans un salon d'attente multijoueur
+        * Attribut : playerId, playerName, isHost, isReady, isBot
+        * Méthode : **getters/setters**, les bots sont automatiquement prêts
+
 
 
 ### VIEW
@@ -157,23 +190,53 @@ Gère la logique du jeu.
 Gère l'affichage 
 
 * **Frame** : Fenêtre principale du jeu (JFrame)
-    * Attribut : cardLayout (CardLayout), mainMenuPanel, settingsOverlay, fullscreen, windowedBounds, audioManager
-    * Méthode : **showSettingsOverlay()**, **hideSettingsOverlay()**, **toggleFullscreen()**, **ge        * **refreshGuide()** - Met à jour le guide d'action selon la phase du jeu
-tAudioManager()**
+    * Attribut : cardLayout (CardLayout), mainMenuPanel, gameModeSelectionPanel, lobbyBrowserPanel, settingsOverlay, fullscreen, windowedBounds, audioManager
+    * Méthode : **showSettingsOverlay()**, **hideSettingsOverlay()**, **toggleFullscreen()**, **refreshGuide()**, **getAudioManager()**
 
 * **Panels** :
     * `MainMenuPanel`: Panel du menu principal
         * Attribut : shopButton, playButton, settingsButton
         * Méthode : **getShopButton()**, **getPlayButton()**, **getSettingsButton()**
+    * `ShopPanel`: Panel de la boutique
+        * Attribut : backBtn, classeurBtn, buyButtons, packImages, topBar, chanceContainer, chanceLabel, cardsRow, caseOpeningOverlay
+        * Méthode : **getBackButton()**, **getBuyButtons()**, **getClasseurButton()**, **startCaseOpening()**, **openClasseur()**, **isCaseOpeningVisible()**
+    * `GameModeSelectionPanel`: Panel de sélection du mode de jeu (Local vs Multi P2P)
+        * Attribut : localBtn, multiBtn, backBtn, backgroundImage
+        * Méthode : **getLocalButton()**, **getMultiButton()**, **getBackButton()**
+    * `LobbyBrowserPanel`: Panel pour afficher la liste des salons multijoueur disponibles
+        * Attribut : backBtn, createLobbyBtn, refreshBtn, lobbiesListPanel, scrollPane, backgroundImage, lobbyItems
+        * Méthode : **addLobby()**, **clearLobbies()**, **refreshLobbies()**, **showNoLobbiesMessage()**, **getBackButton()**, **getCreateLobbyButton()**, **getRefreshButton()**
+    * `LobbyItemPanel`: Composant représentant un salon dans la liste
+        * Attribut : lobby (LobbyModel), joinBtn, nameLabel, hostLabel, playersLabel, modeLabel
+        * Méthode : **getJoinButton()**, **getLobby()**, **updateLobbyInfo()**, **getPlayerCountColor()**
+    * `LobbyRoomPanel`: Panel de la salle d'attente d'un salon multijoueur (hôte peut configurer, tous voient les joueurs)
+        * Attribut : lobbyTitleLabel, lobbyInfoLabel, playersTitleLabel, backBtn, readyBtn, startBtn, playersListPanel, leftPanel, configPanel, maxPlayersSpinner, actionModeCheckbox, addBotButton, playerSlots, isHost
+        * Méthode : **setIsHost()**, **setLobbyTitle()**, **setLobbyInfo()**, **addPlayer()**, **removePlayer()**, **clearPlayers()**, **updatePlayersCount()**, **refreshPlayerSlots()**, **getters**
+    * `PlayerLobbySlot`: Composant représentant un slot de joueur dans le salon d'attente
+        * Attribut : player (LobbyPlayerModel), nameLabel, statusLabel, roleLabel, kickButton, isLocalPlayerHost
+        * Méthode : **updatePlayerStatus()**, **getPlayer()**, **getKickButton()**
+    * `CreateLobbyDialog`: Dialogue pour créer un nouveau salon multijoueur
+        * Attribut : lobbyNameField, maxPlayersSpinner, actionModeCheckbox, createBtn, cancelBtn, confirmed
+        * Méthode : **getLobbyName()**, **getMaxPlayers()**, **isActionMode()**, **isConfirmed()**, **setConfirmed()**, **validateInput()**, **getCreateButton()**, **getCancelButton()**
     * `SettingsOverlay`: Overlay des paramètres (JComponent)
-        * Attribut : card (JPanel), backBtroontroller pour les botsutton, contentPanel, tabJeu, tabAudio, tabAutres
+        * Attribut : card (JPanel), backButton, contentPanel, tabJeu, tabAudio, tabAutres
         * Méthode : **getBackButton()**, **getTabJeu()**, **getTabAudio()**, **getTabAutres()**, **createTabButton()**, **createCardPanel()**
+    * `CaseOpeningOverlayPanel`: Overlay boutique & classeur
+        * Attributs (tempo) : unlockedSkinPaths (ArrayList<String>), selectedSkinPath (String)
+        * Méthodes : **startOpening()**, **openClasseur()**, **drawClasseur()**, **drawSkinBox()**, **handleClasseurClick()**, **getEquipButtonBounds()**, **drawEquipButton()**
+        * Méthodes tempo : **getUnlockedSkinPaths()**, **unlockSkin()**, **isSkinUnlocked()**, **getSelectedSkinPath()**, **setSelectedSkinPath()**
 
 * **GameBoardView** : Panel pour afficher le plateau de jeu
     * Méthode : **initComponents()**, **showPlayerscards()**, **getCardImagePath()**, **resizeLayers()**, **showCursorCard()**, **hideCursorCard()**, **updateCardDisplay()**, **updateDiscardOnly()**, **updateActionCardDisplay()**, **updateActionDiscardOnly()**
+    * **showActionDescription**
+    * **hideActionDescription**
+    * **getActionTitle**
+    * **getActionDescription**
 
 * **PlayerPreviewPanel** : Panel pour afficher les cartes des autres joueurs
     * Méthode : **showOtherPlayerHand**, **getCardImagePath()**
+
+* **ActionDescriptionOverlayPanel** : système d'overlay qui affiche les détails d'une carte action quand le curseur se trouve au dessus (hover)
 
 * **CursorCardView** : Vue pour la petite carte sous le curseur
 
@@ -189,15 +252,44 @@ Gère toutes les entrées du joueur avec l'ordinateur
 
 * **MainMenuController** : Contrôleur du menu principal
     * Attribut : frame (Frame), view (MainMenuPanel), audio (AudioManager)
-    * Méthode : **ActionListener pour playButton, settingsButton, shopButton**
+    * Méthode : **ActionListener pour playButton** → redirige vers GameModeSelectionPanel, **settingsButton, shopButton**
+    * **clicShop()**, **clicSettings()**, **clicAccount()**
+
+* **GameModeSelectionController** : Contrôleur du panel de sélection de mode de jeu
+    * Attribut : frame (Frame), view (GameModeSelectionPanel)
+    * Méthode : **ajouterListeners()**, **clicLocal()** → redirige vers PlayersSetupPanel, **clicMulti()** → redirige vers LobbyBrowserPanel, **clicRetour()** → retour au menu
+
+* **PlayersSetupController** : Contrôleur pour la configuration des joueurs
+    * Méthode : **addRowHoverEffect()**, **updatePlayerCountButtonsStyle()**, **lancerPartie()**
+
+* **LobbyBrowserController** : Contrôleur du navigateur de salons multijoueur
+    * Attribut : frame (Frame), view (LobbyBrowserPanel), availableLobbies (List<LobbyModel>)
+    * Méthode : **ajouterListeners()**, **clicRetour()**, **clicCreerSalon()**, **clicRafraichir()**, **createLobby()**, **loadLobbies()**, **refreshView()**, **joinLobby()**, **generateTestLobbies()**
+    * Note : Les méthodes createLobby(), loadLobbies() et joinLobby() sont à connecter au système P2P
+
+* **LobbyRoomController** : Contrôleur de la salle d'attente d'un salon multijoueur
+    * Attribut : frame (Frame), view (LobbyRoomPanel), players (List<LobbyPlayerModel>), lobbyId, lobbyName, isHost, isReady
+    * Méthode :
+        * **initializeLobby()** - initialise le salon avec les paramètres (host/joueur)
+        * **addPlayer()**, **removePlayer()** - gestion des joueurs
+        * **updatePlayerStatus()** - met à jour le statut prêt d'un joueur
+        * **clicQuitter()** - quitter le salon avec confirmation
+        * **clicReady()** - basculer entre prêt/pas prêt (joueurs non-host)
+        * **clicStart()** - lancer la partie (host uniquement, vérifie que tous sont prêts)
+        * **clicKick()** - retirer un joueur/bot du salon (host uniquement)
+        * **clicAjouterBot()** - ajouter un bot avec sélection de stratégie
+        * **onMaxPlayersChanged()**, **onActionModeChanged()** - gestion des paramètres
+        * **updateLobbyInfo()** - met à jour l'affichage des infos (mode, prêts)
+    * Note : À connecter au système P2P pour synchronisation réseau
 
 * **SettingsOverlayController** : Contrôleur de l'overlay paramètres
     * Attribut : frame (Frame), audioManager (AudioManager)
     * Méthode : **ActionListener pour backButton, tabJeu, tabAudio, tabAutres, fullscreenButton, soundButton, volumeButtons**
 
 * **GameBoardController** : Controller pour le Plateau de jeu (la partie)
-    * Méthode : **listener()**, **nextPlayerSound()**, **showRoundEndScreen()**, **ContinueRound()**, **refreshGuide()**, **updateAllDecksDisplay()**
+    * Méthode : **listener()**, **nextPlayerSound()**, **showRoundEndScreen()**, **ContinueRound()**, **refreshGuide()**, **updateAllDecksDisplay()** , **toggleTimer()**
     * Méthode (boucle de jeu) : **requestEndTurnFromBot()**, **showRoundEndScreenFromLoop()**
+    * **setWaitingNextTurn()**, **isWaitingNextTurn()**, **togglePauseOverlay()**
 
 * **GameBoardBotController** : controller pour les bots
     * Attribut :
@@ -210,15 +302,47 @@ Gère toutes les entrées du joueur avec l'ordinateur
         * **handleBotDrawDecision()**
         * **handleBotAfterDraw()**
         * **handleBotAfterTakeDiscard()**
+        * **revealRandomFaceDownCard()**
+        * **grantActionForStar()**
+
+* **TimeoutTurnController** : Gère les joueurs AFK et les timeouts
+    * Méthode :
+        * **handleTimeoutForCurrentPlayer()**
+        * **copyToBotHand()**
+        * **handleTimeoutInitReveal()**
+        * **handleTimeoutDrawDecision()**
+        * **handleTimeoutAfterDraw()**
+        * **handleTimeoutAfterTakeDiscard()**
+        * **handleTimeoutRevealAfterDiscard()**
+        * **findRandomHiddenCard()**
+        * **runLater()**
 
 * **GameLoop** : Boucle du jeu (Les actions des autres controllers seront acceptés par ce fichier)
 
 * **HumanTurnController** : Toutes les actions joueurs sur le gameBoard
-    * Méthodes : **installListeners()**, **handlePlayerButtonClicked()**, listeners des pioches/mains/actions
-    * Méthodes (actions) : **onActionCardClicked()**, **handleActionModeClick()**, **selectTradeTargetPlayer()**, **completeTrade()**, **startAllPlayersDropAction()**, **selectAllPlayersDropTarget()**, **applyAllPlayersDropOnSelectedCard()**, **resetTurnState()**
+    * Méthode : **installListeners()**, **handlePlayerButtonClicked()**, listeners des pioches/mains/actions
+    * Méthodes (actions) : 
+        * **onActionCardClicked()** - Gestion du clic sur une carte action
+        * **handleActionModeClick()** - Gestion des clics en mode action
+        * **selectTradeTargetPlayer()** - Sélection du joueur cible pour l'échange
+        * **completeTrade()** - Finalisation de l'échange
+        * **startAllPlayersDropAction()** - Initiation de l'action "drop" pour tous
+        * **selectAllPlayersDropTarget()** - Sélection de la cible pour le drop
+        * **applyAllPlayersDropOnSelectedCard()** - Application du drop sur la carte sélectionnée
+        * **grantActionForStar()** - Applique l'effet étoile côté
+        * **resetTurnState()** - Réinitialisation de l'état du tour
+        * **Listeners** pour savoir si le curseur est sur une carte action 
+    * **removeAllListeners()**, **getLastReplayableActionInDiscard()** 
 
-* **ConnexionController** : Gere le `ConnexionPanel` et redirige vers `SupabaseAuth` pour lancer des requetes d'auth.  
-    * Methodes : **sendCreate()**, **sendLogin()**  
+* **AccountController** : Contrôleur pour la gestion des comptes
+    * Méthode : Principales méthodes de gestion des comptes
+
+**Architecture du système de lobby** :
+- `LobbyBrowserPanel` : liste des salons disponibles (créer/rejoindre)
+- `LobbyRoomPanel` : salle d'attente avec deux modes :
+  - **Mode Hôte** : configuration visible (max joueurs, actions, ajout bots), bouton "Lancer la partie", kick joueurs
+  - **Mode Joueur** : configuration cachée, bouton "Prêt"/"Annuler" pour indiquer son statut
+- `PlayerLobbySlot` : affichage d'un joueur avec badges (HOST/BOT), statut prêt, bouton kick (hôte uniquement)
 
 #### DATA :
 

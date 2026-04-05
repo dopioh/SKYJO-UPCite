@@ -1,5 +1,7 @@
 package fr.upc.cr1a.model;
 
+import fr.upc.cr1a.model.player.PlayerData;
+
 /**
  * Classe pour relier un token a un playerData
  */

@@ -18,7 +18,7 @@ import javax.swing.JTextField;
 
 import fr.upc.cr1a.model.AudioManager;
 import fr.upc.cr1a.model.GameManager;
-import fr.upc.cr1a.model.PlayerData;
+import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.view.DoodleButton;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.PlayersSetupPanel;
@@ -35,7 +35,12 @@ public class PlayersSetupController {
         this.audio = frame.getAudioManager();
         addRowHoverEffect();
 
-        addListeners(view.getBtnBack(), () -> frame.showPanel("MENU"));
+        DoodleButton back = view.getBtnBack();
+        back.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) { back.onMouseEnter(); }
+            @Override public void mouseExited(MouseEvent e)  { back.onMouseExit(); }
+            @Override public void mousePressed(MouseEvent e) { frame.showPanel("GAME_MODE"); }
+        });
         addListeners(view.getBtnLaunch(), () -> lancerPartie());
 
         view.getActionModeToggle().addActionListener(e -> {
@@ -57,41 +62,41 @@ public class PlayersSetupController {
     }
 
     private void addRowHoverEffect() {
-        Component[] rows = view.getPlayersContainer().getComponents();
-        for (Component comp : rows) {
-            if (!(comp instanceof JPanel row)) {
-                continue;
-            }
-            JCheckBox botCheck = null;
-            for (Component c : row.getComponents()) {
-                if (c instanceof JCheckBox) {
-                    botCheck = (JCheckBox) c;
-                    break;
-                }
-            }
-            if (botCheck == null) {
-                continue;
-            }
-            JCheckBox finalBotCheck = botCheck;
-            row.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    if (finalBotCheck.isSelected()) {
-                        row.setBackground(new Color(170, 205, 255)); // hover bot
-                    } else {
-                        row.setBackground(new Color(230, 230, 230)); // hover joueur
-                    }
-                }
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    if (finalBotCheck.isSelected()) {
-                        row.setBackground(new Color(200, 220, 255)); // bot
-                    } else {
-                        row.setBackground(new Color(245, 245, 245)); // joueur
-                    }
-                }
-            });
-        }
+        // Component[] rows = view.getPlayersContainer().getComponents();
+        // for (Component comp : rows) {
+        //     if (!(comp instanceof JPanel row)) {
+        //         continue;
+        //     }
+        //     JCheckBox botCheck = null;
+        //     for (Component c : row.getComponents()) {
+        //         if (c instanceof JCheckBox) {
+        //             botCheck = (JCheckBox) c;
+        //             break;
+        //         }
+        //     }
+        //     if (botCheck == null) {
+        //         continue;
+        //     }
+        //     JCheckBox finalBotCheck = botCheck;
+        //     row.addMouseListener(new MouseAdapter() {
+        //         @Override 
+        //         public void mouseEntered(MouseEvent e) {
+        //             if (finalBotCheck.isSelected()) {
+        //                 row.setBackground(new Color(255, 200, 0)); // hover bot
+        //             } else {
+        //                 row.setBackground(new Color(60, 160, 65)); // hover joueur
+        //             }
+        //         }
+        //         @Override 
+        //         public void mouseExited(MouseEvent e) {
+        //             if (finalBotCheck.isSelected()) {
+        //                 row.setBackground(new Color(195, 197, 64)); // bot
+        //             } else {
+        //                 row.setBackground(new Color(76, 175, 80)); // joueur
+        //             }
+        //         }
+        //     });
+        // }
     }
 
     private void updatePlayerCountButtonsStyle(int selectedValue) {
@@ -100,9 +105,9 @@ public class PlayersSetupController {
                 int value = Integer.parseInt(button.getActionCommand());
 
                 if (value == selectedValue) {
-                    button.setBackground(new Color(200, 220, 255));
+                    button.setBackground(new Color(76, 175, 80));
                 } else {
-                    button.setBackground(new Color(235, 235, 235));
+                    button.setBackground(new Color(255, 255, 255, 80));
                 }
             }
         }
@@ -119,7 +124,7 @@ public class PlayersSetupController {
                 btn.onMouseExit();
             }
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 audio.playSfx("/sfx/UIclick.wav");
                 action.run();
             }
@@ -164,9 +169,9 @@ public class PlayersSetupController {
                 players.add(new PlayerData(name));
             }
         }
-
         
         boolean actionMode = view.isSkyjoActionEnabled();
-        new GameManager(frame, players, actionMode);
+        GameManager game = new GameManager(frame, players, actionMode);
+        frame.setCurrentGame(game);
     }
 }

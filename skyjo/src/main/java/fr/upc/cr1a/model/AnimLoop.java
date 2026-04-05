@@ -48,6 +48,7 @@ public class AnimLoop {
     public static void add(Object key, DoubleConsumer task) {
         tasks.put(key, task);
         if (!timer.isRunning()) {
+            lastTime = System.nanoTime(); // reset pour éviter un dt énorme au premier tick
             timer.start();
         }
     }
@@ -56,6 +57,14 @@ public class AnimLoop {
     public static void remove(Object key) {
         tasks.remove(key);
         if (tasks.isEmpty()) {
+            timer.stop();
+        }
+    }
+
+    /** enleve tous les tasks et arrete le timer */
+    public static void clearAll() {
+        tasks.clear();
+        if (timer.isRunning()) {
             timer.stop();
         }
     }

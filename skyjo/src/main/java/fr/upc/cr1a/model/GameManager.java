@@ -1,11 +1,13 @@
 package fr.upc.cr1a.model;
 
 import java.util.List;
-
+import java.util.HashMap;
 import javax.swing.Timer;
 
+import fr.upc.cr1a.controller.GameBoardController;
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
+import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
 
@@ -35,11 +37,13 @@ public class GameManager {
 
     private GameBoardModel gameBoardModel;
     private int initRevealCount = 0;
-    private boolean initRevealStarted = false;  // regarde l'init a commencé
-    private boolean initRevealJustFinished = false;  //regarde si l'init a fini
+    private int roundNumber = 0; // numero de la manche actuelle
 
     private boolean gameWithAction = false; // true si on utilise les actions
     
+    private HashMap<PlayerModel, Integer> afkCounts = new HashMap<>();
+    private HashMap<PlayerModel, Boolean> autoControlledPlayers = new HashMap<>();
+
     /*
     *classe local enum pour gérer les états du jeu
     */
@@ -290,6 +294,10 @@ public class GameManager {
         return currentDrawCard;
     }
 
+    public static boolean isStarCard(CardModel card) {
+        return (card instanceof NumberCardModel numberCard && numberCard.isStar());
+    }
+
     public boolean withActionCard() {
         return this.gameWithAction;
     } 
@@ -301,9 +309,8 @@ public class GameManager {
         //creer un deck deja melange
         //deck = new PiocheModel(); // on a deja un deck initalisé dans le constructeur !
         
-        initRevealStarted = false;
-       lastRoundPlayer = -1;  //variable pour savoir qui a lancé la dernière manche
-        
+        firstPlayerToPlayIndex = currentPlayerIndex;
+
         for (PlayerModel player : players) {
             player.resetHand();
             //distribue les cartes
@@ -353,12 +360,6 @@ public class GameManager {
     *passe au joueur suivant
     */
     public void nextPlayer() {
-        // si le joueur a des tours supplémentaires
-        if (extraTurnsRemaining > 0) {
-            extraTurnsRemaining--;
-            return;
-        }
-        
         currentPlayerIndex++;
         //revenir au premier si le dernier joueur a joué
         if (currentPlayerIndex >= players.size()) {
@@ -367,6 +368,13 @@ public class GameManager {
         //regarde si on est sur le dernier tour et si on est revenu au joueur qui a déclenché la fin
         if (gameState == GameState.LAST_ROUND && currentPlayerIndex == lastRoundPlayer) {
             endRound();
+            return;
+        }
+
+        // si le joueur a des tours supplémentaires (mais pas pour le joueur qui a déclenché LAST_ROUND)
+        if (extraTurnsRemaining > 0) {
+            extraTurnsRemaining--;
+            return;
         }
     }
 
@@ -405,6 +413,46 @@ public class GameManager {
         actionDeck.removeCardAtTop();
         turnPhase = TurnPhase.CARD_DRAW_FROM_DECK;
         return currentDrawCard;
+    }
+
+    /**
+     * pioche une action recompense automatiquement apres reveal d'une etoile
+     * sans modif les etats ingame
+     */
+    public ActionCardModel drawActionRewardCard(){
+        if (actionDeck == null) {
+            return null;
+        }
+        if (actionDeck.stackSize() == 0) {
+            actionDeck.DefausseInPioche(discardActionPile);
+        }
+        if (actionDeck.stackSize() == 0) {
+            return null;
+        }
+        CardModel card = actionDeck.getTopCard();
+        actionDeck.removeCardAtTop();
+        ensureFaceUp(card);
+        if (card instanceof ActionCardModel actionCard) {
+            return actionCard;
+        }
+        return null;
+    }
+
+    /**
+     * applique l'effet etoile sur un joueur : gagne une carte action
+     * @param player joueur qui gagne l'action
+     * @return la carte action gagnée ou null si indisponible
+     */
+    public ActionCardModel grantActionForStar(PlayerModel player) {
+        if (player == null || !gameWithAction) {
+            return null;
+        }
+        ActionCardModel actionCard = drawActionRewardCard();
+        if (actionCard == null) {
+            return null;
+        }
+        player.getActionHand().add(actionCard.getType());
+        return actionCard;
     }
 
     /*
@@ -448,19 +496,14 @@ public class GameManager {
         if (currentDrawCard.isFaceDown()) {
             currentDrawCard.returnCard();
         }
-        // si la carte est une etoile on +1 le starsScore
-        if (currentDrawCard instanceof NumberCardModel numberCard) {
-            if (numberCard.isStar()) {
-                currentPlayer.addStarsScore();
-            }        
-        }
         currentDrawCard = null;
         
         //vérifier les colonnes/lignes identiques
-        GameRuleModel.removeIdenticalColumns(hand, discardPile);
-        GameRuleModel.removeIdenticalRows(hand, discardPile);
-        //vérifier si fin de manche
-        if (gameState != GameState.LAST_ROUND && GameRuleModel.checkEndOfRound(players)) {
+        GameRuleModel.removeIdenticalColumns(hand, discardPile, currentPlayer);
+        GameRuleModel.removeIdenticalRows(hand, discardPile, currentPlayer);
+
+        //vérifier si fin de manche (ne déclencher qu'une seule fois, un seul joueur peut déclencher)
+        if (gameState != GameState.LAST_ROUND && lastRoundPlayer == -1 && GameRuleModel.checkEndOfRound(players)) {
             gameState = GameState.LAST_ROUND;
             lastRoundPlayer = currentPlayerIndex;  // stocker le joueur qui déclenche le dernier tour
         }
@@ -489,11 +532,11 @@ public class GameManager {
         hand.revealCard(row, col);
 
         // check
-        GameRuleModel.removeIdenticalColumns(hand, discardPile);
-        GameRuleModel.removeIdenticalRows(hand, discardPile);
-        
-        //vérifier si fin de manche
-        if (gameState != GameState.LAST_ROUND && GameRuleModel.checkEndOfRound(players)) {
+        GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile, getCurrentPlayer());
+        GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile, getCurrentPlayer());
+
+        //vérifier si fin de manche (ne déclencher qu'une seule fois, un seul joueur peut déclencher)
+        if (gameState != GameState.LAST_ROUND && lastRoundPlayer == -1 && GameRuleModel.checkEndOfRound(players)) {
             gameState = GameState.LAST_ROUND;
             lastRoundPlayer = currentPlayerIndex;  // stocker le joueur qui déclenche le dernier tour
         }
@@ -555,8 +598,11 @@ public class GameManager {
      * Recommence une nouvelle manche, le joueur avec la plus haute somme de cartes visibles après INIT_REVEAL commence
      */
     public void startNewGame() {
-        currentPlayerIndex = 0;
+        roundNumber++;
+        currentPlayerIndex = GameRuleModel.getBiggestScorePlayerIndex(players);
         currentDrawCard = null;
+        lastRoundPlayer = -1;  // réinitialiser le déclencheur du dernier tour
+        extraTurnsRemaining = 0;  // réinitialiser les tours supplémentaires
         discardPile = new DefausseModel();
         initializeGame();
         ensureFaceUp(discardPile.getTopCard());
@@ -593,6 +639,10 @@ public class GameManager {
         this.initRevealJustFinished = value;
     }
 
+    public int getRoundNumber(){
+        return roundNumber;
+    }
+
     public boolean revealInitCard(int col, int row){
         if (turnPhase != TurnPhase.INIT_REVEAL) return false;
         CardModel card = getCurrentPlayer().getHand().getCard(row, col);
@@ -600,9 +650,15 @@ public class GameManager {
         getCurrentPlayer().getHand().revealCard(row, col);
         
         //regarde et supprimer les colonnes/lignes identiques
-        GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile);
-        GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile);
-        
+        GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile, getCurrentPlayer());
+        GameRuleModel.removeIdenticalRows(getCurrentPlayer().getHand(), discardPile, getCurrentPlayer());
+
+        // vérifie si après suppression de colonnes/lignes, toutes les cartes sont révélées (ne déclencher qu'une seule fois, un seul joueur peut déclencher)
+        if (gameState != GameState.LAST_ROUND && lastRoundPlayer == -1 && GameRuleModel.checkEndOfRound(players)) {
+            gameState = GameState.LAST_ROUND;
+            lastRoundPlayer = currentPlayerIndex;
+        }
+
         initRevealCount++;
         if (initRevealCount >= 2) {
             initRevealCount = 0;
@@ -614,20 +670,45 @@ public class GameManager {
             }
             
             currentPlayerIndex++;
-            if (currentPlayerIndex >= players.size()) currentPlayerIndex = 0;
-            
-            if (currentPlayerIndex == firstPlayerToPlayIndex) {
-                firstPlayer();
+            if (currentPlayerIndex >= players.size()) {
+                currentPlayerIndex = GameRuleModel.getFirstPlayerIndex(players);
                 firstPlayerToPlayIndex = currentPlayerIndex;
-                initRevealJustFinished = true;
-                startTurn(); // passe a DRAW_DECISION
+                startTurn(); // passe à DRAW_DECISION
             }
-            gameBoardModel.getGameBoardController().nextPlayerSound();
         }
         return true;
     }
 
     public void setTurnPhase(TurnPhase phase){
         this.turnPhase = phase;
+    }
+
+    public void stopGame() {
+        if (gameBoardModel != null) {
+            GameBoardController controller = gameBoardModel.getGameBoardController();
+            if (controller != null) {
+                controller.stopGame();
+            }
+        }
+    }   
+
+    public int getAfkCount(PlayerModel player) {
+        return afkCounts.getOrDefault(player, 0);
+    }
+
+    public void registerAfkTurn(PlayerModel player) {
+        afkCounts.put(player, getAfkCount(player) + 1);
+    }
+
+    public void resetAfkCount(PlayerModel player) {
+        afkCounts.put(player, 0);
+    }
+
+    public boolean isAutoControlled(PlayerModel player) {
+        return autoControlledPlayers.getOrDefault(player, false);
+    }
+
+    public void setAutoControlled(PlayerModel player, boolean value) {
+        autoControlledPlayers.put(player, value);
     }
 }

@@ -29,7 +29,7 @@ public class ConnexionPanelTest {
         assertEquals("", connexionPanel.getLoginPassword(), "Le mot de passe de connexion doit etre vide par defaut");
         
         assertEquals("", connexionPanel.getInscriptionEmail(), "L'email d'inscription doit etre vide par defaut");
-        assertEquals("", connexionPanel.getInscriptionpUsername(), "Le pseudo d'inscripton doit etre vide par defaut");
+        assertEquals("", connexionPanel.getInscriptionUsername(), "Le pseudo d'inscripton doit etre vide par defaut");
         assertEquals("", connexionPanel.getInscriptionPassword(), "Le mot de passe d'inscription doit etre vide par defaut");
     }
 }

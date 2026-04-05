@@ -1,5 +1,7 @@
 package fr.upc.cr1a.controller;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -23,20 +25,22 @@ public class GameBoardController {
 
     GameBoardModel gameBoardModel;
     GameBoardView gameBoardView;
-    NextRoundPanel nextRoundPanel;
     GameManager gameManager;
 
+    private boolean timerEnabled = false;
     private GameLoop gameLoop;
     private HumanTurnController humanTurnController;
-    
+
     private GameBoardBotController botController;
-    
+
     private boolean waitingNextTurn = false; // empeche de cliquer pendant l'attente
     // pour fixer le clique du playerpreview
     private boolean isPinned = false;
-    private AudioManager audio;
     // panel de fin de manche
     RoundEndPanel currentRoundEndPanel = null;
+
+    private boolean pauseOpen = false;
+    private TimeoutTurnController timeoutTurnController;
 
     /**
      * Initialise la view et le Model du GameBoard
@@ -45,17 +49,46 @@ public class GameBoardController {
         this.gameBoardModel = gameBoardModel;
         this.gameBoardView = gameBoardView;
         this.gameManager = gameManager;
-        this.audio = new AudioManager();
-        this.nextRoundPanel = gameBoardView.getNextRoundPanel();
         this.botController = new GameBoardBotController(gameBoardView, gameManager, this);
 
         this.gameLoop = new GameLoop(gameManager, gameBoardView);
         this.gameLoop.setHumanController(this);
         this.gameLoop.setBotController(botController);
 
+        this.timeoutTurnController = new TimeoutTurnController(gameBoardView, gameManager, this, gameLoop);
+        this.gameLoop.setTimeoutController(timeoutTurnController);
+        
         this.humanTurnController = new HumanTurnController(gameBoardView, gameManager, this, gameLoop);
         humanTurnController.installListeners();
         
+        gameBoardView.setTimerVisible(timerEnabled);
+        gameLoop.setTimerEnabled(timerEnabled);
+
+        InputMap im = gameBoardView.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap am = gameBoardView.getActionMap();
+
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "togglePause");
+        am.put("togglePause", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                togglePauseOverlay();
+            }
+        });
+
+        gameBoardView.getPauseOverlay().getBtnResume().addActionListener(e -> closePauseOverlay());
+
+        gameBoardView.getPauseOverlay().getBtnQuit().addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(gameBoardModel.getFrame(),"Voulez-vous quitter la partie ?","Retour au menu",JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                closePauseOverlay();
+                gameBoardModel.retourMenuCalled();
+            }
+        });
+
+        gameBoardView.getPauseOverlay().getBtnSettings().addActionListener(e -> {
+            gameBoardModel.getFrame().showSettingsOverlay();
+        });
+
         listener();
         refreshGuide();
         
@@ -79,9 +112,6 @@ public class GameBoardController {
      */
     public void listener() {
 
-        JButton retour = gameBoardView.getBtnRetour();
-        retour.addActionListener(e -> gameBoardModel.retourMenuCalled());
-
         // Pour le survol et le ckick des preview player
         // y'a un soucis pour les pinned ici -> bug mineur
         int s = 0;
@@ -99,7 +129,7 @@ public class GameBoardController {
                 }
 
                 @Override
-                public void mouseClicked(MouseEvent e) {
+                public void mousePressed(MouseEvent e) {
                     if (humanTurnController != null && humanTurnController.handlePlayerButtonClicked(tmp)) {
                         return;
                     }
@@ -178,7 +208,7 @@ public class GameBoardController {
                 @Override
                 public void mouseExited(MouseEvent e) { currentRoundEndPanel.getBtnContinuer().onMouseExit(); }
                 @Override
-                public void mouseClicked(MouseEvent e) { ContinueRound(); }
+                public void mousePressed(MouseEvent e) { ContinueRound(); }
             });
         }
 
@@ -190,7 +220,7 @@ public class GameBoardController {
                 @Override
                 public void mouseExited(MouseEvent e) { currentRoundEndPanel.getBtnRetourMenu().onMouseExit(); }
                 @Override
-                public void mouseClicked(MouseEvent e) { gameBoardModel.retourMenuCalled(); }
+                public void mousePressed(MouseEvent e) { gameBoardModel.retourMenuCalled(); }
             });
         }
     }
@@ -223,19 +253,6 @@ public class GameBoardController {
             case INIT_REVEAL -> gameBoardView.setActionGuide(gameManager.getCurrentPlayer().getName()
                     + " doit réveler 2 cartes (" + gameManager.getInitRevealCount() + ")");
         }
-    }
-
-    public void nextPlayerSound() {
-        audio.playSfx("/sfx/round.wav"); //je trouve le son bizzare hmm j'ai mis un alternatif ou juste avec ce son c'est bizzare d'etre accompagné d'un fade
-        nextRoundPanel.setCurrentPlayer(gameManager.getCurrentPlayer());
-        // nextRoundPanel.fade(true);
-        // waitingNextTurn = true;
-        // Timer waitTimer = new Timer(2500, e -> {
-        //     nextRoundPanel.fade(false);
-        //     waitingNextTurn = false;
-        // });
-        // waitTimer.setRepeats(false);
-        // waitTimer.start();
     }
 
     /**
@@ -274,5 +291,38 @@ public class GameBoardController {
 
     public void showRoundEndScreenFromLoop() {
         showRoundEndScreen();
+    }
+
+    public void stopGame() {
+        if (gameLoop != null) {
+            gameLoop.stopGame();
+        }
+        if (humanTurnController != null) {
+            humanTurnController.removeAllListeners();
+        }
+        if (gameBoardView != null) {
+            gameBoardView.cleanup();
+        }
+        AnimLoop.clearAll();
+        setWaitingNextTurn(true);
+    }
+
+    private void togglePauseOverlay() {
+        if(currentRoundEndPanel != null && currentRoundEndPanel.isShowing()) return;
+        pauseOpen = !pauseOpen;
+        gameBoardView.showPauseOverlay(pauseOpen);
+        setWaitingNextTurn(pauseOpen);
+        gameLoop.setPaused(pauseOpen);
+    }
+
+    private void closePauseOverlay() {
+        pauseOpen = false;
+        gameBoardView.showPauseOverlay(false);
+        gameLoop.setPaused(false);
+    }
+
+    public void toggleTimer(boolean enabled) { /// IMPORTANT ICI ICI ICI ICI plus tard pour les différents type de parties
+        gameBoardView.setTimerVisible(enabled);
+        gameLoop.setTimerEnabled(enabled);
     }
 }

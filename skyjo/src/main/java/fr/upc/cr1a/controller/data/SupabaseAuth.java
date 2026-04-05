@@ -1,4 +1,4 @@
-package fr.upc.cr1a.controller.Data;
+package fr.upc.cr1a.controller.data;
 
 //import java.lang.Thread.State;
 import java.net.URI;
@@ -10,6 +10,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 //import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
+import fr.upc.cr1a.model.player.PlayerAccount;
 
 //import fr.upc.cr1a.model.GameSession;
 //import netscape.javascript.JSObject;
@@ -57,7 +59,7 @@ public class SupabaseAuth {
             String id = getIUD(response);
             String accessToken = getAccesToken(response);
 
-            SendAPI.getStats(accessToken, id);
+            PlayerAccount.actuelAccount = SendAPI.getStats(accessToken, id);
             return true;
             
         } catch (Exception e) {
@@ -125,7 +127,7 @@ public class SupabaseAuth {
             String id = getIUD(response);
             String accessToken = getAccesToken(response);
 
-            SendAPI.getStats(accessToken, id);
+            PlayerAccount.actuelAccount = SendAPI.getStats(accessToken, id);
 
             return true;
 
