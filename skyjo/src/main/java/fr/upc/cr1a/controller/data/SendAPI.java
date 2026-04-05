@@ -215,6 +215,64 @@ public class SendAPI {
         }
     }
 
+    /**
+     * commande API unlockSkin qui debloque un skin dans la DB
+     */
+    public static PlayerData unlockSkin(String uuid, String skinPath){
+        try {
+            String jsonBody = "{" + "\"uuidStr\": \"" + uuid + "\"," + "\"skinPath\": \"" + skinPath + "\"}";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlAPI + "/api/player/unlockSkin"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("CODE HTTP UNLOCKSKIN : " + response.statusCode());
+            System.out.println("API REPOND UNLOCKSKIN : " + response.body());
+
+            if (response.statusCode() == 200) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                return gson.fromJson(response.body(), PlayerData.class);
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * commande API selectSkin qui equipe un skin dans la DB
+     */
+    public static PlayerData selectSkin(String uuid, String skinPath){
+        try {
+            String jsonBody = "{" + "\"uuidStr\": \"" + uuid + "\"," + "\"skinPath\": \"" + skinPath + "\"}";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlAPI + "/api/player/selectSkin"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("CODE HTTP SELECTSKIN : " + response.statusCode());
+            System.out.println("API REPOND SELECTSKIN : " + response.body());
+
+            if (response.statusCode() == 200) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                return gson.fromJson(response.body(), PlayerData.class);
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     // Quoi d'autres comme requetes possible ? 
 
@@ -240,6 +298,8 @@ public class SendAPI {
                 System.out.println("elo : " + playerData.getElo());
                 System.out.println("xp : " + playerData.getXp());
                 System.out.println("money : " + playerData.getMoney());
+                System.out.println("skins : " + playerData.getListSkinPlayer());
+                System.out.println("selectedSkinPath : " + playerData.getSelectedSkinPath());
                 // le mail ne s'affiche pas psq on le recupere que temporerement si on se co avec l'username
                 return playerData;
             } else {

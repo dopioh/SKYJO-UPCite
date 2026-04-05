@@ -1,5 +1,8 @@
 package fr.upc.cr1a.view;
 
+import fr.upc.cr1a.controller.data.SendAPI;
+import fr.upc.cr1a.model.player.PlayerAccount;
+import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
 import fr.upc.cr1a.utils.ImageCache;
 
@@ -21,8 +24,9 @@ import java.util.Random;
  */
 public class CaseOpeningOverlayPanel extends JPanel {
 
+    private static final String DEFAULT_SKIN_PATH = "/cartes/carteDos.png";
     private static ArrayList<String> unlockedSkinPaths = new ArrayList<>();
-    private static String selectedSkinPath = "/cartes/carteDos.png";
+    private static String selectedSkinPath = DEFAULT_SKIN_PATH;
     
 
     private static final int[][] PACK_CHANCES = {
@@ -119,7 +123,7 @@ public class CaseOpeningOverlayPanel extends JPanel {
     private DisplayMode mode = DisplayMode.BOUTIQUE;
 
     public CaseOpeningOverlayPanel() {
-        unlockSkin("/cartes/carteDos.png");
+        unlockSkin(DEFAULT_SKIN_PATH);
 
         setOpaque(false);
         setLayout(null);
@@ -579,10 +583,22 @@ public class CaseOpeningOverlayPanel extends JPanel {
         if (skinPath == null) {
             return false;
         }
+        if (PlayerAccount.actuelAccount != null
+            && PlayerAccount.actuelAccount.getListSkinPlayer() != null
+            && PlayerAccount.actuelAccount.getListSkinPlayer().contains(skinPath)) {
+            return false;
+        }
         if (unlockedSkinPaths.contains(skinPath)) {
             return false;
         }
         unlockedSkinPaths.add(skinPath);
+
+        if (PlayerAccount.actuelAccount != null) {
+            PlayerData majData = SendAPI.unlockSkin(PlayerAccount.actuelAccount.getID(), skinPath);
+            if (majData != null) {
+                PlayerAccount.actuelAccount = majData;
+            }
+        }
         return true;
     }
 
@@ -590,12 +606,24 @@ public class CaseOpeningOverlayPanel extends JPanel {
         if (skinPath == null) {
             return false;
         }
+        if (PlayerAccount.actuelAccount != null) {
+            if (PlayerAccount.actuelAccount.getListSkinPlayer() == null) {
+                return DEFAULT_SKIN_PATH.equals(skinPath);
+            }
+            return PlayerAccount.actuelAccount.getListSkinPlayer().contains(skinPath);
+        }
         return unlockedSkinPaths.contains(skinPath);
     }
 
     public static String getSelectedSkinPath() {
+        if (PlayerAccount.actuelAccount != null) {
+            String skinSelectedDB = PlayerAccount.actuelAccount.getSelectedSkinPath();
+            if (skinSelectedDB != null && !skinSelectedDB.isBlank()) {
+                return skinSelectedDB;
+            }
+        }
         if (selectedSkinPath == null) {
-            selectedSkinPath = "/cartes/carteDos.png";
+            selectedSkinPath = DEFAULT_SKIN_PATH;
         }
         return selectedSkinPath;
     }
@@ -606,5 +634,11 @@ public class CaseOpeningOverlayPanel extends JPanel {
         }
         selectedSkinPath = skinPath;
         unlockSkin(skinPath);
+        if (PlayerAccount.actuelAccount != null) {
+            PlayerData majData = SendAPI.selectSkin(PlayerAccount.actuelAccount.getID(), skinPath);
+            if (majData != null) {
+                PlayerAccount.actuelAccount = majData;
+            }
+        }
     }
 }
