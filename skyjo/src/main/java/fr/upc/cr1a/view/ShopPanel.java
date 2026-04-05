@@ -33,13 +33,14 @@ public class ShopPanel extends JPanel {
     private final JPanel cardsRow;
     private final CaseOpeningOverlayPanel caseOpeningOverlay;
     private final Image backgroundImage;
+    private BufferedImage cachedBackground;
 
     public ShopPanel() {
         setLayout(new BorderLayout());
 
         backgroundImage = ImageCache.get("/background.png");
         packSources = new BufferedImage[] {
-            ImageCache.get("/boutique/nul.png"),
+            ImageCache.get("/boutique/nulCard.png"),
             ImageCache.get("/boutique/bof.png"),
             ImageCache.get("/boutique/bien.png")
         };
@@ -188,10 +189,16 @@ public class ShopPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (backgroundImage != null) {
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-            g2d.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+            int w = getWidth(), h = getHeight();
+            if (cachedBackground == null || cachedBackground.getWidth() != w || cachedBackground.getHeight() != h) {
+                cachedBackground = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D bg = cachedBackground.createGraphics();
+                bg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                bg.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                bg.drawImage(backgroundImage, 0, 0, w, h, null);
+                bg.dispose();
+            }
+            g.drawImage(cachedBackground, 0, 0, null);
         }
     }
 
