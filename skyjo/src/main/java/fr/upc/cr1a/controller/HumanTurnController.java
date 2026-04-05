@@ -113,7 +113,7 @@ public class HumanTurnController {
             if (drawn.isFaceDown()) drawn.returnCard();
 
             String drawnPath = gameBoardView.getCardImagePath(drawn);
-            gameBoardView.getBtnPioche().setCardImage(drawnPath);
+            gameBoardView.getBtnPioche().flip(() -> gameBoardView.getBtnPioche().setCardImage(drawnPath));
             gameBoardView.showCursorCard(drawnPath);
             mainController.updateAllDecksDisplay();
 
@@ -134,6 +134,7 @@ public class HumanTurnController {
 
                 CardModel taken = gameManager.takeDiscard();
                 String takenPath = gameBoardView.getCardImagePath(taken);
+                gameBoardView.getBtnDefausse().animatePressLight();
                 gameBoardView.getBtnDefausse().setCardImage(takenPath);
                 gameBoardView.showCursorCard(takenPath);
                 if (GameManager.isStarCard(taken)) {
@@ -146,6 +147,7 @@ public class HumanTurnController {
 
             if (gameManager.getTurnPhase() == GameManager.TurnPhase.CARD_DRAW_FROM_DECK) {
                 gameManager.discardDrawCard();
+                gameBoardView.getBtnDefausse().animatePressLight();
                 waitingReveal = true;
                 gameBoardView.hideCursorCard();
                 mainController.updateAllDecksDisplay();
@@ -249,7 +251,7 @@ public class HumanTurnController {
                             grantActionForStar(revealedPlayer, "ETOILE révélée : carte action gagnée");
                         }
 
-                        gameBoardView.showPlayerCards(revealedPlayer);
+                        gameBoardView.flipCardAt(r, c, () -> gameBoardView.showPlayerCards(revealedPlayer));
                         mainController.updateAllDecksDisplay();
                         mainController.refreshGuide();
 
@@ -272,7 +274,7 @@ public class HumanTurnController {
                         GameRuleModel.removeIdenticalColumns(currentPlayer.getHand(), gameManager.getDiscardPile(), currentPlayer);
                         GameRuleModel.removeIdenticalRows(currentPlayer.getHand(), gameManager.getDiscardPile(), currentPlayer);
 
-                        gameBoardView.showPlayerCards(currentPlayer);
+                        gameBoardView.flipCardAt(r, c, () -> gameBoardView.showPlayerCards(currentPlayer));
 
                         waitingReveal = false;
                         gameManager.setTurnPhase(GameManager.TurnPhase.TURN_ENDED);

@@ -1,18 +1,21 @@
 package fr.upc.cr1a.view;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.*;
 
 import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
 import fr.upc.cr1a.model.PlayerModel;
+import fr.upc.cr1a.utils.ImageCache;
 
 /**
  * Panel affiché entre les manches avec classement des joueurs et bouton continuer/menu
- * 
+ *
  * @author Ian
  */
 public class RoundEndPanel extends JPanel {
@@ -25,19 +28,23 @@ public class RoundEndPanel extends JPanel {
     private List<JLabel> playerLabels = new ArrayList<>();
     private List<PlayerModel> sortedPlayers;
     private PlayerModel roundEndPlayer;
+    private Image bgImage;
+    private BufferedImage cachedBackground;
+
+    private static Font baseFont;
 
     public RoundEndPanel(List<PlayerModel> players, boolean gameOver, PlayerModel roundEndPlayer) {
         this.gameOver = gameOver;
         this.roundEndPlayer = roundEndPlayer;
         setLayout(new BorderLayout());
-        setBackground(Color.WHITE);
+        setOpaque(true);
+        bgImage = ImageCache.get("/background.png");
 
         layeredPane = new JLayeredPane();
         add(layeredPane, BorderLayout.CENTER);
 
         JPanel contentPanel = new JPanel(new BorderLayout());
-        contentPanel.setOpaque(true);
-        contentPanel.setBackground(Color.WHITE);
+        contentPanel.setOpaque(false);
         layeredPane.add(contentPanel, JLayeredPane.DEFAULT_LAYER);
 
         // Preview panel hover
@@ -45,123 +52,138 @@ public class RoundEndPanel extends JPanel {
         previewPanel.setVisible(false);
         layeredPane.add(previewPanel, JLayeredPane.PALETTE_LAYER);
 
-        // fix écran blanc au premier affichage (JLayeredPane sans layout)
+        // full screen etc
         final JPanel contentRef = contentPanel;
-        SwingUtilities.invokeLater(() -> {
-            Dimension size = layeredPane.getSize();
-            if (size.width > 0 && size.height > 0) {
+        layeredPane.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                Dimension size = layeredPane.getSize();
                 contentRef.setBounds(0, 0, size.width, size.height);
-                previewPanel.setBounds(size.width / 4, size.height / 6, size.width / 2, size.height * 2 / 3);
+                previewPanel.setBounds(size.width / 6, size.height / 10, size.width - size.width / 3, size.height - size.height / 5);
+                layeredPane.revalidate();
+                layeredPane.repaint();
             }
-            layeredPane.revalidate();
-            layeredPane.repaint();
         });
 
-        //titre avec information du déclencheur
-        JPanel titlePanel = new JPanel();
-        titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.Y_AXIS));
-        titlePanel.setBackground(Color.WHITE);
-        titlePanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 0));
+        // haut : titre à gauche, bouton à droite
+        JPanel topBar = new JPanel(new BorderLayout());
+        topBar.setOpaque(false);
+        topBar.setBorder(BorderFactory.createEmptyBorder(30, 40, 15, 40));
 
-        String title = gameOver ? "Partie terminée" : "Fin de la manche";
-        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        titlePanel.add(titleLabel);
-
-        //ajouter le nom du joueur qui a déclenché la fin
-        if (!gameOver && roundEndPlayer != null) {
-            JLabel roundEndInfo = new JLabel("Déclenchée par : " + roundEndPlayer.getName(), SwingConstants.CENTER);
-            roundEndInfo.setFont(new Font("Arial", Font.ITALIC, 16));
-            roundEndInfo.setForeground(new Color(100, 100, 100));
-            roundEndInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
-            titlePanel.add(Box.createVerticalStrut(5));
-            titlePanel.add(roundEndInfo);
-        }
-
-        contentPanel.add(titlePanel, BorderLayout.NORTH);
-
-        // gauche : liste des joueurs trié par score
-        sortedPlayers = new ArrayList<>(players);
-        sortedPlayers.sort(Comparator.comparingInt(p -> p.getTotalScore()));
-
-        JPanel listPanel = new JPanel();
-        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
-        listPanel.setBackground(Color.WHITE);
-        listPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 20));
-
-        for (int i = 0; i < sortedPlayers.size(); i++) {
-            PlayerModel p = sortedPlayers.get(i);
-
-            //construction du texte avec détails
-            StringBuilder text = new StringBuilder();
-            text.append(i + 1).append(" - ").append(p.getName()).append("  ");
-
-            // Afficher les détails de la manche si disponibles
-            if (!gameOver && p.getLastRoundScore() != null) {
-                PlayerModel.RoundScore roundScore = p.getLastRoundScore();
-                text.append("(Main: ").append(roundScore.handScore).append("p");
-
-                if (roundScore.actionPenalty > 0) {
-                    text.append(" + Actions: ").append(roundScore.actionPenalty).append("p");
-                }
-
-                //afficher le doublement si applicable
-                if (roundScore.wasDoubled) {
-                    text.append(" × 2 = +").append(roundScore.totalAdded).append("p) ");
-                } else {
-                    text.append(" = +").append(roundScore.totalAdded).append("p) ");
-                }
-            }
-
-            text.append("Total: ").append(p.getTotalScore()).append("p");
-
-            JLabel label = new JLabel(text.toString());
-            label.setFont(new Font("Arial", Font.PLAIN, 18));
-            label.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
-            label.setOpaque(true);
-            label.setBackground(Color.WHITE);
-            label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            playerLabels.add(label);
-            listPanel.add(label);
-        }
-
-        contentPanel.add(listPanel, BorderLayout.CENTER);
-
-        // Droite : zone bouton
-        JPanel rightPanel = new JPanel(new GridBagLayout());
-        rightPanel.setBackground(Color.WHITE);
-        rightPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 40));
-
-        GridBagConstraints gbcBtn = new GridBagConstraints();
-        gbcBtn.gridx = 0;
-        gbcBtn.gridy = 0;
-        gbcBtn.insets = new Insets(10, 10, 10, 10);
+        String title = gameOver ? "Partie terminée !" : "Fin de la manche";
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(font(46f, Font.BOLD));
+        titleLabel.setForeground(Color.WHITE);
+        topBar.add(titleLabel, BorderLayout.WEST);
 
         if (!gameOver) {
             btnContinuer = new DoodleButton("Continuer", ButtonColor.GREEN, 320, 80, "/Button/Continue.png");
-            rightPanel.add(btnContinuer, gbcBtn);
+            topBar.add(btnContinuer, BorderLayout.EAST);
         } else {
-            PlayerModel winner = sortedPlayers.get(0);
-            JLabel winLabel = new JLabel("Gagnant : " + winner.getName(), SwingConstants.CENTER);
-            winLabel.setFont(new Font("Arial", Font.BOLD, 22));
-            rightPanel.add(winLabel, gbcBtn);
-
-            gbcBtn.gridy = 1;
             btnRetourMenu = new DoodleButton("Menu", ButtonColor.RED, 200, 70);
-            rightPanel.add(btnRetourMenu, gbcBtn);
+            topBar.add(btnRetourMenu, BorderLayout.EAST);
         }
 
-        contentPanel.add(rightPanel, BorderLayout.EAST);
+        contentPanel.add(topBar, BorderLayout.NORTH);
+
+        // grande boite transparent en bas de topbar
+        sortedPlayers = new ArrayList<>(players);
+        sortedPlayers.sort((a, b) -> a.getTotalScore() - b.getTotalScore());
+
+        JPanel bigCard = makeCard();
+        bigCard.setLayout(new BoxLayout(bigCard, BoxLayout.Y_AXIS));
+        bigCard.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        for (int i = 0; i < sortedPlayers.size(); i++) {
+            PlayerModel p = sortedPlayers.get(i);
+            String text = (i + 1) + ".   " + p.getName() + "   —   " + p.getTotalScore() + " pts";
+            JLabel pill = makePill(text);
+            playerLabels.add(pill);
+            bigCard.add(pill);
+            bigCard.add(Box.createVerticalStrut(14));
+        }
+
+        JPanel cardPadding = new JPanel(new BorderLayout());
+        cardPadding.setOpaque(false);
+        cardPadding.setBorder(BorderFactory.createEmptyBorder(0, 40, 40, 40));
+        cardPadding.add(bigCard, BorderLayout.CENTER);
+        contentPanel.add(cardPadding, BorderLayout.CENTER);
+    }
+
+    // pilule joueur
+    private JLabel makePill(String text) {
+        JLabel pill = new JLabel(text) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), getHeight(), getHeight());
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        pill.setOpaque(false);
+        pill.setBackground(Color.WHITE);
+        pill.setForeground(new Color(50, 50, 50));
+        pill.setFont(font(22f, Font.BOLD));
+        pill.setBorder(BorderFactory.createEmptyBorder(12, 28, 12, 28));
+        pill.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return pill;
+    }
+
+    private JPanel makeCard() {
+        JPanel card = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(255, 255, 255, 70));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 24, 24);
+                g2.dispose();
+            }
+        };
+        card.setOpaque(false);
+        return card;
+    }
+
+    // charge le font doodle comme toujours
+    private Font font(float size, int style) {
+        if (baseFont == null) {
+            try {
+                var stream = getClass().getResourceAsStream("/PatrickHandSC.ttf");
+                if (stream != null) baseFont = Font.createFont(Font.TRUETYPE_FONT, stream);
+            } catch (Exception ignored) {}
+        }
+        if (baseFont != null) return baseFont.deriveFont(style, size);
+        return new Font("Arial", style, (int) size);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (bgImage != null) {
+            int w = getWidth(), h = getHeight();
+            if (cachedBackground == null || cachedBackground.getWidth() != w || cachedBackground.getHeight() != h) {
+                cachedBackground = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D bg = cachedBackground.createGraphics();
+                bg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                bg.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                bg.drawImage(bgImage, 0, 0, w, h, null);
+                bg.dispose();
+            }
+
+            g.drawImage(cachedBackground, 0, 0, null);
+        }
     }
 
     public void showPreview(PlayerModel player) {
         previewPanel.showOtherPlayerHand(player);
-        previewPanel.setVisible(true);
+        SwingUtilities.invokeLater(() -> previewPanel.fade(true));
     }
 
     public void hidePreview() {
-        previewPanel.setVisible(false);
+        previewPanel.fade(false);
     }
 
     public List<JLabel> getPlayerLabels() {

@@ -685,6 +685,16 @@ public class GameBoardView extends JPanel {
         return this.cardButtons;
     }
 
+    // animation flip : appelle 'onChange' quand on voit plus la carte
+    public void flipCardAt(int row, int col, Runnable onChange) {
+        cardButtons[row][col].flip(onChange);
+    }
+
+    // simule un clic
+    public void animatePressAt(int row, int col) {
+        cardButtons[row][col].animatePress();
+    }
+
     public PlayerModel getCurrentPlayer() {
         return this.currentPlayer;
     }
