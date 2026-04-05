@@ -383,7 +383,7 @@ public class GameBoardController {
                 if (updated != null) {
                     PlayerAccount.actuelAccount = updated;
                 }
-                updated = SendAPI.addMoney(dbUuid, calcElo);
+                updated = SendAPI.addMoney(dbUuid, calcMoney);
                 if (updated != null) {
                     PlayerAccount.actuelAccount = updated;
                 }
