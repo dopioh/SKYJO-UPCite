@@ -312,6 +312,8 @@
 
 - Mailmap
 
+- Bouton multiplayer qui va ensuite faire un panel, où sont les salons et pouvoir créer un salon
+
 - Système de Timer (Si le joueur ne joue pas avant la fin du temps 2 fois il est "remplacé par un bot")
 
 - Toggle Timer
@@ -348,6 +350,10 @@
 - LAST ROUND
 
 ## v.0.9: SPRINT 9
+
+### Added
+
+- les Salons pour le multiplayer
 
 ### Added
 
