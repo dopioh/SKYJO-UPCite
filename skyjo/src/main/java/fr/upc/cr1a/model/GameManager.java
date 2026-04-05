@@ -663,6 +663,31 @@ public class GameManager {
         }
     }   
 
+    /**
+     * Methode exclusive au multijoueur (Cote Client)
+     * Force la revelation d'une carte sur le plateau local selon la request du serveur
+     */
+    public void forceRevealCardFromNetwork(String playerId, int col, int row, int cardValue) {
+        
+        PlayerModel targetPlayer = null;
+        for (PlayerModel p : players) {
+            if (p.getPlayerData().getID().equals(playerId)) {
+                targetPlayer = p;
+                break;
+            }
+        }
+        
+        if (targetPlayer != null) {
+
+            NumberCardModel vraieCarte = new NumberCardModel(false, cardValue);
+            targetPlayer.getHand().replaceCard(row, col, vraieCarte);
+            
+            if (gameBoardModel != null && gameBoardModel.getGameBoardView() != null) {
+                gameBoardModel.getGameBoardView().showPlayerCards(getCurrentPlayer());
+            }
+        }
+    }
+
     public int getAfkCount(PlayerModel player) {
         return afkCounts.getOrDefault(player, 0);
     }

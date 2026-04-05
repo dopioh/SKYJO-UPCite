@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolServer;
+import fr.upc.cr1a.model.GameSession;
 import fr.upc.cr1a.model.player.PlayerData;
 
 /**
@@ -21,18 +22,22 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
 
     private ArrayList<ClientHandler> connectedClient = new ArrayList<>(); // pour garder une trace des joueurs connectés 
 
-    private HashMap<String, String> lobbyPlayers = new HashMap<>();
+    private HashMap<String, String> lobbyPlayers = new HashMap<>(); // key = id, value = name
 
     private Thread thread;
+
+    private boolean modeAction;
 
     public GameHost(int port){
         this.port = port;
         this.thread = new Thread(this);
+        this.modeAction = false;
     }
 
     public void startServer(){
         isRunning = true;
         thread.start();
+        GameSession.status = GameSession.STATUS.HOST;
     }
 
     // methode pour fermer un serveur ( GameHost ) et kick tous les membres dedans
@@ -48,6 +53,7 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
             }
             connectedClient.clear(); //la trace des clients connecté on la garde non ? 
             lobbyPlayers.clear();
+            GameSession.status = GameSession.STATUS.OFFLINE;
             System.out.println("[SERVEUR] Fermerture du serveur et deconnexion de tous les clients.");
         } catch (Exception e) {
             e.printStackTrace();
@@ -100,7 +106,9 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
                 removeClient(client, id, username);
                 client.closeClient();
 
-                System.out.println("[SERVEUR] Expulsion du joueur : " + username);
+                String msg = "[SERVEUR] Expulsion du joueur : " + username;
+                System.out.println(msg);
+                broadcastInfo(msg);
 
                 break; // ça sert à rien de parcourir le reste
             }
@@ -120,12 +128,24 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
 
        if (id != null){
         lobbyPlayers.remove(id); // faut mettre la key
-        System.out.println("[SERVEUR] " + username + " a quitté le salon");
+        String msg = "[SERVEUR] " + username + " a quitté le salon";
+        System.out.println(msg);
+        broadcastInfo(msg);
 
         broadcastUpdateLobby();
        }
     }
 
+    /**
+     * Pour broadcast des messages non predefini a tous les joueurs
+     * @param msg
+     */
+    public synchronized void broadcastInfo(String msg){
+
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(msg.toString());
+        }
+    }
 
     // PARTI PROTOCOL SERVER
 
@@ -141,14 +161,21 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     @Override
     public synchronized void broadcastUpdateLobby(){
 
-        StringBuilder message = new StringBuilder("[LOBBY_UPDATE] Players in lobby : ");
-        for (String pseudo : lobbyPlayers.values()) {
-            message.append(pseudo).append(",");
+        String message = "[LOBBY_UPDATE]:" + lobbyPlayers.size() + ":";
+
+        int tmp = 0;
+        for (String key : lobbyPlayers.keySet()){
+            if (tmp >= lobbyPlayers.size() - 1){
+                message += key +":"+ lobbyPlayers.get(key);
+            } else {
+                message += key +":"+ lobbyPlayers.get(key)+ ":";
+            }
+
         }
 
         // On l'envoie à tous les ClientHandlers
         for (ClientHandler client : connectedClient) {
-            client.sendMessage(message.toString());
+            client.sendMessage(message);
         }
     }
 
@@ -171,11 +198,14 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     }
 
     // second test client simultané ( faut un host compatible )
+    /*
+    
     public static void main(String[] args) {
         PlayerData player = new PlayerData("9846220");
 
-        GameClient gameClient = new GameClient(player);
+        GameClient gameClient = new GameClient(player); // ancien gameclient
 
         gameClient.connect("localhost", 1234);
     }
+    */
 }

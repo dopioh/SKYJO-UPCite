@@ -98,6 +98,7 @@ public class ClientHandler implements Runnable{
     }
 
     // test client ( ne marche que si y'a un host correspondant)
+    /*
     public static void main(String[] args) {
         //PlayerData player = new PlayerData("POPOPO");
 
@@ -121,4 +122,5 @@ public class ClientHandler implements Runnable{
 
         System.out.println("[MAIN] Thread lancé. Le programme doit rester ouvert en écoutant.");
     }
+    */
 }

@@ -8,7 +8,7 @@ import fr.upc.cr1a.model.player.PlayerData;
 public class GameSession {
     private static PlayerData playerData;
     private static String accessToken;
-    private static STATUS status;
+    public static STATUS status;
 
     public enum STATUS{
         INVITED, // donc sans compte -> playerData et accessToken bloqué à null
