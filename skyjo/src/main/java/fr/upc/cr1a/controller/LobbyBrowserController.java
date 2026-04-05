@@ -87,29 +87,15 @@ public class LobbyBrowserController {
      */
     private void createLobby(String name, int maxPlayers, boolean actionMode) {
         //remplacer par l'appel au système P2P pour créer le salon avec les paramètres saisis // a faire
-        //pour l'instant, on simule simplement
-        javax.swing.JOptionPane.showMessageDialog(
-            frame,
-            "Salon créé : " + name + "\n" +
-            "Joueurs max : " + maxPlayers + "\n" +
-            "Mode actions : " + (actionMode ? "Activé" : "Désactivé") + "\n\n" +
-            "En attente de l'intégration P2P...",
-            "Salon créé",
-            javax.swing.JOptionPane.INFORMATION_MESSAGE
-        );
 
-        // Simule l'ajout du salon à la liste
-        String hostName = "Vous"; //plus tard récuperer le vrai nom du joeur
-        LobbyModel newLobby = new LobbyModel(
-            "lobby_" + System.currentTimeMillis(),
-            name,
-            hostName,
-            1, //le host est déjà dans le salon
-            maxPlayers,
-            actionMode
-        );
-        availableLobbies.add(0, newLobby); //ajoute en premier
-        refreshView();
+        // Créer l'ID du salon
+        String lobbyId = "lobby_" + System.currentTimeMillis();
+
+        // Initialiser le salon en tant qu'hôte
+        frame.getLobbyRoomController().initializeLobby(lobbyId, name, true, maxPlayers, actionMode);
+
+        // Rediriger vers le salon
+        frame.showPanel("LOBBY_ROOM");
     }
 
     /**
@@ -147,15 +133,18 @@ public class LobbyBrowserController {
      */
     private void joinLobby(LobbyModel lobby) {
         // remplacer par l'appel au système P2P pour rejoindre le salon
-        javax.swing.JOptionPane.showMessageDialog(
-            frame,
-            "Vous rejoignez le salon : " + lobby.getLobbyName() + "\n" +
-            "Host : " + lobby.getHostName() + "\n" +
-            "Joueurs : " + lobby.getCurrentPlayers() + "/" + lobby.getMaxPlayers() + "\n\n" +
-            "En attente de l'intégration P2P...",
-            "Rejoindre un salon",
-            javax.swing.JOptionPane.INFORMATION_MESSAGE
+
+        // Initialiser le salon en tant que joueur (pas hôte)
+        frame.getLobbyRoomController().initializeLobby(
+            lobby.getLobbyId(),
+            lobby.getLobbyName(),
+            false, // Pas l'hôte
+            lobby.getMaxPlayers(),
+            lobby.isActionMode()
         );
+
+        // Rediriger vers le salon
+        frame.showPanel("LOBBY_ROOM");
     }
 
     /**

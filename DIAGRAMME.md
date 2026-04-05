@@ -178,7 +178,11 @@ Gère la logique du jeu.
         * Attribut : lobbyId, lobbyName, hostName, currentPlayers, maxPlayers, actionMode, status
         * Enum : **LobbyStatus** (WAITING, PLAYING, FULL)
         * Méthode : **canJoin()**, **updateStatus()**, **getters/setters**
-        * **setCurrentPlayers()**, **setStatus()**, **toString()**
+         **setCurrentPlayers()**, **setStatus()**, **toString()**
+    * `LobbyPlayerModel`: Représente un joueur dans un salon d'attente multijoueur
+        * Attribut : playerId, playerName, isHost, isReady, isBot
+        * Méthode : **getters/setters**, les bots sont automatiquement prêts
+
 
 
 ### VIEW
@@ -205,6 +209,12 @@ Gère l'affichage
     * `LobbyItemPanel`: Composant représentant un salon dans la liste
         * Attribut : lobby (LobbyModel), joinBtn, nameLabel, hostLabel, playersLabel, modeLabel
         * Méthode : **getJoinButton()**, **getLobby()**, **updateLobbyInfo()**, **getPlayerCountColor()**
+    * `LobbyRoomPanel`: Panel de la salle d'attente d'un salon multijoueur (hôte peut configurer, tous voient les joueurs)
+        * Attribut : lobbyTitleLabel, lobbyInfoLabel, playersTitleLabel, backBtn, readyBtn, startBtn, playersListPanel, leftPanel, configPanel, maxPlayersSpinner, actionModeCheckbox, addBotButton, playerSlots, isHost
+        * Méthode : **setIsHost()**, **setLobbyTitle()**, **setLobbyInfo()**, **addPlayer()**, **removePlayer()**, **clearPlayers()**, **updatePlayersCount()**, **refreshPlayerSlots()**, **getters**
+    * `PlayerLobbySlot`: Composant représentant un slot de joueur dans le salon d'attente
+        * Attribut : player (LobbyPlayerModel), nameLabel, statusLabel, roleLabel, kickButton, isLocalPlayerHost
+        * Méthode : **updatePlayerStatus()**, **getPlayer()**, **getKickButton()**
     * `CreateLobbyDialog`: Dialogue pour créer un nouveau salon multijoueur
         * Attribut : lobbyNameField, maxPlayersSpinner, actionModeCheckbox, createBtn, cancelBtn, confirmed
         * Méthode : **getLobbyName()**, **getMaxPlayers()**, **isActionMode()**, **isConfirmed()**, **setConfirmed()**, **validateInput()**, **getCreateButton()**, **getCancelButton()**
@@ -256,6 +266,21 @@ Gère toutes les entrées du joueur avec l'ordinateur
     * Attribut : frame (Frame), view (LobbyBrowserPanel), availableLobbies (List<LobbyModel>)
     * Méthode : **ajouterListeners()**, **clicRetour()**, **clicCreerSalon()**, **clicRafraichir()**, **createLobby()**, **loadLobbies()**, **refreshView()**, **joinLobby()**, **generateTestLobbies()**
     * Note : Les méthodes createLobby(), loadLobbies() et joinLobby() sont à connecter au système P2P
+
+* **LobbyRoomController** : Contrôleur de la salle d'attente d'un salon multijoueur
+    * Attribut : frame (Frame), view (LobbyRoomPanel), players (List<LobbyPlayerModel>), lobbyId, lobbyName, isHost, isReady
+    * Méthode :
+        * **initializeLobby()** - initialise le salon avec les paramètres (host/joueur)
+        * **addPlayer()**, **removePlayer()** - gestion des joueurs
+        * **updatePlayerStatus()** - met à jour le statut prêt d'un joueur
+        * **clicQuitter()** - quitter le salon avec confirmation
+        * **clicReady()** - basculer entre prêt/pas prêt (joueurs non-host)
+        * **clicStart()** - lancer la partie (host uniquement, vérifie que tous sont prêts)
+        * **clicKick()** - retirer un joueur/bot du salon (host uniquement)
+        * **clicAjouterBot()** - ajouter un bot avec sélection de stratégie
+        * **onMaxPlayersChanged()**, **onActionModeChanged()** - gestion des paramètres
+        * **updateLobbyInfo()** - met à jour l'affichage des infos (mode, prêts)
+    * Note : À connecter au système P2P pour synchronisation réseau
 
 * **SettingsOverlayController** : Contrôleur de l'overlay paramètres
     * Attribut : frame (Frame), audioManager (AudioManager)
@@ -312,23 +337,12 @@ Gère toutes les entrées du joueur avec l'ordinateur
 * **AccountController** : Contrôleur pour la gestion des comptes
     * Méthode : Principales méthodes de gestion des comptes
 
-## 3. Flow de Navigation
-
-Architecture de navigation du jeu :
-
-```
-ConnexionPanel
-    ↓
-MainMenuPanel
-    ↓ (bouton Jouer)
-GameModeSelectionPanel
-    ├─→ (Local) PlayersSetupPanel → GameBoardView
-    └─→ (Multi P2P) LobbyBrowserPanel
-                    ├─→ (Créer salon) CreateLobbyDialog → Configuration → [Attente intégration P2P]
-                    └─→ (Rejoindre) Sélection d'un salon → [Attente intégration P2P]
-```
-
-**Note** : Le système multijoueur P2P est préparé au niveau de l'interface utilisateur. Les appels réseau vers le système P2P doivent être implémentés dans `LobbyBrowserController` aux emplacements marqués TODO.
+**Architecture du système de lobby** :
+- `LobbyBrowserPanel` : liste des salons disponibles (créer/rejoindre)
+- `LobbyRoomPanel` : salle d'attente avec deux modes :
+  - **Mode Hôte** : configuration visible (max joueurs, actions, ajout bots), bouton "Lancer la partie", kick joueurs
+  - **Mode Joueur** : configuration cachée, bouton "Prêt"/"Annuler" pour indiquer son statut
+- `PlayerLobbySlot` : affichage d'un joueur avec badges (HOST/BOT), statut prêt, bouton kick (hôte uniquement)
 
 #### DATA :
 
