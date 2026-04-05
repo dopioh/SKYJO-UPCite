@@ -240,6 +240,7 @@ public class GameRuleModel {
      * Applique les scores de fin de manche selon les règles Skyjo
      * Si le joueur qui termine n'a pas le meilleur score, son score est doublé
      * Ajoute 10 points par carte action non jouée
+     * Le total (main + actions) détermine si le doublement s'applique
      * @param players la liste des joueurs
      * @param roundEndPlayer le joueur qui a terminé la manche
      * @param lowestPlayer le joueur avec le score le plus bas
@@ -250,30 +251,21 @@ public class GameRuleModel {
             int handScore = player.getHand().calculateScore();
             int unplayedActionCards = player.getActionHand().size();
             int actionPenalty = unplayedActionCards * 10;
-            int score = handScore + actionPenalty;
+            int totalScore = handScore + actionPenalty;
 
-            // Stocker les détails de la manche
-            player.setLastRoundScore(new PlayerModel.RoundScore(handScore, actionPenalty, score, false));
+            //determiner si ce joueur est celui qui a déclenché et s'il doit être doublé
+            boolean shouldDouble = (roundEndPlayer != null && player == roundEndPlayer && roundEndPlayer != lowestPlayer);
 
-            player.addScore(score);
-        }
-
-        //Double le score du joueur qui a lancé la fin de la manche s'il n'a pas le meilleur score
-        if (roundEndPlayer != null && roundEndPlayer != lowestPlayer) {
-            int roundEndPlayerScore = roundEndPlayer.getHand().calculateScore();
-            int unplayedActionCards = roundEndPlayer.getActionHand().size();
-            int actionPenalty = unplayedActionCards * 10;
-            roundEndPlayerScore += actionPenalty;
-
-            // Mettre à jour le RoundScore pour refléter le doublement
-            roundEndPlayer.setLastRoundScore(new PlayerModel.RoundScore(
-                roundEndPlayer.getHand().calculateScore(),
-                actionPenalty,
-                roundEndPlayerScore * 2,  // Le score total est doublé
-                true  // Marquer que le score a été doublé
-            ));
-
-            roundEndPlayer.addScore(roundEndPlayerScore);
+            if (shouldDouble) {
+                //le score total est doublé pour le joueur qui a déclenché
+                int doubledScore = totalScore * 2;
+                player.setLastRoundScore(new PlayerModel.RoundScore(handScore, actionPenalty, doubledScore, true));
+                player.addScore(doubledScore);
+            } else {
+                // Score normal pour les autres
+                player.setLastRoundScore(new PlayerModel.RoundScore(handScore, actionPenalty, totalScore, false));
+                player.addScore(totalScore);
+            }
         }
     }
 

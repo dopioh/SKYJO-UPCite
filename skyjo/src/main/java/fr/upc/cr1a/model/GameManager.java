@@ -555,14 +555,11 @@ public class GameManager {
 
         //calculer le score de chacun et trouver le joueur avec le score le plus bas
         PlayerModel lowestPlayer = GameRuleModel.findLowestScorePlayer(players);
-        
-        //cherche le joueur qui lance la fin de la manche
-        PlayerModel roundEndPlayer = GameRuleModel.findRoundEndPlayer(players);
 
-        //stocker le joueur qui a déclenché la fin pour l'affichage
+        //récuperer le joueur qui a déclenché la fin
+        PlayerModel roundEndPlayer = null;
         if (lastRoundPlayer >= 0 && lastRoundPlayer < players.size()) {
-            this.roundEndPlayerCache = players.get(lastRoundPlayer);
-        } else {
+            roundEndPlayer = players.get(lastRoundPlayer);
             this.roundEndPlayerCache = roundEndPlayer;
         }
 
@@ -600,7 +597,19 @@ public class GameManager {
         currentDrawCard = null;
         lastRoundPlayer = -1;  // réinitialiser le déclencheur du dernier tour
         extraTurnsRemaining = 0;  // réinitialiser les tours supplémentaires
+
+        // reinitialiser le deck de cartes normales
+        deck = new PiocheModel(this.gameWithAction);
         discardPile = new DefausseModel();
+
+        // Réinitialiser les decks d'actions si le mode action est activé
+        if (this.gameWithAction) {
+            actionDeck = new PiocheActionModel();
+            discardActionPile = new DefausseActionModel();
+            ActionCardModel initActionCard = new ActionCardModel(false, ActionType.REPLACE_CARD_IN_HAND);
+            discardActionPile.addCardAtTop(initActionCard);
+        }
+
         initializeGame();
         ensureFaceUp(discardPile.getTopCard());
         turnPhase = TurnPhase.INIT_REVEAL;
