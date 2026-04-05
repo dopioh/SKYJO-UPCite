@@ -344,6 +344,55 @@ Gère toutes les entrées du joueur avec l'ordinateur
   - **Mode Joueur** : configuration cachée, bouton "Prêt"/"Annuler" pour indiquer son statut
 - `PlayerLobbySlot` : affichage d'un joueur avec badges (HOST/BOT), statut prêt, bouton kick (hôte uniquement)
 
+## 4. Corrections et Améliorations Récentes
+
+### Problème 1 : Affichage du bouton Kick
+**Symptôme** : Le bouton affichait "..." au lieu de "X"
+**Cause** : Le caractère Unicode "✕" (U+2715) n'était pas supporté par la police Arial
+**Solution apportée** (PlayerLobbySlot.java:86-112) :
+- Changement du caractère "✕" vers "X" simple
+- Changement de police de "Arial" vers "SansSerif" (cross-platform)
+- Ajustement des dimensions : 45x45 → 50x50 pixels
+- Ajout d'effet hover : changement de couleur rouge au survol
+```
+Avant : kickButton = new JButton("✕");
+Après  : kickButton = new JButton(); + setText("X")
+         Police: SansSerif Font.BOLD 18
+         Taille: 50x50 avec border vide
+```
+
+### Problème 2 : Double affichage du compteur de joueurs
+**Symptôme** : Le titre "Joueurs (X/Y)" avait un affichage en double et se chevauchait avec la zone centrale
+**Cause** : Deux informations similaires s'affichaient au même endroit + pas de rafraîchissement correct
+**Solution apportée** :
+- a) **Séparation des informations** (LobbyRoomController.java:289-299) :
+  - Avant : `"Joueurs (X/Y) • Mode Actions • Prêts (Z)"`
+  - Après : `"Mode Actions • Prêts (Z)"` (le nombre de joueurs est maintenant seulement au-dessus de la liste)
+
+- b) **Rafraîchissement correct** (LobbyRoomPanel.java:26,104,330-335) :
+  - Ajout du champ de classe `leftPanel` pour pouvoir l'invalider
+  - `updatePlayersCount()` appelle maintenant `leftPanel.revalidate()` et `leftPanel.repaint()`
+
+- c) **Appel au bon moment** (LobbyRoomController.java:280) :
+  - Quand `onMaxPlayersChanged()` est appelé, on appelle maintenant :
+    ```java
+    view.updatePlayersCount();  // Met à jour le titre "Joueurs (X/Y)"
+    updateLobbyInfo();           // Met à jour "Mode X • Y prêts"
+    ```
+
+### Modifications aux commentaires
+**Standardisation des commentaires** (PlayerLobbySlot.java + LobbyRoomPanel.java) :
+- Retiré les espaces après "//"
+- Retiré la majuscule au début
+- Format : `//texte minuscule` au lieu de `// Texte majuscule`
+
+## 5. Points d'Intégration P2P Restants
+
+Marqués avec `// MEI` ou `// TODO` dans le code :
+- **LobbyBrowserController.java:75,89,105,135** : Appels réseau P2P pour créer/rejoindre/rafraîchir salons
+- **LobbyRoomController.java:69,70,147,148** : Synchronisation P2P des états joueurs
+- **LobbyRoomPanel.java:215** : Note d'aide pour les hôtes (bouton kick avec "X" désormais affiché correctement)
+
 #### DATA :
 
 * **SendAPI** : Classe qui regroupes des methodes static pour envoyer des donnees a l'API
