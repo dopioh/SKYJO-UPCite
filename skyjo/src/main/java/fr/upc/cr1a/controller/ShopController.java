@@ -91,9 +91,10 @@ public class ShopController {
 
         achatEnCours = true;
         final String uuid = PlayerAccount.actuelAccount.getID();
+        final String packName = "pack_numero_" + packNumber;
         new Thread(() -> {
             try {
-                PlayerData majdata = SendAPI.removeMoney(uuid, price);
+                PlayerData majdata = SendAPI.buyPack(uuid, packName);
                 if (majdata == null) {
                     return;
                 }
@@ -106,7 +107,7 @@ public class ShopController {
             } finally {
                 achatEnCours = false;
             }
-        }, "shop-remove-money").start();
+        }, "shop-buy-pack").start();
     }
 
     private void clicClasseur() {

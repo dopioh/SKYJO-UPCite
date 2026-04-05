@@ -334,6 +334,33 @@ public class GameBoardController {
         gameLoop.setTimerEnabled(enabled);
     }
 
+    private String getOpponentType(PlayerModel opponent) {
+        if (!(opponent instanceof BotModel bot)) {
+            return "human";
+        }
+
+        String strategyName = bot.getStrategy() == null ? "" : bot.getStrategy().getClass().getSimpleName().toLowerCase();
+        if (strategyName.contains("count")) {
+            return "bot_count";
+        }
+        if (strategyName.contains("low")) {
+            return "bot_low";
+        }
+        return "bot_row";
+    }
+
+    private List<String> buildOpponentTypes(List<PlayerModel> opponents) {
+        List<String> opponentTypes = new ArrayList<>();
+        if (opponents == null) {
+            return opponentTypes;
+        }
+
+        for (PlayerModel opponent : opponents) {
+            opponentTypes.add(getOpponentType(opponent));
+        }
+        return opponentTypes;
+    }
+
     private void rewardEndGame(List<PlayerModel> listPlayerInGame) {
         if (alreadyReward) {
             return;
@@ -360,44 +387,16 @@ public class GameBoardController {
             }
         }
 
-        double avgEloWeight = getAverageEloWeight(opponents);
-        double avgMoneyWeight = getAverageMoneyWeight(opponents);
-
-        // calc de l'elo et de la money attribué au joueur db en fonction des joueurs du lobby
-        int calcElo;
-        int calcMoney;
-        if (wonGame) {
-            calcElo = (int)Math.round(10 + (10 * avgEloWeight));
-            calcMoney = (int)Math.round(20 + (10 * avgMoneyWeight));
-        } else {
-            calcElo = Math.max(8, (int)Math.round(30 - (5 * avgEloWeight)));
-            calcMoney = (int)Math.round(8 + (4 * avgMoneyWeight));
-        }
+        List<String> opponentTypes = buildOpponentTypes(opponents);
 
         String dbUuid = PlayerAccount.actuelAccount.getID();
         new Thread(() -> {
-            PlayerData updated = null;
-
-            if (wonGame) {
-                updated = SendAPI.addElo(dbUuid, calcElo);
-                if (updated != null) {
-                    PlayerAccount.actuelAccount = updated;
-                }
-                updated = SendAPI.addMoney(dbUuid, calcMoney);
-                if (updated != null) {
-                    PlayerAccount.actuelAccount = updated;
-                }
-                System.out.println("Fin de partie DB: WIN -> +" + calcElo + " ELO, +" + calcMoney + " MONEY");
+            PlayerData updated = SendAPI.applyGameResult(dbUuid, wonGame, opponentTypes);
+            if (updated != null) {
+                PlayerAccount.actuelAccount = updated;
+                System.out.println("Fin de partie DB: " + (wonGame ? "WIN" : "PERDU"));
             } else {
-                updated = SendAPI.removeElo(dbUuid, calcElo);
-                if (updated != null) {
-                    PlayerAccount.actuelAccount = updated;
-                }
-                updated = SendAPI.addMoney(dbUuid, calcMoney);
-                if (updated != null) {
-                    PlayerAccount.actuelAccount = updated;
-                }
-                System.out.println("Fin de partie DB: PERDU -> -" + calcElo + " ELO, +" + calcMoney + " MONEY");
+                System.out.println("Fin de partie DB: echec applyGameResult");
             }
         }, "db-endgame-rewards").start();
     }
@@ -428,64 +427,5 @@ public class GameBoardController {
             }
         }
         return null;
-    }
-
-    // calc des moyennes du lobby (elo et money)
-    private double getAverageEloWeight(List<PlayerModel> opponents) {
-        if (opponents == null || opponents.isEmpty()) {
-            return 1.0;
-        }
-        double sum = 0;
-        for (PlayerModel opponent : opponents) {
-            sum += getEloWeight(opponent);
-        }
-        return sum / opponents.size();
-    }
-
-    private double getAverageMoneyWeight(List<PlayerModel> opponents) {
-        if (opponents == null || opponents.isEmpty()) {
-            return 1.0;
-        }
-        double sum = 0;
-        for (PlayerModel opponent : opponents) {
-            sum += getMoneyWeight(opponent);
-        }
-        return sum / opponents.size();
-    }
-
-    private int getEloWeight(PlayerModel opponent) {
-        if (!(opponent instanceof BotModel bot)) {
-            return 3; // humain
-        }
-
-        String strategyName = bot.getStrategy() == null ? "" : bot.getStrategy().getClass().getSimpleName().toLowerCase();
-
-        if (strategyName.contains("count")) {
-            return 4;
-        }
-        else if (strategyName.contains("low")) {
-            return 1;
-        }
-        else {
-            return 2; // bot row
-        }
-    }
-
-    private double getMoneyWeight(PlayerModel opponent) {
-        if (!(opponent instanceof BotModel bot)) {
-            return 3.0;
-        }
-
-        String strategyName = bot.getStrategy() == null ? "" : bot.getStrategy().getClass().getSimpleName().toLowerCase();
-
-        if (strategyName.contains("count")) {
-            return 2.5;
-        }
-        else if (strategyName.contains("low")) {
-            return 1.0;
-        }
-        else {
-            return 2.0; // bot row
-        }
     }
 }

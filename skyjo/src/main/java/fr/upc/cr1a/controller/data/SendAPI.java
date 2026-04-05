@@ -4,6 +4,10 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -42,25 +46,29 @@ public class SendAPI {
     }
 
     /**
-     * commande API addMoney qui ajoute de l'argent a un utilisateur dans la DB
+     * commande API buyPack qui retire le prix d'un pack selon son nom cote serveur
      */
-    public static PlayerData addMoney(String uuid, int amount){
+    public static PlayerData buyPack(String uuid, String packName){
         try {
-            String jsonBody = "{" + "\"uuidStr\": \"" + uuid + "\"," + "\"amount\": " + amount + "}";
+            Map<String, String> body = new HashMap<>();
+            body.put("uuidStr", uuid);
+            body.put("packName", packName);
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String jsonBody = gson.toJson(body);
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(urlAPI + "/api/player/addMoney"))
+                    .uri(URI.create(urlAPI + "/api/player/buyPack"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            System.out.println("CODE HTTP ADDMONEY : " + response.statusCode());
-            System.out.println("API REPOND ADDMONEY : " + response.body());
+            System.out.println("CODE HTTP BUYPACK : " + response.statusCode());
+            System.out.println("API REPOND BUYPACK : " + response.body());
 
             if (response.statusCode() == 200) {
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 return gson.fromJson(response.body(), PlayerData.class);
             }
             return null;
@@ -71,141 +79,30 @@ public class SendAPI {
     }
 
     /**
-     * commande API removeMoney qui retire de l'argent a un utilisateur dans la DB
+     * commande API applyGameResult qui applique recompenses/penalites selon resultat et lobby
      */
-    public static PlayerData removeMoney(String uuid, int amount){
+    public static PlayerData applyGameResult(String uuid, boolean wonGame, List<String> opponents){
         try {
-            String jsonBody = "{" + "\"uuidStr\": \"" + uuid + "\"," + "\"amount\": " + amount + "}";
+            Map<String, Object> body = new HashMap<>();
+            body.put("uuidStr", uuid);
+            body.put("result", wonGame ? "win" : "loss");
+            body.put("opponents", opponents == null ? new ArrayList<>() : opponents);
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String jsonBody = gson.toJson(body);
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(urlAPI + "/api/player/removeMoney"))
+                    .uri(URI.create(urlAPI + "/api/player/applyGameResult"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            System.out.println("CODE HTTP REMOVEMONEY : " + response.statusCode());
-            System.out.println("API REPOND REMOVEMONEY : " + response.body());
+            System.out.println("CODE HTTP APPLYGAMERESULT : " + response.statusCode());
+            System.out.println("API REPOND APPLYGAMERESULT : " + response.body());
 
             if (response.statusCode() == 200) {
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                return gson.fromJson(response.body(), PlayerData.class);
-            }
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * commande API addElo qui ajoute de l'elo a un utilisateur dans la DB
-     */
-    public static PlayerData addElo(String uuid, int amount){
-        try {
-            String jsonBody = "{" + "\"uuidStr\": \"" + uuid + "\"," + "\"amount\": " + amount + "}";
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(urlAPI + "/api/player/addElo"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("CODE HTTP ADDELO : " + response.statusCode());
-            System.out.println("API REPOND ADDELO : " + response.body());
-
-            if (response.statusCode() == 200) {
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                return gson.fromJson(response.body(), PlayerData.class);
-            }
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * commande API removeElo qui retire de l'elo a un utilisateur dans la DB
-     */
-    public static PlayerData removeElo(String uuid, int amount){
-        try {
-            String jsonBody = "{" + "\"uuidStr\": \"" + uuid + "\"," + "\"amount\": " + amount + "}";
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(urlAPI + "/api/player/removeElo"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("CODE HTTP REMOVEELO : " + response.statusCode());
-            System.out.println("API REPOND REMOVEELO : " + response.body());
-
-            if (response.statusCode() == 200) {
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                return gson.fromJson(response.body(), PlayerData.class);
-            }
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * commande API addXP qui ajoute de l'xp a un utilisateur dans la DB
-     */
-    public static PlayerData addXP(String uuid, int amount){
-        try {
-            String jsonBody = "{" + "\"uuidStr\": \"" + uuid + "\"," + "\"amount\": " + amount + "}";
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(urlAPI + "/api/player/addXP"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("CODE HTTP ADDXP : " + response.statusCode());
-            System.out.println("API REPOND ADDXP : " + response.body());
-
-            if (response.statusCode() == 200) {
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                return gson.fromJson(response.body(), PlayerData.class);
-            }
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * commande API removeXP qui retire de l'xp a un utilisateur dans la DB
-     */
-    public static PlayerData removeXP(String uuid, int amount){
-        try {
-            String jsonBody = "{" + "\"uuidStr\": \"" + uuid + "\"," + "\"amount\": " + amount + "}";
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(urlAPI + "/api/player/removeXP"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("CODE HTTP REMOVEXP : " + response.statusCode());
-            System.out.println("API REPOND REMOVEXP : " + response.body());
-
-            if (response.statusCode() == 200) {
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 return gson.fromJson(response.body(), PlayerData.class);
             }
             return null;
@@ -220,7 +117,12 @@ public class SendAPI {
      */
     public static PlayerData unlockSkin(String uuid, String skinPath){
         try {
-            String jsonBody = "{" + "\"uuidStr\": \"" + uuid + "\"," + "\"skinPath\": \"" + skinPath + "\"}";
+            Map<String, String> body = new HashMap<>();
+            body.put("uuidStr", uuid);
+            body.put("skinPath", skinPath);
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String jsonBody = gson.toJson(body);
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(urlAPI + "/api/player/unlockSkin"))
@@ -234,7 +136,6 @@ public class SendAPI {
             System.out.println("API REPOND UNLOCKSKIN : " + response.body());
 
             if (response.statusCode() == 200) {
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 return gson.fromJson(response.body(), PlayerData.class);
             }
             return null;
