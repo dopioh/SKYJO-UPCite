@@ -36,7 +36,7 @@ public class ShopPanel extends JPanel {
 
         backgroundImage = ImageCache.get("/background.png");
         packSources = new BufferedImage[] {
-            ImageCache.get("/boutique/nulCard.png"),
+            ImageCache.get("/boutique/nul_card.png"),
             ImageCache.get("/boutique/bof.png"),
             ImageCache.get("/boutique/bien.png")
         };
