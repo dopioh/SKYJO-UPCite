@@ -66,6 +66,8 @@ public class HumanTurnController {
 
     // pour selectionner un joueur cible
     public boolean handlePlayerButtonClicked(int targetIndex) {
+        if (mainController.isWaitingNextTurn()) return false;
+
         if (actionMode == ActionMode.TRADE_SELECT_TARGET_PLAYER || actionMode == ActionMode.TRADE_SELECT_TARGET_CARD) {
             selectTradeTargetPlayer(targetIndex);
             return true;

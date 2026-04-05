@@ -59,7 +59,11 @@ public class GameBoardController {
         this.gameLoop.setTimeoutController(timeoutTurnController);
         
         this.humanTurnController = new HumanTurnController(gameBoardView, gameManager, this, gameLoop);
-        humanTurnController.installListeners();
+
+        //si tous les joueurs sont des bots, on n'installe pas les listeners
+        if (!areAllPlayersBots()) {
+            humanTurnController.installListeners();
+        }
         
         gameBoardView.setTimerVisible(timerEnabled);
         gameLoop.setTimerEnabled(timerEnabled);
@@ -333,5 +337,15 @@ public class GameBoardController {
     public void toggleTimer(boolean enabled) { /// IMPORTANT ICI ICI ICI ICI plus tard pour les différents type de parties
         gameBoardView.setTimerVisible(enabled);
         gameLoop.setTimerEnabled(enabled);
+    }
+
+    //vérifie si tous les joueurs sont des bots
+    private boolean areAllPlayersBots() {
+        for (PlayerModel player : gameManager.getPlayers()) {
+            if (!(player instanceof BotModel)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

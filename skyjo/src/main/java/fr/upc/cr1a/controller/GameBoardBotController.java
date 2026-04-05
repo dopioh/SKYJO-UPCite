@@ -65,6 +65,9 @@ public class GameBoardBotController {
             return;
         }
 
+        //bloquer immédiatement les listeners
+        mainController.setWaitingNextTurn(true);
+
         BotModel bot = (BotModel) currentPlayer;
 
         //révéle 2 cartes
