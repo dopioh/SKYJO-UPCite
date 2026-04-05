@@ -46,4 +46,5 @@ public interface BotStrategyInterface {
      * @return true si le bot doit jouer une action
      */
     boolean shouldPlayAction();
+
 }
