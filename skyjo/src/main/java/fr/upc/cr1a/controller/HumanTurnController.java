@@ -61,7 +61,6 @@ public class HumanTurnController {
     public void installListeners() {
         installDeckListeners();
         installHandListeners();
-        installActionCardListeners();
     }
 
     // pour selectionner un joueur cible
@@ -80,6 +79,31 @@ public class HumanTurnController {
     }
 
     private void installDeckListeners() {
+        //listener pour le deck de cartes actions
+        gameBoardView.getDeckActionButton().addActionListener(e -> {
+            if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) return;
+            if (mainController.isWaitingNextTurn()) return;
+            if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
+
+            PlayerModel player = gameManager.getCurrentPlayer();
+            if (player == null) return;
+
+            ArrayList<ActionType> actions = player.getActionHand();
+            if (actions == null || actions.isEmpty()) return;
+
+            //ouvrir l'overlay des cartes action
+            gameBoardView.openActionCardOverlay(actions);
+
+            //configue le retour quand une carte est selec
+            gameBoardView.setActionCardSelectionCallback(() -> {
+                int selectedIndex = gameBoardView.getSelectedActionCardIndex();
+                if (selectedIndex >= 0 && selectedIndex < actions.size()) {
+                    ActionType type = actions.get(selectedIndex);
+                    onActionCardClicked(type, selectedIndex);
+                }
+            });
+        });
+
         gameBoardView.getBtnPioche().addActionListener(e -> {
             if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) return;
             if (mainController.isWaitingNextTurn()) return;
@@ -178,6 +202,22 @@ public class HumanTurnController {
                 gameBoardView.hideActionDescription();
             }
         });
+
+        //listener pour ouvrir l'overlay
+        gameBoardView.getDeckActionButton().addActionListener(e -> {
+            if (mainController.isWaitingNextTurn()) return;
+            if (actionMode != ActionMode.NONE) return;
+            if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
+
+            PlayerModel player = gameManager.getCurrentPlayer();
+            if (player == null) return;
+
+            ArrayList<ActionType> actions = player.getActionHand();
+            if (actions == null || actions.isEmpty()) return;
+
+            //ouvrir l'overlay
+            gameBoardView.openActionCardOverlay(actions);
+        });
     }
 
     private void installHandListeners() {
@@ -270,38 +310,7 @@ public class HumanTurnController {
     }
 
     private void installActionCardListeners() {
-        for (int i = 0; i < gameBoardView.getActionCardButtons().length; i++) {
-            final int id = i;
-
-            gameBoardView.getActionCardButtons()[i].addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    if (id >= gameBoardView.getVisibleActionCount()) {
-                        return;
-                    }
-                    ActionType type = gameBoardView.getActionCardType(id);
-                    gameBoardView.showActionDescription(type);
-                }
-
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    gameBoardView.hideActionDescription();
-                }
-            });
-
-            gameBoardView.getActionCardButtons()[i].addActionListener(e -> {
-                if (mainController.isWaitingNextTurn()) return;
-                if (actionMode != ActionMode.NONE) return;
-                if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
-                if (id >= gameBoardView.getVisibleActionCount()) return;
-
-                ActionType type = gameBoardView.getActionCardType(id);
-                if (type == null) return;
-
-                gameBoardView.hideActionDescription();
-                onActionCardClicked(type, id);
-            });
-        }
+        // Les listeners de l'overlay sont gérés directement dans ActionCardOverlayPanel
     }
 
     public void removeAllListeners() {
@@ -348,19 +357,22 @@ public class HumanTurnController {
             }
         }
 
-        // Retire les listeners des cartes action
+        //retire les listeners des cartes action
         for (int i = 0; i < gameBoardView.getActionCardButtons().length; i++) {
             var btn = gameBoardView.getActionCardButtons()[i];
             if (btn != null) {
-                ActionListener[] actionListeners = btn.getActionListeners();
-                for (ActionListener listener : actionListeners) {
-                    btn.removeActionListener(listener);
-                }
-
                 MouseListener[] mouseListeners = btn.getMouseListeners();
                 for (MouseListener listener : mouseListeners) {
                     btn.removeMouseListener(listener);
                 }
+            }
+        }
+
+        //retirer le retour du deck action button
+        if (gameBoardView.getDeckActionButton() != null) {
+            ActionListener[] deckListeners = gameBoardView.getDeckActionButton().getActionListeners();
+            for (ActionListener listener : deckListeners) {
+                gameBoardView.getDeckActionButton().removeActionListener(listener);
             }
         }
     }
