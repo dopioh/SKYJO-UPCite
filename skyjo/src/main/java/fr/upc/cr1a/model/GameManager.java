@@ -555,15 +555,15 @@ public class GameManager {
 
         //calculer le score de chacun et trouver le joueur avec le score le plus bas
         PlayerModel lowestPlayer = GameRuleModel.findLowestScorePlayer(players);
-
-        //cherche le joueur qui lance la fin de la manche (celui qui a déclenché le LAST_ROUND)
+        
+        //cherche le joueur qui lance la fin de la manche
         PlayerModel roundEndPlayer = GameRuleModel.findRoundEndPlayer(players);
 
-        // Stocker le joueur qui a DÉCLENCHÉ la fin (lastRoundPlayer) pour l'affichage
+        //stocker le joueur qui a déclenché la fin pour l'affichage
         if (lastRoundPlayer >= 0 && lastRoundPlayer < players.size()) {
             this.roundEndPlayerCache = players.get(lastRoundPlayer);
         } else {
-            this.roundEndPlayerCache = roundEndPlayer;  // Fallback si lastRoundPlayer non défini
+            this.roundEndPlayerCache = roundEndPlayer;
         }
 
         //Applique les scores selon les règles Skyjo
@@ -600,19 +600,7 @@ public class GameManager {
         currentDrawCard = null;
         lastRoundPlayer = -1;  // réinitialiser le déclencheur du dernier tour
         extraTurnsRemaining = 0;  // réinitialiser les tours supplémentaires
-
-        // Réinitialiser le deck de cartes normales
-        deck = new PiocheModel(this.gameWithAction);
         discardPile = new DefausseModel();
-
-        // Réinitialiser les decks d'actions si le mode action est activé
-        if (this.gameWithAction) {
-            actionDeck = new PiocheActionModel();
-            discardActionPile = new DefausseActionModel();
-            ActionCardModel initActionCard = new ActionCardModel(false, ActionType.REPLACE_CARD_IN_HAND);
-            discardActionPile.addCardAtTop(initActionCard);
-        }
-
         initializeGame();
         ensureFaceUp(discardPile.getTopCard());
         turnPhase = TurnPhase.INIT_REVEAL;

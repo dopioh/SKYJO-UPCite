@@ -41,7 +41,7 @@ public class PlayerModel {
     private PlayerHandModel hand;
     private ArrayList<ActionType> actionHand;
     private int totalScore;
-    private RoundScore lastRoundScore; // Détails de la dernière manche
+    private RoundScore lastRoundScore; //détails de la dernière manche
     
     
     //constructeur

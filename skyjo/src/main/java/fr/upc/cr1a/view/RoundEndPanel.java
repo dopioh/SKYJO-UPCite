@@ -57,7 +57,7 @@ public class RoundEndPanel extends JPanel {
             layeredPane.repaint();
         });
 
-        // Titre avec information du déclencheur
+        //titre avec information du déclencheur
         JPanel titlePanel = new JPanel();
         titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.Y_AXIS));
         titlePanel.setBackground(Color.WHITE);
@@ -69,7 +69,7 @@ public class RoundEndPanel extends JPanel {
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         titlePanel.add(titleLabel);
 
-        // Ajouter le nom du joueur qui a déclenché la fin
+        //ajouter le nom du joueur qui a déclenché la fin
         if (!gameOver && roundEndPlayer != null) {
             JLabel roundEndInfo = new JLabel("Déclenchée par : " + roundEndPlayer.getName(), SwingConstants.CENTER);
             roundEndInfo.setFont(new Font("Arial", Font.ITALIC, 16));
@@ -93,7 +93,7 @@ public class RoundEndPanel extends JPanel {
         for (int i = 0; i < sortedPlayers.size(); i++) {
             PlayerModel p = sortedPlayers.get(i);
 
-            // Construction du texte avec détails
+            //construction du texte avec détails
             StringBuilder text = new StringBuilder();
             text.append(i + 1).append(" - ").append(p.getName()).append("  ");
 
@@ -106,7 +106,7 @@ public class RoundEndPanel extends JPanel {
                     text.append(" + Actions: ").append(roundScore.actionPenalty).append("p");
                 }
 
-                // Afficher le doublement si applicable
+                //afficher le doublement si applicable
                 if (roundScore.wasDoubled) {
                     text.append(" × 2 = +").append(roundScore.totalAdded).append("p) ");
                 } else {
