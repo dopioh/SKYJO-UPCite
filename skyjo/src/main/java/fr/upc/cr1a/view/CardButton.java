@@ -182,7 +182,7 @@ public class CardButton extends JButton {
         AnimLoop.add(pressKey, dt -> {
             pressScale += (pressTarget - pressScale) * ScaleSmoothness * dt;
             repaint();
-            if (pressScale >= 0.999 && pressTarget == 1.0) AnimLoop.remove(pressKey);
+            if (pressTarget == 1.0 && pressScale > 0.999 && pressScale < 1.001) AnimLoop.remove(pressKey);
         });
         Timer timer1 = new Timer(180, e -> { ((Timer) e.getSource()).stop(); pressTarget = 1.2; });
         Timer timer2 = new Timer(360, e -> { ((Timer) e.getSource()).stop(); pressTarget = 1.0; });
@@ -199,7 +199,7 @@ public class CardButton extends JButton {
         AnimLoop.add(pressKey, dt -> {
             pressScale += (pressTarget - pressScale) * ScaleSmoothness * dt;
             repaint();
-            if (pressScale >= 0.999 && pressTarget == 1.0) AnimLoop.remove(pressKey);
+            if (pressTarget == 1.0 && pressScale > 0.999 && pressScale < 1.001) AnimLoop.remove(pressKey);
         });
         Timer timer1 = new Timer(120, e -> { ((Timer) e.getSource()).stop(); pressTarget = 1.05; });
         Timer timer2 = new Timer(240, e -> { ((Timer) e.getSource()).stop(); pressTarget = 1.0; });
