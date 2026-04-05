@@ -2,7 +2,7 @@ package fr.upc.cr1a.model;
 
 import java.util.List;
 import java.util.HashMap;
-import javax.swing.Timer;
+//import javax.swing.Timer;
 
 import fr.upc.cr1a.controller.GameBoardController;
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
@@ -663,6 +663,8 @@ public class GameManager {
         }
     }   
 
+    // PARTIE NETWORK
+
     /**
      * Methode exclusive au multijoueur (Cote Client)
      * Force la revelation d'une carte sur le plateau local selon la request du serveur
@@ -684,6 +686,33 @@ public class GameManager {
             
             if (gameBoardModel != null && gameBoardModel.getGameBoardView() != null) {
                 gameBoardModel.getGameBoardView().showPlayerCards(getCurrentPlayer());
+            }
+        }
+    }
+
+    /**
+     * Force le changement de tour d'apres une request Host
+     */
+    public void forceTurnFromNetwork(String playerId) {
+        for (int i = 0; i < players.size(); i++) {
+            if (players.get(i).getPlayerData().getID().equals(playerId)) {
+                
+                this.currentPlayerIndex = i;
+                
+                this.turnPhase = TurnPhase.DRAW_DECISION;
+                
+                if (gameBoardModel != null && gameBoardModel.getGameBoardController() != null) {
+                    gameBoardModel.getGameBoardController().refreshGuide(); // pour afficher les bonnes indications pour DRAW DECISION
+                    
+
+                    if (gameBoardModel.getGameBoardView() != null) {
+                        gameBoardModel.getGameBoardView().showPlayerTransition(players.get(i), () -> {
+                            // pour lancer l'animation du changement de round
+                            // besoin d'attendre l'implementation de l'interface graphique
+                        });
+                    }
+                }
+                break;
             }
         }
     }

@@ -8,7 +8,7 @@ import java.net.Socket;
 //import java.util.ArrayList;
 import java.util.ArrayList;
 
-import fr.upc.cr1a.controller.network.UDP.UDPBroadcaster;
+//import fr.upc.cr1a.controller.network.UDP.UDPBroadcaster;
 import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolClient;
 import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolServer;
 import fr.upc.cr1a.model.GameManager;
@@ -121,6 +121,20 @@ public class GameClient implements NetworkProtocolClient{
                     
                     if (game != null) {
                         game.forceRevealCardFromNetwork(id, col, row, valeur);
+                    }
+                }
+
+                if(message.startsWith(NetworkProtocolServer.UPDATE_TURN_CHANGED)){
+                    String[] parts = message.split(":");
+                    
+                    if (parts.length >= 2) {
+                        String idJoueurActif = parts[1];
+                        
+                        GameManager game = frame.getCurrentGame();
+                        
+                        if (game != null) {
+                            game.forceTurnFromNetwork(idJoueurActif);
+                        }
                     }
                 }
             }

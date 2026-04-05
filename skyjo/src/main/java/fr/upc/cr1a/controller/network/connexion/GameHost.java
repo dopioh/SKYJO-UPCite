@@ -6,8 +6,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolServer;
+import fr.upc.cr1a.model.GameManager;
 import fr.upc.cr1a.model.GameSession;
+//import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.model.player.PlayerData;
+import fr.upc.cr1a.view.Frame;
 
 /**
  * Sert à heberger un serveur sur le pc d'un joueur
@@ -27,11 +30,14 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     private Thread thread;
 
     private boolean modeAction;
+    private GameManager gameManager;
+    private Frame frame;
 
-    public GameHost(int port){
+    public GameHost(int port, boolean modeAction, Frame frame){ // rajouter le nom d'un salon et toutes les infos necessaire egalement
         this.port = port;
         this.thread = new Thread(this);
-        this.modeAction = false;
+        this.modeAction = modeAction;
+        this.frame = frame;
     }
 
     public void startServer(){
@@ -147,6 +153,17 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
         }
     }
 
+    public void startAGame(){
+        ArrayList<PlayerData> listPlayers = new ArrayList<>();
+   
+        for (String key : lobbyPlayers.keySet()){
+            PlayerData tmp = new PlayerData(key, lobbyPlayers.get(key));
+            listPlayers.add(tmp);
+        }
+        this.gameManager = new GameManager(frame, listPlayers, modeAction);
+        frame.setCurrentGame(gameManager);
+    }
+
     // PARTI PROTOCOL SERVER
 
     @Override
@@ -195,6 +212,11 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
         for (ClientHandler client : connectedClient) {
             client.sendMessage(message.toString());
         }
+    }
+
+
+    public GameManager getGameManager(){
+        return this.gameManager;
     }
 
     // second test client simultané ( faut un host compatible )
