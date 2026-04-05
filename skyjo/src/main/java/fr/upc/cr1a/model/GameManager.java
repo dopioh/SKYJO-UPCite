@@ -610,6 +610,11 @@ public class GameManager {
             discardActionPile.addCardAtTop(initActionCard);
         }
 
+        //vide toutes les cartes actions dans la amin
+        for (PlayerModel player : players) {
+            player.getActionHand().clear();
+        }
+
         initializeGame();
         ensureFaceUp(discardPile.getTopCard());
         turnPhase = TurnPhase.INIT_REVEAL;

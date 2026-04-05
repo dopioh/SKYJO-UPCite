@@ -481,11 +481,12 @@ public class GameBoardView extends JPanel {
                 actionCardButtons[i].setVisible(true);
             } else {
                 actionCardTypes[i] = null;
+                actionCardButtons[i].clearImage();
                 actionCardButtons[i].setVisible(false);
             }
         }
 
-        actionHandPanel.revalidate(); //ça sert a quoi ?
+        actionHandPanel.revalidate(); //ça sert a quoi ? 
         actionHandPanel.repaint();
     }
 
