@@ -1,6 +1,9 @@
 package fr.upc.cr1a.model;
 
 import org.junit.jupiter.api.Test;
+
+import fr.upc.cr1a.model.player.PlayerData;
+
 import static org.junit.jupiter.api.Assertions.*;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;

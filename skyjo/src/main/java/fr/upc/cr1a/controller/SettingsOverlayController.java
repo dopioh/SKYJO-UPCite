@@ -41,21 +41,21 @@ public class SettingsOverlayController {
         //Actionne l'actionListener lié au cointroller pour la bande
 
         overlay.getTabJeuPanel().addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) {
-                overlay.getTabJeu().doClick(); 
+            @Override public void mousePressed(MouseEvent e) {
+                overlay.getTabJeu().doClick();
                 e.consume();
             }
         });
 
         overlay.getTabAudioPanel().addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) {
+            @Override public void mousePressed(MouseEvent e) {
                 overlay.getTabAudio().doClick();
                 e.consume();
             }
         });
 
         overlay.getTabAutresPanel().addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) {
+            @Override public void mousePressed(MouseEvent e) {
                 overlay.getTabAutres().doClick();
                 e.consume();
             }

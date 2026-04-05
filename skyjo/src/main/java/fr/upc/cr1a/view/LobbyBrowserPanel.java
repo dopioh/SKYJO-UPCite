@@ -47,25 +47,22 @@ public class LobbyBrowserPanel extends JPanel {
         //bouton retour à gauche
         JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         leftPanel.setOpaque(false);
-        backBtn = new DoodleButton("Retour", ButtonColor.RED, 200, 60);
+        backBtn = new DoodleButton("Retour", ButtonColor.RED, 220, 60, "/Button/retour.png");
+        backBtn.setFontSize(32f);
+        backBtn.setIconSide(DoodleButton.IconSide.LEFT);
         leftPanel.add(backBtn);
-
-        //titre au centre
-        JLabel titre = new JLabel("Salons Multijoueur");
-        titre.setFont(new Font("Arial", Font.BOLD, 42));
-        titre.setForeground(Color.WHITE);
-        titre.setHorizontalAlignment(SwingConstants.CENTER);
 
         //boutons à droite
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         rightPanel.setOpaque(false);
         refreshBtn = new DoodleButton("Rafraîchir", ButtonColor.YELLOW, 220, 60);
-        createLobbyBtn = new DoodleButton("Créer un salon", ButtonColor.GREEN, 250, 60);
+        refreshBtn.setFontSize(32f);
+        createLobbyBtn = new DoodleButton("Créer un salon", ButtonColor.GREEN, 300, 60);
+        createLobbyBtn.setFontSize(32f);
         rightPanel.add(refreshBtn);
         rightPanel.add(createLobbyBtn);
 
         topBar.add(leftPanel, BorderLayout.WEST);
-        topBar.add(titre, BorderLayout.CENTER);
         topBar.add(rightPanel, BorderLayout.EAST);
 
         return topBar;

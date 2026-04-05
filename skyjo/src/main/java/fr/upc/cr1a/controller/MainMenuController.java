@@ -1,20 +1,20 @@
 package fr.upc.cr1a.controller;
 
 import fr.upc.cr1a.model.AudioManager;
-import fr.upc.cr1a.model.GameManager;
-import fr.upc.cr1a.model.PlayerData;
+//import fr.upc.cr1a.model.GameManager;
+//import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.view.DoodleButton;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.MainMenuPanel;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.List;
+//import java.util.ArrayList;
+//import java.util.List;
 import java.util.Scanner;
 
-import javax.swing.JButton;
-import javax.swing.SwingUtilities;
+//import javax.swing.JButton;
+//import javax.swing.SwingUtilities;
 
 /**
  * Controller du menu principal avec les bouttons existants (jouer, boutique, paramètres)
@@ -56,7 +56,7 @@ public class MainMenuController {
     }
 
     private void clicShop() {
-        // ici mettreeeee
+        frame.showPanel("SHOP");
     }
 
     private void clicPlay() {
