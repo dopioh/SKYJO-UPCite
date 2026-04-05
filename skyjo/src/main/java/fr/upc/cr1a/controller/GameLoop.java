@@ -233,7 +233,13 @@ public class GameLoop {
         this.paused = paused;
         if (paused) {
             stopTurnCountdown();
+            if (botController != null) {
+                botController.stopAllBotActions();
+            }
             return;
+        }
+        if (botController != null) {
+            botController.resumeBotActions();
         }
         if (pendingContinueAfterPause) {
             pendingContinueAfterPause = false;
@@ -251,6 +257,10 @@ public class GameLoop {
             startTurnCountdown();
         } else {
             gameBoardView.setTurnTimerText("--");
+            //relancer le bot si c'est son tour
+            if (currentPlayer instanceof BotModel && botController != null) {
+                botController.handleBotTurn();
+            }
         }
     }
 
