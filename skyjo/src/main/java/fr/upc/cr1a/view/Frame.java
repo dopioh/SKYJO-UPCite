@@ -121,7 +121,7 @@ public class Frame extends JFrame{
                 "/plateau/red_topbar.png", "/plateau/green_topbar.png", "/plateau/yellow_topbar.png"
             );
             ImageCache.preload(
-                "/boutique/nulCard.png", "/boutique/bof.png", "/boutique/bien.png", "/boutique/GOLDGOLDGOLD.png"
+                "/boutique/nul_card.png", "/boutique/bof.png", "/boutique/bien.png", "/boutique/GOLDGOLDGOLD.png"
             );
             // son : ouvre et ferme chaque clip pour que Java initialise le mixer audio
             try {

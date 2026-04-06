@@ -6,18 +6,25 @@ import java.io.PrintWriter;
 //import java.net.ServerSocket;
 import java.net.Socket;
 //import java.util.ArrayList;
+import java.util.ArrayList;
 
-import fr.upc.cr1a.controller.network.UDP.UDPBroadcaster;
+//import fr.upc.cr1a.controller.network.UDP.UDPBroadcaster;
+import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolClient;
+import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolServer;
+import fr.upc.cr1a.model.GameManager;
+import fr.upc.cr1a.model.GameSession;
 import fr.upc.cr1a.model.player.PlayerData;
 
 import java.io.*;
+
+import fr.upc.cr1a.view.Frame;
 
 /**
  * Pour se connecter à un GameHost
  * 
  * @author Mei
  */
-public class GameClient {
+public class GameClient implements NetworkProtocolClient{
 
     private Socket socket;
     private PrintWriter out;
@@ -25,7 +32,13 @@ public class GameClient {
     private PlayerData playerData;
     //private LobbyCallback lobbyCallback
 
-    public GameClient( PlayerData playerData){
+    private Frame frame;
+
+    private ArrayList<PlayerData> listPlayersData;
+    private boolean modeAction;
+
+    public GameClient( Frame frame, PlayerData playerData){
+        this.frame = frame;
         this.playerData = playerData;
 
     }
@@ -40,6 +53,8 @@ public class GameClient {
             // System.out.println(); -> print console alors que l'autre est envoyé au receveur
 
             new Thread(this::listenerToServer).start();
+
+            GameSession.status = GameSession.STATUS.CLIENT;
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -56,6 +71,7 @@ public class GameClient {
 
             if (in != null) in.close();
             if (out != null) out.close();
+            GameSession.status = GameSession.STATUS.OFFLINE;
             System.out.println("[CLIENT] Déconnecté du serveur");
         } catch (Exception e) {
             e.printStackTrace();
@@ -67,18 +83,112 @@ public class GameClient {
             String message;
             while ((message = in.readLine()) != null){
                 if ( message.startsWith("[LOBBY_UPDATE]")){
-                    System.out.println("Nouveau message : \" " + message + " \" ");
+                    String[] parts = message.split(":");
+                    int nbrPlayers = Integer.parseInt(parts[1]); // mettre une securite plus tard au cas ou qqln met autre chose qu'un nombre
+                    this.modeAction = Boolean.parseBoolean(parts[2]);
+                    ArrayList<PlayerData> lisPlayersData = new ArrayList<>();
+
+                    int index = 3;
+                    for (int i = 0 ; i < nbrPlayers ; i++){
+                        String key = parts[index];
+                        index++;
+                        String name = parts[index];
+                        index++;
+                        PlayerData tmp = new PlayerData(key,name);
+                        lisPlayersData.add(tmp);
+                    }
+                }
+
+                // NetworkProtocol du serveur qui vont definir des actions pour chaque client
+
+                if (message.startsWith(NetworkProtocolServer.UPDATE_START_GAME)){ // LANCER UNE GAME DEPUIS LE GAMEMANAGER
+                    System.out.println("[SYSTEM] message start with \""+NetworkProtocolServer.UPDATE_START_GAME+"\"");
+                    GameManager game = new GameManager(this.frame, listPlayersData, modeAction); // faudra bloquer les clics du joueur visuellement
+                    frame.setCurrentGame(game);
+                    System.out.println("[SYSTEM] Game launched");
+
+                }
+
+                if (message.startsWith(NetworkProtocolServer.UPDATE_CARD_FLIPPED)){
+                    String[] parts = message.split(":");
+                    
+                    String id = parts[1];
+                    int col = Integer.parseInt(parts[2]);
+                    int row = Integer.parseInt(parts[3]);
+                    int valeur = Integer.parseInt(parts[4]);
+                    
+                    GameManager game = frame.getCurrentGame();
+                    
+                    if (game != null) {
+                        game.forceRevealCardFromNetwork(id, col, row, valeur);
+                    }
+                }
+
+                if(message.startsWith(NetworkProtocolServer.UPDATE_TURN_CHANGED)){
+                    String[] parts = message.split(":");
+                    
+                    if (parts.length >= 2) {
+                        String idJoueurActif = parts[1];
+                        
+                        GameManager game = frame.getCurrentGame();
+                        
+                        if (game != null) {
+                            game.forceTurnFromNetwork(idJoueurActif);
+                        }
+                    }
                 }
             }
+
         } catch (Exception e) {
             System.out.println("[CLIENT] Déconnecté du serveur.");
+            GameSession.status = GameSession.STATUS.OFFLINE;
             e.printStackTrace();
         } finally {
             disconnect();
         }
     }
 
+    // implementation de l'interface pour send les requests in game 
+    // faut dire qu'on peut les envoyer que si on est bien connecté a un host et que une game est en cours
+
+    /**
+     * Request pour retourner une carte
+     * STUCTURE = id:protocol:col:row
+     */
+    @Override
+    public void sendFlipCardRequest(String id, int col, int row){
+        out.println(id +":"+NetworkProtocolClient.REQ_FLIP_CARD+":"+col +":" + row);
+    }
+
+    /**
+     * Request pour piocher une carte
+     * STRUCTURE = id:protocol
+     */
+    @Override
+    public void sendPickPiocheRequest(String id){
+        out.println(id + ":" + NetworkProtocolClient.REQ_PICK_PIOCHE);
+    }
+
+    /**
+     * Request pour prendre une carte de la defausse
+     * STRUCTURE = id:protocol
+     */
+    @Override
+    public void sendPickDefausseRequest(String id){
+        out.println(id + ":" + NetworkProtocolClient.REQ_PICK_DEFAUSSE);
+    }
+
+    /**
+     * Request pour jeter une carte dans la defausse
+     * STRUCTURE = id:protocol:col:row
+     */
+    @Override
+    public void sendDisquardRequest(String id, int col, int row){
+        out.println(id +":"+NetworkProtocolClient.REQ_DISCARD+":"+col +":" + row);
+    }
+
     // test host
+    /*
     public static void main(String[] args) {
         GameHost gm = new GameHost(1234);
         gm.startServer();
@@ -93,4 +203,5 @@ public class GameClient {
         gm.stopServer();
         
     }
+    */
 }

@@ -28,11 +28,9 @@ public class PlayerData {
 
     // transient pour dire a gson d'eviter de lire l'attribut
 
-    /**
-     * ANCIEN CONSTRUCTEUR AVANT DB
-     */
-    public PlayerData(String id){
-        this.id = id;
+    public PlayerData(String name){
+        this.id = null;
+        this.username = name;
         this.rank = 1; // ou on commence unranked ?
         this.elo = 0;
         this.xp = 0;
@@ -40,8 +38,23 @@ public class PlayerData {
         this.isBot = false;
         this.botType = null;
         this.skins = null; // a modif plus tard
-
     }
+
+    /**
+     * Constructeur que pour le nom, utiliser pour le multijoueur
+     */
+    public PlayerData(String id, String name){
+        this.id = id;
+        this.username = name;
+        this.rank = 1; // ou on commence unranked ?
+        this.elo = 0;
+        this.xp = 0;
+        this.money = 1000;
+        this.isBot = false;
+        this.botType = null;
+        this.skins = null; // a modif plus tard
+    }
+    
     
     /**
      * Constructeur pour un bot

@@ -17,10 +17,13 @@ public class PlayerModel {
     private PlayerHandModel hand;
     private ArrayList<ActionType> actionHand;
     private int totalScore;
+
+    private PlayerData playerData;
     
     
     //constructeur
     public PlayerModel(PlayerData playerData){
+        this.playerData = playerData;
         this.name = playerData.getID();
         this.hand = new PlayerHandModel();
         this.actionHand = new ArrayList<>();;
@@ -37,6 +40,10 @@ public class PlayerModel {
 
     public ArrayList<ActionType> getActionHand() {
         return this.actionHand;
+    }
+
+    public PlayerData getPlayerData(){
+        return this.playerData;
     }
 
     public String showActionHand() {

@@ -428,6 +428,8 @@
 - Animation lift :
     - sur la défausse : quand le bot décide de prendre la défausse
 
+- Protocol Serveur -> Clients et debut Client -> Serveur
+
 ### Modified
 
 - Amélioration DA de l'écran fin de manche / fin de partie

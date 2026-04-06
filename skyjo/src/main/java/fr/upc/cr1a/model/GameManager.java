@@ -2,7 +2,7 @@ package fr.upc.cr1a.model;
 
 import java.util.List;
 import java.util.HashMap;
-import javax.swing.Timer;
+//import javax.swing.Timer;
 
 import fr.upc.cr1a.controller.GameBoardController;
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
@@ -693,6 +693,60 @@ public class GameManager {
             }
         }
     }   
+
+    // PARTIE NETWORK
+
+    /**
+     * Methode exclusive au multijoueur (Cote Client)
+     * Force la revelation d'une carte sur le plateau local selon la request du serveur
+     */
+    public void forceRevealCardFromNetwork(String playerId, int col, int row, int cardValue) {
+        
+        PlayerModel targetPlayer = null;
+        for (PlayerModel p : players) {
+            if (p.getPlayerData().getID().equals(playerId)) {
+                targetPlayer = p;
+                break;
+            }
+        }
+        
+        if (targetPlayer != null) {
+
+            NumberCardModel vraieCarte = new NumberCardModel(false, cardValue);
+            targetPlayer.getHand().replaceCard(row, col, vraieCarte);
+            
+            if (gameBoardModel != null && gameBoardModel.getGameBoardView() != null) {
+                gameBoardModel.getGameBoardView().showPlayerCards(getCurrentPlayer());
+            }
+        }
+    }
+
+    /**
+     * Force le changement de tour d'apres une request Host
+     */
+    public void forceTurnFromNetwork(String playerId) {
+        for (int i = 0; i < players.size(); i++) {
+            if (players.get(i).getPlayerData().getID().equals(playerId)) {
+                
+                this.currentPlayerIndex = i;
+                
+                this.turnPhase = TurnPhase.DRAW_DECISION;
+                
+                if (gameBoardModel != null && gameBoardModel.getGameBoardController() != null) {
+                    gameBoardModel.getGameBoardController().refreshGuide(); // pour afficher les bonnes indications pour DRAW DECISION
+                    
+
+                    if (gameBoardModel.getGameBoardView() != null) {
+                        gameBoardModel.getGameBoardView().showPlayerTransition(players.get(i), () -> {
+                            // pour lancer l'animation du changement de round
+                            // besoin d'attendre l'implementation de l'interface graphique
+                        });
+                    }
+                }
+                break;
+            }
+        }
+    }
 
     public int getAfkCount(PlayerModel player) {
         return afkCounts.getOrDefault(player, 0);
