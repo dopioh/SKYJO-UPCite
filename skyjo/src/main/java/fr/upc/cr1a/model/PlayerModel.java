@@ -13,7 +13,8 @@ import fr.upc.cr1a.model.player.PlayerData;
 
 public class PlayerModel {
 
-    private final String name; // id unique qui permettra de retrouver le player dans la db
+    private final String name; // nom du joueur
+    //private final String id; // id unique qui permettra de retrouver le player dans la db
     private PlayerHandModel hand;
     private ArrayList<ActionType> actionHand;
     private int totalScore;
@@ -24,7 +25,8 @@ public class PlayerModel {
     //constructeur
     public PlayerModel(PlayerData playerData){
         this.playerData = playerData;
-        this.name = playerData.getID();
+        this.name = playerData.getUsername();
+        //this.id = playerData.getID();
         this.hand = new PlayerHandModel();
         this.actionHand = new ArrayList<>();;
         this.totalScore = 0;
