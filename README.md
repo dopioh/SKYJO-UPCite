@@ -7,7 +7,9 @@ Jeu de cartes [Skyjo](https://fr.wikipedia.org/wiki/Skyjo) développé en Java, 
 ## Prérequis
 
 - **Java 21 ou supérieur**
-- **Apache Maven** 3.9
+- **Apache Maven** 3.8+
+
+Recommandé : Mac OS
 
 ## Compilation
 
