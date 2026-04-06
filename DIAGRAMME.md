@@ -118,16 +118,19 @@ Gère la logique du jeu.
         * Méthodess supplémentaires : **revealRandomCard()**, **sameCardInHandPosition()**, **tradeInHand()**, **isAcceptableCard()**
         * **countVisibleCardsInColumn()**
     * `BotStrategyInterface`: Interface définissant les stratégies de bot
-        * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **getSeuil()**
+        * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **getSeuil()**, **shouldPlayAction()**
     * `BotTerminalModel`: Stratégie de bot basique (implémente BotStrategyInterface)
         * Stratégie par défaut pour les bots avec seuil fixe
+        * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **shouldPlayAction()**
     * `BotRow`: Stratégie de bot optimisant les lignes (implémente BotStrategyInterface)
         * Se concentre sur l'élimination de lignes complètes
+        * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **shouldPlayAction()**
     * `BotLow`: Stratégie de bot favorisant les cartes basses (implémente BotStrategyInterface)
         * Privilégie les cartes de faible valeur
+        * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **shouldPlayAction()**
     * `BotCounting`: Stratégie de bot avancée qui compte les cartes (implémente BotStrategyInterface)
         * Attribut : gameManager (GameManager), cardDeck (Map statique des cartes dans le deck)
-        * Méthode : 
+        * Méthode :
             * **getSeuil()** - Calcule dynamiquement le seuil basé sur les probabilités
             * **countVisibleCards()** - Compte toutes les cartes visibles (mains + défausse)
             * **calculateRemainingCards()** - Calcule les cartes restantes dans la pioche
@@ -135,6 +138,7 @@ Gère la logique du jeu.
             * **TakeFromDiscard()** - Décision basée sur les probabilités
             * **ExchangeDrawCard()** - Décision d'échange basée sur les statistiques
             * **CardToExchange()** - Choix intelligent de la carte à échanger
+            * **shouldPlayAction()** - Décide si le bot doit jouer une action (50% de chance)
     * `BotStatsManager`: Gère les statistiques des bots
         * Méthode : **recordVictory()**, gestion des stats de parties
 
@@ -304,6 +308,15 @@ Gère toutes les entrées du joueur avec l'ordinateur
         * **handleBotAfterTakeDiscard()**
         * **revealRandomFaceDownCard()**
         * **grantActionForStar()**
+        * **Support des actions pour les bots en mode graphique** :
+            * **shouldBotPlayAction()** - Vérifie si le bot doit jouer une action
+            * **handleBotPlayAction()** - Gère le déroulement du jeu d'une action
+            * **botReplaceCardInHand()** - REPLACE_CARD_IN_HAND : échange 2 cartes aléatoires
+            * **botTradeCardWithPlayer()** - TRADE_CARD_WITH_PLAYER : échange une carte avec un autre joueur
+            * **botSpyOneColumn()** - SPY_ONE_COLUMN : révèle temporairement une colonne
+            * **botDrawThreeCard()** - DRAW_THREE_CARD : pioche 3 cartes et choisit d'en garder une
+            * **botPlayLastActionInDefausse()** - PLAY_LAST_ACTION_IN_DEFAUSSE : rejette la dernière action
+            * **botAllPlayersDropCard()** - ALL_PLAYERS_DROP_CARD : force les autres joueurs à défausser
 
 * **TimeoutTurnController** : Gère les joueurs AFK et les timeouts
     * Méthode :

@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.upc.cr1a.model.ActionCardModel;
+import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.BotHandModel;
-import fr.upc.cr1a.model.BotLow;
 import fr.upc.cr1a.model.BotModel;
 import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.GameManager;
@@ -66,6 +66,16 @@ public class GameBoardBotController {
         }
 
         BotModel bot = (BotModel) currentPlayer;
+
+        //le bot peut jouer une action en début de tour
+        if (gameManager.getTurnPhase() == GameManager.TurnPhase.DRAW_DECISION) {
+            if (gameManager.withActionCard() && !bot.getActionHand().isEmpty()) {
+                if (shouldBotPlayAction(bot)) {
+                    handleBotPlayAction(bot);
+                    return;
+                }
+            }
+        }
 
         //révéle 2 cartes
         if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) {
@@ -353,6 +363,280 @@ public class GameBoardBotController {
         ActionCardModel actionCard = gameManager.grantActionForStar(player);
         if (actionCard == null) {
             return;
+        }
+    }
+
+    /**
+     * verifie si le bot doit jouer une action
+     */
+    private boolean shouldBotPlayAction(BotModel bot) {
+        BotStrategyInterface strategy = bot.getStrategy();
+        if (strategy == null) {
+            return Math.random() < 0.5;
+        }
+        return strategy.shouldPlayAction();
+    }
+
+    /**
+     * gère le jeu d'une carte action par le bot
+     */
+    private void handleBotPlayAction(BotModel bot) {
+        if (pausedState) return;
+
+        mainController.setWaitingNextTurn(true);
+
+        Timer actionTimer = new Timer(800, e -> {
+            if (pausedState) return;
+
+            if (bot.getActionHand().isEmpty()) {
+                mainController.setWaitingNextTurn(false);
+                handleBotTurn();
+                return;
+            }
+
+            //choisir aléatoirement une action
+            int actionIndex = (int) (Math.random() * bot.getActionHand().size());
+            ActionType actionType = bot.getActionHand().get(actionIndex);
+
+            System.out.println(bot.getName() + " joue l'action: " + actionType);
+
+            try {
+                switch (actionType) {
+                    case PLAY_TWO_TURN:
+                        gameManager.grantExtraTurn();
+                        break;
+
+                    case REPLACE_CARD_IN_HAND:
+                        botReplaceCardInHand(bot);
+                        break;
+
+                    case TRADE_CARD_WITH_PLAYER:
+                        botTradeCardWithPlayer(bot);
+                        break;
+
+                    case SPY_ONE_COLUMN:
+                        botSpyOneColumn(bot);
+                        break;
+
+                    case DRAW_THREE_CARD:
+                        botDrawThreeCard(bot);
+                        break;
+
+                    case PLAY_LAST_ACTION_IN_DEFAUSSE:
+                        botPlayLastActionInDefausse(bot);
+                        break;
+
+                    case ALL_PLAYERS_DROP_CARD:
+                        botAllPlayersDropCard(bot);
+                        break;
+
+                    default:
+                        break;
+                }
+
+                bot.getActionHand().remove(actionIndex);
+                gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, actionType));
+                gameBoardView.showPlayerCards(bot);
+                mainController.updateAllDecksDisplay();
+
+            } catch (Exception ex) {
+                System.err.println("Erreur lors du jeu de l'action: " + ex.getMessage());
+            }
+
+            mainController.setWaitingNextTurn(false);
+            mainController.requestEndTurnFromBot();
+        });
+        actionTimer.setRepeats(false);
+        activeTimers.add(actionTimer);
+        actionTimer.start();
+    }
+
+    /**
+     *bot joue REPLACE_CARD_IN_HAND
+     */
+    private void botReplaceCardInHand(BotModel bot) {
+        BotHandModel hand = bot.getHand();
+        int row1, col1, row2, col2;
+        do {
+            row1 = (int) (Math.random() * 3);
+            col1 = (int) (Math.random() * 4);
+            row2 = (int) (Math.random() * 3);
+            col2 = (int) (Math.random() * 4);
+        } while ((row1 == row2 && col1 == col2) || hand.getCard(row1, col1) == null || hand.getCard(row2, col2) == null);
+
+        CardModel card1 = hand.getCard(row1, col1);
+        CardModel card2 = hand.getCard(row2, col2);
+
+        hand.replaceCard(row1, col1, card2);
+        hand.replaceCard(row2, col2, card1);
+    }
+
+    /**
+     * bot joue TRADE_CARD_WITH_PLAYER
+     */
+    private void botTradeCardWithPlayer(BotModel bot) {
+        ArrayList<PlayerModel> players = new ArrayList<>(gameManager.getPlayers());
+        int botIndex = players.indexOf(bot);
+
+        int targetIndex;
+        do {
+            targetIndex = (int) (Math.random() * players.size());
+        } while (targetIndex == botIndex);
+
+        PlayerModel target = players.get(targetIndex);
+        int myRow = (int) (Math.random() * 3);
+        int myCol = (int) (Math.random() * 4);
+        int opRow = (int) (Math.random() * 3);
+        int opCol = (int) (Math.random() * 4);
+
+        CardModel myCard = bot.getHand().getCard(myRow, myCol);
+        CardModel opCard = target.getHand().getCard(opRow, opCol);
+
+        if (myCard != null && opCard != null) {
+            bot.getHand().replaceCard(myRow, myCol, opCard);
+            target.getHand().replaceCard(opRow, opCol, myCard);
+        }
+    }
+
+    /**
+     * bot joue SPY_ONE_COLUMN
+     */
+    private void botSpyOneColumn(BotModel bot) {
+        BotHandModel hand = bot.getHand();
+        int targetCol = (int) (Math.random() * 4);
+
+        ArrayList<int[]> hiddenCards = new ArrayList<>();
+        for (int row = 0; row < 3; row++) {
+            CardModel card = hand.getCard(row, targetCol);
+            if (card != null && card.isFaceDown()) {
+                card.returnCard();
+                hiddenCards.add(new int[]{row, targetCol});
+            }
+        }
+
+        gameBoardView.showPlayerCards(bot);
+
+        Timer hideTimer = new Timer(2000, e -> {
+            for (int[] pos : hiddenCards) {
+                CardModel card = hand.getCard(pos[0], pos[1]);
+                if (card != null && !card.isFaceDown()) {
+                    card.returnCard();
+                }
+            }
+            gameBoardView.showPlayerCards(bot);
+        });
+        hideTimer.setRepeats(false);
+        activeTimers.add(hideTimer);
+        hideTimer.start();
+    }
+
+    /**
+     * bot joue DRAW_THREE_CARD
+     */
+    private void botDrawThreeCard(BotModel bot) {
+        CardModel card1 = gameManager.drawDeck();
+        CardModel card2 = gameManager.drawDeck();
+        CardModel card3 = gameManager.drawDeck();
+
+        if (card1.isFaceDown()) card1.returnCard();
+        if (card2.isFaceDown()) card2.returnCard();
+        if (card3.isFaceDown()) card3.returnCard();
+
+        if (GameManager.isStarCard(card1)) grantActionForStar(bot);
+        if (GameManager.isStarCard(card2)) grantActionForStar(bot);
+        if (GameManager.isStarCard(card3)) grantActionForStar(bot);
+
+        //choisir aléatoirement une carte ou aucune
+        int choice = (int) (Math.random() * 4);
+
+        CardModel chosenCard = null;
+        CardModel discardCard1 = card1;
+        CardModel discardCard2 = card2;
+        CardModel discardCard3 = card3;
+
+        switch (choice) {
+            case 0:
+                chosenCard = card1;
+                discardCard1 = card2;
+                discardCard2 = card3;
+                discardCard3 = null;
+                break;
+            case 1:
+                chosenCard = card2;
+                discardCard1 = card1;
+                discardCard2 = card3;
+                discardCard3 = null;
+                break;
+            case 2:
+                chosenCard = card3;
+                discardCard1 = card1;
+                discardCard2 = card2;
+                discardCard3 = null;
+                break;
+            default:
+                discardCard1 = card1;
+                discardCard2 = card2;
+                discardCard3 = card3;
+                break;
+        }
+
+        if (chosenCard != null) {
+            //choisir une position pour échanger la carte
+            int row = (int) (Math.random() * 3);
+            int col = (int) (Math.random() * 4);
+            CardModel oldCard = bot.getHand().getCard(row, col);
+
+            if (oldCard != null) {
+                bot.getHand().replaceCard(row, col, chosenCard);
+                gameManager.getDiscardPile().addCardAtTop(oldCard);
+            }
+        }
+
+        if (discardCard1 != null) gameManager.getDiscardPile().addCardAtTop(discardCard1);
+        if (discardCard2 != null) gameManager.getDiscardPile().addCardAtTop(discardCard2);
+        if (discardCard3 != null) gameManager.getDiscardPile().addCardAtTop(discardCard3);
+    }
+
+    /**
+     * bot joue PLAY_LAST_ACTION_IN_DEFAUSSE
+     */
+    private void botPlayLastActionInDefausse(BotModel bot) {
+        if (gameManager.getDiscardActionPile().getTopCard() != null) {
+            ActionCardModel topCard = (ActionCardModel) gameManager.getDiscardActionPile().getTopCard();
+            bot.getActionHand().add(topCard.getType());
+            gameManager.getDiscardActionPile().removeCardAtTop();
+        }
+    }
+
+    /**
+     * bot joue ALL_PLAYERS_DROP_CARD
+     */
+    private void botAllPlayersDropCard(BotModel bot) {
+        ArrayList<PlayerModel> players = new ArrayList<>(gameManager.getPlayers());
+        int botIndex = players.indexOf(bot);
+
+        for (int i = 0; i < players.size(); i++) {
+            if (i == botIndex) continue;
+
+            PlayerModel target = players.get(i);
+            int row = (int) (Math.random() * 3);
+            int col = (int) (Math.random() * 4);
+
+            CardModel targetCard = target.getHand().getCard(row, col);
+            if (targetCard == null) continue;
+
+            CardModel drawnCard = gameManager.drawDeck();
+            if (drawnCard.isFaceDown()) drawnCard.returnCard();
+
+            target.getHand().replaceCard(row, col, drawnCard);
+            gameManager.getDiscardPile().addCardAtTop(targetCard);
+
+            if (GameManager.isStarCard(drawnCard)) {
+                grantActionForStar(target);
+            }
+
+            GameRuleModel.removeIdenticalColumns(target.getHand(), gameManager.getDiscardPile(), target);
+            GameRuleModel.removeIdenticalRows(target.getHand(), gameManager.getDiscardPile(), target);
         }
     }
 }
