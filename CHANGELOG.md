@@ -392,9 +392,28 @@
     - font, couleur, fond, espacement, doodle button
     - JTextField/mdp plus beau
 
+
 ## v.0.10: SPRINT 10
 
 ### Added
+
+- Système d'elo en ligne
+    - gain ou perte d'elo a la fin d'une partie
+    - depend du nombre de joueur dans la partie et si c'est un bot fort/nul ou un humain
+    - changement de rank tous les 100 elo
+
+- Système de money en ligne
+    - gain de money a la fin d'une partie
+    - depend du nombre de joueur dans la partie et si c'est un bot fort/nul ou un humain
+    - debit a chaque achat dans la boutique
+    - 500 money pour chaque nouveau joueur
+
+- Système de skin en ligne
+    - debloquage des skins sauvegardé dans la base de donnée
+    - selection du skin utilisé dans la base de donnée
+
+- Boutique
+    - en mode invité le jeu donne 1000000 money au joueur
 
 - Animation flip :
     - Sur pioche : joueur et bot

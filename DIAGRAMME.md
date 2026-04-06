@@ -348,7 +348,7 @@ Gère toutes les entrées du joueur avec l'ordinateur
 
 * **SendAPI** : Classe qui regroupes des methodes static pour envoyer des donnees a l'API
     * Variables gloabales : **urlAPI (String)**, **client (HttpClient)**
-    * Methodes : **WinGameSolo()**, **getStats()**
+    * Methodes : **WinGameSolo()**, **buyPack()**, **applyGameResult()**, **unlockSkin()**, **selectSkin()**, **getStats()**
 
 * **SupabaseAuth** : Classe qui gere l'authentification du joueur a la base de donnees
     * Variables gloabales : **SUPABASE_URL (String)**, **SUPABASE_PUBLIC_KEY (String)**

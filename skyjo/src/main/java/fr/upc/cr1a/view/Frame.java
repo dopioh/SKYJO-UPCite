@@ -147,6 +147,10 @@ public class Frame extends JFrame{
     public MainMenuPanel getMainMenuPanel() {
         return mainMenuPanel;
     }
+
+    public ShopPanel getShopPanel() {
+        return shopPanel;
+    }
     
     public void showPanel(String panelName) {
         cardLayout.show(getContentPane(), panelName);
