@@ -5,6 +5,7 @@ import fr.upc.cr1a.utils.ImageCache;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 /**
  * Panel du main menu avec les bouttons
@@ -18,6 +19,7 @@ public class MainMenuPanel extends JPanel {
     private DoodleButton settingsBtn;
     private JButton accountBtn;
     private Image backgroundImage;
+    private BufferedImage cachedBackground;
 
     public MainMenuPanel() {
         setLayout(new BorderLayout());
@@ -72,10 +74,16 @@ public class MainMenuPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (backgroundImage != null) {
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-            g2d.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+            int w = getWidth(), h = getHeight();
+            if (cachedBackground == null || cachedBackground.getWidth() != w || cachedBackground.getHeight() != h) {
+                cachedBackground = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D bg = cachedBackground.createGraphics();
+                bg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                bg.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                bg.drawImage(backgroundImage, 0, 0, w, h, null);
+                bg.dispose();
+            }
+            g.drawImage(cachedBackground, 0, 0, null);
         }
     }
 

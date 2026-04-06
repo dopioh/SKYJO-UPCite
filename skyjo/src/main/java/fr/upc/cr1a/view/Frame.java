@@ -8,6 +8,7 @@ import fr.upc.cr1a.controller.AccountController;
 import fr.upc.cr1a.controller.ConnexionController;
 import fr.upc.cr1a.controller.GameModeSelectionController;
 import fr.upc.cr1a.controller.LobbyBrowserController;
+import fr.upc.cr1a.controller.LobbyRoomController;
 import fr.upc.cr1a.controller.MainMenuController;
 import fr.upc.cr1a.controller.PlayersSetupController;
 import fr.upc.cr1a.controller.SettingsOverlayController;
@@ -30,6 +31,7 @@ public class Frame extends JFrame{
     private MainMenuPanel mainMenuPanel;
     private GameModeSelectionPanel gameModeSelectionPanel;
     private LobbyBrowserPanel lobbyBrowserPanel;
+    private LobbyRoomPanel lobbyRoomPanel;
     private SettingsOverlay settingsOverlay;
     private ShopPanel shopPanel;
     private boolean fullscreen = false;
@@ -42,6 +44,7 @@ public class Frame extends JFrame{
     // Controller
     private AccountController account; // sert a rien pour le moment
     private ConnexionController connexionController;
+    private LobbyRoomController lobbyRoomController;
 
 
     public Frame() {
@@ -71,6 +74,9 @@ public class Frame extends JFrame{
         lobbyBrowserPanel = new LobbyBrowserPanel();
         add(lobbyBrowserPanel, "LOBBY_BROWSER");
 
+        lobbyRoomPanel = new LobbyRoomPanel();
+        add(lobbyRoomPanel, "LOBBY_ROOM");
+
         playersSetupPanel = new PlayersSetupPanel();
         add(playersSetupPanel, "PLAYERS");
 
@@ -85,6 +91,7 @@ public class Frame extends JFrame{
         new ShopController(this, shopPanel);
         new GameModeSelectionController(this, gameModeSelectionPanel);
         new LobbyBrowserController(this, lobbyBrowserPanel);
+        lobbyRoomController = new LobbyRoomController(this, lobbyRoomPanel);
         new PlayersSetupController(this, playersSetupPanel);
 
         this.connexionController = new ConnexionController(this, connexionPanel);
@@ -114,7 +121,11 @@ public class Frame extends JFrame{
                 "/plateau/red_topbar.png", "/plateau/green_topbar.png", "/plateau/yellow_topbar.png"
             );
             ImageCache.preload(
+<<<<<<< HEAD
                 "/boutique/nul_card.png", "/boutique/bof.png", "/boutique/bien.png", "/boutique/GOLDGOLDGOLD.png"
+=======
+                "/boutique/nulCard.png", "/boutique/bof.png", "/boutique/bien.png", "/boutique/GOLDGOLDGOLD.png"
+>>>>>>> dev
             );
             // son : ouvre et ferme chaque clip pour que Java initialise le mixer audio
             try {
@@ -139,6 +150,10 @@ public class Frame extends JFrame{
     
     public MainMenuPanel getMainMenuPanel() {
         return mainMenuPanel;
+    }
+
+    public ShopPanel getShopPanel() {
+        return shopPanel;
     }
     
     public void showPanel(String panelName) {
@@ -200,6 +215,11 @@ public class Frame extends JFrame{
 
     public AccountController getAccountController(){
         return this.account;
+    }
+
+    public LobbyRoomController getLobbyRoomController(){
+        return this.lobbyRoomController;
+
     }
 
     public void setCurrentGame(GameManager game) {

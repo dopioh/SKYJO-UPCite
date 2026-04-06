@@ -118,16 +118,19 @@ Gère la logique du jeu.
         * Méthodess supplémentaires : **revealRandomCard()**, **sameCardInHandPosition()**, **tradeInHand()**, **isAcceptableCard()**
         * **countVisibleCardsInColumn()**
     * `BotStrategyInterface`: Interface définissant les stratégies de bot
-        * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **getSeuil()**
+        * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **getSeuil()**, **shouldPlayAction()**
     * `BotTerminalModel`: Stratégie de bot basique (implémente BotStrategyInterface)
         * Stratégie par défaut pour les bots avec seuil fixe
+        * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **shouldPlayAction()**
     * `BotRow`: Stratégie de bot optimisant les lignes (implémente BotStrategyInterface)
         * Se concentre sur l'élimination de lignes complètes
+        * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **shouldPlayAction()**
     * `BotLow`: Stratégie de bot favorisant les cartes basses (implémente BotStrategyInterface)
         * Privilégie les cartes de faible valeur
+        * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **shouldPlayAction()**
     * `BotCounting`: Stratégie de bot avancée qui compte les cartes (implémente BotStrategyInterface)
         * Attribut : gameManager (GameManager), cardDeck (Map statique des cartes dans le deck)
-        * Méthode : 
+        * Méthode :
             * **getSeuil()** - Calcule dynamiquement le seuil basé sur les probabilités
             * **countVisibleCards()** - Compte toutes les cartes visibles (mains + défausse)
             * **calculateRemainingCards()** - Calcule les cartes restantes dans la pioche
@@ -135,6 +138,7 @@ Gère la logique du jeu.
             * **TakeFromDiscard()** - Décision basée sur les probabilités
             * **ExchangeDrawCard()** - Décision d'échange basée sur les statistiques
             * **CardToExchange()** - Choix intelligent de la carte à échanger
+            * **shouldPlayAction()** - Décide si le bot doit jouer une action (50% de chance)
     * `BotStatsManager`: Gère les statistiques des bots
         * Méthode : **recordVictory()**, gestion des stats de parties
 
@@ -178,7 +182,11 @@ Gère la logique du jeu.
         * Attribut : lobbyId, lobbyName, hostName, currentPlayers, maxPlayers, actionMode, status
         * Enum : **LobbyStatus** (WAITING, PLAYING, FULL)
         * Méthode : **canJoin()**, **updateStatus()**, **getters/setters**
-        * **setCurrentPlayers()**, **setStatus()**, **toString()**
+         **setCurrentPlayers()**, **setStatus()**, **toString()**
+    * `LobbyPlayerModel`: Représente un joueur dans un salon d'attente multijoueur
+        * Attribut : playerId, playerName, isHost, isReady, isBot
+        * Méthode : **getters/setters**, les bots sont automatiquement prêts
+
 
 
 ### VIEW
@@ -205,6 +213,12 @@ Gère l'affichage
     * `LobbyItemPanel`: Composant représentant un salon dans la liste
         * Attribut : lobby (LobbyModel), joinBtn, nameLabel, hostLabel, playersLabel, modeLabel
         * Méthode : **getJoinButton()**, **getLobby()**, **updateLobbyInfo()**, **getPlayerCountColor()**
+    * `LobbyRoomPanel`: Panel de la salle d'attente d'un salon multijoueur (hôte peut configurer, tous voient les joueurs)
+        * Attribut : lobbyTitleLabel, lobbyInfoLabel, playersTitleLabel, backBtn, readyBtn, startBtn, playersListPanel, leftPanel, configPanel, maxPlayersSpinner, actionModeCheckbox, addBotButton, playerSlots, isHost
+        * Méthode : **setIsHost()**, **setLobbyTitle()**, **setLobbyInfo()**, **addPlayer()**, **removePlayer()**, **clearPlayers()**, **updatePlayersCount()**, **refreshPlayerSlots()**, **getters**
+    * `PlayerLobbySlot`: Composant représentant un slot de joueur dans le salon d'attente
+        * Attribut : player (LobbyPlayerModel), nameLabel, statusLabel, roleLabel, kickButton, isLocalPlayerHost
+        * Méthode : **updatePlayerStatus()**, **getPlayer()**, **getKickButton()**
     * `CreateLobbyDialog`: Dialogue pour créer un nouveau salon multijoueur
         * Attribut : lobbyNameField, maxPlayersSpinner, actionModeCheckbox, createBtn, cancelBtn, confirmed
         * Méthode : **getLobbyName()**, **getMaxPlayers()**, **isActionMode()**, **isConfirmed()**, **setConfirmed()**, **validateInput()**, **getCreateButton()**, **getCancelButton()**
@@ -257,6 +271,21 @@ Gère toutes les entrées du joueur avec l'ordinateur
     * Méthode : **ajouterListeners()**, **clicRetour()**, **clicCreerSalon()**, **clicRafraichir()**, **createLobby()**, **loadLobbies()**, **refreshView()**, **joinLobby()**, **generateTestLobbies()**
     * Note : Les méthodes createLobby(), loadLobbies() et joinLobby() sont à connecter au système P2P
 
+* **LobbyRoomController** : Contrôleur de la salle d'attente d'un salon multijoueur
+    * Attribut : frame (Frame), view (LobbyRoomPanel), players (List<LobbyPlayerModel>), lobbyId, lobbyName, isHost, isReady
+    * Méthode :
+        * **initializeLobby()** - initialise le salon avec les paramètres (host/joueur)
+        * **addPlayer()**, **removePlayer()** - gestion des joueurs
+        * **updatePlayerStatus()** - met à jour le statut prêt d'un joueur
+        * **clicQuitter()** - quitter le salon avec confirmation
+        * **clicReady()** - basculer entre prêt/pas prêt (joueurs non-host)
+        * **clicStart()** - lancer la partie (host uniquement, vérifie que tous sont prêts)
+        * **clicKick()** - retirer un joueur/bot du salon (host uniquement)
+        * **clicAjouterBot()** - ajouter un bot avec sélection de stratégie
+        * **onMaxPlayersChanged()**, **onActionModeChanged()** - gestion des paramètres
+        * **updateLobbyInfo()** - met à jour l'affichage des infos (mode, prêts)
+    * Note : À connecter au système P2P pour synchronisation réseau
+
 * **SettingsOverlayController** : Contrôleur de l'overlay paramètres
     * Attribut : frame (Frame), audioManager (AudioManager)
     * Méthode : **ActionListener pour backButton, tabJeu, tabAudio, tabAutres, fullscreenButton, soundButton, volumeButtons**
@@ -279,6 +308,15 @@ Gère toutes les entrées du joueur avec l'ordinateur
         * **handleBotAfterTakeDiscard()**
         * **revealRandomFaceDownCard()**
         * **grantActionForStar()**
+        * **Support des actions pour les bots en mode graphique** :
+            * **shouldBotPlayAction()** - Vérifie si le bot doit jouer une action
+            * **handleBotPlayAction()** - Gère le déroulement du jeu d'une action
+            * **botReplaceCardInHand()** - REPLACE_CARD_IN_HAND : échange 2 cartes aléatoires
+            * **botTradeCardWithPlayer()** - TRADE_CARD_WITH_PLAYER : échange une carte avec un autre joueur
+            * **botSpyOneColumn()** - SPY_ONE_COLUMN : révèle temporairement une colonne
+            * **botDrawThreeCard()** - DRAW_THREE_CARD : pioche 3 cartes et choisit d'en garder une
+            * **botPlayLastActionInDefausse()** - PLAY_LAST_ACTION_IN_DEFAUSSE : rejette la dernière action
+            * **botAllPlayersDropCard()** - ALL_PLAYERS_DROP_CARD : force les autres joueurs à défausser
 
 * **TimeoutTurnController** : Gère les joueurs AFK et les timeouts
     * Méthode :
@@ -312,29 +350,18 @@ Gère toutes les entrées du joueur avec l'ordinateur
 * **AccountController** : Contrôleur pour la gestion des comptes
     * Méthode : Principales méthodes de gestion des comptes
 
-## 3. Flow de Navigation
-
-Architecture de navigation du jeu :
-
-```
-ConnexionPanel
-    ↓
-MainMenuPanel
-    ↓ (bouton Jouer)
-GameModeSelectionPanel
-    ├─→ (Local) PlayersSetupPanel → GameBoardView
-    └─→ (Multi P2P) LobbyBrowserPanel
-                    ├─→ (Créer salon) CreateLobbyDialog → Configuration → [Attente intégration P2P]
-                    └─→ (Rejoindre) Sélection d'un salon → [Attente intégration P2P]
-```
-
-**Note** : Le système multijoueur P2P est préparé au niveau de l'interface utilisateur. Les appels réseau vers le système P2P doivent être implémentés dans `LobbyBrowserController` aux emplacements marqués TODO.
+**Architecture du système de lobby** :
+- `LobbyBrowserPanel` : liste des salons disponibles (créer/rejoindre)
+- `LobbyRoomPanel` : salle d'attente avec deux modes :
+  - **Mode Hôte** : configuration visible (max joueurs, actions, ajout bots), bouton "Lancer la partie", kick joueurs
+  - **Mode Joueur** : configuration cachée, bouton "Prêt"/"Annuler" pour indiquer son statut
+- `PlayerLobbySlot` : affichage d'un joueur avec badges (HOST/BOT), statut prêt, bouton kick (hôte uniquement)
 
 #### DATA :
 
 * **SendAPI** : Classe qui regroupes des methodes static pour envoyer des donnees a l'API
     * Variables gloabales : **urlAPI (String)**, **client (HttpClient)**
-    * Methodes : **WinGameSolo()**, **getStats()**
+    * Methodes : **WinGameSolo()**, **buyPack()**, **applyGameResult()**, **unlockSkin()**, **selectSkin()**, **getStats()**
 
 * **SupabaseAuth** : Classe qui gere l'authentification du joueur a la base de donnees
     * Variables gloabales : **SUPABASE_URL (String)**, **SUPABASE_PUBLIC_KEY (String)**

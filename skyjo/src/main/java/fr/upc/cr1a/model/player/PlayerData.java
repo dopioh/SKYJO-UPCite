@@ -24,6 +24,7 @@ public class PlayerData {
     private transient String botType; // type de bot
     // les skins sont dans une list de String mais ils auront leur propre classes plus tard
     private ArrayList<String> skins; // tous les skins du jeu et si le joueur l'a, alors l'attribue unlocked du skin est true // on l'a pas appeler depuis la db encore lui
+    private String selectedSkinPath;
 
     // transient pour dire a gson d'eviter de lire l'attribut
 
@@ -105,6 +106,10 @@ public class PlayerData {
 
     public ArrayList<String> getListSkinPlayer(){
         return this.skins;
+    }
+
+    public String getSelectedSkinPath(){
+        return this.selectedSkinPath;
     }
 
     public String getUsername(){

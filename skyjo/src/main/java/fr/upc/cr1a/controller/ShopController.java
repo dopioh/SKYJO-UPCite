@@ -1,9 +1,13 @@
 package fr.upc.cr1a.controller;
 
+import fr.upc.cr1a.controller.data.SendAPI;
+import fr.upc.cr1a.model.player.PlayerAccount;
+import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.view.DoodleButton;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.ShopPanel;
 
+import javax.swing.SwingUtilities;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -14,6 +18,7 @@ public class ShopController {
 
     private final Frame frame;
     private final ShopPanel view;
+    private boolean achatEnCours = false;
 
     public ShopController(Frame frame, ShopPanel view) {
         this.frame = frame;
@@ -62,12 +67,47 @@ public class ShopController {
     }
 
     private void clicAcheter(int packNumber) {
-        if (view.getMoney() < packNumber * 100 || view.isCaseOpeningVisible()) {
+        if (view.isCaseOpeningVisible() || achatEnCours) {
             return;
         }
-        view.startCaseOpening(packNumber);
-        view.setMoney(view.getMoney() - packNumber * 100);
-        view.refreshMoneyButton();
+
+        int price = packNumber * 100;
+
+        // en mode invité (on theorie il va servir a rien car tout sera debloqué mais j'ai pas encore fait ça)
+        if (PlayerAccount.actuelAccount == null) {
+            if (view.getMoney() < price) {
+                return;
+            }
+            view.startCaseOpening(packNumber);
+            view.setMoney(view.getMoney() - price);
+            view.refreshMoneyButton();
+            return;
+        }
+
+        // mode joueur db
+        if (PlayerAccount.actuelAccount.getMoney() < price) {
+            return;
+        }
+
+        achatEnCours = true;
+        final String uuid = PlayerAccount.actuelAccount.getID();
+        final String packName = "pack_numero_" + packNumber;
+        new Thread(() -> {
+            try {
+                PlayerData majdata = SendAPI.buyPack(uuid, packName);
+                if (majdata == null) {
+                    return;
+                }
+                PlayerAccount.actuelAccount = majdata;
+                SwingUtilities.invokeLater(() -> {
+                    view.startCaseOpening(packNumber);
+                    view.setMoney(majdata.getMoney());
+                    view.refreshMoneyButton();
+                });
+            } finally {
+                achatEnCours = false;
+            }
+        }, "shop-buy-pack").start();
     }
 
     private void clicClasseur() {

@@ -38,6 +38,8 @@ public class GameManager {
     private GameBoardModel gameBoardModel;
     private int initRevealCount = 0;
     private int roundNumber = 0; // numero de la manche actuelle
+    private boolean initRevealStarted = false;
+    private boolean initRevealJustFinished = false;
 
     private boolean gameWithAction = false; // true si on utilise les actions
     
@@ -103,6 +105,8 @@ public class GameManager {
         if (firstDiscard.isFaceDown()) firstDiscard.returnCard();
         discardPile.addCardAtTop(firstDiscard);
 
+        this.initRevealStarted = false;
+        this.initRevealJustFinished = false;
         this.gameBoardModel = new GameBoardModel(players, frame, this);
         GameBoardView view = this.gameBoardModel.getGameBoardView();
         view.updateCardDisplay(discardPile.getTopCard(), deck.stackSize() > 0);
@@ -242,6 +246,8 @@ public class GameManager {
         lastRoundPlayer = -1;
         deck = new PiocheModel(this.gameWithAction);
         discardPile = new DefausseModel();
+        initRevealStarted = false;
+        initRevealJustFinished = false;
 
         if (this.gameWithAction) {
             actionDeck = new PiocheActionModel();
@@ -253,6 +259,8 @@ public class GameManager {
         currentDrawCard = null;
         gameState = GameState.WAITING_FOR_PLAYERS;
         turnPhase = TurnPhase.DRAW_DECISION;
+        initRevealStarted = false;
+        initRevealJustFinished = false;
     }
     
     //getters
@@ -518,8 +526,12 @@ public class GameManager {
     *montre la carte après avoir défaussé
     */
     public void revealCardInHand(int col, int row){
-        currentDrawCard.returnCard();
-        getCurrentPlayer().getHand().revealCard(row, col);
+        PlayerHandModel hand = getCurrentPlayer().getHand();
+        CardModel card = hand.getCard(row, col);
+        if (card == null || !card.isFaceDown()) {
+            return;
+        }
+        hand.revealCard(row, col);
 
         // check
         GameRuleModel.removeIdenticalColumns(getCurrentPlayer().getHand(), discardPile, getCurrentPlayer());
@@ -530,6 +542,7 @@ public class GameManager {
             gameState = GameState.LAST_ROUND;
             lastRoundPlayer = currentPlayerIndex;  // stocker le joueur qui déclenche le dernier tour
         }
+        turnPhase = TurnPhase.TURN_ENDED;
     }
 
 
@@ -584,7 +597,7 @@ public class GameManager {
     }
 
     /**
-     * Recommence une nouvelle manche, le joueur avec le plus grand score commence
+     * Recommence une nouvelle manche, le joueur avec la plus haute somme de cartes visibles après INIT_REVEAL commence
      */
     public void startNewGame() {
         roundNumber++;
@@ -597,6 +610,9 @@ public class GameManager {
         ensureFaceUp(discardPile.getTopCard());
         turnPhase = TurnPhase.INIT_REVEAL;
         initRevealCount = 0;
+        initRevealStarted = false; //reset
+        initRevealJustFinished = false;
+        firstPlayerToPlayIndex = 0;
     }
 
     /**
@@ -615,6 +631,14 @@ public class GameManager {
     
     public int getInitRevealCount(){
         return initRevealCount;
+    }
+    
+    public boolean isInitRevealJustFinished() {
+        return initRevealJustFinished;
+    }
+    
+    public void setInitRevealJustFinished(boolean value) {
+        this.initRevealJustFinished = value;
     }
 
     public int getRoundNumber(){
@@ -640,6 +664,13 @@ public class GameManager {
         initRevealCount++;
         if (initRevealCount >= 2) {
             initRevealCount = 0;
+            
+            //marquer l'init
+            if (!initRevealStarted) {
+                initRevealStarted = true;
+                firstPlayerToPlayIndex = currentPlayerIndex;
+            }
+            
             currentPlayerIndex++;
             if (currentPlayerIndex >= players.size()) {
                 currentPlayerIndex = GameRuleModel.getFirstPlayerIndex(players);

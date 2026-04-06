@@ -40,6 +40,18 @@ public class CardButton extends JButton {
     private double targetScale = 1.0;
     private boolean animationEnabled = false;
 
+    // animation flip carte
+    private static final double FLIP_SPEED = 0.15;
+    private double flipScale = 1.0; // 1 = visible, 0 = invisible / flipped
+    private boolean flipExpanding = false;
+    private final Object flipKey = new Object();
+
+    // animation press
+    private double pressScale = 1.0;
+    private double pressTarget = 1.0;
+    private final Object pressKey = new Object();
+
+
 
     public CardButton() {
         // setPreferredSize(new Dimension(CardW, CardH));
@@ -108,10 +120,13 @@ public class CardButton extends JButton {
                 return;
             }
 
-            // nouvelle image cropée
-            BufferedImage cropped = new BufferedImage(cropW, cropH, BufferedImage.TYPE_INT_ARGB);
+            // nouvelle image cropée et réduite pour la perf
+            int targetW = 300;
+            int targetH = 433; // ratio : 1217/1754
+            BufferedImage cropped = new BufferedImage(targetW, targetH, BufferedImage.TYPE_INT_ARGB);
             Graphics2D g2 = cropped.createGraphics();
-            g2.drawImage(original.getSubimage(CropLeft, CropTop, cropW, cropH), 0, 0, null);
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g2.drawImage(original.getSubimage(CropLeft, CropTop, cropW, cropH), 0, 0, targetW, targetH, null);
             g2.dispose();
 
             this.cardImage = cropped;
@@ -140,6 +155,84 @@ public class CardButton extends JButton {
         setMaximumSize(d);
         revalidate();
         repaint();
+    }
+
+    // grossit la carte jusqu'à resetLift() c'est pour la defausse pour le bot
+    public void lift() {
+        pressTarget = 1.1;
+        AnimLoop.add(pressKey, dt -> {
+            pressScale += (pressTarget - pressScale) * ScaleSmoothness * dt;
+            repaint();
+        });
+    }
+
+    public void resetLift() {
+        pressTarget = 1.0;
+        AnimLoop.add(pressKey, dt -> {
+            pressScale += (pressTarget - pressScale) * ScaleSmoothness * dt;
+            if (pressScale >= 0.999) {
+                pressScale = 1.0;
+                AnimLoop.remove(pressKey);
+            }
+            repaint();
+        });
+    }
+
+    // press qui est un peu exagéré pour bot
+    public void animatePress() {
+        pressScale = 1.0;
+        pressTarget = 0.75;
+        AnimLoop.add(pressKey, dt -> {
+            pressScale += (pressTarget - pressScale) * ScaleSmoothness * dt;
+            repaint();
+            if (pressTarget == 1.0 && pressScale > 0.999 && pressScale < 1.001) AnimLoop.remove(pressKey);
+        });
+        Timer timer1 = new Timer(180, e -> { ((Timer) e.getSource()).stop(); pressTarget = 1.2; });
+        Timer timer2 = new Timer(360, e -> { ((Timer) e.getSource()).stop(); pressTarget = 1.0; });
+        timer1.setRepeats(false);
+        timer2.setRepeats(false);
+        timer1.start();
+        timer2.start();
+    }
+
+    // normal pour joueurs
+    public void animatePressLight() {
+        pressScale = 1.0;
+        pressTarget = 0.93;
+        AnimLoop.add(pressKey, dt -> {
+            pressScale += (pressTarget - pressScale) * ScaleSmoothness * dt;
+            repaint();
+            if (pressTarget == 1.0 && pressScale > 0.999 && pressScale < 1.001) AnimLoop.remove(pressKey);
+        });
+        Timer timer1 = new Timer(120, e -> { ((Timer) e.getSource()).stop(); pressTarget = 1.05; });
+        Timer timer2 = new Timer(240, e -> { ((Timer) e.getSource()).stop(); pressTarget = 1.0; });
+        timer1.setRepeats(false);
+        timer2.setRepeats(false);
+        timer1.start();
+        timer2.start();
+    }
+
+    // retourne la carte : rétrécit jusqu'à 0, appelle onChange au milieu, reagrandit
+    public void flip(Runnable onChange) {
+        flipScale = 1.0;
+        flipExpanding = false;
+        AnimLoop.add(flipKey, dt -> {
+            if (!flipExpanding) {
+                flipScale -= FLIP_SPEED * dt;
+                if (flipScale <= 0) {
+                    flipScale = 0;
+                    flipExpanding = true;
+                    if (onChange != null) onChange.run();
+                }
+            } else {
+                flipScale += FLIP_SPEED * dt;
+                if (flipScale >= 1.0) {
+                    flipScale = 1.0;
+                    AnimLoop.remove(flipKey);
+                }
+            }
+            repaint();
+        });
     }
 
     /**
@@ -204,7 +297,7 @@ public class CardButton extends JButton {
             int w = getWidth();
             int h = getHeight();
             g2.translate(w / 2.0 + floatOffsetX, h / 2.0 + floatOffsetY); // changement origine du bouton au centre de la carte
-            g2.scale(scale, scale); // resize depuis la nouvelle origine
+            g2.scale(scale * flipScale * pressScale, scale * pressScale); // resize depuis la nouvelle origine
             g2.translate(-w / 2.0, -h / 2.0); // replacage de l'origine en haut a gauche pour dessiner la carte 
             g2.drawImage(cardImage, 0, 0, w, h, this);
             

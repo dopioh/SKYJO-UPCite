@@ -312,6 +312,8 @@
 
 - Mailmap
 
+- Bouton multiplayer qui va ensuite faire un panel, où sont les salons et pouvoir créer un salon
+
 - Système de Timer (Si le joueur ne joue pas avant la fin du temps 2 fois il est "remplacé par un bot")
 
 - Toggle Timer
@@ -351,6 +353,10 @@
 
 ### Added
 
+- les Salons pour le multiplayer
+
+### Added
+
 - Boutique avec 3 packs de skins disponibles avec raretés differentes
     - Plusieurs skins
     - Logique d'achat
@@ -385,3 +391,54 @@
 - Page connexion panel
     - font, couleur, fond, espacement, doodle button
     - JTextField/mdp plus beau
+
+
+## v.0.10: SPRINT 10
+
+### Added
+
+- Système d'elo en ligne
+    - gain ou perte d'elo a la fin d'une partie
+    - depend du nombre de joueur dans la partie et si c'est un bot fort/nul ou un humain
+    - changement de rank tous les 100 elo
+
+- Système de money en ligne
+    - gain de money a la fin d'une partie
+    - depend du nombre de joueur dans la partie et si c'est un bot fort/nul ou un humain
+    - debit a chaque achat dans la boutique
+    - 500 money pour chaque nouveau joueur
+
+- Système de skin en ligne
+    - debloquage des skins sauvegardé dans la base de donnée
+    - selection du skin utilisé dans la base de donnée
+
+- Boutique
+    - en mode invité le jeu donne 1000000 money au joueur
+
+- Animation flip :
+    - Sur pioche : joueur et bot
+    - Sur init reveal : joueur et bot
+    - Sur révéler une carte après avoir défaussé la piochée : joueur et bot
+    - Mais pas pour placer/échanger les cartes
+
+- Animation press :
+    - sur la défausse : joueur et bot
+    - sur les cartes du plateau : bot
+
+- Animation lift :
+    - sur la défausse : quand le bot décide de prendre la défausse
+
+### Modified
+
+- Amélioration DA de l'écran fin de manche / fin de partie
+
+- Application de opti partout :
+    - background qui n'étais pas en cache et redimentionnais constament sur les panel autre que GameBoardView
+
+- Liaison des bot avec le mode de jeu action
+
+### Fixed
+
+- Fix de l'animation hover du `DoodleButton` qui grossisait si le dernier hover datais (reset tick de deltatime)
+
+- Fix du `PlayerPreviewPanel` qui ne s'affichait plus en fin de manche/partie

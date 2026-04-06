@@ -1,6 +1,9 @@
 package fr.upc.cr1a.view;
 
+import fr.upc.cr1a.controller.data.SendAPI;
 import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
+import fr.upc.cr1a.model.player.PlayerAccount;
+import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.utils.ImageCache;
 
 import javax.swing.*;
@@ -30,13 +33,18 @@ public class ShopPanel extends JPanel {
     private final JPanel cardsRow;
     private final CaseOpeningOverlayPanel caseOpeningOverlay;
     private final Image backgroundImage;
+    private BufferedImage cachedBackground;
 
     public ShopPanel() {
         setLayout(new BorderLayout());
 
         backgroundImage = ImageCache.get("/background.png");
         packSources = new BufferedImage[] {
+<<<<<<< HEAD
             ImageCache.get("/boutique/nul_card.png"),
+=======
+            ImageCache.get("/boutique/nulCard.png"),
+>>>>>>> dev
             ImageCache.get("/boutique/bof.png"),
             ImageCache.get("/boutique/bien.png")
         };
@@ -185,10 +193,16 @@ public class ShopPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (backgroundImage != null) {
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-            g2d.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+            int w = getWidth(), h = getHeight();
+            if (cachedBackground == null || cachedBackground.getWidth() != w || cachedBackground.getHeight() != h) {
+                cachedBackground = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D bg = cachedBackground.createGraphics();
+                bg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                bg.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                bg.drawImage(backgroundImage, 0, 0, w, h, null);
+                bg.dispose();
+            }
+            g.drawImage(cachedBackground, 0, 0, null);
         }
     }
 
@@ -209,8 +223,17 @@ public class ShopPanel extends JPanel {
         caseOpeningOverlay.startOpening(packNumber);
     }
 
+    
     public void openClasseur() {
         clearHoverStates();
+        
+        // tests rankup
+        // PlayerData updated = null;
+        // String dbUuid = PlayerAccount.actuelAccount.getID();
+       
+        // updated = SendAPI.addElo(dbUuid, 30);
+        // PlayerAccount.actuelAccount = updated;
+
         caseOpeningOverlay.openClasseur();
     }
 
