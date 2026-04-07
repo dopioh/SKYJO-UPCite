@@ -238,6 +238,7 @@ public class GameBoardController {
      */
     private void ContinueRound() {
         gameManager.startNewGame();
+        gameBoardView.setMancheLabel("Pré-Manche");
         waitingNextTurn = false;
         humanTurnController.resetTurnState();
         gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());

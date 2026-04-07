@@ -37,7 +37,7 @@ public class GameManager {
 
     private GameBoardModel gameBoardModel;
     private int initRevealCount = 0;
-    private int roundNumber = 0; // numero de la manche actuelle
+    private int roundNumber = 1; // numero de la manche actuelle
     private boolean initRevealStarted = false;
     private boolean initRevealJustFinished = false;
 
@@ -193,6 +193,7 @@ public class GameManager {
             discardPile.isEmpty() ? null : discardPile.getTopCard(),
             deck.stackSize() > 0
         );
+        view.setMancheLabel("Pré-Manche");
         frame.add(view, "GAME");
         frame.showPanel("GAME");
     }
