@@ -41,14 +41,6 @@ public class LobbyBrowserController {
         ajouterListeners(view.getBackButton(), () -> clicRetour());
         ajouterListeners(view.getCreateLobbyButton(), () -> clicCreerSalon());
         ajouterListeners(view.getRefreshButton(), () -> clicRafraichir());
-
-        // Recherche automatique des salons quand le panel devient visible
-        view.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentShown(ComponentEvent e) {
-                loadLobbies();
-            }
-        });
     }
 
     private void ajouterListeners(DoodleButton btn, Runnable action) {
@@ -94,6 +86,7 @@ public class LobbyBrowserController {
 
     private void clicRafraichir() {
         loadLobbies();
+        System.out.println("Refresh");
     }
 
     /**
