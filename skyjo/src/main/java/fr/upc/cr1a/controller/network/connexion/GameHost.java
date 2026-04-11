@@ -178,21 +178,15 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     @Override
     public synchronized void broadcastUpdateLobby(){
 
-        String message = "[LOBBY_UPDATE]:" + lobbyPlayers.size() + ":";
+        StringBuilder message = new StringBuilder("[LOBBY_UPDATE]:" + lobbyPlayers.size() + ":" + modeAction);
 
-        int tmp = 0;
         for (String key : lobbyPlayers.keySet()){
-            if (tmp >= lobbyPlayers.size() - 1){
-                message += key +":"+ lobbyPlayers.get(key);
-            } else {
-                message += key +":"+ lobbyPlayers.get(key)+ ":";
-            }
-
+            message.append(":").append(key).append(":").append(lobbyPlayers.get(key));
         }
 
         // On l'envoie à tous les ClientHandlers
         for (ClientHandler client : connectedClient) {
-            client.sendMessage(message);
+            client.sendMessage(message.toString());
         }
     }
 

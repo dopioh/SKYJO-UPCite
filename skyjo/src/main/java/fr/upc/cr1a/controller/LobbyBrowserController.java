@@ -1,16 +1,22 @@
 package fr.upc.cr1a.controller;
 
+import fr.upc.cr1a.controller.network.Client;
+import fr.upc.cr1a.controller.network.Host;
 import fr.upc.cr1a.model.LobbyModel;
+import fr.upc.cr1a.model.player.PlayerAccount;
+import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.view.CreateLobbyDialog;
 import fr.upc.cr1a.view.DoodleButton;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.LobbyBrowserPanel;
 import fr.upc.cr1a.view.LobbyItemPanel;
 
+import javax.swing.JOptionPane;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  *controller pour le LobbyBrowserPanel
@@ -21,6 +27,8 @@ public class LobbyBrowserController {
     private final Frame frame;
     private final LobbyBrowserPanel view;
     private List<LobbyModel> availableLobbies;
+
+    private Client discoveryClient;
 
     public LobbyBrowserController(Frame frame, LobbyBrowserPanel view) {
         this.frame = frame;
@@ -45,6 +53,7 @@ public class LobbyBrowserController {
     }
 
     private void clicRetour() {
+        cleanupDiscovery();
         frame.showPanel("GAME_MODE");
     }
 
@@ -72,8 +81,6 @@ public class LobbyBrowserController {
             int maxPlayers = dialog.getMaxPlayers();
             boolean actionMode = dialog.isActionMode();
 
-            //remplacer par l'appel au système P2P pour créer le salon avec les paramètres saisis (a faire)
-            //pour l'instant, on simule la création
             createLobby(lobbyName, maxPlayers, actionMode);
         }
     }
@@ -83,29 +90,66 @@ public class LobbyBrowserController {
     }
 
     /**
-     *crée un nouveau salon (simulation pour l'instant)
+     * Crée un salon en tant qu'hôte via le système P2P
      */
     private void createLobby(String name, int maxPlayers, boolean actionMode) {
-        //remplacer par l'appel au système P2P pour créer le salon avec les paramètres saisis // a faire
+        cleanupDiscovery();
 
-        // Créer l'ID du salon
+        // Créer le Host qui démarre le serveur TCP, connecte le host en tant que client, et lance le broadcast UDP
+        Host host = new Host(maxPlayers, actionMode, name, frame);
+
         String lobbyId = "lobby_" + System.currentTimeMillis();
 
-        // Initialiser le salon en tant qu'hôte
-        frame.getLobbyRoomController().initializeLobby(lobbyId, name, true, maxPlayers, actionMode);
+        // Passer le Host au LobbyRoomController
+        LobbyRoomController lobbyRoom = frame.getLobbyRoomController();
+        lobbyRoom.setNetworkHost(host);
+        lobbyRoom.setNetworkClient(null);
+        lobbyRoom.initializeLobby(lobbyId, name, true, maxPlayers, actionMode);
 
-        // Rediriger vers le salon
         frame.showPanel("LOBBY_ROOM");
     }
 
     /**
-     *charge les salons disponibles du réseau
+     * Recherche les salons disponibles sur le réseau local via UDP
      */
     private void loadLobbies() {
-        //remplacer par l'appel au système P2P pour récupérer les salons( a faire)
-        // Pour l'instant, on génère des salons de test
-        availableLobbies = generateTestLobbies();
-        refreshView();
+        PlayerData account = PlayerAccount.actuelAccount;
+        if (account == null) {
+            availableLobbies = new ArrayList<>();
+            view.showNoLobbiesMessage();
+            return;
+        }
+
+        cleanupDiscovery();
+        discoveryClient = new Client(frame, account);
+
+        discoveryClient.discoverLobbies(2000, () -> {
+            // callback sur l'EDT après 2 secondes de recherche
+            Map<String, String> found = discoveryClient.getLobbyAvailable();
+            availableLobbies = new ArrayList<>();
+
+            for (Map.Entry<String, String> entry : found.entrySet()) {
+                String ip = entry.getKey();
+                String info = entry.getValue(); // "lobbyName:maxPlayers:modeAction"
+                String[] parts = info.split(":");
+
+                if (parts.length >= 3) {
+                    String lobbyName = parts[0];
+                    int maxPlayers;
+                    try {
+                        maxPlayers = Integer.parseInt(parts[1]);
+                    } catch (NumberFormatException e) {
+                        maxPlayers = 8;
+                    }
+                    boolean actionMode = Boolean.parseBoolean(parts[2]);
+
+                    // On utilise l'IP comme lobbyId (nécessaire pour se connecter)
+                    LobbyModel lobby = new LobbyModel(ip, lobbyName, "Hôte", 0, maxPlayers, actionMode);
+                    availableLobbies.add(lobby);
+                }
+            }
+            refreshView();
+        });
     }
 
     /**
@@ -129,47 +173,47 @@ public class LobbyBrowserController {
     }
 
     /**
-     * rejoint un salon
+     * Rejoint un salon via TCP en utilisant l'IP stockée dans lobbyId
      */
     private void joinLobby(LobbyModel lobby) {
-        // remplacer par l'appel au système P2P pour rejoindre le salon
+        String ip = lobby.getLobbyId(); // l'IP du host
 
-        // Initialiser le salon en tant que joueur (pas hôte)
-        frame.getLobbyRoomController().initializeLobby(
+        if (discoveryClient == null) {
+            JOptionPane.showMessageDialog(frame, "Erreur : client non initialisé.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        boolean connected = discoveryClient.connect(ip);
+        if (!connected) {
+            JOptionPane.showMessageDialog(frame, "Impossible de se connecter au salon.", "Erreur de connexion", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Passer le Client au LobbyRoomController
+        LobbyRoomController lobbyRoom = frame.getLobbyRoomController();
+        lobbyRoom.setNetworkHost(null);
+        lobbyRoom.setNetworkClient(discoveryClient);
+        lobbyRoom.initializeLobby(
             lobby.getLobbyId(),
             lobby.getLobbyName(),
-            false, // Pas l'hôte
+            false,
             lobby.getMaxPlayers(),
             lobby.isActionMode()
         );
 
-        // Rediriger vers le salon
+        // Le discoveryClient est géré par le LobbyRoomController
+        discoveryClient = null;
+
         frame.showPanel("LOBBY_ROOM");
     }
 
     /**
-     *salons de test (à supprimer quand le P2P sera implémenté)
+     * Nettoie le client de découverte s'il existe
      */
-    private List<LobbyModel> generateTestLobbies() {
-        List<LobbyModel> lobbies = new ArrayList<>();
-
-        lobbies.add(new LobbyModel(
-            "lobby_1",
-            "Partie rapide",
-            "Alice",
-            3,
-            4,
-            false
-        ));
-
-        lobbies.add(new LobbyModel(
-            "lobby_2",
-            "Débutants bienvenus",
-            "Charlie",
-            1,
-            3,
-            false
-        ));
-        return lobbies;
+    private void cleanupDiscovery() {
+        if (discoveryClient != null) {
+            discoveryClient.disconnect();
+            discoveryClient = null;
+        }
     }
 }

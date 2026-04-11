@@ -1,8 +1,8 @@
 package fr.upc.cr1a.controller.network;
 
 import fr.upc.cr1a.controller.network.UDP.UDPBroadcaster;
-//import fr.upc.cr1a.controller.network.connexion.GameClient;
 import fr.upc.cr1a.controller.network.connexion.GameHost;
+import fr.upc.cr1a.model.GameSession;
 import fr.upc.cr1a.model.player.PlayerAccount;
 import fr.upc.cr1a.view.Frame;
 
@@ -47,8 +47,9 @@ public class Host {
 
         this.gameHost.startServer();
 
-        this.client = new Client(PlayerAccount.actuelAccount);
+        this.client = new Client(frame, PlayerAccount.actuelAccount);
         client.connect("localhost"); // l'host va se connecter sur son propre pc donc localhost
+        GameSession.status = GameSession.STATUS.HOST; // rétablir le statut HOST (écrasé par GameClient.connect)
 
         startBroadcasting();
     }
@@ -94,10 +95,20 @@ public class Host {
     }
 
     /**
+     * Lance la partie : arrête le broadcast, prévient tous les clients, et crée le GameManager coté host
+     */
+    public void startGame(){
+        stopBroadcasting();
+        gameHost.broadcastStartGame();
+        gameHost.startAGame();
+    }
+
+    /**
      * Quand l'hote se deconnecte ( avec la methode ici),
      * Alors ça deconnecte egalement tous les joueurs du lobby proprement
      */
     public void quit(){
+        stopBroadcasting();
         gameHost.stopServer();
     }
 
@@ -132,6 +143,14 @@ public class Host {
 
     public void setModeAction(boolean isModeAction){
         this.modeAction = isModeAction;
+    }
+
+    public Client getClient(){
+        return this.client;
+    }
+
+    public GameHost getGameHost(){
+        return this.gameHost;
     }
 
 }

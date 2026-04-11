@@ -17,6 +17,8 @@ import fr.upc.cr1a.model.player.PlayerData;
 
 import java.io.*;
 
+import javax.swing.SwingUtilities;
+
 import fr.upc.cr1a.view.Frame;
 
 /**
@@ -84,9 +86,9 @@ public class GameClient implements NetworkProtocolClient{
             while ((message = in.readLine()) != null){
                 if ( message.startsWith("[LOBBY_UPDATE]")){
                     String[] parts = message.split(":");
-                    int nbrPlayers = Integer.parseInt(parts[1]); // mettre une securite plus tard au cas ou qqln met autre chose qu'un nombre
+                    int nbrPlayers = Integer.parseInt(parts[1]);
                     this.modeAction = Boolean.parseBoolean(parts[2]);
-                    ArrayList<PlayerData> lisPlayersData = new ArrayList<>();
+                    this.listPlayersData = new ArrayList<>();
 
                     int index = 3;
                     for (int i = 0 ; i < nbrPlayers ; i++){
@@ -95,18 +97,30 @@ public class GameClient implements NetworkProtocolClient{
                         String name = parts[index];
                         index++;
                         PlayerData tmp = new PlayerData(key,name);
-                        lisPlayersData.add(tmp);
+                        this.listPlayersData.add(tmp);
                     }
+
+                    // Met à jour l'interface du lobby avec les joueurs reçus du serveur
+                    ArrayList<PlayerData> snapshot = new ArrayList<>(this.listPlayersData);
+                    SwingUtilities.invokeLater(() -> {
+                        if (frame.getLobbyRoomController() != null) {
+                            frame.getLobbyRoomController().updatePlayersFromNetwork(snapshot);
+                        }
+                    });
                 }
 
                 // NetworkProtocol du serveur qui vont definir des actions pour chaque client
 
-                if (message.startsWith(NetworkProtocolServer.UPDATE_START_GAME)){ // LANCER UNE GAME DEPUIS LE GAMEMANAGER
+                if (message.startsWith(NetworkProtocolServer.UPDATE_START_GAME)){
                     System.out.println("[SYSTEM] message start with \""+NetworkProtocolServer.UPDATE_START_GAME+"\"");
-                    GameManager game = new GameManager(this.frame, listPlayersData, modeAction); // faudra bloquer les clics du joueur visuellement
-                    frame.setCurrentGame(game);
-                    System.out.println("[SYSTEM] Game launched");
-
+                    // Seuls les CLIENTS créent le GameManager ici ; le HOST le crée via GameHost.startAGame()
+                    if (GameSession.status != GameSession.STATUS.HOST) {
+                        SwingUtilities.invokeLater(() -> {
+                            GameManager game = new GameManager(this.frame, this.listPlayersData, this.modeAction);
+                            frame.setCurrentGame(game);
+                            System.out.println("[SYSTEM] Game launched (client side)");
+                        });
+                    }
                 }
 
                 if (message.startsWith(NetworkProtocolServer.UPDATE_CARD_FLIPPED)){

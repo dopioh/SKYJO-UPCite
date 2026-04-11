@@ -1,6 +1,10 @@
 package fr.upc.cr1a.controller;
 
+import fr.upc.cr1a.controller.network.Client;
+import fr.upc.cr1a.controller.network.Host;
 import fr.upc.cr1a.model.LobbyPlayerModel;
+import fr.upc.cr1a.model.player.PlayerAccount;
+import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.view.DoodleButton;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.LobbyRoomPanel;
@@ -26,6 +30,10 @@ public class LobbyRoomController {
     private boolean isHost;
     private boolean isReady;
 
+    // Références réseau
+    private Host host;
+    private Client client;
+
     public LobbyRoomController(Frame frame, LobbyRoomPanel view) {
         this.frame = frame;
         this.view = view;
@@ -41,6 +49,20 @@ public class LobbyRoomController {
         view.getMaxPlayersSpinner().addChangeListener(e -> onMaxPlayersChanged());
         view.getActionModeCheckbox().addActionListener(e -> onActionModeChanged());
         view.getAddBotButton().addActionListener(e -> clicAjouterBot());
+    }
+
+    /**
+     * Définit le Host réseau (quand le joueur crée un salon)
+     */
+    public void setNetworkHost(Host host) {
+        this.host = host;
+    }
+
+    /**
+     * Définit le Client réseau (quand le joueur rejoint un salon)
+     */
+    public void setNetworkClient(Client client) {
+        this.client = client;
     }
 
     /**
@@ -65,10 +87,35 @@ public class LobbyRoomController {
         view.getMaxPlayersSpinner().setValue(maxPlayers);
         view.getActionModeCheckbox().setSelected(actionMode);
 
-        //ajouter le joueur local
-        String localPlayerId = "player_local"; // MEI ID DU VRAI JOUEUR
-        String localPlayerName = "Vous"; // MEI LE BLAZE DU JOUEUR
+        //ajouter le joueur local avec les vraies infos du compte
+        PlayerData localPlayer = PlayerAccount.actuelAccount;
+        String localPlayerId = localPlayer != null ? localPlayer.getID() : "player_local";
+        String localPlayerName = localPlayer != null ? localPlayer.getUsername() : "Vous";
         addPlayer(new LobbyPlayerModel(localPlayerId, localPlayerName, isHost, false));
+
+        updateLobbyInfo();
+    }
+
+    /**
+     * Appelé par GameClient quand un LOBBY_UPDATE est reçu du serveur.
+     * Remplace la liste de joueurs par celle du réseau.
+     */
+    public void updatePlayersFromNetwork(ArrayList<PlayerData> networkPlayers) {
+        if (networkPlayers == null) return;
+
+        players.clear();
+        view.clearPlayers();
+
+        PlayerData localPlayer = PlayerAccount.actuelAccount;
+        String localId = localPlayer != null ? localPlayer.getID() : null;
+
+        for (PlayerData pd : networkPlayers) {
+            boolean playerIsHost = isHost && pd.getID() != null && pd.getID().equals(localId);
+            LobbyPlayerModel model = new LobbyPlayerModel(
+                pd.getID(), pd.getUsername(), playerIsHost, pd.isBot()
+            );
+            addPlayer(model);
+        }
 
         updateLobbyInfo();
     }
@@ -128,6 +175,7 @@ public class LobbyRoomController {
         );
 
         if (confirm == JOptionPane.YES_OPTION) {
+            cleanup();
             frame.showPanel("LOBBY_BROWSER");
         }
     }
@@ -143,13 +191,17 @@ public class LobbyRoomController {
             view.getReadyButton().setCouleur(fr.upc.cr1a.model.DoodleButtonModel.ButtonColor.GREEN);
         }
 
-        // statue du joueur
-        // MEI A METTRE EN LIGNE AVEC LE P2P
-        updatePlayerStatus("player_local", isReady);
-
+        PlayerData localPlayer = PlayerAccount.actuelAccount;
+        String localId = localPlayer != null ? localPlayer.getID() : "player_local";
+        updatePlayerStatus(localId, isReady);
     }
 
     private void clicStart() {
+        if (!isHost) {
+            JOptionPane.showMessageDialog(frame,"Seul l'hôte peut lancer la partie.","Action non autorisée",JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         //vérifie que tous les joueurs sont prêts
         boolean allReady = true;
         for (LobbyPlayerModel player : players) {
@@ -180,14 +232,10 @@ public class LobbyRoomController {
             return;
         }
 
-        // MEI LANCEMENT DE LA PARTIE AVEC LE GAME MANAGER ET P2P
-
-        JOptionPane.showMessageDialog(
-            frame,
-            "Lancement de la partie...\n",
-            "Démarrage",
-            JOptionPane.INFORMATION_MESSAGE
-        );
+        // Lancer la partie via le réseau
+        if (host != null) {
+            host.startGame();
+        }
     }
 
     private void clicKick(String playerId) {
@@ -215,6 +263,12 @@ public class LobbyRoomController {
 
         if (confirm == JOptionPane.YES_OPTION) {
             System.out.println("[LobbyRoomController] Retrait de: " + playerName);
+
+            // Kick via le réseau si on est host
+            if (isHost && host != null) {
+                host.kickPlayer(playerId);
+            }
+
             removePlayer(playerId);
         }
     }
@@ -305,5 +359,22 @@ public class LobbyRoomController {
             }
         }
         return null;
+    }
+
+    /**
+     * Nettoyage réseau quand on quitte le lobby
+     */
+    private void cleanup() {
+        if (isHost && host != null) {
+            host.quit();
+            host = null;
+        }
+        if (client != null) {
+            client.disconnect();
+            client = null;
+        }
+
+        players.clear();
+        view.clearPlayers();
     }
 }
