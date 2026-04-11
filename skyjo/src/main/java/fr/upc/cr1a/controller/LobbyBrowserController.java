@@ -12,6 +12,8 @@ import fr.upc.cr1a.view.LobbyBrowserPanel;
 import fr.upc.cr1a.view.LobbyItemPanel;
 
 import javax.swing.JOptionPane;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -40,8 +42,13 @@ public class LobbyBrowserController {
         ajouterListeners(view.getCreateLobbyButton(), () -> clicCreerSalon());
         ajouterListeners(view.getRefreshButton(), () -> clicRafraichir());
 
-        //charge les salons au démarrage
-        loadLobbies();
+        // Recherche automatique des salons quand le panel devient visible
+        view.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                loadLobbies();
+            }
+        });
     }
 
     private void ajouterListeners(DoodleButton btn, Runnable action) {
