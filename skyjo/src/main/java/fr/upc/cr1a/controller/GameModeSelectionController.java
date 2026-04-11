@@ -44,12 +44,7 @@ public class GameModeSelectionController {
 
     private void clicMulti() {
         if (PlayerAccount.actuelAccount == null) {
-            JOptionPane.showMessageDialog(
-                frame,
-                "Vous devez être connecté avec un compte pour jouer en multijoueur.",
-                "Connexion requise",
-                JOptionPane.WARNING_MESSAGE
-            );
+            JOptionPane.showMessageDialog(frame,"Vous devez être connecté avec un compte pour jouer en multijoueur.","Connexion requise",JOptionPane.WARNING_MESSAGE);
             return;
         }
         frame.showPanel("LOBBY_BROWSER");
