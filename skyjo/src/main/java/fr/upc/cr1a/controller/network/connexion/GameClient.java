@@ -137,6 +137,24 @@ public class GameClient implements NetworkProtocolClient{
                         }
                     }
                 }
+
+                if (message.startsWith(NetworkProtocolServer.UPDATE_DISCARD_TAKEN)) {
+                    //String[] parts = message.split(":");
+                    //String playerId = parts[1];
+                    
+                    GameManager game = frame.getCurrentGame();
+                    if (game != null) {
+     
+                        // tlm fait l'action localement
+                        game.takeDiscard();
+                        
+
+                        if (game.getGameBoardModel() != null) {
+                            game.getGameBoardModel().getGameBoardController().updateAllDecksDisplay(); // mettra une carte au hasard, il faut attendre la view pour tester
+                            game.getGameBoardModel().getGameBoardController().refreshGuide();
+                        }
+                    }
+                }
             }
 
         } catch (Exception e) {

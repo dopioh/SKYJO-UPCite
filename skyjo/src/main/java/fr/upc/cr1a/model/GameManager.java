@@ -695,7 +695,9 @@ public class GameManager {
         }
     }   
 
-    // PARTIE NETWORK
+    public GameBoardModel getGameBoardModel(){
+        return this.gameBoardModel;
+    }
 
     /**
      * Methode exclusive au multijoueur (Cote Client)
