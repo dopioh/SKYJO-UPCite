@@ -41,6 +41,9 @@ public class LobbyBrowserController {
         ajouterListeners(view.getBackButton(), () -> clicRetour());
         ajouterListeners(view.getCreateLobbyButton(), () -> clicCreerSalon());
         ajouterListeners(view.getRefreshButton(), () -> clicRafraichir());
+
+        //charge les salons au démarrage
+        loadLobbies();
     }
 
     private void ajouterListeners(DoodleButton btn, Runnable action) {
