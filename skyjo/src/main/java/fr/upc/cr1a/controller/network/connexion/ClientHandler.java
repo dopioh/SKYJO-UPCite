@@ -65,7 +65,7 @@ public class ClientHandler implements Runnable{
                         this.id = parts[2];
                      
                         gameHost.addPlayerToLobby(id, username);
-                        out.println("[LOBBY_UPDATE] Tu es bien connecté au serveur !");
+                        System.out.println("[INFO] Tu es bien connecté au serveur !");
                     }
                 }
 
