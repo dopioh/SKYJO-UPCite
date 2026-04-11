@@ -77,15 +77,15 @@ public class CreateLobbyDialog extends JDialog {
         mainPanel.add(Box.createVerticalStrut(30));
 
         //boutons en bas
-        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
+        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
         buttonsPanel.setOpaque(false);
         buttonsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         buttonsPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
 
-        cancelBtn = new DoodleButton("Annuler", ButtonColor.RED, 180, 60);
-        cancelBtn.setFontSize(32f);
-        createBtn = new DoodleButton("Créer", ButtonColor.GREEN, 180, 60);
-        createBtn.setFontSize(32f);
+        cancelBtn = new DoodleButton("Annuler", ButtonColor.RED, 150, 50);
+        cancelBtn.setFontSize(28f);
+        createBtn = new DoodleButton("Créer", ButtonColor.GREEN, 150, 50);
+        createBtn.setFontSize(28f);
 
         buttonsPanel.add(cancelBtn);
         buttonsPanel.add(createBtn);
