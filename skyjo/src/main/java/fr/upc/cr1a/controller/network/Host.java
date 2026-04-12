@@ -4,6 +4,7 @@ import fr.upc.cr1a.controller.network.UDP.UDPBroadcaster;
 //import fr.upc.cr1a.controller.network.connexion.GameClient;
 import fr.upc.cr1a.controller.network.connexion.GameHost;
 import fr.upc.cr1a.model.player.PlayerAccount;
+import fr.upc.cr1a.view.Frame;
 
 /**
  * Classe appelé lorqu'un joueur crée un salon
@@ -25,6 +26,8 @@ public class Host {
     private boolean isBroadcasting = false;
     private Thread threadBroadcast;
 
+    private Frame frame;
+
 
     /**
      * Ce constructeur doit etre appelé lorsque un joueur creer un salon ( avec tous les parametres renseignés )
@@ -32,9 +35,10 @@ public class Host {
      * @param modeAction 
      * @param lobbyName nom du lobby (exp "Salon de Mei")
      */
-    public Host( int nbrPlayers, boolean modeAction, String lobbyName){
+    public Host( int nbrPlayers, boolean modeAction, String lobbyName,Frame frame){
         //this.port = port;
-        this.gameHost = new GameHost(port);
+        this.frame = frame;
+        this.gameHost = new GameHost(port,modeAction,frame);
         
         this.nunmberPlayersMax = nbrPlayers;
         this.modeAction = modeAction;
@@ -128,11 +132,6 @@ public class Host {
 
     public void setModeAction(boolean isModeAction){
         this.modeAction = isModeAction;
-    }
-
-    public static void main(String[] args) {
-        Host host = new Host(4, false, "MEI DOMINATION");
-
     }
 
 }

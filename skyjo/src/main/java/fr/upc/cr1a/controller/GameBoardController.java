@@ -10,7 +10,10 @@ import java.util.List;
 
 import javax.swing.*;
 
+import fr.upc.cr1a.controller.data.SendAPI;
 import fr.upc.cr1a.model.*;
+import fr.upc.cr1a.model.player.PlayerAccount;
+import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.view.*;
 
 /**
@@ -41,6 +44,7 @@ public class GameBoardController {
 
     private boolean pauseOpen = false;
     private TimeoutTurnController timeoutTurnController;
+    private boolean alreadyReward = false;
 
     /**
      * Initialise la view et le Model du GameBoard
@@ -183,6 +187,10 @@ public class GameBoardController {
             new ArrayList<>(gameManager.getPlayers()), isGameOver, roundEndPlayer
         );
 
+        if (isGameOver) {
+            rewardEndGame(currentRoundEndPanel.getSortedPlayers());
+        }
+
         frame.add(currentRoundEndPanel, "ROUND_END");
         frame.showPanel("ROUND_END");
 
@@ -236,6 +244,7 @@ public class GameBoardController {
      */
     private void ContinueRound() {
         gameManager.startNewGame();
+        gameBoardView.setMancheLabel("Pré-Manche");
         waitingNextTurn = false;
         humanTurnController.resetTurnState();
 
@@ -347,5 +356,101 @@ public class GameBoardController {
             }
         }
         return true;
+    }
+
+
+    private String getOpponentType(PlayerModel opponent) {
+        if (!(opponent instanceof BotModel bot)) {
+            return "human";
+        }
+
+        String strategyName = bot.getStrategy() == null ? "" : bot.getStrategy().getClass().getSimpleName().toLowerCase();
+        if (strategyName.contains("count")) {
+            return "bot_count";
+        }
+        if (strategyName.contains("low")) {
+            return "bot_low";
+        }
+        return "bot_row";
+    }
+
+    private List<String> buildOpponentTypes(List<PlayerModel> opponents) {
+        List<String> opponentTypes = new ArrayList<>();
+        if (opponents == null) {
+            return opponentTypes;
+        }
+
+        for (PlayerModel opponent : opponents) {
+            opponentTypes.add(getOpponentType(opponent));
+        }
+        return opponentTypes;
+    }
+
+    private void rewardEndGame(List<PlayerModel> listPlayerInGame) {
+        if (alreadyReward) {
+            return;
+        }
+        if (PlayerAccount.actuelAccount == null || listPlayerInGame == null || listPlayerInGame.isEmpty()) {
+            return;
+        }
+
+        PlayerModel dbPlayer = findConnectedDbPlayer(listPlayerInGame);
+        if (dbPlayer == null) {
+            System.out.println("elo et money non appliques car joueur DB introuvable");
+            return;
+        }
+
+        alreadyReward = true;
+
+        int rank = listPlayerInGame.indexOf(dbPlayer) + 1; // place du joueur db a la fin de la partie
+        boolean wonGame = (rank == 1); // si rank = 1 alors jouer db a gagné
+
+        List<PlayerModel> opponents = new ArrayList<>();
+        for (PlayerModel player : gameManager.getPlayers()) {
+            if (player != dbPlayer) {
+                opponents.add(player);
+            }
+        }
+
+        List<String> opponentTypes = buildOpponentTypes(opponents);
+
+        String dbUuid = PlayerAccount.actuelAccount.getID();
+        new Thread(() -> {
+            PlayerData updated = SendAPI.applyGameResult(dbUuid, wonGame, opponentTypes);
+            if (updated != null) {
+                PlayerAccount.actuelAccount = updated;
+                System.out.println("Fin de partie DB: " + (wonGame ? "WIN" : "PERDU"));
+            } else {
+                System.out.println("Fin de partie DB: echec applyGameResult");
+            }
+        }, "db-endgame-rewards").start();
+    }
+
+    // retrouve le joueur db dans la partie
+    private PlayerModel findConnectedDbPlayer(List<PlayerModel> listPlayerInGame) {
+        if (PlayerAccount.actuelAccount == null) {
+            return null;
+        }
+
+        String dbId = PlayerAccount.actuelAccount.getID();
+        String dbUsername = PlayerAccount.actuelAccount.getUsername();
+
+        for (PlayerModel player : listPlayerInGame) {
+            String name = player.getName();
+            if (dbId != null && dbId.equals(name)) {
+                return player;
+            }
+            if (dbUsername != null && !dbUsername.isBlank() && dbUsername.equalsIgnoreCase(name)) {
+                return player;
+            }
+        }
+
+        // si le joueur a un nom ingame different de la DB on prend le premier joueur humain ingame
+        for (PlayerModel player : listPlayerInGame) {
+            if (!(player instanceof BotModel)) {
+                return (PlayerModel) player;
+            }
+        }
+        return null;
     }
 }

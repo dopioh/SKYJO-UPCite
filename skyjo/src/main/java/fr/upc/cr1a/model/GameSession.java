@@ -8,11 +8,26 @@ import fr.upc.cr1a.model.player.PlayerData;
 public class GameSession {
     private static PlayerData playerData;
     private static String accessToken;
+    public static STATUS status;
 
-    public static void init(PlayerData Data, String Token){
+    public enum STATUS{
+        INVITED, // donc sans compte -> playerData et accessToken bloqué à null
+        OFFLINE,
+        HOST,
+        CLIENT
+    }
+
+    public static void init(PlayerData Data, String Token, STATUS statusInit){
         accessToken = Token;
         playerData = Data;
 
+        if (!statusInit.equals(STATUS.INVITED) || !statusInit.equals(STATUS.OFFLINE)){
+            status = STATUS.INVITED;
+            accessToken = null;
+            playerData = null;
+        } else {
+            status = STATUS.OFFLINE;
+        }
     }
 
     public static PlayerData getPlayerData(){

@@ -16,7 +16,7 @@ public class PlayerData {
 
     private final String id; // id unique qui permettra de retrouver le player dans la db
     private String username;
-    private int rank; // Faire une enum Rang ? Ou une classe ? String pour le moment 
+    private int rank_id; // Faire une enum Rang ? Ou une classe ? String pour le moment 
     private int elo; // c'est quoi exactement ? les rr sur valo ?
     private int xp;
     private int money;
@@ -24,23 +24,37 @@ public class PlayerData {
     private transient String botType; // type de bot
     // les skins sont dans une list de String mais ils auront leur propre classes plus tard
     private ArrayList<String> skins; // tous les skins du jeu et si le joueur l'a, alors l'attribue unlocked du skin est true // on l'a pas appeler depuis la db encore lui
+    private String selectedSkinPath;
 
     // transient pour dire a gson d'eviter de lire l'attribut
 
-    /**
-     * ANCIEN CONSTRUCTEUR AVANT DB
-     */
-    public PlayerData(String id){
-        this.id = id;
-        this.rank = 1; // ou on commence unranked ?
+    public PlayerData(String name){
+        this.id = null;
+        this.username = name;
+        this.rank_id = 1; // ou on commence unranked ?
         this.elo = 0;
         this.xp = 0;
         this.money = 1000;
         this.isBot = false;
         this.botType = null;
         this.skins = null; // a modif plus tard
-
     }
+
+    /**
+     * Constructeur que pour le nom, utiliser pour le multijoueur
+     */
+    public PlayerData(String id, String name){
+        this.id = id;
+        this.username = name;
+        this.rank_id = 1; // ou on commence unranked ?
+        this.elo = 0;
+        this.xp = 0;
+        this.money = 1000;
+        this.isBot = false;
+        this.botType = null;
+        this.skins = null; // a modif plus tard
+    }
+    
     
     /**
      * Constructeur pour un bot
@@ -51,7 +65,7 @@ public class PlayerData {
      */
     public PlayerData(String id, boolean isBot, String botType){
         this.id = id;
-        this.rank = 1;
+        this.rank_id = 1;
         this.elo = 0;
         this.xp = 0;
         this.money = 0;
@@ -74,8 +88,8 @@ public class PlayerData {
         return this.botType;
     }
 
-    public int getPlayerRank(){
-        return this.rank;
+    public int getRankId(){
+        return this.rank_id;
     }
 
     public int getElo(){
@@ -92,6 +106,10 @@ public class PlayerData {
 
     public ArrayList<String> getListSkinPlayer(){
         return this.skins;
+    }
+
+    public String getSelectedSkinPath(){
+        return this.selectedSkinPath;
     }
 
     public String getUsername(){

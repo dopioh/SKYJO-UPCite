@@ -277,7 +277,6 @@ public class HumanTurnController {
                         gameBoardView.flipCardAt(r, c, () -> gameBoardView.showPlayerCards(currentPlayer));
 
                         waitingReveal = false;
-                        gameManager.setTurnPhase(GameManager.TurnPhase.TURN_ENDED);
                         mainController.refreshGuide();
                         gameManager.resetAfkCount(gameManager.getCurrentPlayer());
                         gameManager.setAutoControlled(gameManager.getCurrentPlayer(), false);

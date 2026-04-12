@@ -3,6 +3,7 @@ package fr.upc.cr1a.model;
 import java.util.ArrayList;
 
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
+import fr.upc.cr1a.model.PlayerModel.RoundScore;
 import fr.upc.cr1a.model.player.PlayerData;
 
 /**
@@ -37,16 +38,23 @@ public class PlayerModel {
         }
     }
 
-    private final String name; // id unique qui permettra de retrouver le player dans la db
+    private final String name; // nom du joueur
+    //private final String id; // id unique qui permettra de retrouver le player dans la db
     private PlayerHandModel hand;
     private ArrayList<ActionType> actionHand;
     private int totalScore;
     private RoundScore lastRoundScore; //détails de la dernière manche
+
+    private PlayerData playerData;
+
+
     
     
     //constructeur
     public PlayerModel(PlayerData playerData){
-        this.name = playerData.getID();
+        this.playerData = playerData;
+        this.name = playerData.getUsername();
+        //this.id = playerData.getID();
         this.hand = new PlayerHandModel();
         this.actionHand = new ArrayList<>();;
         this.totalScore = 0;
@@ -62,6 +70,10 @@ public class PlayerModel {
 
     public ArrayList<ActionType> getActionHand() {
         return this.actionHand;
+    }
+
+    public PlayerData getPlayerData(){
+        return this.playerData;
     }
 
     public String showActionHand() {

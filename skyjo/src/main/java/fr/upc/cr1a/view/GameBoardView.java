@@ -743,6 +743,10 @@ public class GameBoardView extends JPanel {
         mancheLabel.setText("Manche " + roundNumber);
     }
 
+    public void setMancheLabel(String roundNumber) {
+        mancheLabel.setText(roundNumber);
+    }
+
     public void updatePoints() {
         if (currentPlayer != null) {
             int liveScore = currentPlayer.getHand().getVisibleCardScore();

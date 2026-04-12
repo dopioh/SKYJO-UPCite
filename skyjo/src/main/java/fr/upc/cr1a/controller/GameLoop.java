@@ -88,6 +88,7 @@ public class GameLoop {
             initRevealJustFinished = false;
             gameManager.firstPlayer();
             PlayerModel firstPlayer = gameManager.getCurrentPlayer();
+            gameBoardView.setMancheLabel(gameManager.getRoundNumber());
             gameBoardView.showPlayerTransition(firstPlayer, () -> startCurrentFlow());
             return;
         }

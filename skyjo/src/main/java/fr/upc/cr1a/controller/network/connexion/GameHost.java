@@ -5,14 +5,19 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolServer;
+import fr.upc.cr1a.model.GameManager;
+import fr.upc.cr1a.model.GameSession;
+//import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.model.player.PlayerData;
+import fr.upc.cr1a.view.Frame;
 
 /**
  * Sert à heberger un serveur sur le pc d'un joueur
  * 
  * @author Mei
  */
-public class GameHost implements Runnable{ // GameServer au lieu de GameHost ? 
+public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer au lieu de GameHost ? 
     
     private int port; // pour se connecter, en ipv4 ou ipv6 ? jsp encore // non c'est un port d'acces de meme type que entre Render et l'api 
     private ServerSocket serverSocket; // permet de se recup des requests
@@ -20,18 +25,25 @@ public class GameHost implements Runnable{ // GameServer au lieu de GameHost ?
 
     private ArrayList<ClientHandler> connectedClient = new ArrayList<>(); // pour garder une trace des joueurs connectés 
 
-    private HashMap<String, String> lobbyPlayers = new HashMap<>();
+    private HashMap<String, String> lobbyPlayers = new HashMap<>(); // key = id, value = name
 
     private Thread thread;
 
-    public GameHost(int port){
+    private boolean modeAction;
+    private GameManager gameManager;
+    private Frame frame;
+
+    public GameHost(int port, boolean modeAction, Frame frame){ // rajouter le nom d'un salon et toutes les infos necessaire egalement
         this.port = port;
         this.thread = new Thread(this);
+        this.modeAction = modeAction;
+        this.frame = frame;
     }
 
     public void startServer(){
         isRunning = true;
         thread.start();
+        GameSession.status = GameSession.STATUS.HOST;
     }
 
     // methode pour fermer un serveur ( GameHost ) et kick tous les membres dedans
@@ -47,6 +59,7 @@ public class GameHost implements Runnable{ // GameServer au lieu de GameHost ?
             }
             connectedClient.clear(); //la trace des clients connecté on la garde non ? 
             lobbyPlayers.clear();
+            GameSession.status = GameSession.STATUS.OFFLINE;
             System.out.println("[SERVEUR] Fermerture du serveur et deconnexion de tous les clients.");
         } catch (Exception e) {
             e.printStackTrace();
@@ -89,20 +102,7 @@ public class GameHost implements Runnable{ // GameServer au lieu de GameHost ?
         lobbyPlayers.put(id, username);
         System.out.println("[LOBBY] " + username + " a rejoint la salle d'attente !");
 
-        broadcastLobbyUpdate();
-    }
-
-    public synchronized void broadcastLobbyUpdate() { // synchronised pour gerer les appels de fonctions sur du multi-thread -> modele file d'attente
-
-        StringBuilder message = new StringBuilder("[LOBBY_UPDATE] Players in : ");
-        for (String pseudo : lobbyPlayers.values()) {
-            message.append(pseudo).append(",");
-        }
-
-        // On l'envoie à tous les ClientHandlers
-        for (ClientHandler client : connectedClient) {
-            client.sendMessage(message.toString());
-        }
+        broadcastUpdateLobby();
     }
 
     public void kickPlayer(String id){ // plus sécu avec l'id que l'username
@@ -112,7 +112,9 @@ public class GameHost implements Runnable{ // GameServer au lieu de GameHost ?
                 removeClient(client, id, username);
                 client.closeClient();
 
-                System.out.println("[SERVEUR] Expulsion du joueur : " + username);
+                String msg = "[SERVEUR] Expulsion du joueur : " + username;
+                System.out.println(msg);
+                broadcastInfo(msg);
 
                 break; // ça sert à rien de parcourir le reste
             }
@@ -132,18 +134,100 @@ public class GameHost implements Runnable{ // GameServer au lieu de GameHost ?
 
        if (id != null){
         lobbyPlayers.remove(id); // faut mettre la key
-        System.out.println("[SERVEUR] " + username + " a quitté le salon");
+        String msg = "[SERVEUR] " + username + " a quitté le salon";
+        System.out.println(msg);
+        broadcastInfo(msg);
 
-        broadcastLobbyUpdate();
+        broadcastUpdateLobby();
        }
     }
 
+    /**
+     * Pour broadcast des messages non predefini a tous les joueurs
+     * @param msg
+     */
+    public synchronized void broadcastInfo(String msg){
+
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(msg.toString());
+        }
+    }
+
+    public void startAGame(){
+        ArrayList<PlayerData> listPlayers = new ArrayList<>();
+   
+        for (String key : lobbyPlayers.keySet()){
+            PlayerData tmp = new PlayerData(key, lobbyPlayers.get(key));
+            listPlayers.add(tmp);
+        }
+        this.gameManager = new GameManager(frame, listPlayers, modeAction);
+        frame.setCurrentGame(gameManager);
+    }
+
+    // PARTI PROTOCOL SERVER
+
+    @Override
+    public synchronized void broadcastStartGame(){
+        String message = NetworkProtocolServer.UPDATE_START_GAME;
+
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message.toString());
+        }
+    }
+
+    @Override
+    public synchronized void broadcastUpdateLobby(){
+
+        String message = "[LOBBY_UPDATE]:" + lobbyPlayers.size() + ":";
+
+        int tmp = 0;
+        for (String key : lobbyPlayers.keySet()){
+            if (tmp >= lobbyPlayers.size() - 1){
+                message += key +":"+ lobbyPlayers.get(key);
+            } else {
+                message += key +":"+ lobbyPlayers.get(key)+ ":";
+            }
+
+        }
+
+        // On l'envoie à tous les ClientHandlers
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message);
+        }
+    }
+
+    @Override
+    public synchronized void broadcastCardFlipped(String id, int col, int row, int valeur){
+        String message = NetworkProtocolServer.UPDATE_CARD_FLIPPED + ":" + id + ":" + col + ":" + row + ":" +valeur;
+
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message.toString());
+        }
+    }
+
+    @Override
+    public synchronized void broadcastTurnChanged(String id){
+        String message = NetworkProtocolServer.UPDATE_TURN_CHANGED + ":" + id;
+
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message.toString());
+        }
+    }
+
+
+    public GameManager getGameManager(){
+        return this.gameManager;
+    }
+
     // second test client simultané ( faut un host compatible )
+    /*
+    
     public static void main(String[] args) {
         PlayerData player = new PlayerData("9846220");
 
-        GameClient gameClient = new GameClient(player);
+        GameClient gameClient = new GameClient(player); // ancien gameclient
 
         gameClient.connect("localhost", 1234);
     }
+    */
 }

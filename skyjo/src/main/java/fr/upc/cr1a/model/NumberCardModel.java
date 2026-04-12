@@ -27,6 +27,13 @@ public class NumberCardModel extends CardModel  {
 
     }
 
+    public NumberCardModel(boolean faceDown,int cardValue){
+        super(faceDown);
+        this.cardValue = cardValue;
+        this.star = false;
+        this.cardColor = null;
+    }
+
 
     // Getters & Setters
     public int getCardValue() { return cardValue; }

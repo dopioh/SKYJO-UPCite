@@ -106,8 +106,8 @@ Gère la logique du jeu.
         * Méthode : **placeCard()**, **getCard()**, **isAvailable()**, **getVisibleCardScore()**, **révéler cartes**, **détecter colonnes complètes**
         * **replaceCard()**, **revealCard()**, **allCardsRevealed()**, **countRevealedCards()**, **checkRows()**, **removeRow()**, **calculateScore()**, **revealCardsTemp()**
     * `PlayerData`: Données persistantes du joueur
-        * Attribut : id, rank (Rank), elo, xp, money, skins (ArrayList)
-        * Méthode : **getters/setters pour toutes les données**
+        * Attribut : id, username, rank_id, elo, xp, money, skins (ArrayList), selectedSkinPath
+        * Méthode : **getID()**, **getRankId()**, **getElo()**, **getXp()**, **getMoney()**, **getListSkinPlayer()**, **getSelectedSkinPath()**, **getUsername()**
 
 * **Bot** :
     * `BotModel`: Représente un bot (héritage de bot)
@@ -118,16 +118,19 @@ Gère la logique du jeu.
         * Méthodess supplémentaires : **revealRandomCard()**, **sameCardInHandPosition()**, **tradeInHand()**, **isAcceptableCard()**
         * **countVisibleCardsInColumn()**
     * `BotStrategyInterface`: Interface définissant les stratégies de bot
-        * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **getSeuil()**
+        * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **getSeuil()**, **shouldPlayAction()**
     * `BotTerminalModel`: Stratégie de bot basique (implémente BotStrategyInterface)
         * Stratégie par défaut pour les bots avec seuil fixe
+        * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **shouldPlayAction()**
     * `BotRow`: Stratégie de bot optimisant les lignes (implémente BotStrategyInterface)
         * Se concentre sur l'élimination de lignes complètes
+        * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **shouldPlayAction()**
     * `BotLow`: Stratégie de bot favorisant les cartes basses (implémente BotStrategyInterface)
         * Privilégie les cartes de faible valeur
+        * Méthode : **TakeFromDiscard()**, **ExchangeDrawCard()**, **CardToExchange()**, **shouldPlayAction()**
     * `BotCounting`: Stratégie de bot avancée qui compte les cartes (implémente BotStrategyInterface)
         * Attribut : gameManager (GameManager), cardDeck (Map statique des cartes dans le deck)
-        * Méthode : 
+        * Méthode :
             * **getSeuil()** - Calcule dynamiquement le seuil basé sur les probabilités
             * **countVisibleCards()** - Compte toutes les cartes visibles (mains + défausse)
             * **calculateRemainingCards()** - Calcule les cartes restantes dans la pioche
@@ -135,6 +138,7 @@ Gère la logique du jeu.
             * **TakeFromDiscard()** - Décision basée sur les probabilités
             * **ExchangeDrawCard()** - Décision d'échange basée sur les statistiques
             * **CardToExchange()** - Choix intelligent de la carte à échanger
+            * **shouldPlayAction()** - Décide si le bot doit jouer une action (50% de chance)
     * `BotStatsManager`: Gère les statistiques des bots
         * Méthode : **recordVictory()**, gestion des stats de parties
 
@@ -195,8 +199,8 @@ Gère l'affichage
 
 * **Panels** :
     * `MainMenuPanel`: Panel du menu principal
-        * Attribut : shopButton, playButton, settingsButton
-        * Méthode : **getShopButton()**, **getPlayButton()**, **getSettingsButton()**
+        * Attribut : shopButton, playButton, settingsButton, accountButton, accountStatsOverlay
+        * Méthode : **getShopButton()**, **getPlayButton()**, **getSettingsButton()**, **getAccountButton()**, **openAccountStats()**, **isAccountStatsVisible()**
     * `ShopPanel`: Panel de la boutique
         * Attribut : backBtn, classeurBtn, buyButtons, packImages, topBar, chanceContainer, chanceLabel, cardsRow, caseOpeningOverlay
         * Méthode : **getBackButton()**, **getBuyButtons()**, **getClasseurButton()**, **startCaseOpening()**, **openClasseur()**, **isCaseOpeningVisible()**
@@ -225,6 +229,9 @@ Gère l'affichage
         * Attributs (tempo) : unlockedSkinPaths (ArrayList<String>), selectedSkinPath (String)
         * Méthodes : **startOpening()**, **openClasseur()**, **drawClasseur()**, **drawSkinBox()**, **handleClasseurClick()**, **getEquipButtonBounds()**, **drawEquipButton()**
         * Méthodes tempo : **getUnlockedSkinPaths()**, **unlockSkin()**, **isSkinUnlocked()**, **getSelectedSkinPath()**, **setSelectedSkinPath()**
+    * `AccountStatsOverlayPanel`: Overlay des stats du compte (menu principal)
+        * Attribut : closeButton, fonts (title/label/value/info), constantes couleurs
+        * Méthodes : **openStats()**, **isOpen()**, **drawOverlayBackground()**, **drawCard()**, **drawTitle()**, **drawStats()**, **drawNoAccountMessage()**
 
 * **GameBoardView** : Panel pour afficher le plateau de jeu
     * Méthode : **initComponents()**, **showPlayerscards()**, **getCardImagePath()**, **resizeLayers()**, **showCursorCard()**, **hideCursorCard()**, **updateCardDisplay()**, **updateDiscardOnly()**, **updateActionCardDisplay()**, **updateActionDiscardOnly()**
@@ -253,7 +260,8 @@ Gère toutes les entrées du joueur avec l'ordinateur
 * **MainMenuController** : Contrôleur du menu principal
     * Attribut : frame (Frame), view (MainMenuPanel), audio (AudioManager)
     * Méthode : **ActionListener pour playButton** → redirige vers GameModeSelectionPanel, **settingsButton, shopButton**
-    * **clicShop()**, **clicSettings()**, **clicAccount()**
+    * **clicShop()**, **clicSettings()**, **clicAccount()** (ouvre l'overlay stats)
+    * Les clics/hover sur les boutons principaux sont bloqués si l'overlay stats est visible
 
 * **GameModeSelectionController** : Contrôleur du panel de sélection de mode de jeu
     * Attribut : frame (Frame), view (GameModeSelectionPanel)
@@ -304,6 +312,15 @@ Gère toutes les entrées du joueur avec l'ordinateur
         * **handleBotAfterTakeDiscard()**
         * **revealRandomFaceDownCard()**
         * **grantActionForStar()**
+        * **Support des actions pour les bots en mode graphique** :
+            * **shouldBotPlayAction()** - Vérifie si le bot doit jouer une action
+            * **handleBotPlayAction()** - Gère le déroulement du jeu d'une action
+            * **botReplaceCardInHand()** - REPLACE_CARD_IN_HAND : échange 2 cartes aléatoires
+            * **botTradeCardWithPlayer()** - TRADE_CARD_WITH_PLAYER : échange une carte avec un autre joueur
+            * **botSpyOneColumn()** - SPY_ONE_COLUMN : révèle temporairement une colonne
+            * **botDrawThreeCard()** - DRAW_THREE_CARD : pioche 3 cartes et choisit d'en garder une
+            * **botPlayLastActionInDefausse()** - PLAY_LAST_ACTION_IN_DEFAUSSE : rejette la dernière action
+            * **botAllPlayersDropCard()** - ALL_PLAYERS_DROP_CARD : force les autres joueurs à défausser
 
 * **TimeoutTurnController** : Gère les joueurs AFK et les timeouts
     * Méthode :
@@ -459,7 +476,7 @@ Marqués avec `// MEI` ou `// TODO` dans le code :
 
 * **SendAPI** : Classe qui regroupes des methodes static pour envoyer des donnees a l'API
     * Variables gloabales : **urlAPI (String)**, **client (HttpClient)**
-    * Methodes : **WinGameSolo()**, **getStats()**
+    * Methodes : **WinGameSolo()**, **buyPack()**, **applyGameResult()**, **unlockSkin()**, **selectSkin()**, **getStats()**
 
 * **SupabaseAuth** : Classe qui gere l'authentification du joueur a la base de donnees
     * Variables gloabales : **SUPABASE_URL (String)**, **SUPABASE_PUBLIC_KEY (String)**

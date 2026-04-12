@@ -1,6 +1,9 @@
 package fr.upc.cr1a.view;
 
+import fr.upc.cr1a.controller.data.SendAPI;
 import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
+import fr.upc.cr1a.model.player.PlayerAccount;
+import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.utils.ImageCache;
 
 import javax.swing.*;
@@ -37,7 +40,7 @@ public class ShopPanel extends JPanel {
 
         backgroundImage = ImageCache.get("/background.png");
         packSources = new BufferedImage[] {
-            ImageCache.get("/boutique/nulCard.png"),
+            ImageCache.get("/boutique/nul_card.png"),
             ImageCache.get("/boutique/bof.png"),
             ImageCache.get("/boutique/bien.png")
         };
@@ -216,8 +219,17 @@ public class ShopPanel extends JPanel {
         caseOpeningOverlay.startOpening(packNumber);
     }
 
+    
     public void openClasseur() {
         clearHoverStates();
+        
+        // tests rankup
+        // PlayerData updated = null;
+        // String dbUuid = PlayerAccount.actuelAccount.getID();
+       
+        // updated = SendAPI.addElo(dbUuid, 30);
+        // PlayerAccount.actuelAccount = updated;
+
         caseOpeningOverlay.openClasseur();
     }
 

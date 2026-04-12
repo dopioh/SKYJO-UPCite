@@ -2,7 +2,7 @@ package fr.upc.cr1a.controller;
 
 import fr.upc.cr1a.model.AudioManager;
 //import fr.upc.cr1a.model.GameManager;
-//import fr.upc.cr1a.model.player.PlayerData;
+import fr.upc.cr1a.model.player.PlayerAccount;
 import fr.upc.cr1a.view.DoodleButton;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.MainMenuPanel;
@@ -49,13 +49,31 @@ public class MainMenuController {
     // ajoute hover + clic
     private void ajouterListeners(DoodleButton btn, Runnable action) {
         btn.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) { btn.onMouseEnter(); }
-            public void mouseExited(MouseEvent e) { btn.onMouseExit(); }
-            public void mousePressed(MouseEvent e) { action.run(); }
+            public void mouseEntered(MouseEvent e) {
+                if (view.isAccountStatsVisible()) {
+                    return;
+                }
+                btn.onMouseEnter();
+            }
+
+            public void mouseExited(MouseEvent e) { 
+                btn.onMouseExit(); 
+            }
+            
+            public void mousePressed(MouseEvent e) {
+                if (view.isAccountStatsVisible()) {
+                    return;
+                }
+                action.run();
+            }
         });
     }
 
     private void clicShop() {
+
+        if (PlayerAccount.actuelAccount != null) {
+            frame.getShopPanel().setMoney(PlayerAccount.actuelAccount.getMoney());
+        }
         frame.showPanel("SHOP");
     }
 
@@ -69,6 +87,6 @@ public class MainMenuController {
     }
 
     private void clicAccount() {
-        // MEI ICI ICI ICI pour afficher le panel de gestion de compte
+        view.openAccountStats();
     }
 }

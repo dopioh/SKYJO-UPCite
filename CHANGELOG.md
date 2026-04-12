@@ -392,9 +392,28 @@
     - font, couleur, fond, espacement, doodle button
     - JTextField/mdp plus beau
 
+
 ## v.0.10: SPRINT 10
 
 ### Added
+
+- Système d'elo en ligne
+    - gain ou perte d'elo a la fin d'une partie
+    - depend du nombre de joueur dans la partie et si c'est un bot fort/nul ou un humain
+    - changement de rank tous les 100 elo
+
+- Système de money en ligne
+    - gain de money a la fin d'une partie
+    - depend du nombre de joueur dans la partie et si c'est un bot fort/nul ou un humain
+    - debit a chaque achat dans la boutique
+    - 500 money pour chaque nouveau joueur
+
+- Système de skin en ligne
+    - debloquage des skins sauvegardé dans la base de donnée
+    - selection du skin utilisé dans la base de donnée
+
+- Boutique
+    - en mode invité le jeu donne 1000000 money au joueur
 
 - Animation flip :
     - Sur pioche : joueur et bot
@@ -409,12 +428,16 @@
 - Animation lift :
     - sur la défausse : quand le bot décide de prendre la défausse
 
+- Protocol Serveur -> Clients et debut Client -> Serveur
+
 ### Modified
 
 - Amélioration DA de l'écran fin de manche / fin de partie
 
 - Application de opti partout :
     - background qui n'étais pas en cache et redimentionnais constament sur les panel autre que GameBoardView
+
+- Liaison des bot avec le mode de jeu action
 
 ### Fixed
 
@@ -433,3 +456,20 @@
 - désactivation des listener lors d'un bot vs bot 
 
 
+=======
+## v.0.11: SPRINT 11
+
+### Added
+
+- Overlay des stats du compte connecté dans le menu principal
+
+### Modified
+
+- MainMenuPanel pour gerer les couches avec l'overlay accountStats
+
+- PlayerData et SendAPI pour le fix du rank
+
+### Fixed
+
+- Fix recuperation money avec getStats dans l'API
+- Fix recuperation rank via l'API

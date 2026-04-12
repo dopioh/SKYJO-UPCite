@@ -4,12 +4,14 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.HashSet;
+//import java.util.HashMap;
+//import java.util.HashSet;
 
-import fr.upc.cr1a.controller.network.UDP.ServerListener;
-import fr.upc.cr1a.controller.network.UDP.UDPReceiver;
-import fr.upc.cr1a.model.player.PlayerData;
+import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolClient;
+
+//import fr.upc.cr1a.controller.network.UDP.ServerListener;
+//import fr.upc.cr1a.controller.network.UDP.UDPReceiver;
+//import fr.upc.cr1a.model.player.PlayerData;
 
 /**
  * Classe Runnable qui gère la connexion entre le host (server) et le client
@@ -66,6 +68,16 @@ public class ClientHandler implements Runnable{
                         out.println("[LOBBY_UPDATE] Tu es bien connecté au serveur !");
                     }
                 }
+
+                if (message.contains(NetworkProtocolClient.REQ_FLIP_CARD)) {
+                    String[] parts = message.split(":");
+                    String playerId = parts[0];
+                    int col = Integer.parseInt(parts[2]);
+                    int row = Integer.parseInt(parts[3]);
+                    
+                    // verifier que le coup est valide
+                   //gameHost.getGameManager().
+                }
             }
 
         } catch (Exception e) {
@@ -98,6 +110,7 @@ public class ClientHandler implements Runnable{
     }
 
     // test client ( ne marche que si y'a un host correspondant)
+    /*
     public static void main(String[] args) {
         //PlayerData player = new PlayerData("POPOPO");
 
@@ -121,4 +134,5 @@ public class ClientHandler implements Runnable{
 
         System.out.println("[MAIN] Thread lancé. Le programme doit rester ouvert en écoutant.");
     }
+    */
 }
