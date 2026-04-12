@@ -444,3 +444,14 @@
 - Fix de l'animation hover du `DoodleButton` qui grossisait si le dernier hover datais (reset tick de deltatime)
 
 - Fix du `PlayerPreviewPanel` qui ne s'affichait plus en fin de manche/partie
+
+
+## v.0.11: SPRINT 11
+
+### Added
+
+- Leaderboard
+    - Bouton en haut à droite du menu principal
+    - Joueurs triés par XP
+    - Médailles colorées pour le top 3 (or, argent, bronze)
+    - nom coupé à 18 caractères
