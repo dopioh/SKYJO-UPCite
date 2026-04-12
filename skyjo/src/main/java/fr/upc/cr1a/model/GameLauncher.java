@@ -5,7 +5,6 @@ import fr.upc.cr1a.view.Frame;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import javax.swing.UIManager;
 
 /**
  * Classe pour lancer le jeu 
@@ -78,4 +77,7 @@ public class GameLauncher {
         scanner.close();
     }
 
+    public static void main(String[] args) {
+        new GameLauncher();
+    }
 }
