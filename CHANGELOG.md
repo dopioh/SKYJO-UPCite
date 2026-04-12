@@ -451,6 +451,8 @@
 
 - Overlay des stats du compte connecté dans le menu principal
 
+- Fin Protocols serveur - client(s) 
+
 ### Modified
 
 - MainMenuPanel pour gerer les couches avec l'overlay accountStats
