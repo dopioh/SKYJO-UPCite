@@ -183,7 +183,11 @@ public class Frame extends JFrame{
 
     public void showLeaderboard(java.util.List<fr.upc.cr1a.model.player.PlayerData> players) {
         leaderboard.setBounds(0, 0, getWidth(), getHeight());
-        leaderboard.updatePlayers(players);
+        if (players.isEmpty()) {
+            leaderboard.showLoading();
+        } else {
+            leaderboard.updatePlayers(players);
+        }
         leaderboard.setVisible(true);
         leaderboard.revalidate();
         leaderboard.repaint();

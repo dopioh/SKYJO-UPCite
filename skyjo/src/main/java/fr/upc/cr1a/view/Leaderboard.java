@@ -1,5 +1,6 @@
 package fr.upc.cr1a.view;
 
+import fr.upc.cr1a.model.AnimLoop;
 import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.utils.ImageCache;
 
@@ -24,6 +25,9 @@ public class Leaderboard extends JComponent {
     private JLabel backButton;
     private JPanel listPanel;
     private Font doodleFont;
+    private boolean loading = false;
+    private float loadingAlpha = 0.5f;
+    private float loadingTime = 0f;
 
     public Leaderboard() {
         setOpaque(false);
@@ -73,7 +77,23 @@ public class Leaderboard extends JComponent {
         card.add(titleBar, BorderLayout.NORTH);
 
         // liste scrollable
-        listPanel = new JPanel();
+        listPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (!loading) return;
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int alpha = (int) (loadingAlpha * 255);
+                int rowHeight = 68;
+                int gap = 6;
+                g2.setColor(new Color(90, 180, 84, alpha));
+                for (int i = 0; i < 5; i++) {
+                    g2.fillRoundRect(0, i * (rowHeight + gap), getWidth() - 8, rowHeight, 16, 16);
+                }
+                g2.dispose();
+            }
+        };
         listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
         listPanel.setOpaque(false);
         listPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 8)); // espace entre la barre scroll
@@ -90,8 +110,27 @@ public class Leaderboard extends JComponent {
         add(card);
     }
 
+    // animation pendant le chargement
+    public void showLoading() {
+        loading = true;
+        loadingTime = 0f;
+        listPanel.removeAll();
+        listPanel.revalidate();
+        listPanel.repaint();
+        AnimLoop.add(this, dt -> {
+            if (!loading) {
+                AnimLoop.remove(this);
+                return;
+            }
+            loadingTime += 0.05f * (float) dt;
+            loadingAlpha = (float) Math.abs(Math.sin(loadingTime));
+            listPanel.repaint();
+        });
+    }
+
     // affiche la liste des joueurs
     public void updatePlayers(List<PlayerData> players) {
+        loading = false;
         // tri du plus haut elo au plus bas
         ArrayList<PlayerData> sorted = new ArrayList<>(players);
         for (int i = 0; i < sorted.size() - 1; i++) {

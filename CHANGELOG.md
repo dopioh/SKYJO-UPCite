@@ -454,4 +454,6 @@
     - Bouton en haut à droite du menu principal
     - Joueurs triés par elo
     - Chiffre colorée pour le top 3
-    - nom coupé à 18 caractères
+    - Nom coupé à 24 caractères avec "..."
+    - Animation pendant le chargement
+    - Retry automatique toutes les 5 secondes si l'API ne répond pas
