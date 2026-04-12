@@ -106,8 +106,8 @@ Gère la logique du jeu.
         * Méthode : **placeCard()**, **getCard()**, **isAvailable()**, **getVisibleCardScore()**, **révéler cartes**, **détecter colonnes complètes**
         * **replaceCard()**, **revealCard()**, **allCardsRevealed()**, **countRevealedCards()**, **checkRows()**, **removeRow()**, **calculateScore()**, **revealCardsTemp()**
     * `PlayerData`: Données persistantes du joueur
-        * Attribut : id, rank (Rank), elo, xp, money, skins (ArrayList)
-        * Méthode : **getters/setters pour toutes les données**
+        * Attribut : id, username, rank_id, elo, xp, money, skins (ArrayList), selectedSkinPath
+        * Méthode : **getID()**, **getRankId()**, **getElo()**, **getXp()**, **getMoney()**, **getListSkinPlayer()**, **getSelectedSkinPath()**, **getUsername()**
 
 * **Bot** :
     * `BotModel`: Représente un bot (héritage de bot)
@@ -199,8 +199,8 @@ Gère l'affichage
 
 * **Panels** :
     * `MainMenuPanel`: Panel du menu principal
-        * Attribut : shopButton, playButton, settingsButton
-        * Méthode : **getShopButton()**, **getPlayButton()**, **getSettingsButton()**
+        * Attribut : shopButton, playButton, settingsButton, accountButton, accountStatsOverlay
+        * Méthode : **getShopButton()**, **getPlayButton()**, **getSettingsButton()**, **getAccountButton()**, **openAccountStats()**, **isAccountStatsVisible()**
     * `ShopPanel`: Panel de la boutique
         * Attribut : backBtn, classeurBtn, buyButtons, packImages, topBar, chanceContainer, chanceLabel, cardsRow, caseOpeningOverlay
         * Méthode : **getBackButton()**, **getBuyButtons()**, **getClasseurButton()**, **startCaseOpening()**, **openClasseur()**, **isCaseOpeningVisible()**
@@ -229,6 +229,9 @@ Gère l'affichage
         * Attributs (tempo) : unlockedSkinPaths (ArrayList<String>), selectedSkinPath (String)
         * Méthodes : **startOpening()**, **openClasseur()**, **drawClasseur()**, **drawSkinBox()**, **handleClasseurClick()**, **getEquipButtonBounds()**, **drawEquipButton()**
         * Méthodes tempo : **getUnlockedSkinPaths()**, **unlockSkin()**, **isSkinUnlocked()**, **getSelectedSkinPath()**, **setSelectedSkinPath()**
+    * `AccountStatsOverlayPanel`: Overlay des stats du compte (menu principal)
+        * Attribut : closeButton, fonts (title/label/value/info), constantes couleurs
+        * Méthodes : **openStats()**, **isOpen()**, **drawOverlayBackground()**, **drawCard()**, **drawTitle()**, **drawStats()**, **drawNoAccountMessage()**
 
 * **GameBoardView** : Panel pour afficher le plateau de jeu
     * Méthode : **initComponents()**, **showPlayerscards()**, **getCardImagePath()**, **resizeLayers()**, **showCursorCard()**, **hideCursorCard()**, **updateCardDisplay()**, **updateDiscardOnly()**, **updateActionCardDisplay()**, **updateActionDiscardOnly()**
@@ -257,7 +260,8 @@ Gère toutes les entrées du joueur avec l'ordinateur
 * **MainMenuController** : Contrôleur du menu principal
     * Attribut : frame (Frame), view (MainMenuPanel), audio (AudioManager)
     * Méthode : **ActionListener pour playButton** → redirige vers GameModeSelectionPanel, **settingsButton, shopButton**
-    * **clicShop()**, **clicSettings()**, **clicAccount()**
+    * **clicShop()**, **clicSettings()**, **clicAccount()** (ouvre l'overlay stats)
+    * Les clics/hover sur les boutons principaux sont bloqués si l'overlay stats est visible
 
 * **GameModeSelectionController** : Contrôleur du panel de sélection de mode de jeu
     * Attribut : frame (Frame), view (GameModeSelectionPanel)

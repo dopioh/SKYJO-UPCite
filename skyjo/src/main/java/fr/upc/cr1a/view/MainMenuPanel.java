@@ -5,12 +5,14 @@ import fr.upc.cr1a.utils.ImageCache;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 
 /**
  * Panel du main menu avec les bouttons
  * 
- * @author Ian
+ * @author Ian, Nassim
  */
 public class MainMenuPanel extends JPanel {
 
@@ -19,6 +21,7 @@ public class MainMenuPanel extends JPanel {
     private DoodleButton settingsBtn;
     private JButton accountBtn;
     private JButton podiumBtn;
+    private AccountStatsOverlayPanel accountStatsOverlay;
     private Image backgroundImage;
     private BufferedImage cachedBackground;
 
@@ -44,7 +47,6 @@ public class MainMenuPanel extends JPanel {
         accountBtn.setFocusPainted(false);
         accountBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         topBar.add(accountBtn);
-        add(topBar, BorderLayout.NORTH);
 
         // contenu centré
         JPanel centre = new JPanel(new GridBagLayout());
@@ -75,7 +77,38 @@ public class MainMenuPanel extends JPanel {
         gbc.gridy = 1;
         centre.add(panel, gbc);
 
-        add(centre, BorderLayout.CENTER);
+        JLayeredPane overlayStack = new JLayeredPane();
+        overlayStack.setOpaque(false);
+
+        accountStatsOverlay = new AccountStatsOverlayPanel();
+        overlayStack.add(centre, Integer.valueOf(JLayeredPane.DEFAULT_LAYER));
+        overlayStack.add(topBar, Integer.valueOf(JLayeredPane.DEFAULT_LAYER));
+        overlayStack.add(accountStatsOverlay, Integer.valueOf(JLayeredPane.MODAL_LAYER));
+
+        overlayStack.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                fillOverlayStack(overlayStack, topBar, centre);
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+                fillOverlayStack(overlayStack, topBar, centre);
+            }
+        });
+        fillOverlayStack(overlayStack, topBar, centre);
+
+        add(overlayStack, BorderLayout.CENTER);
+    }
+
+    private void fillOverlayStack(JLayeredPane overlayStack, JPanel topBar, JPanel centre) {
+        int width = overlayStack.getWidth();
+        int height = overlayStack.getHeight();
+        int topHeight = topBar.getPreferredSize().height;
+
+        topBar.setBounds(0, 0, width, topHeight);
+        centre.setBounds(0, topHeight, width, Math.max(0, height - topHeight));
+        accountStatsOverlay.setBounds(0, 0, width, height);
     }
 
     @Override
@@ -100,4 +133,19 @@ public class MainMenuPanel extends JPanel {
     public DoodleButton getSettingsButton() { return settingsBtn; }
     public JButton getAccountButton() { return accountBtn; }
     public JButton getPodiumButton() { return podiumBtn; }
+
+    public void openAccountStats() {
+        clearHoverStates();
+        accountStatsOverlay.openStats();
+    }
+
+    public boolean isAccountStatsVisible() {
+        return accountStatsOverlay.isOpen();
+    }
+
+    private void clearHoverStates() {
+        shopBtn.onMouseExit();
+        playBtn.onMouseExit();
+        settingsBtn.onMouseExit();
+    }
 }

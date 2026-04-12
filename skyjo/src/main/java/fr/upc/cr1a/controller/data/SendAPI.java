@@ -223,7 +223,7 @@ public class SendAPI {
                 System.out.println("Stats recup : ");
                 System.out.println("id : " + playerData.getID());
                 System.out.println("username : " + playerData.getUsername());
-                System.out.println("rank : " + playerData.getPlayerRank());
+                System.out.println("rank_id : " + playerData.getRankId());
                 System.out.println("elo : " + playerData.getElo());
                 System.out.println("xp : " + playerData.getXp());
                 System.out.println("money : " + playerData.getMoney());

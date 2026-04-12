@@ -457,3 +457,16 @@
     - Nom coupé à 24 caractères avec "..."
     - Animation pendant le chargement
     - Retry automatique toutes les 5 secondes si l'API ne répond pas
+
+- Overlay des stats du compte connecté dans le menu principal
+
+### Modified
+
+- MainMenuPanel pour gerer les couches avec l'overlay accountStats
+
+- PlayerData et SendAPI pour le fix du rank
+
+### Fixed
+
+- Fix recuperation money avec getStats dans l'API
+- Fix recuperation rank via l'API
