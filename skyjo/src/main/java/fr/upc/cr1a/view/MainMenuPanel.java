@@ -18,6 +18,7 @@ public class MainMenuPanel extends JPanel {
     private DoodleButton playBtn;
     private DoodleButton settingsBtn;
     private JButton accountBtn;
+    private JButton podiumBtn;
     private Image backgroundImage;
     private BufferedImage cachedBackground;
 
@@ -27,9 +28,16 @@ public class MainMenuPanel extends JPanel {
         //fond
         backgroundImage = ImageCache.get("/background.png");
 
-        JPanel topBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 8));
+        JPanel topBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 16, 16));
         topBar.setOpaque(false);
-        Image scaledAccount = ImageCache.get("/Account.png").getScaledInstance(48, 48, Image.SCALE_SMOOTH);
+        Image scaledPodium = ImageCache.get("/podium.png").getScaledInstance(60, 60, Image.SCALE_SMOOTH);
+        podiumBtn = new JButton(new ImageIcon(scaledPodium));
+        podiumBtn.setBorderPainted(false);
+        podiumBtn.setContentAreaFilled(false);
+        podiumBtn.setFocusPainted(false);
+        podiumBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        topBar.add(podiumBtn);
+        Image scaledAccount = ImageCache.get("/Account.png").getScaledInstance(60, 60, Image.SCALE_SMOOTH);
         accountBtn = new JButton(new ImageIcon(scaledAccount));
         accountBtn.setBorderPainted(false);
         accountBtn.setContentAreaFilled(false);
@@ -91,4 +99,5 @@ public class MainMenuPanel extends JPanel {
     public DoodleButton getPlayButton() { return playBtn; }
     public DoodleButton getSettingsButton() { return settingsBtn; }
     public JButton getAccountButton() { return accountBtn; }
+    public JButton getPodiumButton() { return podiumBtn; }
 }

@@ -2,6 +2,7 @@ package fr.upc.cr1a.view;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 
 import fr.upc.cr1a.controller.AccountController;
@@ -33,6 +34,7 @@ public class Frame extends JFrame{
     private LobbyBrowserPanel lobbyBrowserPanel;
     private LobbyRoomPanel lobbyRoomPanel;
     private SettingsOverlay settingsOverlay;
+    private Leaderboard leaderboard;
     private ShopPanel shopPanel;
     private boolean fullscreen = false;
     private Rectangle windowedBounds;
@@ -83,6 +85,18 @@ public class Frame extends JFrame{
         //Overlay paramètre
         settingsOverlay = new SettingsOverlay();
         setGlassPane(settingsOverlay);
+
+        // Overlay classement
+        leaderboard = new Leaderboard();
+        getLayeredPane().add(leaderboard, JLayeredPane.POPUP_LAYER);
+
+        // redimentionnement
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent e) {
+                leaderboard.setBounds(0, 0, getWidth(), getHeight());
+            }
+        });
 
         //Contrôleurs
         audioManager = new AudioManager();
@@ -166,6 +180,21 @@ public class Frame extends JFrame{
         settingsOverlay.revalidate();
         settingsOverlay.repaint();
     }
+
+    public void showLeaderboard(java.util.List<fr.upc.cr1a.model.player.PlayerData> players) {
+        leaderboard.setBounds(0, 0, getWidth(), getHeight());
+        leaderboard.updatePlayers(players);
+        leaderboard.setVisible(true);
+        leaderboard.revalidate();
+        leaderboard.repaint();
+    }
+
+    public void hideLeaderboard() {
+        leaderboard.setVisible(false);
+        repaint();
+    }
+
+    public Leaderboard getLeaderboard() { return leaderboard; }
 
     public void hideSettingsOverlay() {
         settingsOverlay.setVisible(false);

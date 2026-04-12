@@ -13,8 +13,8 @@ import fr.upc.cr1a.view.MainMenuPanel;
 import javax.swing.SwingUtilities;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-//import java.util.ArrayList;
-//import java.util.List;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 //import javax.swing.JButton;
@@ -48,6 +48,14 @@ public class MainMenuController {
             @Override
             public void mousePressed(MouseEvent e) { clicAccount(); }
         });
+        view.getPodiumButton().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) { clicPodium(); }
+        });
+        frame.getLeaderboard().getBackButton().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) { frame.hideLeaderboard(); }
+        });
     }
 
     // ajoute hover + clic
@@ -78,5 +86,27 @@ public class MainMenuController {
 
     private void clicAccount() {
         // MEI ICI ICI ICI pour afficher le panel de gestion de compte
+    }
+
+    private void clicPodium() {
+        // Faux joueurs
+        List<PlayerData> players = new ArrayList<>();
+        players.add(new PlayerData("Ian"));
+        players.add(new PlayerData("Bob"));
+        players.add(new PlayerData("biubb"));
+        players.add(new PlayerData("oih"));
+        players.add(new PlayerData("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"));
+        players.add(new PlayerData("<html>Hacker<br>mauvais</html>")); // il faut interdir de se nommer comme ça
+        players.add(new PlayerData("Bob"));
+        players.add(new PlayerData("biubb"));
+        players.add(new PlayerData("oih"));
+        players.add(new PlayerData("oiiaiaoiiaia"));
+        frame.showLeaderboard(players);
+
+        // Vrai joueurs (marche pas encore)
+        // new Thread(() -> {
+        //     List<PlayerData> players = SendAPI.getAllPlayers();
+        //     SwingUtilities.invokeLater(() -> frame.showLeaderboard(players));
+        // }).start();
     }
 }
