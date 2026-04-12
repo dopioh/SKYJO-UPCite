@@ -89,21 +89,21 @@ public class MainMenuController {
     }
 
     private void clicPodium() {
-        // Faux joueurs
+        // Faux joueurs (pour tester)
         List<PlayerData> players = new ArrayList<>();
         players.add(new PlayerData("Ian"));
         players.add(new PlayerData("Bob"));
         players.add(new PlayerData("biubb"));
         players.add(new PlayerData("oih"));
         players.add(new PlayerData("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"));
-        players.add(new PlayerData("<html>Hacker<br>mauvais</html>")); // il faut interdir de se nommer comme ça
         players.add(new PlayerData("Bob"));
         players.add(new PlayerData("biubb"));
         players.add(new PlayerData("oih"));
         players.add(new PlayerData("oiiaiaoiiaia"));
         frame.showLeaderboard(players);
 
-        // Vrai joueurs (marche pas encore)
+        // Vrai joueurs
+        // frame.showLeaderboard(new ArrayList<>());
         // new Thread(() -> {
         //     List<PlayerData> players = SendAPI.getAllPlayers();
         //     SwingUtilities.invokeLater(() -> frame.showLeaderboard(players));

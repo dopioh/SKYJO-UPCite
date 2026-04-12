@@ -40,7 +40,7 @@ public class Leaderboard extends JComponent {
 
         // carte verte arrondie principale
         JPanel card = createCard();
-        card.setPreferredSize(new Dimension(480, 560));
+        card.setPreferredSize(new Dimension(620, 560));
         card.setLayout(new BorderLayout(0, 12));
         card.setBorder(BorderFactory.createEmptyBorder(28, 28, 28, 28));
 
@@ -92,11 +92,11 @@ public class Leaderboard extends JComponent {
 
     // affiche la liste des joueurs
     public void updatePlayers(List<PlayerData> players) {
-        // tri du plus haut xp au plus bas
+        // tri du plus haut elo au plus bas
         ArrayList<PlayerData> sorted = new ArrayList<>(players);
         for (int i = 0; i < sorted.size() - 1; i++) {
             for (int j = 0; j < sorted.size() - 1 - i; j++) {
-                if (sorted.get(j).getXp() < sorted.get(j + 1).getXp()) {
+                if (sorted.get(j).getElo() < sorted.get(j + 1).getElo()) {
                     PlayerData tmp = sorted.get(j);
                     sorted.set(j, sorted.get(j + 1));
                     sorted.set(j + 1, tmp);
@@ -139,8 +139,8 @@ public class Leaderboard extends JComponent {
             center.setOpaque(false);
             center.add(new JLabel(avatar));
             String name = p.getUsername();
-            if (name.length() > 18) { // max 18 lettre
-                name = name.substring(0, 18) + "...";
+            if (name.length() > 24) { // max 24 caractere
+                name = name.substring(0, 24) + "...";
             }
             JLabel nameLabel = new JLabel(name);
             nameLabel.setForeground(Color.WHITE);
@@ -148,11 +148,32 @@ public class Leaderboard extends JComponent {
             center.add(nameLabel);
             row.add(center, BorderLayout.CENTER);
 
-            // score
-            JLabel scoreLabel = new JLabel(p.getXp() + " pts");
+            // rank + elo
+            JPanel east = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+            east.setOpaque(false);
+            JPanel rankBadge = new JPanel() {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setColor(new Color(219, 240, 217));
+                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                    g2.dispose();
+                }
+            };
+            rankBadge.setOpaque(false);
+            rankBadge.setLayout(new GridBagLayout());
+            rankBadge.setPreferredSize(new Dimension(36, 26));
+            JLabel rankLabel2 = new JLabel(String.valueOf(p.getPlayerRank()), SwingConstants.CENTER);
+            rankLabel2.setForeground(new Color(80, 168, 74));
+            rankLabel2.setFont(doodleFont.deriveFont(Font.BOLD, 16f));
+            rankBadge.add(rankLabel2, new GridBagConstraints());
+            east.add(rankBadge);
+            JLabel scoreLabel = new JLabel(p.getElo() + " elo");
             scoreLabel.setForeground(Color.WHITE);
             scoreLabel.setFont(doodleFont.deriveFont(Font.BOLD, 20f));
-            row.add(scoreLabel, BorderLayout.EAST);
+            east.add(scoreLabel);
+            row.add(east, BorderLayout.EAST);
 
             listPanel.add(row);
             listPanel.add(Box.createVerticalStrut(6));
