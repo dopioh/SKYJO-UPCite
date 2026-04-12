@@ -453,5 +453,11 @@
 
 ### Modified
 
+- MainMenuPanel pour gerer les couches avec l'overlay accountStats
+
+- PlayerData et SendAPI pour le fix du rank
+
+### Fixed
+
 - Fix recuperation money avec getStats dans l'API
 - Fix recuperation rank via l'API
