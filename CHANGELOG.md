@@ -444,3 +444,14 @@
 - Fix de l'animation hover du `DoodleButton` qui grossisait si le dernier hover datais (reset tick de deltatime)
 
 - Fix du `PlayerPreviewPanel` qui ne s'affichait plus en fin de manche/partie
+
+## v.0.11: SPRINT 11
+
+### Added
+
+- Overlay des stats du compte connecté dans le menu principal
+
+### Modified
+
+- Fix recuperation money avec getStats dans l'API
+- Fix recuperation rank via l'API
