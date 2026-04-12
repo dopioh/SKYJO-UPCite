@@ -274,9 +274,17 @@ public class HumanTurnController {
                         GameRuleModel.removeIdenticalColumns(currentPlayer.getHand(), gameManager.getDiscardPile(), currentPlayer);
                         GameRuleModel.removeIdenticalRows(currentPlayer.getHand(), gameManager.getDiscardPile(), currentPlayer);
 
+                        // verifier si la manche se termine
+                        if (gameManager.getGameState() != GameManager.GameState.LAST_ROUND &&
+                            GameRuleModel.checkEndOfRound(new ArrayList<>(gameManager.getPlayers()))) {
+                            gameManager.setGameState(GameManager.GameState.LAST_ROUND);
+                            gameManager.setLastRoundPlayer(gameManager.getCurrentPlayerIndex());
+                        }
+
                         gameBoardView.flipCardAt(r, c, () -> gameBoardView.showPlayerCards(currentPlayer));
 
                         waitingReveal = false;
+                        gameManager.setTurnPhase(GameManager.TurnPhase.TURN_ENDED);
                         mainController.refreshGuide();
                         gameManager.resetAfkCount(gameManager.getCurrentPlayer());
                         gameManager.setAutoControlled(gameManager.getCurrentPlayer(), false);

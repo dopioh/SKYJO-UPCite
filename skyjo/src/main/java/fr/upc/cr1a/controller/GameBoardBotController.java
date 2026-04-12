@@ -296,6 +296,13 @@ public class GameBoardBotController {
                     GameRuleModel.removeIdenticalColumns(botHand, gameManager.getDiscardPile(), bot);
                     GameRuleModel.removeIdenticalRows(botHand, gameManager.getDiscardPile(), bot);
 
+                    // Vérifier si la manche se termine
+                    if (gameManager.getGameState() != GameManager.GameState.LAST_ROUND &&
+                        GameRuleModel.checkEndOfRound(new ArrayList<>(gameManager.getPlayers()))) {
+                        gameManager.setGameState(GameManager.GameState.LAST_ROUND);
+                        gameManager.setLastRoundPlayer(gameManager.getCurrentPlayerIndex());
+                    }
+
                     gameBoardView.flipCardAt(pos[0], pos[1], () -> gameBoardView.showPlayerCards(bot));
                     mainController.updateAllDecksDisplay();
                     System.out.println(bot.getName() + " révèle une carte");

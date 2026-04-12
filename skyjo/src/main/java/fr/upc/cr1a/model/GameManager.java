@@ -30,6 +30,7 @@ public class GameManager {
     private int currentPlayerIndex;
     private int firstPlayerToPlayIndex;  // joueur qui a commencé la manche
     private int lastRoundPlayer = -1;  // joueur qui a déclenché le LAST_ROUND
+    private PlayerModel roundEndPlayerCache;  // stockage du joueur qui a déclenché la fin
     private GameState gameState;
     private TurnPhase turnPhase;
     private CardModel currentDrawCard;
@@ -709,6 +710,14 @@ public class GameManager {
 
     public void setTurnPhase(TurnPhase phase){
         this.turnPhase = phase;
+    }
+
+    public void setGameState(GameState state) {
+        this.gameState = state;
+    }
+
+    public void setLastRoundPlayer(int playerIndex) {
+        this.lastRoundPlayer = playerIndex;
     }
 
     public void stopGame() {

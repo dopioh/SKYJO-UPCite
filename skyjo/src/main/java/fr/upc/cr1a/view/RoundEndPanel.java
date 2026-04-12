@@ -70,11 +70,24 @@ public class RoundEndPanel extends JPanel {
         topBar.setOpaque(false);
         topBar.setBorder(BorderFactory.createEmptyBorder(30, 40, 15, 40));
 
+        JPanel leftSection = new JPanel();
+        leftSection.setLayout(new BoxLayout(leftSection, BoxLayout.Y_AXIS));
+        leftSection.setOpaque(false);
+
         String title = gameOver ? "Partie terminée !" : "Fin de la manche";
         JLabel titleLabel = new JLabel(title);
         titleLabel.setFont(font(46f, Font.BOLD));
         titleLabel.setForeground(Color.WHITE);
-        topBar.add(titleLabel, BorderLayout.WEST);
+        leftSection.add(titleLabel);
+
+        // Afficher le calcul des points
+        JLabel calculLabel = new JLabel("Calcul des pts: points dans la main + carte action");
+        calculLabel.setFont(font(14f, Font.PLAIN));
+        calculLabel.setForeground(new Color(200, 200, 200));
+        leftSection.add(Box.createVerticalStrut(5));
+        leftSection.add(calculLabel);
+
+        topBar.add(leftSection, BorderLayout.WEST);
 
         if (!gameOver) {
             btnContinuer = new DoodleButton("Continuer", ButtonColor.GREEN, 320, 80, "/Button/Continue.png");
@@ -96,8 +109,30 @@ public class RoundEndPanel extends JPanel {
 
         for (int i = 0; i < sortedPlayers.size(); i++) {
             PlayerModel p = sortedPlayers.get(i);
-            String text = (i + 1) + ".   " + p.getName() + "   —   " + p.getTotalScore() + " pts";
+
+            //récupérer les détails du score de la manche
+            PlayerModel.RoundScore roundScore = p.getLastRoundScore();
+            String scoreDetails = "";
+
+            if (roundScore != null) {
+                //calculer les détails: main + (actions × 10)
+                int handScore = roundScore.handScore;
+                int actionPenalty = roundScore.actionPenalty;
+
+                if (roundScore.wasDoubled) {
+                    scoreDetails = String.format("   (%d+%d)×2=%d", handScore, actionPenalty, roundScore.totalAdded);
+                } else {
+                    scoreDetails = String.format("   %d+%d=%d", handScore, actionPenalty, roundScore.totalAdded);
+                }
+            }
+
+            //indicateur du joueur qui a déclenché LAST_ROUND
+            boolean isRoundEnd = (roundEndPlayer != null && p == roundEndPlayer);
+            String trigger = isRoundEnd ? " [FIRST]" : "";
+
+            String text = (i + 1) + ".   " + p.getName() + trigger + scoreDetails + "   —   " + p.getTotalScore() + " pts";
             JLabel pill = makePill(text);
+
             playerLabels.add(pill);
             bigCard.add(pill);
             bigCard.add(Box.createVerticalStrut(14));
@@ -124,8 +159,10 @@ public class RoundEndPanel extends JPanel {
             }
         };
         pill.setOpaque(false);
+        pill.setFocusable(false);
         pill.setBackground(Color.WHITE);
         pill.setForeground(new Color(50, 50, 50));
+
         pill.setFont(font(22f, Font.BOLD));
         pill.setBorder(BorderFactory.createEmptyBorder(12, 28, 12, 28));
         pill.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
