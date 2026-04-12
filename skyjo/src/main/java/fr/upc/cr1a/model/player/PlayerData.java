@@ -16,7 +16,7 @@ public class PlayerData {
 
     private final String id; // id unique qui permettra de retrouver le player dans la db
     private String username;
-    private int rank; // Faire une enum Rang ? Ou une classe ? String pour le moment
+    private int rank_id; // Faire une enum Rang ? Ou une classe ? String pour le moment
     private int elo; // c'est quoi exactement ? les rr sur valo ?
     private int xp;
     private int money;
@@ -31,7 +31,7 @@ public class PlayerData {
     public PlayerData(String name){
         this.id = null;
         this.username = name;
-        this.rank = 1; // ou on commence unranked ?
+        this.rank_id = 1; // ou on commence unranked ?
         this.elo = 0;
         this.xp = 0;
         this.money = 1000;
@@ -46,7 +46,7 @@ public class PlayerData {
     public PlayerData(String id, String name){
         this.id = id;
         this.username = name;
-        this.rank = 1; // ou on commence unranked ?
+        this.rank_id = 1; // ou on commence unranked ?
         this.elo = 0;
         this.xp = 0;
         this.money = 1000;
@@ -65,7 +65,7 @@ public class PlayerData {
      */
     public PlayerData(String id, boolean isBot, String botType){
         this.id = id;
-        this.rank = 1;
+        this.rank_id = 1;
         this.elo = 0;
         this.xp = 0;
         this.money = 0;
@@ -88,8 +88,8 @@ public class PlayerData {
         return this.botType;
     }
 
-    public int getPlayerRank(){
-        return this.rank;
+    public int getRankId(){
+        return this.rank_id;
     }
 
     public int getElo(){

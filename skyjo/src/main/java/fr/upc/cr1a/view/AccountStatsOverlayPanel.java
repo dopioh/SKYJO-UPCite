@@ -139,7 +139,7 @@ public class AccountStatsOverlayPanel extends JPanel {
         String[] labels = { "Pseudo", "Rang", "Elo", "Argent"};
         String[] values = {
             safeText(account.getUsername(), "Inconnu"),
-            String.valueOf(account.getPlayerRank()),
+            String.valueOf(account.getRankId()),
             String.valueOf(account.getElo()),
             account.getMoney() + " $"
         };

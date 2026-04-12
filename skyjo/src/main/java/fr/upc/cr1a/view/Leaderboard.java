@@ -203,7 +203,7 @@ public class Leaderboard extends JComponent {
             rankBadge.setOpaque(false);
             rankBadge.setLayout(new GridBagLayout());
             rankBadge.setPreferredSize(new Dimension(36, 26));
-            JLabel rankLabel2 = new JLabel(String.valueOf(p.getPlayerRank()), SwingConstants.CENTER);
+            JLabel rankLabel2 = new JLabel(String.valueOf(p.getRankId()), SwingConstants.CENTER);
             rankLabel2.setForeground(new Color(80, 168, 74));
             rankLabel2.setFont(doodleFont.deriveFont(Font.BOLD, 16f));
             rankBadge.add(rankLabel2, new GridBagConstraints());
