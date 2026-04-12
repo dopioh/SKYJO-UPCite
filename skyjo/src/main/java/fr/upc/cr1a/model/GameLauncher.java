@@ -78,17 +78,4 @@ public class GameLauncher {
         scanner.close();
     }
 
-    // hange le style des trucs comme JButton de java sur windows
-    public static void main(String[] args) throws Exception {
-        try {
-            if (System.getProperty("os.name").toLowerCase().contains("mac")) {
-                // mac garde le defaut
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } else {
-                // windows
-                UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-            }
-        } catch (Exception ignored) {}
-        new GameLauncher();
-    }
 }
