@@ -29,7 +29,7 @@ public interface NetworkProtocolServer {
     public abstract void broadcastUpdateDiscardTaken(String id);
 
 
-    public abstract void broadcastUpdateDiscard(String id, int value);
+    //public abstract void broadcastUpdatePioche(String id, int value);
 
 
 

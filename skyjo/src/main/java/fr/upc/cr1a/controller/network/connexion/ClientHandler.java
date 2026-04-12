@@ -157,12 +157,32 @@ public class ClientHandler implements Runnable{
                             CardModel card = game.getCurrentPlayer().getHand().getCard(row, col);
                             if (card instanceof NumberCardModel) {
                                 int val = ((NumberCardModel) card).getCardValue();
-                                gameHost.broadcastUpdateDiscard(playerId, val);
+                                gameHost.broadcastCardFlipped(playerId, col, row, val);
                             }
                             
                             // Le tour est fini
                             game.nextPlayer();
                             gameHost.broadcastTurnChanged(game.getCurrentPlayer().getPlayerData().getID());
+                        }
+                    }
+                }
+
+                else if (message.contains(NetworkProtocolClient.REQ_PICK_PIOCHE)) {
+                    String[] parts = message.split(":");
+                    String playerId = parts[0];
+
+                    GameManager game = gameHost.getGameManager();
+                    if (game != null && game.getCurrentPlayer().getPlayerData().getID().equals(playerId)) {
+                        if (game.getTurnPhase() == GameManager.TurnPhase.DRAW_DECISION) {
+                            CardModel drawnCard = game.drawDeck();
+                            
+
+                            if (drawnCard instanceof NumberCardModel) {
+                                int val = ((NumberCardModel) drawnCard).getCardValue();
+                                sendMessage("UPDATE_DRAWN_CARD:" + val); // pas dans NetworkProtocol pour le moment car requete unique à un joueur
+                            }
+                            
+                            gameHost.broadcastTurnChanged(playerId);
                         }
                     }
                 }

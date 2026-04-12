@@ -232,15 +232,6 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
         }
     }
 
-    @Override
-    public void broadcastUpdateDiscard(String id, int numberCard){
-        String message = NetworkProtocolServer.UPDATE_DISCARD + ":" + id + ":" + numberCard;
-
-        for (ClientHandler client : connectedClient) {
-            client.sendMessage(message);
-        }
-    }
-
 
     public GameManager getGameManager(){
         return this.gameManager;
