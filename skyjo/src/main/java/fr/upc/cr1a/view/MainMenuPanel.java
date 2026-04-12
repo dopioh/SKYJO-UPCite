@@ -30,13 +30,15 @@ public class MainMenuPanel extends JPanel {
 
         JPanel topBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 16, 16));
         topBar.setOpaque(false);
-        podiumBtn = new JButton(new ImageIcon(scaleImage("/podium.png", 60, 60)));
+        Image scaledPodium = ImageCache.get("/podium.png").getScaledInstance(60, 60, Image.SCALE_SMOOTH);
+        podiumBtn = new JButton(new ImageIcon(scaledPodium));
         podiumBtn.setBorderPainted(false);
         podiumBtn.setContentAreaFilled(false);
         podiumBtn.setFocusPainted(false);
         podiumBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         topBar.add(podiumBtn);
-        accountBtn = new JButton(new ImageIcon(scaleImage("/Account.png", 60, 60)));
+        Image scaledAccount = ImageCache.get("/Account.png").getScaledInstance(60, 60, Image.SCALE_SMOOTH);
+        accountBtn = new JButton(new ImageIcon(scaledAccount));
         accountBtn.setBorderPainted(false);
         accountBtn.setContentAreaFilled(false);
         accountBtn.setFocusPainted(false);
@@ -52,9 +54,8 @@ public class MainMenuPanel extends JPanel {
         gbc.insets = new Insets(20, 20, 20, 20);
 
         // Logo
-        BufferedImage logoSrc = ImageCache.get("/skyjo_logo.png");
-        int logoH = 400 * logoSrc.getHeight() / logoSrc.getWidth();
-        JLabel titre = new JLabel(new ImageIcon(scaleImage("/skyjo_logo.png", 400, logoH)));
+        Image scaledLogo = ImageCache.get("/skyjo_logo.png").getScaledInstance(400, -1, Image.SCALE_SMOOTH);
+        JLabel titre = new JLabel(new ImageIcon(scaledLogo));
         gbc.gridy = 0;
         gbc.gridwidth = 3;
         centre.add(titre, gbc);
@@ -75,19 +76,6 @@ public class MainMenuPanel extends JPanel {
         centre.add(panel, gbc);
 
         add(centre, BorderLayout.CENTER);
-    }
-
-    // redimensionne avec bicubique pour eviter le pixelisé sur windows
-    private BufferedImage scaleImage(String path, int w, int h) {
-        BufferedImage src = ImageCache.get(path);
-        BufferedImage result = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = result.createGraphics();
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-        g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.drawImage(src, 0, 0, w, h, null);
-        g2.dispose();
-        return result;
     }
 
     @Override
