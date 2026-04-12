@@ -90,23 +90,23 @@ public class MainMenuController {
 
     private void clicPodium() {
         // Faux joueurs (pour tester)
-        List<PlayerData> players = new ArrayList<>();
-        players.add(new PlayerData("Ian"));
-        players.add(new PlayerData("Bob"));
-        players.add(new PlayerData("biubb"));
-        players.add(new PlayerData("oih"));
-        players.add(new PlayerData("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"));
-        players.add(new PlayerData("Bob"));
-        players.add(new PlayerData("biubb"));
-        players.add(new PlayerData("oih"));
-        players.add(new PlayerData("oiiaiaoiiaia"));
-        frame.showLeaderboard(players);
+         // List<PlayerData> players = new ArrayList<>();
+        // players.add(new PlayerData("Ian"));
+        // players.add(new PlayerData("Bob"));
+        // players.add(new PlayerData("biubb"));
+        // players.add(new PlayerData("oih"));
+        // players.add(new PlayerData("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"));
+        // players.add(new PlayerData("Bob"));
+        // players.add(new PlayerData("biubb"));
+        // players.add(new PlayerData("oih"));
+        // players.add(new PlayerData("oiiaiaoiiaia"));
+        // frame.showLeaderboard(players);
 
         // Vrai joueurs
-        // frame.showLeaderboard(new ArrayList<>());
-        // new Thread(() -> {
-        //     List<PlayerData> players = SendAPI.getAllPlayers();
-        //     SwingUtilities.invokeLater(() -> frame.showLeaderboard(players));
-        // }).start();
+        frame.showLeaderboard(new ArrayList<>());
+        new Thread(() -> {
+            List<PlayerData> players = SendAPI.getAllPlayers();
+            SwingUtilities.invokeLater(() -> frame.showLeaderboard(players));
+        }).start();
     }
 }

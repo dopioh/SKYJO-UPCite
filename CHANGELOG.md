@@ -452,6 +452,6 @@
 
 - Leaderboard
     - Bouton en haut à droite du menu principal
-    - Joueurs triés par XP
+    - Joueurs triés par elo
     - Chiffre colorée pour le top 3
     - nom coupé à 18 caractères
