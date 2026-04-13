@@ -10,7 +10,9 @@ import java.util.List;
 
 import javax.swing.*;
 
+import fr.upc.cr1a.controller.data.ApiErrorManager;
 import fr.upc.cr1a.controller.data.SendAPI;
+import fr.upc.cr1a.view.ErrorDialog;
 import fr.upc.cr1a.model.*;
 import fr.upc.cr1a.model.player.PlayerAccount;
 import fr.upc.cr1a.model.player.PlayerData;
@@ -422,6 +424,11 @@ public class GameBoardController {
                 System.out.println("Fin de partie DB: " + (wonGame ? "WIN" : "PERDU"));
             } else {
                 System.out.println("Fin de partie DB: echec applyGameResult");
+                SwingUtilities.invokeLater(() -> ErrorDialog.showError(
+                    gameBoardModel.getFrame(),
+                    "Resultat de partie",
+                    ApiErrorManager.getLastUserMessageOrDefault("Fin de manche OK, mais les recompenses n'ont pas pu etre synchronisees. ZUT ALORS")
+                ));
             }
         }, "db-endgame-rewards").start();
     }

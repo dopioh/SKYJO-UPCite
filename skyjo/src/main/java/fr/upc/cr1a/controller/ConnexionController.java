@@ -1,8 +1,10 @@
 package fr.upc.cr1a.controller;
 
+import fr.upc.cr1a.controller.data.ApiErrorManager;
 import fr.upc.cr1a.controller.data.SupabaseAuth;
 import fr.upc.cr1a.model.player.PlayerAccount;
 import fr.upc.cr1a.view.ConnexionPanel;
+import fr.upc.cr1a.view.ErrorDialog;
 import fr.upc.cr1a.view.Frame;
 
 import java.awt.event.MouseAdapter;
@@ -47,6 +49,11 @@ public class ConnexionController {
         if (!create){
             PlayerAccount.actuelAccount = null;
             System.out.println("Erreur lors de l'envoi à la base de données (email/pseudo peut être déjà utilisé)"); 
+            ErrorDialog.showError(
+                frame,
+                "Inscription",
+                ApiErrorManager.getLastUserMessageOrDefault("Oups, creation du compte impossible pour le moment.")
+            );
         } else {
             System.out.println("CONNECTERRRRRRRRRRRR");
             frame.showPanel("MENU");
@@ -69,6 +76,11 @@ public class ConnexionController {
         if (!connexion){
             PlayerAccount.actuelAccount = null;
             System.out.println("ERREUR DE CONNEXION : Surement Mot de Passe Errones"); 
+            ErrorDialog.showError(
+                frame,
+                "Connexion",
+                ApiErrorManager.getLastUserMessageOrDefault("Connexion impossible pour le moment. Reessaie dans un instant.")
+            );
         } else {
             System.out.println("CONNNNNNNNECCTERRRRRRRRRRRRRRRRRRRRRRRRRRR");
             frame.showPanel("MENU");

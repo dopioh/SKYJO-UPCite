@@ -39,12 +39,6 @@ public class GameBoardBotController {
      *arrête toutes les actions des bots en cours
      */
     public void stopAllBotActions() {
-        for (Timer timer : activeTimers) {
-            if (timer != null && timer.isRunning()) {
-                timer.stop();
-            }
-        }
-        activeTimers.clear();
         pausedState = true;
     }
 

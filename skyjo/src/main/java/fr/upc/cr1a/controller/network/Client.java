@@ -64,4 +64,8 @@ public class Client {
     public HashMap<String,String> getLobbyAvailable(){
         return this.lobbyfound;
     }
+
+    public GameClient getGameClient(){
+        return this.gameClient;
+    }
 }

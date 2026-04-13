@@ -16,7 +16,7 @@ public class PlayerData {
 
     private final String id; // id unique qui permettra de retrouver le player dans la db
     private String username;
-    private int rank_id; // Faire une enum Rang ? Ou une classe ? String pour le moment 
+    private int rank_id; // Faire une enum Rang ? Ou une classe ? String pour le moment
     private int elo; // c'est quoi exactement ? les rr sur valo ?
     private int xp;
     private int money;
@@ -54,11 +54,11 @@ public class PlayerData {
         this.botType = null;
         this.skins = null; // a modif plus tard
     }
-    
-    
+
+
     /**
      * Constructeur pour un bot
-     * 
+     *
      * @param id le nom du bot
      * @param isBot true si c'est un bot
      * @param botType le type de bot
