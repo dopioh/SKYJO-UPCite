@@ -451,6 +451,9 @@
 
 - Overlay des stats du compte connecté dans le menu principal
 
+- Ajout des panel d'erreur de l'API au serveur
+
+
 ### Modified
 
 - MainMenuPanel pour gerer les couches avec l'overlay accountStats

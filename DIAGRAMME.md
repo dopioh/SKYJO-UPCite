@@ -370,6 +370,78 @@ Gère toutes les entrées du joueur avec l'ordinateur
 * **SupabaseAuth** : Classe qui gere l'authentification du joueur a la base de donnees
     * Variables gloabales : **SUPABASE_URL (String)**, **SUPABASE_PUBLIC_KEY (String)**
     * Methodes : **connectPlayerByEmail()**, **connectPlayerByUsername()**, **createAccount()**,**getIUD()**, **getAccesToken()**
+    * **Intégration Erreurs** : Tous les appels peuplent `ApiErrorManager` en cas d'erreur HTTP (401, 403, 500, etc.)
+
+### Système de Gestion des Erreurs API
+
+**Architecture** : Système centralisé de capture, mapping et affichage des erreurs API/réseau
+
+* **ApiErrorManager** : Gestionnaire centralisé des erreurs (classe statique)
+    * Attribut (static volatile) :
+        * `lastUserMessage` (String) - Message utilisateur français actuel
+        * `lastStatusCode` (int) - Code HTTP ou code erreur réseau
+        * `lastContext` (String) - Contexte de l'erreur (ex: "connexion", "boutique")
+    * Méthode :
+        * **mapHttpStatusToMessage()** - Traduit code HTTP → message français Skyjo-style :
+            * 400 → "Mauvaise requête, vérifies tes données"
+            * 401 → "Mauvaise combinaison identifiant/mot de passe. Essaie encore."
+            * 403 → "Tu n'as pas accès à cette action"
+            * 404 → "La ressource demandée n'existe pas"
+            * 409 → "Cet email ou ce pseudo est déjà pris."
+            * 422 → "Les données envoyées sont invalides"
+            * 429 → "Trop de requêtes. Attends un peu."
+            * 500-504 → "Erreur serveur. L'équipe Skyjo est là-dessus!"
+        * **setHttpError(String context, int statusCode, String responseBody)** - Enregistre une erreur HTTP
+        * **setNetworkError(String context, Exception exception)** - Enregistre une erreur réseau (ConnectException, HttpTimeoutException)
+        * **getLastUserMessageOrDefault()** - Retourne le message utilisateur ou un message par défaut
+        * **clear()** - Efface le dernier message d'erreur
+        * **getLastStatusCode()**, **getLastContext()** - Accesseurs pour debugging
+
+* **Intégration SupabaseAuth** :
+    * Chaque méthode (`connectPlayerByEmail`, `connectPlayerByUsername`, `createAccount`, `getEmailFromUsername`) :
+        * Appelle `ApiErrorManager.clear()` au début
+        * Sur réponse non-200 : appelle `ApiErrorManager.setHttpError(context, statusCode, responseBody)`
+        * Sur exception réseau : appelle `ApiErrorManager.setNetworkError(context, exception)`
+    * Codes gérés : 401 (mauvaise auth), 403 (accès refusé), 404 (utilisateur non trouvé), 409 (email/pseudo déjà pris), 500 (erreur serveur)
+
+* **Intégration SendAPI** :
+    * Méthode helper `isHttpSuccess(HttpResponse<String> response, String context)` :
+        * Retourne true si statusCode == 200
+        * Sinon : `ApiErrorManager.setHttpError()` et retourne false
+    * Tous les endpoints utilisent ce pattern :
+        * `buyPack()` - Achat d'un paquet en boutique
+        * `applyGameResult()` - Synchronisation résultats partie
+        * `unlockSkin()` - Déverrouiller un skin
+        * `selectSkin()` - Équiper un skin
+        * `getStats()` - Récupération stats joueur
+    * Codes gérés : 400, 401, 403, 404, 409, 422, 500
+
+* **ErrorDialog** : Composant Swing personnalisé pour affichage Skyjo
+    * Construction graphique :
+        * Background : Semi-transparent noir (0,0,0,180)
+        * Carré : Beige Skyjo (248,243,226), bordure marron (54,45,34), coins arrondis 20px
+        * Fonts : PatrickHandSC bold pour titre (28f), GoogleSans regular pour message (16f)
+        * Bouton : DoodleButton vert avec états hover
+    * Signature : `ErrorDialog(Frame owner, String title, String message)`
+    * Méthode statique : `ErrorDialog.showError(Frame owner, String title, String message)`
+    * Utilisé dans :
+        * `ConnexionController` → sendLogin(), sendCreate() (titres: "Connexion", "Inscription")
+        * `ShopController` → clicAcheter() (titre: "Boutique")
+        * `GameBoardController` → rewardEndGame() (titre: "Resultat de partie")
+
+* **CaseOpeningOverlayPanel** : Limitation statique
+    * Méthodes statiques `unlockSkin()` et `setSelectedSkinPath()` ne peuvent pas accéder au contexte instance
+    * Solution : Utilisation de JOptionPane (système) au lieu de ErrorDialog personnalisé
+    * À améliorer : Refactorisation en méthodes instances si styling critique pour cette section
+
+**Flux d'erreurs global** :
+1. API call dans SupabaseAuth/SendAPI
+2. Si erreur : population ApiErrorManager (via setHttpError/setNetworkError)
+3. Controller réceptionne réponse nulle/ErrorDialog trigger
+4. ErrorDialog.showError() affiche message utilisateur français + design Skyjo
+5. ApiErrorManager.clear() sur prochaine tentative (ou au début de méthode)
+
+**Codes d'erreur gérés** : 400, 401, 403, 404, 409, 422, 429, 500, 502, 503, 504, ConnectException, HttpTimeoutException
 
 ## UTILS
 
