@@ -124,10 +124,10 @@ public class MainMenuController {
         frame.showLeaderboard(new ArrayList<>());
         new Thread(() -> {
             List<PlayerData> players = new ArrayList<>();
-            while (players.isEmpty() && leaderboardLoading) { // reessayer de load tout les 5 second si il arrive pas
+            while (players.isEmpty() && leaderboardLoading) { // reessayer de load tout les 2 second si il arrive pas
                 players = SendAPI.getAllPlayers();
                 if (players.isEmpty()) {
-                    try { Thread.sleep(5000); } catch (InterruptedException e) { break; }
+                    try { Thread.sleep(2000); } catch (InterruptedException e) { break; }
                 }
             }
             List<PlayerData> result = players;
