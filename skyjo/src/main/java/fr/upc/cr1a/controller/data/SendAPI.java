@@ -194,7 +194,35 @@ public class SendAPI {
     }
 
 
-    // Quoi d'autres comme requetes possible ? 
+    /**
+     * recupere tous les joueurs pour le classement
+     */
+    public static List<PlayerData> getAllPlayers() {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlAPI + "/api/player/leaderboard"))
+                    .header("Content-Type", "application/json")
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("CODE HTTP LEADERBOARD : " + response.statusCode());
+            System.out.println("API REPOND LEADERBOARD : " + response.body());
+
+            if (response.statusCode() == 200) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                PlayerData[] players = gson.fromJson(response.body(), PlayerData[].class);
+                return List.of(players);
+            }
+            return new ArrayList<>();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    // Quoi d'autres comme requetes possible ?
 
     /**
      * Methode pour creer ou actualiser les stats du player en local

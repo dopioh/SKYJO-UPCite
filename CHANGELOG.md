@@ -445,9 +445,18 @@
 
 - Fix du `PlayerPreviewPanel` qui ne s'affichait plus en fin de manche/partie
 
+
 ## v.0.11: SPRINT 11
 
 ### Added
+
+- Leaderboard
+    - Bouton en haut à droite du menu principal
+    - Joueurs triés par elo
+    - Chiffre colorée pour le top 3
+    - Nom coupé à 24 caractères avec "..."
+    - Animation pendant le chargement
+    - Retry automatique toutes les 5 secondes si l'API ne répond pas
 
 - Overlay des stats du compte connecté dans le menu principal
 
