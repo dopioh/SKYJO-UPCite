@@ -8,16 +8,19 @@ import java.net.Socket;
 //import java.util.ArrayList;
 import java.util.ArrayList;
 
+import fr.upc.cr1a.controller.GameBoardController;
 //import fr.upc.cr1a.controller.network.UDP.UDPBroadcaster;
 import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolClient;
 import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolServer;
 import fr.upc.cr1a.model.GameManager;
 import fr.upc.cr1a.model.GameSession;
+import fr.upc.cr1a.model.NumberCardModel;
 import fr.upc.cr1a.model.player.PlayerData;
 
 import java.io.*;
 
 import fr.upc.cr1a.view.Frame;
+import fr.upc.cr1a.view.GameBoardView;
 
 /**
  * Pour se connecter à un GameHost
@@ -104,6 +107,7 @@ public class GameClient implements NetworkProtocolClient{
                 if (message.startsWith(NetworkProtocolServer.UPDATE_START_GAME)){ // LANCER UNE GAME DEPUIS LE GAMEMANAGER
                     System.out.println("[SYSTEM] message start with \""+NetworkProtocolServer.UPDATE_START_GAME+"\"");
                     GameManager game = new GameManager(this.frame, listPlayersData, modeAction); // faudra bloquer les clics du joueur visuellement
+                    game.setNetwork(this); 
                     frame.setCurrentGame(game);
                     System.out.println("[SYSTEM] Game launched");
 
@@ -134,6 +138,50 @@ public class GameClient implements NetworkProtocolClient{
                         
                         if (game != null) {
                             game.forceTurnFromNetwork(idJoueurActif);
+                        }
+                    }
+                }
+
+                if (message.startsWith(NetworkProtocolServer.UPDATE_DISCARD_TAKEN)) {
+                    //String[] parts = message.split(":");
+                    //String playerId = parts[1];
+                    
+                    GameManager game = frame.getCurrentGame();
+                    if (game != null) {
+     
+                        // tlm fait l'action localement
+                        game.takeDiscard();
+                        
+
+                        if (game.getGameBoardModel() != null) {
+                            game.getGameBoardModel().getGameBoardController().updateAllDecksDisplay(); // mettra une carte au hasard, il faut attendre la view pour tester
+                            game.getGameBoardModel().getGameBoardController().refreshGuide();
+                        }
+                    }
+                }
+
+                // requete secrete ( broadcast que le client handler concerné normalement)
+                if (message.startsWith("UPDATE_DRAWN_CARD")) { // valeur de la pioche 
+                    String[] parts = message.split(":");
+                    int valeur = Integer.parseInt(parts[1]);
+
+                    GameManager game = frame.getCurrentGame();
+                    if (game != null) {
+                        NumberCardModel vraieCarte = new NumberCardModel(false, valeur);
+                        
+                        
+                        game.setCurrentDrawCard(vraieCarte); // ça set que dans la main du client concerné 
+                        
+                        // phase de choix entre echanger ou jeter
+                        game.setTurnPhase(GameManager.TurnPhase.CARD_DRAW_FROM_DECK);
+                        
+
+                        if (game.getGameBoardModel() != null) {
+                            GameBoardView view = game.getGameBoardModel().getGameBoardView();
+                            GameBoardController controller = game.getGameBoardModel().getGameBoardController();
+                            
+                            controller.refreshGuide(); 
+                            view.showCursorCard(view.getCardImagePath(vraieCarte)); // carte sous la souris du joueur
                         }
                     }
                 }

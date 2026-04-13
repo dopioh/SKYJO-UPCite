@@ -460,6 +460,7 @@
 
 - Overlay des stats du compte connecté dans le menu principal
 
+- Fin Protocols serveur - client(s) 
 - Ajout des panel d'erreur de l'API au serveur
 
 

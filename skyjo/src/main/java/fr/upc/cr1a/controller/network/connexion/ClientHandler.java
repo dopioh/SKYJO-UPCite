@@ -8,6 +8,9 @@ import java.net.Socket;
 //import java.util.HashSet;
 
 import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolClient;
+import fr.upc.cr1a.model.CardModel;
+import fr.upc.cr1a.model.GameManager;
+import fr.upc.cr1a.model.NumberCardModel;
 
 //import fr.upc.cr1a.controller.network.UDP.ServerListener;
 //import fr.upc.cr1a.controller.network.UDP.UDPReceiver;
@@ -77,6 +80,111 @@ public class ClientHandler implements Runnable{
                     
                     // verifier que le coup est valide
                    //gameHost.getGameManager().
+
+                   GameManager game = gameHost.getGameManager();
+
+                   // Verifie que c'est le tour du bon joueur de joué 
+                    if (game != null && game.getCurrentPlayer().getPlayerData().getID().equals(playerId)) { 
+                        GameManager.TurnPhase phase = game.getTurnPhase();
+                        
+                        // cas du retournement de cartes PRE MANCHE
+                        if (phase == GameManager.TurnPhase.INIT_REVEAL) {
+                            boolean success = game.revealInitCard(col, row);
+
+                            if (success) {
+                                CardModel card = game.getCurrentPlayer().getHand().getCard(row, col);
+                                if (card instanceof NumberCardModel) {
+                                    int val = ((NumberCardModel) card).getCardValue();
+                                    
+                                    // braodcast de la carte retourné
+                                    gameHost.broadcastCardFlipped(playerId, col, row, val);
+                                }
+                                
+                                gameHost.broadcastTurnChanged(game.getCurrentPlayer().getPlayerData().getID());
+                            }
+                        } 
+                        // cas du retournement obligatoire apres avoir jeté une pioche
+
+                        else if (phase == GameManager.TurnPhase.CARD_DISCARD_FROM_DRAW) {
+
+                            game.revealCardInHand(col, row);
+                            CardModel card = game.getCurrentPlayer().getHand().getCard(row, col);
+
+                            if (card instanceof NumberCardModel) {
+                                int val = ((NumberCardModel) card).getCardValue();
+                                gameHost.broadcastCardFlipped(playerId, col, row, val);
+                            }
+                            
+                            game.nextPlayer();
+                            gameHost.broadcastTurnChanged(game.getCurrentPlayer().getPlayerData().getID());
+                        }
+                    }
+                }
+                // PIOCHE UNE CARTE DANS LA DEFAUSSE
+                if (message.contains(NetworkProtocolClient.REQ_PICK_DEFAUSSE)) {
+                    String[] parts = message.split(":");
+                    String playerId = parts[0];
+
+                    GameManager game = gameHost.getGameManager();
+
+                    if (game != null && game.getCurrentPlayer().getPlayerData().getID().equals(playerId)) {
+
+                        if (game.getTurnPhase() == GameManager.TurnPhase.DRAW_DECISION) {
+                            
+                            // execution dans le jeu
+                            game.takeDiscard();
+                            gameHost.broadcastUpdateDiscardTaken(playerId); 
+                        }
+                    }
+                }
+
+                // Echanger une carte ( jeter dans la defausse )
+                else if (message.contains(NetworkProtocolClient.REQ_DISCARD)) {
+                    String[] parts = message.split(":");
+                    String playerId = parts[0];
+                    int col = Integer.parseInt(parts[2]);
+                    int row = Integer.parseInt(parts[3]);
+
+                    GameManager game = gameHost.getGameManager();
+                    if (game != null && game.getCurrentPlayer().getPlayerData().getID().equals(playerId)) {
+                        GameManager.TurnPhase phase = game.getTurnPhase();
+                        
+                        // verifie que le joueur a une pioche en main
+                        if (phase == GameManager.TurnPhase.CARD_TAKE_FROM_DISCARD || phase == GameManager.TurnPhase.CARD_DRAW_FROM_DECK) {
+                            game.exchangeCardInHand(col, row);
+                            
+                            // on revele la carte a tlm
+                            CardModel card = game.getCurrentPlayer().getHand().getCard(row, col);
+                            if (card instanceof NumberCardModel) {
+                                int val = ((NumberCardModel) card).getCardValue();
+                                gameHost.broadcastCardFlipped(playerId, col, row, val);
+                            }
+                            
+                            // Le tour est fini
+                            game.nextPlayer();
+                            gameHost.broadcastTurnChanged(game.getCurrentPlayer().getPlayerData().getID());
+                        }
+                    }
+                }
+
+                else if (message.contains(NetworkProtocolClient.REQ_PICK_PIOCHE)) {
+                    String[] parts = message.split(":");
+                    String playerId = parts[0];
+
+                    GameManager game = gameHost.getGameManager();
+                    if (game != null && game.getCurrentPlayer().getPlayerData().getID().equals(playerId)) {
+                        if (game.getTurnPhase() == GameManager.TurnPhase.DRAW_DECISION) {
+                            CardModel drawnCard = game.drawDeck();
+                            
+
+                            if (drawnCard instanceof NumberCardModel) {
+                                int val = ((NumberCardModel) drawnCard).getCardValue();
+                                sendMessage("UPDATE_DRAWN_CARD:" + val); // pas dans NetworkProtocol pour le moment car requete unique à un joueur
+                            }
+                            
+                            gameHost.broadcastTurnChanged(playerId);
+                        }
+                    }
                 }
             }
 

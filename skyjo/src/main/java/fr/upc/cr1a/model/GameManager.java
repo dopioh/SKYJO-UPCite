@@ -5,6 +5,7 @@ import java.util.HashMap;
 //import javax.swing.Timer;
 
 import fr.upc.cr1a.controller.GameBoardController;
+import fr.upc.cr1a.controller.network.connexion.GameClient;
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
 import fr.upc.cr1a.model.player.PlayerData;
@@ -42,6 +43,7 @@ public class GameManager {
     private boolean initRevealJustFinished = false;
 
     private boolean gameWithAction = false; // true si on utilise les actions
+    private GameClient onlineClient; // si on est en ligne alors on en associe un, sinon ça reste a null
     
     private HashMap<PlayerModel, Integer> afkCounts = new HashMap<>();
     private HashMap<PlayerModel, Boolean> autoControlledPlayers = new HashMap<>();
@@ -642,6 +644,18 @@ public class GameManager {
         this.initRevealJustFinished = value;
     }
 
+    public GameClient getNetwork(){
+        return this.onlineClient;
+    }
+
+    public void setNetwork(GameClient gameClient){
+        this.onlineClient = gameClient;
+    }
+
+    public void setCurrentDrawCard(CardModel card) {
+        this.currentDrawCard = card;
+    }
+
     public int getRoundNumber(){
         return roundNumber;
     }
@@ -695,7 +709,9 @@ public class GameManager {
         }
     }   
 
-    // PARTIE NETWORK
+    public GameBoardModel getGameBoardModel(){
+        return this.gameBoardModel;
+    }
 
     /**
      * Methode exclusive au multijoueur (Cote Client)
