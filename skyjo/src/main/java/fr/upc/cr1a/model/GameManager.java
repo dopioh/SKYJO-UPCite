@@ -514,7 +514,7 @@ public class GameManager {
         if (isStarCard(cardInHand)) {
             ActionCardModel actionCard = grantActionForStar(currentPlayer);
             if (actionCard != null) {
-                System.out.println("[Exchange] Étoile jetée : carte action gagnée !");
+                System.out.println("Étoile jetée : carte action gagnée !");
             }
         }
         

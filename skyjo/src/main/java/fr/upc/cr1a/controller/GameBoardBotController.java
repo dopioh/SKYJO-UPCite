@@ -197,7 +197,6 @@ public class GameBoardBotController {
                 //prend de la défausse
                 gameBoardView.getBtnDefausse().lift();
                 CardModel taken = gameManager.takeDiscard();
-                System.out.println(bot.getName() + " prend la défausse : " + taken.getCardValue());
                 mainController.refreshGuide();
                 mainController.setWaitingNextTurn(false);
 
