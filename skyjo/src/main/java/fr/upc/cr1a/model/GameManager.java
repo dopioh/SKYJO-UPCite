@@ -261,8 +261,8 @@ public class GameManager {
             discardActionPile = new DefausseActionModel();
             ActionCardModel initActionCard = (ActionCardModel) actionDeck.getTopCard();
             actionDeck.removeCardAtTop();
-            ensureFaceUp(discardActionPile.getTopCard());
             discardActionPile.addCardAtTop(initActionCard);
+            ensureFaceUp(discardActionPile.getTopCard());
         }
 
         currentDrawCard = null;
