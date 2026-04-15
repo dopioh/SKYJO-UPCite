@@ -213,7 +213,7 @@ public class PlayersSetupPanel extends JPanel {
         cardsPreviewPanel.setOpaque(false);
         cardsPreviewPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        emptyCardIcon = loadResizedIconFromCache("/cartes/carteVide.png", 200, 220);
+        emptyCardIcon = loadResizedIconFromCache("/cartes/cartevide.png", 200, 220);
         actionCardIcon = loadResizedIconFromCache("/cartes/carteActionDos.png", 200, 220);
 
         cardPreview = new JLabel();

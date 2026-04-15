@@ -97,13 +97,26 @@ public class RoundEndPanel extends JPanel {
         bigCard.setLayout(new BoxLayout(bigCard, BoxLayout.Y_AXIS));
         bigCard.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
+        // Label explicatif du calcul
+        JLabel scoreExplanation = new JLabel("Calcul : pts dans la main + carte action");
+        scoreExplanation.setFont(font(16f, Font.ITALIC));
+        scoreExplanation.setForeground(new Color(255, 255, 255, 200));
+        bigCard.add(scoreExplanation);
+        bigCard.add(Box.createVerticalStrut(12));
+
         for (int i = 0; i < sortedPlayers.size(); i++) {
             PlayerModel p = sortedPlayers.get(i);
+            
+            //calculer les détails du score
+            int handScore = p.getHand().calculateScore();
+            int actionScore = p.getActionHand().size() * 10;
+            int totalRoundScore = handScore + actionScore;
+            
             String text = (i + 1) + ".   " + p.getName();
             if (lastRoundPlayer != null && p.equals(lastRoundPlayer)) {
                 text += " (first)";
             }
-            text += "   —   " + p.getTotalScore() + " pts";
+            text += "   —   " + handScore + " + " + actionScore + " = " + totalRoundScore + " pts";
             JLabel pill = makePill(text);
             playerLabels.add(pill);
             bigCard.add(pill);

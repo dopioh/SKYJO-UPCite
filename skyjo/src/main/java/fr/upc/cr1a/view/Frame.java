@@ -116,7 +116,7 @@ public class Frame extends JFrame{
         new Thread(() -> {
             // cartes
             ImageCache.preload(
-                "/cartes/carteDos.png", "/cartes/carteVide.png",
+                "/cartes/carteDos.png", "/cartes/cartevide.png",
                 "/cartes/carteMoins2.png", "/cartes/carteMoins1.png",
                 "/cartes/carte0.png", "/cartes/carte1.png", "/cartes/carte2.png",
                 "/cartes/carte3.png", "/cartes/carte4.png", "/cartes/carte5.png",
