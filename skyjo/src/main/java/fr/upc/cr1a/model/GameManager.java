@@ -78,8 +78,10 @@ public class GameManager {
         if (this.gameWithAction) {
             actionDeck = new PiocheActionModel();
             discardActionPile = new DefausseActionModel();
-            ActionCardModel initActionCard = new ActionCardModel(false, ActionType.REPLACE_CARD_IN_HAND);
+            ActionCardModel initActionCard = (ActionCardModel) actionDeck.getTopCard();
+            actionDeck.removeCardAtTop();
             discardActionPile.addCardAtTop(initActionCard);
+            ensureFaceUp(discardActionPile.getTopCard());
         }
 
         System.out.println("GameManager Called");
@@ -121,8 +123,10 @@ public class GameManager {
         if (this.gameWithAction) {
             actionDeck = new PiocheActionModel();
             discardActionPile = new DefausseActionModel();
-            ActionCardModel initActionCard = new ActionCardModel(false, ActionType.REPLACE_CARD_IN_HAND);
+            ActionCardModel initActionCard = (ActionCardModel) actionDeck.getTopCard();
+            actionDeck.removeCardAtTop();
             discardActionPile.addCardAtTop(initActionCard);
+            ensureFaceUp(discardActionPile.getTopCard());
         }
         //Creation des joueurs 
         this.players = new ArrayList<>();
@@ -255,7 +259,9 @@ public class GameManager {
         if (this.gameWithAction) {
             actionDeck = new PiocheActionModel();
             discardActionPile = new DefausseActionModel();
-            ActionCardModel initActionCard = new ActionCardModel(false, ActionType.REPLACE_CARD_IN_HAND);
+            ActionCardModel initActionCard = (ActionCardModel) actionDeck.getTopCard();
+            actionDeck.removeCardAtTop();
+            ensureFaceUp(discardActionPile.getTopCard());
             discardActionPile.addCardAtTop(initActionCard);
         }
 
@@ -609,6 +615,22 @@ public class GameManager {
         lastRoundPlayer = -1;  // réinitialiser le déclencheur du dernier tour
         extraTurnsRemaining = 0;  // réinitialiser les tours supplémentaires
         discardPile = new DefausseModel();
+
+        //vider les cartes actions de tous les joueurs
+        for (PlayerModel player : players) {
+            player.getActionHand().clear();
+        }
+
+        //vider les cartes actions des decks
+        if (this.gameWithAction) {
+            actionDeck = new PiocheActionModel();
+            discardActionPile = new DefausseActionModel();
+            ActionCardModel initActionCard = (ActionCardModel) actionDeck.getTopCard();
+            actionDeck.removeCardAtTop();
+            discardActionPile.addCardAtTop(initActionCard);
+            ensureFaceUp(discardActionPile.getTopCard());
+        }
+        
         initializeGame();
         ensureFaceUp(discardPile.getTopCard());
         turnPhase = TurnPhase.INIT_REVEAL;
