@@ -474,3 +474,40 @@
 
 - Fix recuperation money avec getStats dans l'API
 - Fix recuperation rank via l'API
+
+
+## v.0.12: SPRINT 12
+
+### Modified
+
+- Amélioration de la page Paramètres dans le style du Leaderboard
+    - Onglet "Jeu" renommé "Graphique", contenu bot supprimé
+    - Onglet actif change de couleur
+
+- Amélioration du menu Pause dans le même style
+
+- Boutique
+    - Bouton Retour aligné avec les autres écrans
+    - Changement couleur des icone boutons d'achat
+
+- Amélioration de `PlayerPreviewPanel`
+    - Effet de flou (JH Labs) sur le fond
+    - Panel en jeu légèrement descendu pour pas coller au bar en haut
+
+- Player button
+    - Changement a doodle button
+    - icone correspondant au couleur
+    - nom de joueur un peu transparent si c'est pas celui qui joue pour differencier
+    - nom deviens ".." après 8 caratrère pour pas dépasser
+
+### Fixed
+
+- Liste des joueurs maintenant scrollable dans Fin de manche / fin de partie car avec 8 joueurs ça dépassait
+
+- Problème de double click partout dans le projet
+
+- `PlayerPreviewPanel`
+    - la preview disparait dès que la transition entre joueurs commence
+    - les cartes face cachée utilisent maintenant le skin équipé
+    - accumulation de flou en passant rapidement d'un joueur à l'autre
+    - animation fade ne rejoue plus si le panel était déjà visible (changement rapide entre preview)

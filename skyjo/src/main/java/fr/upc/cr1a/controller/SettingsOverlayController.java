@@ -34,39 +34,32 @@ public class SettingsOverlayController {
         overlay.addMouseWheelListener(e -> e.consume());
 
         //Bouton Fermer
-        overlay.getBackButton().addActionListener(e -> {
-            frame.hideSettingsOverlay();
+        overlay.getBackButton().addMouseListener(new MouseAdapter() {
+            @Override public void mousePressed(MouseEvent e) {
+                frame.hideSettingsOverlay();
+            }
         });
 
         //Actionne l'actionListener lié au cointroller pour la bande
 
-        overlay.getTabJeuPanel().addMouseListener(new MouseAdapter() {
-            @Override public void mousePressed(MouseEvent e) {
-                overlay.getTabJeu().doClick();
-                e.consume();
-            }
+        overlay.getTabGraphiquePanel().addMouseListener(new MouseAdapter() {
+            @Override public void mousePressed(MouseEvent e) { overlay.getTabGraphique().doClick(); }
         });
 
         overlay.getTabAudioPanel().addMouseListener(new MouseAdapter() {
-            @Override public void mousePressed(MouseEvent e) {
-                overlay.getTabAudio().doClick();
-                e.consume();
-            }
+            @Override public void mousePressed(MouseEvent e) { overlay.getTabAudio().doClick(); }
         });
 
         overlay.getTabAutresPanel().addMouseListener(new MouseAdapter() {
-            @Override public void mousePressed(MouseEvent e) {
-                overlay.getTabAutres().doClick();
-                e.consume();
-            }
+            @Override public void mousePressed(MouseEvent e) { overlay.getTabAutres().doClick(); }
         });
 
         //Changer la page selon la catégorie
         var cl = overlay.getCardLayout();
         var content = overlay.getContentPanel();
-        overlay.getTabJeu().addActionListener(e -> {
-            cl.show(content, "JEU");
-            overlay.setSelectedTabPanel(overlay.getTabJeuPanel());
+        overlay.getTabGraphique().addActionListener(e -> {
+            cl.show(content, "GRAPHIQUE");
+            overlay.setSelectedTabPanel(overlay.getTabGraphiquePanel());
         });
 
         overlay.getTabAudio().addActionListener(e -> {
@@ -78,20 +71,11 @@ public class SettingsOverlayController {
             cl.show(content, "AUTRES");
             overlay.setSelectedTabPanel(overlay.getTabAutresPanel());
         });
+
+        cl.show(content, "GRAPHIQUE");
+        overlay.setSelectedTabPanel(overlay.getTabGraphiquePanel());
         
-        cl.show(content, "JEU");
-        overlay.setSelectedTabPanel(overlay.getTabJeuPanel());
-        
-        //Changer le label du bot 
-        //A modifier plus tard 
-        overlay.getBotDifficultyButton().addActionListener(e -> { 
-            String current = overlay.getBotDifficultyButton().getText();
-            switch (current) {
-                case "Facile" -> overlay.getBotDifficultyButton().setText("Moyen");
-                case "Moyen"  -> overlay.getBotDifficultyButton().setText("Goat");
-                default       -> overlay.getBotDifficultyButton().setText("Facile");
-            }
-        });
+
 
         //Activer/OFF le plein ecran
         overlay.getFullscreenButton().addActionListener(e -> {

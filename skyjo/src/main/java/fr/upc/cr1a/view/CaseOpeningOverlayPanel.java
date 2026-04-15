@@ -150,7 +150,7 @@ public class CaseOpeningOverlayPanel extends JPanel {
             }
 
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 closeButton.onMouseExit();
                 setVisible(false);
                 repaint();
@@ -160,7 +160,7 @@ public class CaseOpeningOverlayPanel extends JPanel {
 
         addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 handleClasseurClick(e.getPoint());
             }
         });

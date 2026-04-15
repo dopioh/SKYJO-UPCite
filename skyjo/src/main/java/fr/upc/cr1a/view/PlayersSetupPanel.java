@@ -394,7 +394,7 @@ public class PlayersSetupPanel extends JPanel {
             nameField.setCaretColor(Color.WHITE);
             nameField.addMouseListener(new MouseAdapter() {
                 @Override
-                public void mouseClicked(MouseEvent e) {
+                public void mousePressed(MouseEvent e) {
                     if (nameField.getText().equals("Joueur " + playerIndex)) {
                         nameField.setText("");
                     } else {

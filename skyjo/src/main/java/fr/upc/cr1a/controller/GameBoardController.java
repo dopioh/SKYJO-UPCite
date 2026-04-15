@@ -121,7 +121,7 @@ public class GameBoardController {
         // Pour le survol et le ckick des preview player
         // y'a un soucis pour les pinned ici -> bug mineur
         int s = 0;
-        for (JButton jb : gameBoardView.getListPlayerButton()) {
+        for (DoodleButton jb : gameBoardView.getListPlayerButton()) {
             int tmp = s;
             jb.addMouseListener(new MouseAdapter() {
                 @Override
@@ -129,9 +129,10 @@ public class GameBoardController {
                     if (tmp == gameManager.getCurrentPlayerIndex()) {
                         return;
                     }
+                    jb.onMouseEnter();
                     gameBoardModel.buttonPlayerCalled(tmp);
                     gameBoardView.showOtherPlayerMain(true);
-                    isPinned = false;   
+                    isPinned = false;
                 }
 
                 @Override
@@ -149,6 +150,9 @@ public class GameBoardController {
 
                 @Override
                 public void mouseExited(MouseEvent e) {
+                    if (tmp != gameManager.getCurrentPlayerIndex()) {
+                        jb.onMouseExit();
+                    }
                     //gameBoardView.setIsPlayer(false);
                     if (!isPinned) {
                         gameBoardView.showOtherPlayerMain(false);

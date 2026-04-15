@@ -52,7 +52,7 @@ public class ShopController {
             }
 
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 if (view.isCaseOpeningVisible()) {
                     return;
                 }

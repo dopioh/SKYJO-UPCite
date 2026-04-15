@@ -14,6 +14,7 @@ import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.NumberCardModel;
 import fr.upc.cr1a.model.PlayerHandModel;
 import fr.upc.cr1a.model.PlayerModel;
+import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
 import fr.upc.cr1a.utils.ImageCache;
 
 /**
@@ -28,7 +29,7 @@ public class GameBoardView extends JPanel {
     private ArrayList<PlayerModel> listPlayer; // jusqu'a 8 normalement
 
     // a transferer :
-    private ArrayList<JButton> buttonlistPlayer; // jusqu'a 8 normalement
+    private ArrayList<DoodleButton> buttonlistPlayer; // jusqu'a 8 normalement
 
     // panel :
     private JPanel zonePlayer;
@@ -115,7 +116,7 @@ public class GameBoardView extends JPanel {
 
     public GameBoardView(ArrayList<PlayerModel> listPlayerModels) {
         this.listPlayer = listPlayerModels;
-        this.buttonlistPlayer = new ArrayList<JButton>();
+        this.buttonlistPlayer = new ArrayList<>();
         this.cardButtons = new CardButton[3][4];
         this.actionCardButtons = new CardButton[MAX_ACTION_CARDS];
         this.actionCardTypes = new ActionType[MAX_ACTION_CARDS];
@@ -219,7 +220,7 @@ public class GameBoardView extends JPanel {
         this.zonePlayer = new JPanel();
         zonePlayer.setLayout(new GridBagLayout());
         zonePlayer.setOpaque(false);
-        zonePlayer.setPreferredSize(new Dimension(50, 0));
+        zonePlayer.setPreferredSize(new Dimension(220, 0));
 
         GridBagConstraints gbcZonePlayer = new GridBagConstraints();
         gbcZonePlayer.gridx = 0;
@@ -552,6 +553,13 @@ public class GameBoardView extends JPanel {
      * Recuperer l'info de la list de PlayerModel
      * Creer dans le GameManager (pour le moment)
      */
+    private static final ButtonColor[] BTN_COLORS = { ButtonColor.RED, ButtonColor.GREEN, ButtonColor.YELLOW };
+    private static final String[] PROFIL_ICONS = {
+        "/plateau/players/red_profil.png",
+        "/plateau/players/green_profil.png",
+        "/plateau/players/yellow_profil.png"
+    };
+
     private void playerButton() {
         GridBagConstraints gbcPlayerButton = new GridBagConstraints();
         gbcPlayerButton.gridx = 0;
@@ -560,33 +568,19 @@ public class GameBoardView extends JPanel {
         gbcPlayerButton.weighty = 1;
         int colorIndex = 0;
         for (PlayerModel pm : listPlayer) {
-            Color playerColor = PLAYER_COLORS[colorIndex % PLAYER_COLORS.length];
+            int i = colorIndex % BTN_COLORS.length;
             colorIndex++;
 
-            JButton p = new JButton(pm.getName());
-            p.setOpaque(true);
-            p.setBorderPainted(false);
-            p.setBackground(playerColor);
-            p.setForeground(Color.WHITE);
-            p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            p.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    p.setBackground(playerColor.brighter());
-                    isPinned = false;
-                }
-
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    if (!isPinned) {
-                        p.setBackground(playerColor);
-                    }
-                }
-            });
+            String nom = pm.getName();
+            if (nom.length() > 8) nom = nom.substring(0, 8) + "..";
+            DoodleButton p = new DoodleButton(nom, BTN_COLORS[i], 180, 55, PROFIL_ICONS[i]);
+            p.setIconSide(DoodleButton.IconSide.LEFT);
+            p.setFontSize(28f);
             buttonlistPlayer.add(p);
             zonePlayer.add(p, gbcPlayerButton);
             gbcPlayerButton.gridy++;
         }
+        setActivePlayerButton(0);
     }
 
     /**
@@ -616,7 +610,7 @@ public class GameBoardView extends JPanel {
 
         Component[] compsM = layeredPane.getComponentsInLayer(JLayeredPane.MODAL_LAYER); // previewPlayer
         for (Component c : compsM) {
-            c.setBounds(size.width / 6, size.height / 10, size.width - size.width / 3, size.height - size.height / 5);
+            c.setBounds(size.width / 6, size.height / 8, size.width * 2 / 3, size.height * 7 / 8 - 20);
         }
 
         Component[] compsPopup = layeredPane.getComponentsInLayer(JLayeredPane.POPUP_LAYER);
@@ -643,7 +637,7 @@ public class GameBoardView extends JPanel {
         return this.listPlayer;
     }
 
-    public ArrayList<JButton> getListPlayerButton() {
+    public ArrayList<DoodleButton> getListPlayerButton() {
         return this.buttonlistPlayer;
     }
 
@@ -728,8 +722,16 @@ public class GameBoardView extends JPanel {
      * @param onDone  appelé en fin d'animation
      */
     public void showPlayerTransition(PlayerModel player, Runnable onDone) {
+        previewPanel.fade(false); // cache la preview si elle est visible pendant la transition
         int colorIndex = listPlayer.indexOf(player) % PLAYER_COLORS.length;
+        setActivePlayerButton(listPlayer.indexOf(player));
         transitionPanel.showTransition(player.getName(), PLAYER_COLORS[colorIndex], onDone);
+    }
+
+    public void setActivePlayerButton(int activeIndex) {
+        for (int i = 0; i < buttonlistPlayer.size(); i++) {
+            buttonlistPlayer.get(i).setActive(i == activeIndex);
+        }
     }
 
     /**
