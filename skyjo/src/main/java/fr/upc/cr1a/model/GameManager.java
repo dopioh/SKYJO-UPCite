@@ -561,7 +561,16 @@ public class GameManager {
         turnPhase = TurnPhase.TURN_ENDED;
     }
 
-
+    /**
+     * Vérifie et déclenche le LAST_ROUND si un joueur a révélé toutes ses cartes
+     * À appeler après avoir supprimé les colonnes/lignes identiques
+     */
+    public void checkAndTriggerLastRound() {
+        if (gameState != GameState.LAST_ROUND && lastRoundPlayer == -1 && GameRuleModel.checkEndOfRound(players)) {
+            gameState = GameState.LAST_ROUND;
+            lastRoundPlayer = currentPlayerIndex;
+        }
+    }
     
     /*
     *fonction qui gère la fin de la manche

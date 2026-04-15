@@ -22,7 +22,7 @@ public class ActionCardTutorialOverlayPanel extends JPanel {
     private JPanel contentPanel;
 
     /**
-     * classe interne pour créer des bulles avec design du jeu
+     * classe interne pour créer des bulles
      */
     private static class PillPanel extends JPanel {
         private Color bgColor;
@@ -82,7 +82,7 @@ public class ActionCardTutorialOverlayPanel extends JPanel {
         wrapperPanel.setOpaque(false);
         wrapperPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        //bouton fermer rouge arrondi en haut à droite
+        //bouton fermer haut à droite
         JButton closeBtn = new JButton("✕") {
             @Override
             protected void paintComponent(Graphics g) {
@@ -168,7 +168,7 @@ public class ActionCardTutorialOverlayPanel extends JPanel {
         mainPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 190));
         mainPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 190));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(0, 125, 0, 0));
-        // Bulle pour l'image - fond blanc
+        // Bulle pour l'image
         PillPanel imagePill = new PillPanel(new Color(255, 255, 255, 230));
         imagePill.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         imagePill.setPreferredSize(new Dimension(160, 175));
@@ -183,7 +183,7 @@ public class ActionCardTutorialOverlayPanel extends JPanel {
         }
         mainPanel.add(imagePill);
 
-        // Bulle pour la description - fond bleu clair
+        // Bulle pour la description
         PillPanel descPill = new PillPanel(new Color(240, 245, 250, 220));
         descPill.setBorder(BorderFactory.createEmptyBorder(15, 18, 15, 18));
         descPill.setPreferredSize(new Dimension(750, 175));

@@ -275,6 +275,9 @@ public class HumanTurnController {
                         GameRuleModel.removeIdenticalColumns(currentPlayer.getHand(), gameManager.getDiscardPile(), currentPlayer);
                         GameRuleModel.removeIdenticalRows(currentPlayer.getHand(), gameManager.getDiscardPile(), currentPlayer);
 
+                        // Vérifier si fin de manche (LAST_ROUND)
+                        gameManager.checkAndTriggerLastRound();
+
                         gameBoardView.flipCardAt(r, c, () -> gameBoardView.showPlayerCards(currentPlayer));
 
                         waitingReveal = false;
@@ -654,6 +657,9 @@ public class HumanTurnController {
         GameRuleModel.removeIdenticalColumns(targetPlayer.getHand(), gameManager.getDiscardPile(), targetPlayer);
         GameRuleModel.removeIdenticalRows(targetPlayer.getHand(), gameManager.getDiscardPile(), targetPlayer);
 
+        // Vérifier si fin de manche (LAST_ROUND) - pour le joueur courant qui joue l'action
+        gameManager.checkAndTriggerLastRound();
+
         actionMode = ActionMode.NONE;
         resetTradeSelection();
         gameBoardView.setActionHandVisible(true);
@@ -750,6 +756,9 @@ public class HumanTurnController {
 
         GameRuleModel.removeIdenticalColumns(targetPlayer.getHand(), gameManager.getDiscardPile(), targetPlayer);
         GameRuleModel.removeIdenticalRows(targetPlayer.getHand(), gameManager.getDiscardPile(), targetPlayer);
+
+        // Vérifier si fin de manche (LAST_ROUND) - pour le joueur courant qui joue l'action
+        gameManager.checkAndTriggerLastRound();
 
         allPlayersDropPendingTargets.remove(Integer.valueOf(allPlayersDropCurrentTargetIndex));
         allPlayersDropCurrentTargetIndex = -1;

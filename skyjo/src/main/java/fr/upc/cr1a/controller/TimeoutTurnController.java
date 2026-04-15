@@ -212,6 +212,9 @@ public class TimeoutTurnController {
             player.getHand().revealCard(pos[0], pos[1]);
             GameRuleModel.removeIdenticalColumns(player.getHand(), gameManager.getDiscardPile());
             GameRuleModel.removeIdenticalRows(player.getHand(), gameManager.getDiscardPile());
+
+            // Vérifier si fin de manche (LAST_ROUND)
+            gameManager.checkAndTriggerLastRound();
         }
 
         gameBoardView.showPlayerCards(player);

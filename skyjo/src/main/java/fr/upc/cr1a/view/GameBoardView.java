@@ -100,7 +100,7 @@ public class GameBoardView extends JPanel {
     // Que dois faire le joueur?
     private JLabel actionGuide;
 
-    // Bouton d'aide pour les cartes action
+    //bouton d'aide pour les cartes action
     private JPanel helpBtn;
 
     // pour fixer le clique
