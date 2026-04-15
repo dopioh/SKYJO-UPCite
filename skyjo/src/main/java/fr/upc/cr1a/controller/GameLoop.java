@@ -121,6 +121,14 @@ public class GameLoop {
     
     private void finishNormalTurnFlow() {
         if (!gameActive) return;
+        
+        // FIX: Si on est en pause, ne pas changer de joueur maintenant
+        // Les timers vont finir et rappeler continueFlow()
+        if (paused) {
+            pendingContinueAfterPause = true;
+            return;
+        }
+        
         gameManager.nextPlayer();
         if (gameManager.getGameState() == GameManager.GameState.ROUND_ENDED
                 || gameManager.getGameState() == GameManager.GameState.GAME_ENDED) {
