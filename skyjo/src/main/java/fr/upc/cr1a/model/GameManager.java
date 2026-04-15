@@ -604,7 +604,7 @@ public class GameManager {
      */
     public void startNewGame() {
         roundNumber++;
-        currentPlayerIndex = GameRuleModel.getBiggestScorePlayerIndex(players);
+        currentPlayerIndex = 0;
         currentDrawCard = null;
         lastRoundPlayer = -1;  // réinitialiser le déclencheur du dernier tour
         extraTurnsRemaining = 0;  // réinitialiser les tours supplémentaires
