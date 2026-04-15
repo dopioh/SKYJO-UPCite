@@ -138,9 +138,6 @@ public class HumanTurnController {
                 gameBoardView.getBtnDefausse().animatePressLight();
                 gameBoardView.getBtnDefausse().setCardImage(takenPath);
                 gameBoardView.showCursorCard(takenPath);
-                if (GameManager.isStarCard(taken)) {
-                    grantActionForStar(gameManager.getCurrentPlayer(), "ETOILE piochée depuis la défausse : carte action gagnée");
-                }
                 mainController.updateAllDecksDisplay();
                 mainController.refreshGuide();
                 return;
@@ -275,7 +272,7 @@ public class HumanTurnController {
                         GameRuleModel.removeIdenticalColumns(currentPlayer.getHand(), gameManager.getDiscardPile(), currentPlayer);
                         GameRuleModel.removeIdenticalRows(currentPlayer.getHand(), gameManager.getDiscardPile(), currentPlayer);
 
-                        // Vérifier si fin de manche (LAST_ROUND)
+                        //vérifier si fin de manche
                         gameManager.checkAndTriggerLastRound();
 
                         gameBoardView.flipCardAt(r, c, () -> gameBoardView.showPlayerCards(currentPlayer));
@@ -657,7 +654,7 @@ public class HumanTurnController {
         GameRuleModel.removeIdenticalColumns(targetPlayer.getHand(), gameManager.getDiscardPile(), targetPlayer);
         GameRuleModel.removeIdenticalRows(targetPlayer.getHand(), gameManager.getDiscardPile(), targetPlayer);
 
-        // Vérifier si fin de manche (LAST_ROUND) - pour le joueur courant qui joue l'action
+        //vérifier si fin de manche
         gameManager.checkAndTriggerLastRound();
 
         actionMode = ActionMode.NONE;
@@ -757,7 +754,7 @@ public class HumanTurnController {
         GameRuleModel.removeIdenticalColumns(targetPlayer.getHand(), gameManager.getDiscardPile(), targetPlayer);
         GameRuleModel.removeIdenticalRows(targetPlayer.getHand(), gameManager.getDiscardPile(), targetPlayer);
 
-        // Vérifier si fin de manche (LAST_ROUND) - pour le joueur courant qui joue l'action
+        //vérifier si fin de manche
         gameManager.checkAndTriggerLastRound();
 
         allPlayersDropPendingTargets.remove(Integer.valueOf(allPlayersDropCurrentTargetIndex));

@@ -118,9 +118,9 @@ public class RoundEndPanel extends JPanel {
             }
             text += "   —   " + handScore + " + " + actionScore + " = " + totalRoundScore + " pts";
             
-            // Vérifier si doublement appliqué (si c'est le premier joueur à révéler toutes cartes et qu'il n'a pas le meilleur score)
+            //vérifier si doublement appliqué
             if (lastRoundPlayer != null && p.equals(lastRoundPlayer)) {
-                // Chercher si ce joueur n'est pas le premier de la liste (meilleur score)
+                //chercher si ce joueur n'est pas le premier de la liste
                 if (i > 0) {
                     int finalScore = totalRoundScore * 2;
                     text += " × 2 = " + finalScore + " pts";

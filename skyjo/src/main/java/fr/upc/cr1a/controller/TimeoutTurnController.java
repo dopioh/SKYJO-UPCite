@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.swing.Timer;
 
+import fr.upc.cr1a.model.ActionCardModel;
 import fr.upc.cr1a.model.BotHandModel;
 import fr.upc.cr1a.model.BotLow;
 import fr.upc.cr1a.model.BotModel;
@@ -210,10 +211,17 @@ public class TimeoutTurnController {
         int[] pos = findRandomHiddenCard(player);
         if (pos != null) {
             player.getHand().revealCard(pos[0], pos[1]);
+            CardModel revealedCard = player.getHand().getCard(pos[0], pos[1]);
+            if (GameManager.isStarCard(revealedCard)) {
+                ActionCardModel actionCard = gameManager.grantActionForStar(player);
+                if (actionCard != null) {
+                    System.out.println(player.getName() + " révèle une étoile et gagne une action: " + actionCard.getType());
+                }
+            }
             GameRuleModel.removeIdenticalColumns(player.getHand(), gameManager.getDiscardPile());
             GameRuleModel.removeIdenticalRows(player.getHand(), gameManager.getDiscardPile());
 
-            // Vérifier si fin de manche (LAST_ROUND)
+            //verifier si fin de manche
             gameManager.checkAndTriggerLastRound();
         }
 

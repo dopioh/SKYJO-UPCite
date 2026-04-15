@@ -509,6 +509,15 @@ public class GameManager {
         ensureFaceUp(cardInHand);
         hand.replaceCard(row, col, currentDrawCard);
         discardPile.addCardAtTop(cardInHand);
+        
+        // Vérifier si la carte jetée est une étoile
+        if (isStarCard(cardInHand)) {
+            ActionCardModel actionCard = grantActionForStar(currentPlayer);
+            if (actionCard != null) {
+                System.out.println("[Exchange] Étoile jetée : carte action gagnée !");
+            }
+        }
+        
         //montrer la nouvelle carte
         if(currentDrawCard.isFaceDown()) currentDrawCard.returnCard();
         if (currentDrawCard.isFaceDown()) {
@@ -562,8 +571,7 @@ public class GameManager {
     }
 
     /**
-     * Vérifie et déclenche le LAST_ROUND si un joueur a révélé toutes ses cartes
-     * À appeler après avoir supprimé les colonnes/lignes identiques
+     * verifie et déclenche le LAST_ROUND si un joueur a révélé toutes ses cartes
      */
     public void checkAndTriggerLastRound() {
         if (gameState != GameState.LAST_ROUND && lastRoundPlayer == -1 && GameRuleModel.checkEndOfRound(players)) {

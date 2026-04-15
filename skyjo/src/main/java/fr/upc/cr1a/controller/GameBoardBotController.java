@@ -197,9 +197,6 @@ public class GameBoardBotController {
                 //prend de la défausse
                 gameBoardView.getBtnDefausse().lift();
                 CardModel taken = gameManager.takeDiscard();
-                if (GameManager.isStarCard(taken)) {
-                    grantActionForStar(bot);
-                }
                 System.out.println(bot.getName() + " prend la défausse : " + taken.getCardValue());
                 mainController.refreshGuide();
                 mainController.setWaitingNextTurn(false);
@@ -293,7 +290,7 @@ public class GameBoardBotController {
                     GameRuleModel.removeIdenticalColumns(botHand, gameManager.getDiscardPile(), bot);
                     GameRuleModel.removeIdenticalRows(botHand, gameManager.getDiscardPile(), bot);
 
-                    // Vérifier si fin de manche (LAST_ROUND)
+                    //vérifier si fin de manche
                     gameManager.checkAndTriggerLastRound();
 
                     gameBoardView.flipCardAt(pos[0], pos[1], () -> gameBoardView.showPlayerCards(bot));
@@ -641,7 +638,7 @@ public class GameBoardBotController {
             GameRuleModel.removeIdenticalColumns(target.getHand(), gameManager.getDiscardPile(), target);
             GameRuleModel.removeIdenticalRows(target.getHand(), gameManager.getDiscardPile(), target);
 
-            // Vérifier si fin de manche (LAST_ROUND) - pour le joueur courant qui joue l'action
+            //verifier si fin de manche
             gameManager.checkAndTriggerLastRound();
         }
     }
