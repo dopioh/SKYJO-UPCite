@@ -638,6 +638,15 @@ public class GameManager {
         initRevealStarted = false; //reset
         initRevealJustFinished = false;
         firstPlayerToPlayIndex = 0;
+        
+        // Mettre à jour l'affichage graphique du deck et de la défausse
+        if (gameBoardModel != null && gameBoardModel.getGameBoardView() != null) {
+            GameBoardView view = gameBoardModel.getGameBoardView();
+            view.updateCardDisplay(discardPile.getTopCard(), deck.stackSize() > 0);
+            if (gameWithAction) {
+                view.updateActionCardDisplay(discardActionPile.getTopCard(), actionDeck.stackSize() > 0);
+            }
+        }
     }
 
     /**
