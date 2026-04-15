@@ -100,6 +100,9 @@ public class GameBoardView extends JPanel {
     // Que dois faire le joueur?
     private JLabel actionGuide;
 
+    // Bouton d'aide pour les cartes action
+    private JPanel helpBtn;
+
     // pour fixer le clique
     private boolean isPinned = false;
 
@@ -202,12 +205,12 @@ public class GameBoardView extends JPanel {
         pointsLabel.setForeground(Color.WHITE);
         pointsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        // Bouton "?" pour le tutoriel des cartes action
+        //bouton astuce pour les cartes actions
         JLabel helpLabel = new JLabel("?", SwingConstants.CENTER);
         helpLabel.setFont(patrickFont.deriveFont(Font.BOLD, 32f));
         helpLabel.setForeground(Color.WHITE);
 
-        JPanel helpBtn = new JPanel(new BorderLayout()) {
+        helpBtn = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -459,7 +462,7 @@ public class GameBoardView extends JPanel {
         actionCardOverlay.setVisible(false);
         layeredPane.add(actionCardOverlay, JLayeredPane.PALETTE_LAYER);
 
-        // Ajouter le tutoriel des cartes action
+        //ajouter l'astuce des cartes action'
         actionCardTutorialOverlay = new ActionCardTutorialOverlayPanel();
         actionCardTutorialOverlay.setGameBoardView(this);
         actionCardTutorialOverlay.setVisible(false);
@@ -769,6 +772,7 @@ public class GameBoardView extends JPanel {
         btnDefausseAction.setVisible(visible);
         labPiocheAction.setVisible(visible);
         labDefausseAction.setVisible(visible);
+        helpBtn.setVisible(visible);
     }
 
     public void setActionHandVisible(boolean visible) {
@@ -879,14 +883,14 @@ public class GameBoardView extends JPanel {
     }
 
     /**
-     * Méthode publique pour accéder à la description d'une action
+     * méthode publique pour accéder à la description d'une action
      */
     public String getActionDescriptionPublic(ActionType actionType) {
         return getActionDescription(actionType);
     }
 
     /**
-     * Méthode publique pour accéder au titre d'une action
+     * méthode publique pour accéder au titre d'une action
      */
     public String getActionTitlePublic(ActionType actionType) {
         return getActionTitle(actionType);
