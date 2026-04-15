@@ -367,6 +367,13 @@ public class GameManager {
         return this.currentPlayerIndex;
     }
 
+    /**
+     * Retourne le joueur qui a déclenché le dernier round
+     */
+    public PlayerModel getLastRoundPlayer(){
+        return (lastRoundPlayer >= 0) ? players.get(lastRoundPlayer) : null;
+    }
+
     /*
     *passe au joueur suivant
     */
@@ -577,8 +584,8 @@ public class GameManager {
         //calculer le score de chacun et trouver le joueur avec le score le plus bas
         PlayerModel lowestPlayer = GameRuleModel.findLowestScorePlayer(players);
         
-        //cherche le joueur qui lance la fin de la manche
-        PlayerModel roundEndPlayer = GameRuleModel.findRoundEndPlayer(players);
+        //cherche le joueur qui a déclenché la fin de la manche
+        PlayerModel roundEndPlayer = (lastRoundPlayer >= 0) ? players.get(lastRoundPlayer) : null;
         
         //Applique les scores selon les règles Skyjo
         GameRuleModel.applyRoundScores(players, roundEndPlayer, lowestPlayer);
@@ -639,7 +646,7 @@ public class GameManager {
         initRevealJustFinished = false;
         firstPlayerToPlayIndex = 0;
         
-        // Mettre à jour l'affichage graphique du deck et de la défausse
+        //maj du deck et de la défausse
         if (gameBoardModel != null && gameBoardModel.getGameBoardView() != null) {
             GameBoardView view = gameBoardModel.getGameBoardView();
             view.updateCardDisplay(discardPile.getTopCard(), deck.stackSize() > 0);

@@ -29,10 +29,15 @@ public class RoundEndPanel extends JPanel {
     private List<PlayerModel> sortedPlayers;
     private Image bgImage;
     private BufferedImage cachedBackground;
+    private PlayerModel lastRoundPlayer;
 
     private static Font baseFont;
 
     public RoundEndPanel(List<PlayerModel> players, boolean gameOver) {
+        this(players, gameOver, null);
+    }
+
+    public RoundEndPanel(List<PlayerModel> players, boolean gameOver, PlayerModel lastRoundPlayer) {
         this.gameOver = gameOver;
         setLayout(new BorderLayout());
         setOpaque(true);
@@ -94,7 +99,11 @@ public class RoundEndPanel extends JPanel {
 
         for (int i = 0; i < sortedPlayers.size(); i++) {
             PlayerModel p = sortedPlayers.get(i);
-            String text = (i + 1) + ".   " + p.getName() + "   —   " + p.getTotalScore() + " pts";
+            String text = (i + 1) + ".   " + p.getName();
+            if (lastRoundPlayer != null && p.equals(lastRoundPlayer)) {
+                text += " (first)";
+            }
+            text += "   —   " + p.getTotalScore() + " pts";
             JLabel pill = makePill(text);
             playerLabels.add(pill);
             bigCard.add(pill);
