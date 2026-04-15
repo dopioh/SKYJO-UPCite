@@ -46,6 +46,7 @@ public class GameBoardView extends JPanel {
 
     private CursorCardView cursorCardView;
     private ActionDescriptionOverlayPanel actionDescriptionOverlay;
+    private ActionCardTutorialOverlayPanel actionCardTutorialOverlay;
 
     // 3 couleurs pour l'instant peut etre 8 un jour mais la pas le temps
     private static final Color[] PLAYER_COLORS = {
@@ -201,9 +202,41 @@ public class GameBoardView extends JPanel {
         pointsLabel.setForeground(Color.WHITE);
         pointsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 
+        // Bouton "?" pour le tutoriel des cartes action
+        JLabel helpLabel = new JLabel("?", SwingConstants.CENTER);
+        helpLabel.setFont(patrickFont.deriveFont(Font.BOLD, 32f));
+        helpLabel.setForeground(Color.WHITE);
+
+        JPanel helpBtn = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(255, 255, 255, 80));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 14, 14);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        helpBtn.setOpaque(false);
+        helpBtn.setPreferredSize(new Dimension(40, 40));
+        helpBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        helpBtn.add(helpLabel, BorderLayout.CENTER);
+        helpBtn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                actionCardTutorialOverlay.openOverlay();
+            }
+        });
+
+        JPanel topRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
+        topRightPanel.setOpaque(false);
+        topRightPanel.add(helpBtn);
+        topRightPanel.add(pointsLabel);
+
         topBar.add(mancheLabel, BorderLayout.WEST);
         topBar.add(actionGuide, BorderLayout.CENTER);
-        topBar.add(pointsLabel, BorderLayout.EAST);
+        topBar.add(topRightPanel, BorderLayout.EAST);
 
         plateauPanel.add(topBar, BorderLayout.NORTH);
 
@@ -425,6 +458,12 @@ public class GameBoardView extends JPanel {
         actionCardOverlay = new ActionCardOverlayPanel();
         actionCardOverlay.setVisible(false);
         layeredPane.add(actionCardOverlay, JLayeredPane.PALETTE_LAYER);
+
+        // Ajouter le tutoriel des cartes action
+        actionCardTutorialOverlay = new ActionCardTutorialOverlayPanel();
+        actionCardTutorialOverlay.setGameBoardView(this);
+        actionCardTutorialOverlay.setVisible(false);
+        layeredPane.add(actionCardTutorialOverlay, JLayeredPane.PALETTE_LAYER);
 
         cursorCardView = new CursorCardView(this);
         cursorCardView.setOverlayBounds(getWidth(), getHeight());
@@ -837,6 +876,20 @@ public class GameBoardView extends JPanel {
                 return "Révèle pendant 3s toutes les cartes d'une colonne de ta main.";
             default: return "";
         }
+    }
+
+    /**
+     * Méthode publique pour accéder à la description d'une action
+     */
+    public String getActionDescriptionPublic(ActionType actionType) {
+        return getActionDescription(actionType);
+    }
+
+    /**
+     * Méthode publique pour accéder au titre d'une action
+     */
+    public String getActionTitlePublic(ActionType actionType) {
+        return getActionTitle(actionType);
     }
 
     /**

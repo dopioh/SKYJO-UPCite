@@ -44,7 +44,7 @@ public class ActionCardOverlayPanel extends JPanel {
     private JButton validateButton;
 
     /**
-     * Classe interne pour les panels de cartes sélectionnables avec contour arrondi transparent
+     * classe interne pour les panels de cartes sélectionnables avec contour arrondi transparent
      */
     private static class SelectableCardPanel extends JPanel {
         private boolean isSelected = false;
@@ -78,14 +78,14 @@ public class ActionCardOverlayPanel extends JPanel {
         setOpaque(false);
         setVisible(false);
 
-        // Panel contenant les cartes avec fond blanc transparent et coins arrondis
+        //panel contenant les cartes avec fond blanc
         cardsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10)) {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 
-                // Fond blanc semi-transparent
+                //fond blanc semi-transparent
                 g2.setColor(new Color(255, 255, 255, 220)); // Blanc transparent
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
                 
