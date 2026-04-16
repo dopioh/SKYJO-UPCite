@@ -197,10 +197,6 @@ public class GameBoardBotController {
                 //prend de la défausse
                 gameBoardView.getBtnDefausse().lift();
                 CardModel taken = gameManager.takeDiscard();
-                if (GameManager.isStarCard(taken)) {
-                    grantActionForStar(bot);
-                }
-                System.out.println(bot.getName() + " prend la défausse : " + taken.getCardValue());
                 mainController.refreshGuide();
                 mainController.setWaitingNextTurn(false);
 
@@ -292,6 +288,9 @@ public class GameBoardBotController {
                     //regarde et supprimer les colonnes/lignes identiques
                     GameRuleModel.removeIdenticalColumns(botHand, gameManager.getDiscardPile(), bot);
                     GameRuleModel.removeIdenticalRows(botHand, gameManager.getDiscardPile(), bot);
+
+                    //vérifier si fin de manche
+                    gameManager.checkAndTriggerLastRound();
 
                     gameBoardView.flipCardAt(pos[0], pos[1], () -> gameBoardView.showPlayerCards(bot));
                     mainController.updateAllDecksDisplay();
@@ -637,6 +636,9 @@ public class GameBoardBotController {
 
             GameRuleModel.removeIdenticalColumns(target.getHand(), gameManager.getDiscardPile(), target);
             GameRuleModel.removeIdenticalRows(target.getHand(), gameManager.getDiscardPile(), target);
+
+            //verifier si fin de manche
+            gameManager.checkAndTriggerLastRound();
         }
     }
 }

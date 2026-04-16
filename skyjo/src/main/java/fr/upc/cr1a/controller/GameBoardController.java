@@ -184,7 +184,7 @@ public class GameBoardController {
 
         boolean isGameOver = gameManager.getGameState() == GameManager.GameState.GAME_ENDED;
         currentRoundEndPanel = new RoundEndPanel(
-            new ArrayList<>(gameManager.getPlayers()), isGameOver
+            new ArrayList<>(gameManager.getPlayers()), isGameOver, gameManager.getLastRoundPlayer()
         );
 
         if (isGameOver) {

@@ -506,6 +506,12 @@
 
 - Problème de double click partout dans le projet
 
+- Fix étoiles 
+
+- Fix actions 
+
+- fix bouton
+
 - `PlayerPreviewPanel`
     - la preview disparait dès que la transition entre joueurs commence
     - les cartes face cachée utilisent maintenant le skin équipé

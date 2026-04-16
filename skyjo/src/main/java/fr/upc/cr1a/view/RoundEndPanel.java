@@ -29,10 +29,15 @@ public class RoundEndPanel extends JPanel {
     private List<PlayerModel> sortedPlayers;
     private Image bgImage;
     private BufferedImage cachedBackground;
+    private PlayerModel lastRoundPlayer;
 
     private static Font baseFont;
 
     public RoundEndPanel(List<PlayerModel> players, boolean gameOver) {
+        this(players, gameOver, null);
+    }
+
+    public RoundEndPanel(List<PlayerModel> players, boolean gameOver, PlayerModel lastRoundPlayer) {
         this.gameOver = gameOver;
         setLayout(new BorderLayout());
         setOpaque(true);
@@ -94,9 +99,36 @@ public class RoundEndPanel extends JPanel {
         bigCard.setLayout(new BoxLayout(bigCard, BoxLayout.Y_AXIS));
         bigCard.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
+        // Label explicatif du calcul
+        JLabel scoreExplanation = new JLabel("Calcul : pts dans la main + carte action");
+        scoreExplanation.setFont(font(16f, Font.ITALIC));
+        scoreExplanation.setForeground(new Color(255, 255, 255, 200));
+        bigCard.add(scoreExplanation);
+        bigCard.add(Box.createVerticalStrut(12));
+
         for (int i = 0; i < sortedPlayers.size(); i++) {
             PlayerModel p = sortedPlayers.get(i);
-            String text = (i + 1) + ".   " + p.getName() + "   —   " + p.getTotalScore() + " pts";
+            
+            //calculer les détails du score
+            int handScore = p.getHand().calculateScore();
+            int actionScore = p.getActionHand().size() * 10;
+            int totalRoundScore = handScore + actionScore;
+            
+            String text = (i + 1) + ".   " + p.getName();
+            if (lastRoundPlayer != null && p.equals(lastRoundPlayer)) {
+                text += " (first)";
+            }
+            text += "   —   " + handScore + " + " + actionScore + " = " + totalRoundScore + " pts";
+            
+            //vérifier si doublement appliqué
+            if (lastRoundPlayer != null && p.equals(lastRoundPlayer)) {
+                //chercher si ce joueur n'est pas le premier de la liste
+                if (i > 0) {
+                    int finalScore = totalRoundScore * 2;
+                    text += " × 2 = " + finalScore + " pts";
+                }
+            }
+            
             JLabel pill = makePill(text);
             playerLabels.add(pill);
             bigCard.add(pill);
