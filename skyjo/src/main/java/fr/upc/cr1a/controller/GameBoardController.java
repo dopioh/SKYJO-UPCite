@@ -66,6 +66,7 @@ public class GameBoardController {
         
         this.humanTurnController = new HumanTurnController(gameBoardView, gameManager, this, gameLoop);
         humanTurnController.installListeners();
+        humanTurnController.disableListenersIfOnlyBots();
         
         gameBoardView.setTimerVisible(timerEnabled);
         gameLoop.setTimerEnabled(timerEnabled);

@@ -64,6 +64,23 @@ public class HumanTurnController {
         installActionCardListeners();
     }
 
+    /**
+     * désactive les listeners si tous les joueurs sont des bots
+     */
+    public void disableListenersIfOnlyBots() {
+        var players = gameManager.getPlayers();
+        
+        // verifier s'il y a au moins un joueur humain
+        if (players != null && !players.isEmpty()) {
+            boolean hasHumanPlayer = players.stream().anyMatch(p -> !p.getPlayerData().isBot());
+            
+            //si tous les joueurs sont des bots, désactiver les listeners
+            if (!hasHumanPlayer) {
+                removeAllListeners();
+            }
+        }
+    }
+
     // pour selectionner un joueur cible
     public boolean handlePlayerButtonClicked(int targetIndex) {
         if (actionMode == ActionMode.TRADE_SELECT_TARGET_PLAYER || actionMode == ActionMode.TRADE_SELECT_TARGET_CARD) {
