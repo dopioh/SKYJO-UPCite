@@ -65,6 +65,16 @@ public class PlayerModel {
         this.totalScore += score;
     }
 
+    /**
+     *calcule le score de la manche avec les cartes de la main et les cartes actions
+     * @return le score total de la manche avec les actions
+     */
+    public int calculateRoundScore(){
+        int handScore = hand.calculateScore();
+        int actionScore = actionHand.size() * 10; // +10 pts par carte action
+        return handScore + actionScore;
+    }
+
     public void resetHand(){
         this.hand = new PlayerHandModel();
         this.actionHand.clear(); 

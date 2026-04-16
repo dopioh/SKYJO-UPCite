@@ -223,7 +223,7 @@ public class GameRuleModel {
         int lowestScore = Integer.MAX_VALUE;
         
         for (PlayerModel player : players) {
-            int score = player.getHand().calculateScore();
+            int score = player.calculateRoundScore();
             if (score < lowestScore) {
                 lowestScore = score;
                 lowestPlayer = player;
@@ -240,16 +240,23 @@ public class GameRuleModel {
      * @param lowestPlayer le joueur avec le score le plus bas
      */
     public static void applyRoundScores(ArrayList<PlayerModel> players, PlayerModel roundEndPlayer, PlayerModel lowestPlayer) {
-        //Applique le score à tout le monde
+        int roundEndPlayerScore = 0;
+        
+        //applique le score à tout le monde
         for (PlayerModel player : players) {
-            int score = player.getHand().calculateScore();
+            int score = player.calculateRoundScore();
             player.addScore(score);
+            
+            //stocker le score du joueur qui a déclenché LAST_ROUND
+            if (player == roundEndPlayer) {
+                roundEndPlayerScore = score;
+            }
         }
         
-        //Double le score du joueur qui a lancé la fin de la manche s'il n'a pas le meilleur score
-        if (roundEndPlayer != null && roundEndPlayer != lowestPlayer) {
-            int roundEndPlayerScore = roundEndPlayer.getHand().calculateScore();
+        //double le score du joueur qui a lancé la fin de la manche s'il n'a pas le meilleur score
+        if (roundEndPlayer != null && lowestPlayer != null && roundEndPlayer != lowestPlayer) {
             roundEndPlayer.addScore(roundEndPlayerScore); 
+            System.out.println("[SCORE] " + roundEndPlayer.getName() + " a ses points doubles : +" + roundEndPlayerScore + " x2");
         }
     }
 

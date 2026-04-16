@@ -450,3 +450,81 @@ Classes utilitaires
 * **ImageCache** : Cache pour les images du jeu
     * Attribut : cache (Map<String, BufferedImage>)
     * Méthode : **get(String path)**, **preload(String... paths)**, **clear()**
+
+## Corrections et Améliorations Récentes
+
+### Bugs correctifs
+
+#### 1. **LAST_ROUND Trigger Manquant pour Joueurs Humains**
+- **Problème** : Le déclenchement de la dernière manche (LAST_ROUND) ne fonctionnait que pour les bots, pas pour les joueurs humains
+- **Solution** : Ajout de la vérification `checkAndTriggerLastRound()` à 6 points critiques:
+  - `HumanTurnController.java` (3 appels) :
+    - Après révélation d'une carte en `waitingReveal`
+    - Après une action TRADE
+    - Après une action DROP
+  - `GameBoardBotController.java` (2 appels) :
+    - Après révélation du bot
+    - Après DROP action du bot
+  - `TimeoutTurnController.java` (1 appel) :
+    - Après révélation timeout avec timeout handler
+- **Fichiers modifiés** :
+  - `GameManager.java` : Ajout de la méthode publique `checkAndTriggerLastRound()`
+  - `HumanTurnController.java` : 3 appels aux lignes ~271, ~656, ~755
+  - `GameBoardBotController.java` : 2 appels aux lignes ~288, ~642
+  - `TimeoutTurnController.java` : 1 appel dans `handleTimeoutRevealAfterDiscard()`
+
+#### 2. **Score Doublé Non Affiché à l'Écran**
+- **Problème** : Le score était bien doublé pour le joueur avec le plus bas score en fin de manche, mais cela n'était pas visible dans l'UI
+- **Solution** : 
+  - Optimisation de `GameRuleModel.applyRoundScores()` pour calculer proprement les scores et les doubler
+  - Mise à jour de `RoundEndPanel.java` pour afficher le multiplicateur "× 2 = SCORE FINAL pts"
+  - Ajout de logs de debug pour traçabilité
+- **Fichiers modifiés** :
+  - `GameRuleModel.java` : Lignes 242-265 - Logique recalculée
+  - `RoundEndPanel.java` : Lignes 115-124 - UI mise à jour avec affichage "× 2" visible
+
+#### 3. **Cartes Action Accordées Incorrectement au Prise de Défausse**
+- **Problème** : Quand un joueur prenait une carte étoile de la défausse (échange classique), la carte action était accordée. Or, les étoiles ne devraient activer les actions que lors de la révélation initiale ou dans d'autres cas spécifiques, PAS lors de la prise.
+- **Solution** : 
+  - Suppression des appels `grantActionForStar()` après la prise de défausse
+  - Les actions sont maintenant accordées UNIQUEMENT lors de :
+    - Révélation initiale (`INIT_REVEAL`)
+    - Révélation après une action
+    - Pioche automatique d'une nouvelle carte
+    - Actions DROP (accordé au joueur affecté qui découvre une étoile)
+- **Fichiers modifiés** :
+  - `HumanTurnController.java` : Ligne ~141 - Suppression du grant à la prise
+  - `GameBoardBotController.java` : Ligne ~200 - Suppression du grant pour les bots
+
+#### 4. **Star Card Actions Manquantes en Timeout Reveal**
+- **Problème** : Quand un joueur en timeout révélait une carte et qu'il s'agissait d'une étoile, la carte action n'était pas accordée
+- **Solution** : 
+  - Ajout de la vérification `isStarCard()` dans `TimeoutTurnController.handleTimeoutRevealAfterDiscard()`
+  - Appel à `grantActionForStar()` si la carte révélée au timeout est une étoile
+  - Ajout de l'import `ActionCardModel`
+- **Fichiers modifiés** :
+  - `TimeoutTurnController.java` : 
+    - Ligne 5 : Import `fr.upc.cr1a.model.ActionCardModel`
+    - Lignes 207-232 : Logique de révélation avec vérification étoile
+
+#### 5. **Star Card Actions Non Accordées lors de Discard/Exchange**
+- **Problème** : Quand un joueur échangeait une carte star de sa main avec la carte qu'il venait de piocher, la carte action n'était pas accordée
+- **Solution** : 
+  - Ajout de la vérification `isStarCard()` dans la méthode `GameManager.exchangeCardInHand()`
+  - Appel à `grantActionForStar()` si la carte jetée est une étoile
+  - Log de debug pour traçabilité : "[Exchange] Étoile jetée : carte action gagnée !"
+- **Fichiers modifiés** :
+  - `GameManager.java` : Lignes 503-530 dans `exchangeCardInHand()`
+    - Ajout de la logique de vérification après l'échange
+    - Accordage de l'action si nécessaire
+
+### Résumé des Correctifs
+
+| Bug | Statut | Fichiers | Lignes |
+|-----|--------|----------|--------|
+| LAST_ROUND for Humans | Fixé | GameManager, HumanTurnController, GameBoardBotController, TimeoutTurnController | ~271, ~656, ~755, ~288, ~642, handler |
+| Score Doubling Display | Fixé | GameRuleModel, RoundEndPanel | 242-265, 115-124 |
+| Star Actions on Discard Take | Fixé | HumanTurnController, GameBoardBotController | ~141, ~200 |
+| Star Actions on Timeout Reveal | Fixé | TimeoutTurnController | 207-232 |
+| Star Actions on Exchange | Fixé | GameManager | 503-530 |
+

@@ -30,7 +30,7 @@ public class ScoreCalculator {
     }
 
     /**
-     *calcule les scores de tous les joueurs pour la manche
+     *calcule les scores de tous les joueurs pour la manche (cartes + actions)
      *@param players Liste des joueurs
      *@return Map associant chaque joueur à son score de manche
      */
@@ -38,7 +38,7 @@ public class ScoreCalculator {
         Map<PlayerModel, Integer> scores = new HashMap<>();
         
         for (PlayerModel player : players) {
-            int score = calculateHandScore(player.getHand());
+            int score = player.calculateRoundScore();
             scores.put(player, score);
         }
         
@@ -46,7 +46,7 @@ public class ScoreCalculator {
     }
     
     /**
-     * cherche le joueur avec le score le plus bas
+     * cherche le joueur avec le score le plus bas (cartes + actions)
      * @param players Liste des joueurs
      * @return Le joueur avec le score le plus bas
      */
@@ -56,11 +56,11 @@ public class ScoreCalculator {
         }
         
         PlayerModel lowestPlayer = players.get(0);
-        int lowestScore = calculateHandScore(lowestPlayer.getHand());
+        int lowestScore = lowestPlayer.calculateRoundScore();
         
         for (int i = 1; i < players.size(); i++) {
             PlayerModel player = players.get(i);
-            int score = calculateHandScore(player.getHand());
+            int score = player.calculateRoundScore();
             
             if (score < lowestScore) {
                 lowestScore = score;
@@ -72,7 +72,7 @@ public class ScoreCalculator {
     }
     
     /**
-     * regle qui dit que si le joueur qui active la fin de la manche a le score le plus élevé, double son score de la manche
+     * regle qui dit que si le joueur qui active la fin de la manche a le score le plus élevé, double son score de la manche (cartes + actions)
      * @param roundEndPlayer Le joueur qui a déclenché la fin de manche
      * @param Players liste des joueurs
      */
@@ -80,13 +80,13 @@ public class ScoreCalculator {
         if (roundEndPlayer == null || Players == null || Players.isEmpty()) {
             return;
         }
-        //calculer le score du joueur qui a terminé
-        int roundEndPlayerScore = calculateHandScore(roundEndPlayer.getHand());
+        //calculer le score du joueur qui a terminé (avec cartes + actions)
+        int roundEndPlayerScore = roundEndPlayer.calculateRoundScore();
         //regarde s'il a le score le plus élevé
         boolean hasHighestScore = true;
         for (PlayerModel player : Players) {
             if (player != roundEndPlayer) {
-                int playerScore = calculateHandScore(player.getHand());
+                int playerScore = player.calculateRoundScore();
                 if (playerScore > roundEndPlayerScore) {
                     hasHighestScore = false;
                     break;

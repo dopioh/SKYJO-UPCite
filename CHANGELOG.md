@@ -474,3 +474,14 @@
 
 - Fix recuperation money avec getStats dans l'API
 - Fix recuperation rank via l'API
+
+- Fix étoiles 
+- Fix actions 
+- fix bouton
+
+
+
+
+
+
+

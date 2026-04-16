@@ -121,6 +121,13 @@ public class GameLoop {
     
     private void finishNormalTurnFlow() {
         if (!gameActive) return;
+        
+        //si pause ne pas changer de joueur maintenant
+        if (paused) {
+            pendingContinueAfterPause = true;
+            return;
+        }
+        
         gameManager.nextPlayer();
         if (gameManager.getGameState() == GameManager.GameState.ROUND_ENDED
                 || gameManager.getGameState() == GameManager.GameState.GAME_ENDED) {
