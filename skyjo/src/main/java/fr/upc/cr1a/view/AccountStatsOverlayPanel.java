@@ -57,7 +57,7 @@ public class AccountStatsOverlayPanel extends JPanel {
             }
 
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 closeButton.onMouseExit();
                 setVisible(false);
                 repaint();

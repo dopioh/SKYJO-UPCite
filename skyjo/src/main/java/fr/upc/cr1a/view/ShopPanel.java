@@ -55,7 +55,9 @@ public class ShopPanel extends JPanel {
         leftColumn.setOpaque(false);
         leftColumn.setLayout(new BoxLayout(leftColumn, BoxLayout.Y_AXIS));
 
-        backBtn = new DoodleButton("Retour", ButtonColor.RED, 200, 60);
+        backBtn = new DoodleButton("Retour", ButtonColor.RED, 220, 60, "/Button/retour.png");
+        backBtn.setFontSize(32f);
+        backBtn.setIconSide(DoodleButton.IconSide.LEFT);
         backBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         leftColumn.add(backBtn);
         leftColumn.add(Box.createVerticalStrut(8));
@@ -127,11 +129,11 @@ public class ShopPanel extends JPanel {
             }
 
             if (i == 0) {
-                buyButtons[i] = new DoodleButton("100$", ButtonColor.GREEN, 220, 70, "/Button/Shop.png");
+                buyButtons[i] = new DoodleButton("100$", ButtonColor.GREEN, 220, 70, "/Button/shop_green.png");
             } else if (i == 1) {
-                buyButtons[i] = new DoodleButton("200$", ButtonColor.GREEN, 220, 70, "/Button/Shop.png");
+                buyButtons[i] = new DoodleButton("200$", ButtonColor.GREEN, 220, 70, "/Button/shop_green.png");
             } else {
-                buyButtons[i] = new DoodleButton("300$", ButtonColor.GREEN, 220, 70, "/Button/Shop.png");
+                buyButtons[i] = new DoodleButton("300$", ButtonColor.GREEN, 220, 70, "/Button/shop_green.png");
             }
 
             buyButtons[i].setAlignmentX(Component.CENTER_ALIGNMENT);

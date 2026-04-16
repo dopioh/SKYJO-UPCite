@@ -55,19 +55,6 @@ public class RoundEndPanel extends JPanel {
         previewPanel.setVisible(false);
         layeredPane.add(previewPanel, JLayeredPane.PALETTE_LAYER);
 
-        // full screen etc
-        final JPanel contentRef = contentPanel;
-        layeredPane.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                Dimension size = layeredPane.getSize();
-                contentRef.setBounds(0, 0, size.width, size.height);
-                previewPanel.setBounds(size.width / 6, size.height / 10, size.width - size.width / 3, size.height - size.height / 5);
-                layeredPane.revalidate();
-                layeredPane.repaint();
-            }
-        });
-
         // haut : titre à gauche, bouton à droite
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setOpaque(false);
@@ -88,6 +75,21 @@ public class RoundEndPanel extends JPanel {
         }
 
         contentPanel.add(topBar, BorderLayout.NORTH);
+
+        // full screen etc
+        final JPanel contentRef = contentPanel;
+        layeredPane.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                Dimension size = layeredPane.getSize();
+                contentRef.setBounds(0, 0, size.width, size.height);
+                int pw = size.width * 2 / 3;
+                int ph = size.height * 3 / 4;
+                previewPanel.setBounds((size.width - pw) / 2, (size.height - ph) / 2, pw, ph);
+                layeredPane.revalidate();
+                layeredPane.repaint();
+            }
+        });
 
         // grande boite transparent en bas de topbar
         sortedPlayers = new ArrayList<>(players);
@@ -133,10 +135,20 @@ public class RoundEndPanel extends JPanel {
             bigCard.add(Box.createVerticalStrut(14));
         }
 
+        JScrollPane scroll = new JScrollPane(bigCard);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.setBorder(null);
+        // scroll vertical si besoin mais jamais horizontal
+        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.getVerticalScrollBar().setPreferredSize(new Dimension(0, 0));
+        scroll.getVerticalScrollBar().setUnitIncrement(16); //vitesse de scroll sinon elle est giga lent par defaut
+
         JPanel cardPadding = new JPanel(new BorderLayout());
         cardPadding.setOpaque(false);
         cardPadding.setBorder(BorderFactory.createEmptyBorder(0, 40, 40, 40));
-        cardPadding.add(bigCard, BorderLayout.CENTER);
+        cardPadding.add(scroll, BorderLayout.CENTER);
         contentPanel.add(cardPadding, BorderLayout.CENTER);
     }
 
@@ -156,8 +168,8 @@ public class RoundEndPanel extends JPanel {
         pill.setOpaque(false);
         pill.setBackground(Color.WHITE);
         pill.setForeground(new Color(50, 50, 50));
-        pill.setFont(font(22f, Font.BOLD));
-        pill.setBorder(BorderFactory.createEmptyBorder(12, 28, 12, 28));
+        pill.setFont(font(24f, Font.BOLD));
+        pill.setBorder(BorderFactory.createEmptyBorder(14, 28, 14, 28));
         pill.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return pill;
     }

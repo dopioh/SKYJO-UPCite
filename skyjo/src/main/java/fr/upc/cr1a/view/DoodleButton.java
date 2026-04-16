@@ -7,6 +7,8 @@ import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
 import javax.swing.*;
 import fr.upc.cr1a.utils.ImageCache;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
@@ -37,6 +39,7 @@ public class DoodleButton extends JComponent {
     private float hoverScale = 1f;
     private boolean animRunning = false;
     private IconSide iconSide = null; // null = groupé avec le texte (truc par défaut)
+    private boolean active = true;
     private float fontSize = 48f;
 
     // juste texte
@@ -157,7 +160,7 @@ public class DoodleButton extends JComponent {
 
         // texte
         g2.setFont(font);
-        g2.setColor(Color.WHITE);
+        g2.setColor(active ? Color.WHITE : new Color(255, 255, 255, 100));
         FontMetrics fm = g2.getFontMetrics();
         String txt = model.getText();
         int txtW = fm.stringWidth(txt);
@@ -169,8 +172,12 @@ public class DoodleButton extends JComponent {
 
         // position du texte et de l'icone
         int txtX;
-        if (iconSide != null && icon != null) {
-            // icone collée au bord, texte centré indépendamment
+        if (iconSide == IconSide.LEFT && icon != null) {
+            // texte centré
+            int iconEnd = x + 5 + iconSize + 5;
+            txtX = Math.max((getWidth() - txtW) / 2, iconEnd);
+        } else if (iconSide == IconSide.RIGHT && icon != null) {
+            // icone collée à droite
             txtX = (getWidth() - txtW) / 2;
         } else if (icon != null) {
             // text icone centré ensemble
@@ -190,7 +197,7 @@ public class DoodleButton extends JComponent {
             if (iconSide == IconSide.RIGHT) {
                 iconeX = x + w - iconSize - 10;
             } else if (iconSide == IconSide.LEFT) {
-                iconeX = x + 10;
+                iconeX = x + 5;
             } else {
                 iconeX = txtX + txtW + 10;
             }
@@ -225,7 +232,17 @@ public class DoodleButton extends JComponent {
         stopAnim();
     }
 
+    // simule un clic (pour les tests)
+    public void doClick() {
+        MouseEvent e = new MouseEvent(this, MouseEvent.MOUSE_PRESSED, System.currentTimeMillis(), 0, 0, 0, 1, false);
+        for (MouseListener l : getMouseListeners()) {
+            l.mousePressed(e);
+        }
+    }
+
     // setters
+    public void setActive(boolean active) { this.active = active; repaint(); }
+    public String getText() { return model.getText(); }
     public void setCouleur(ButtonColor c) { model.setColor(c); repaint(); }
     public void setText(String t) { model.setText(t); repaint(); }
     public void setImage(String path) { model.setImagePath(path); loadIcon(path); repaint(); }

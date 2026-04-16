@@ -7,12 +7,15 @@ import fr.upc.cr1a.model.PlayerHandModel;
 import fr.upc.cr1a.model.PlayerModel;
 
 import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
+import java.awt.image.BufferedImage;
+import com.jhlabs.image.GaussianFilter;
 import javax.swing.*;
 
 /**
  * Classe pour le panel de preview des autres joueurs
  * Les previews de leurs cartes devront etre ajouter ici
- * 
+ *
  * @author Mei
  */
 public class PlayerPreviewPanel extends JPanel{
@@ -23,11 +26,12 @@ public class PlayerPreviewPanel extends JPanel{
     private int lastCardW = 95;
     private int lastCardH = 135;
 
-    private PlayerModel player;
+    private Font doodleFont;
+    private BufferedImage blurredBg; // fond flouté capturé au moment de l'affichage
 
-    // Animation fondu : 
+    // Animation fondu :
     private float opaque = 0.0f; // 0.0 = invisible, 1.0 = totalement opaque
-    
+
     public PlayerPreviewPanel(){
         setLayout(new BorderLayout());
         setOpaque(false);
@@ -35,12 +39,25 @@ public class PlayerPreviewPanel extends JPanel{
         setVisible(false);
         //showOtherPlayerHand();
         this.cardButtons = new CardButton[3][4];
+
+        try {
+            var stream = getClass().getResourceAsStream("/PatrickHandSC.ttf");
+            doodleFont = Font.createFont(Font.TRUETYPE_FONT, stream);
+        } catch (Exception e) {
+            doodleFont = new Font("Arial", Font.BOLD, 12);
+        }
     }
 
 
     public void showOtherPlayerHand(PlayerModel player){
-        this.player = player;
         removeAll(); // TRES IMPORTANT sinon les cartes facedown du debut seront tjr au dessus visuellement
+
+        JLabel title = new JLabel("Main de " + player.getName(), JLabel.CENTER);
+        title.setFont(doodleFont.deriveFont(Font.BOLD, 30f));
+        title.setForeground(Color.WHITE);
+        title.setBorder(BorderFactory.createEmptyBorder(12, 0, 8, 0));
+        this.add(title, BorderLayout.NORTH);
+
         JPanel cardsGrid = new JPanel(new GridBagLayout());
         cardsGrid.setOpaque(false);
 
@@ -90,7 +107,7 @@ public class PlayerPreviewPanel extends JPanel{
     private String getCardImagePath(CardModel card) {
         //System.out.println("getCardImagePath called"); // est called
         if (card.isFaceDown()) {
-            return "/cartes/carteDos.png";
+            return CaseOpeningOverlayPanel.getSelectedSkinPath();
         }
         if (card instanceof NumberCardModel numberCard && numberCard.isStar()) {
             return "/cartes/carteEtoile.png";
@@ -120,6 +137,34 @@ public class PlayerPreviewPanel extends JPanel{
         repaint();
     }
 
+    // capture le fond, le floute, et met dans blurredBg
+    private void updateBlurredBackground() {
+        if (getWidth() <= 0 || getHeight() <= 0) return;
+        Component parent = getParent(); // il faut le parent car sinon elle ne prenais pas en compte le background pour flouter
+        if (parent == null) return;
+        Component root = parent;
+        if (parent.getParent() != null) root = parent.getParent();
+        // se cacher avant de capturer pour ne pas flouter notre propre flou
+        boolean visible = isVisible();
+        setVisible(false);
+
+        // calculer la position de ce panel par rapport à root
+        int offX = 0, offY = 0;
+        Component c = this;
+        while (c != root && c != null) {
+            offX += c.getX();
+            offY += c.getY();
+            c = c.getParent();
+        }
+        BufferedImage img = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2 = img.createGraphics();
+        g2.translate(-offX, -offY);
+        root.paint(g2);
+        g2.dispose();
+        blurredBg = new GaussianFilter(22).filter(img, null);
+        setVisible(visible);
+    }
+
     /**
      * Methode qui remplace 'setOpaque()'
      * Fait apparaitre le panel avec un effet de fondu
@@ -128,7 +173,8 @@ public class PlayerPreviewPanel extends JPanel{
     public void fade(boolean fadeOn){
         AnimLoop.remove(this);
             if (fadeOn){
-                // le delay geré par AnimLoop
+                if (!isVisible()) opaque = 0; // reset seulement si le panel etait caché
+                updateBlurredBackground();
                 setVisible(true);
                 AnimLoop.add(this, dt -> {
                 opaque += 0.05f * (float) dt; // vitesse d'apparition
@@ -155,32 +201,19 @@ public class PlayerPreviewPanel extends JPanel{
     @Override
     protected void paintComponent(Graphics g){
         super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D) g.create(); // copie du pinceau
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // bord plus lisses
-        g2.setColor(new Color(168, 168, 168)); // gris clair
-        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20); 
-        
-        g2.dispose(); // seul la copie est detruite, les cartes peuvent etre dessiner avec le pinceau original
-    }
-
-    @Override
-    protected void paintChildren(Graphics g){
-        if (player == null) return;
-        super.paintChildren(g);
         Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g2.setFont(new Font("Arial", Font.BOLD,18)); // fix la version full screen avec les cartes aussi
-        String text = "Preview de la main du joueur " + player.getName() + " :";
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        FontMetrics fm = g2.getFontMetrics();
+        // flou en arrondi
+        if (blurredBg != null) {
+            g2.setClip(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 40, 40));
+            g2.drawImage(blurredBg, 0, 0, null);
+            g2.setClip(null);
+        }
 
-        int textWidth = fm.stringWidth(text);
-            int textHeight = fm.getAscent();
-            int x = (getWidth() - textWidth) / 2;
-            int y = (getHeight() + textHeight) / 12;
-    
-        g2.setColor(Color.BLACK);
-        g2.drawString(text , x, y);
+        g2.setColor(new Color(0, 0, 0, 80));
+        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 40, 40);
+        g2.dispose();
     }
 
     @Override
