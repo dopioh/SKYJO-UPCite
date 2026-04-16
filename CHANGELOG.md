@@ -478,6 +478,10 @@
 
 ## v.0.12: SPRINT 12
 
+### Added
+
+- Première partie des cartes nombres colorées
+
 ### Modified
 
 - Amélioration de la page Paramètres dans le style du Leaderboard
