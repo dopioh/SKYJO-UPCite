@@ -638,6 +638,7 @@ public class GameManager {
         currentDrawCard = null;
         lastRoundPlayer = -1;  // réinitialiser le déclencheur du dernier tour
         extraTurnsRemaining = 0;  // réinitialiser les tours supplémentaires
+        deck = new PiocheModel(this.gameWithAction);
         discardPile = new DefausseModel();
 
         //vider les cartes actions de tous les joueurs
