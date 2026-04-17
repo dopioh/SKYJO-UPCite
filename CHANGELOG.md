@@ -487,6 +487,7 @@
 - Amélioration de la page Paramètres dans le style du Leaderboard
     - Onglet "Jeu" renommé "Graphique", contenu bot supprimé
     - Onglet actif change de couleur
+    - Bouton toggle qui permet d'activer ou non les animations de carte flottante
 
 - Amélioration du menu Pause dans le même style
 
