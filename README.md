@@ -38,6 +38,8 @@ java -jar skyjo/target/skyjo-app.jar
 
 ## Règle du jeu 
 
+### Mode Classique
+
 Chaque joueur possède 12 cartes face caché devant lui.   
 Les cartes possèdes des valeurs entre **-2** et **12**.   
 Lorsque toutes les cartes d'un joueur sont retournées, il y'a un tour supplémentaire pour les autres joueur et c'est la fin de la manche.   
@@ -48,16 +50,42 @@ Lors du premier tour de chaque manche, chaque joueur doit retourner deux cartes.
 
 La somme des deux cartes défini le l'ordre des actions des joueurs, celui qui à la somme la plus élévé joue en premier, le deuxième qui à la plus grosse somme joue en deuxième etc..
 
-Ensuite à chaque tour jusqu'à la fin de la manche, chaque joueur peut :
-    - Piocher une carte soit dans la pioche, soit dans la défausse *( si il y en a un )*.   
+Ensuite à chaque tour jusqu'à la fin de la manche, chaque joueur peut :  
+
+- Piocher une carte soit dans la pioche, soit dans la défausse *( si il y en a un )*.   
     Et remplacer une de ses 12 cartes par la carte pioché.   
-    - Piocher une carte dans la pioche mais ne pas vouloir la jouer, donc la défausser directement.   
+
+- Piocher une carte dans la pioche mais ne pas vouloir la jouer, donc la défausser directement.   
     Dans ce cas, il est necessaire de retourner une carte parmis les 12.  
 
 > Si on pioche dans la défausse, on est obliger de la jouer  
 > À noter, la pioche est face caché mais la défausse est face visible pour tous    
 
-Pour le mode **Skyjo Action** : 
+### Mode **Skyjo Action** : 
+
+Il existe 6 cartes spécial dans le jeu *( disponible que dans le **Mode Action**)* :  
+
+- **ECHANGE** : Échange une carte de ta main avec une carte d'un autre joueur.  
+
+- **REPLACE** : Echange la position de 2 cartes dans ta main.
+
+- **JOUE 2 FOIS** : Tu gagnes un tour supplémentaire à la fin de ce tour.
+
+- **REJOUE** : Rejoue la dernière action de la défausse action. 
+
+- **CHAQUE JOUEUR DEFAUSSE** : Pour chaque autre joueur, choisis une carte à défausser: elle est remplacée par la première carte de la pioche.    
+
+- **REGARDE** : Révèle pendant 3s toutes les cartes d'une colonne de ta main.  
+
+Chaque tour, le joueur peut decider de ... *( en plus des actions de bases )* :
+
+- Piocher une carte action, mais son tour se fini instantanément.
+
+- Jouer une carte action, si une carte action est joué alors le tour est fini, on ne peut pas piocher une carte normale ensuite
+
+> Il existe une pioche et défausse pour les cartes actions.   
+> Mais contrairement à la défause classique, on peut pas piocher dedans.  
+
 
 
 ## Utilisation du jeu
@@ -69,8 +97,8 @@ Créer un compte en fournissant **mail**, **pseudonyme** ( vu par tous ) et **mo
 Ce compte vous donne accès au **mode de jeu en réseau** ainsi qu'à la sauvegarde de vos statistiques sur notre base de données.    
 
 Si vous avez déjà un compte, vous pouvez cliquer sur **"Se Connecter"** pour accéder à votre compte.     
-> Attention, les entrées sont sensibles à la casse   
-> Vérifiez bien dans que vous n'ayez pas mis d'espace au debut ou à la fin de votre saisie (pour la création ou la connexion) 
+> Attention, les entrées sont sensibles à la casse.     
+> Vérifiez bien dans que vous n'ayez pas mis d'espace au debut ou à la fin de votre saisie (pour la création ou la connexion).   
 
 Si vous ne souhaitez pas avoir un compte, vous pouvez toujours jouer en tant qu'*invité*, vous aurez assez d'argent pour debloqué tous les skins de cartes mais vous ne pourrez pas jouer en réseau.  
 
@@ -79,7 +107,7 @@ Si vous ne souhaitez pas avoir un compte, vous pouvez toujours jouer en tant qu'
 - **Boutique** : Vous donne accès à votre classeur de skins, votre portefeuille, à trois différents types boosters, ainsi qu'aux pourcentages de chance d'avoir une rareté de skins selons les boosters (Commun, Rare ou Légendraire).   
     Les booster vous permettent de débloquer des skins de dos de carte *(N'influence en aucun cas le Gameplayer, pûrement décoratif)*
     Pour équiper un skin, rendez vous dans votre classer et cliquer sur "Equiper".
-    > Les skins que vous avez débloquer auront un fond vert
+    > Les skins que vous avez débloquer auront un fond vert.  
 
 - **Règlages** : 
 
@@ -97,13 +125,11 @@ Si vous ne souhaitez pas avoir un compte, vous pouvez toujours jouer en tant qu'
     - Local : Vous pouvez configurer le nombres de joueurs *( jusqu'à 8 maximum )*, le noms des ces derniers, dire si se sont des bots ( et choisir le type de bot ) ainsi qu'activer ou non le mode **Skyjo Action**
 
     - Multijoueur : Vous pouvez créer un salon ou bien en rejoindre un déjà existant si il existe un  
-    > Attention, c'est un mode en Peer-To-Peer et donc vous ne pouvez que détecter que les joueurs qui sont sur le même réseau internet que vous  
+    > Attention, c'est un mode en Peer-To-Peer et donc vous ne pouvez que détecter que les joueurs qui sont sur le même réseau internet que vous.    
     **A FINIR DE REMPLIR LORSQUE MULTIJOUEUR FONCTIONNEL**
 
 ### Déroulement d'une partie
 
-
-### Contrôles en jeu
 
 
 ## Tests
