@@ -61,7 +61,7 @@ Ensuite à chaque tour jusqu'à la fin de la manche, chaque joueur peut :
     Dans ce cas, il est necessaire de retourner une carte parmis les 12.  
 
 > Si on pioche dans la défausse, on est obligé de la jouer.  
-> **À noter**f : la pioche est face caché mais la défausse est face visible pour tous.    
+> **À noter** : la pioche est face caché mais la défausse est face visible pour tous.    
 
 ### Mode **Skyjo Action** : 
 
