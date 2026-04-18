@@ -505,6 +505,8 @@
     - nom de joueur un peu transparent si c'est pas celui qui joue pour differencier
     - nom deviens ".." après 8 caratrère pour pas dépasser
 
+- Réinstauration des cartes actions sous le jeu
+
 ### Fixed
 
 - Liste des joueurs maintenant scrollable dans Fin de manche / fin de partie car avec 8 joueurs ça dépassait

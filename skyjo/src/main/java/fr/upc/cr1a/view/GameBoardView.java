@@ -78,9 +78,13 @@ public class GameBoardView extends JPanel {
     private int cachedBgHeight;
 
     // Affichage de la main des cartes action du joueur
-    private CardButton deckActionButton;
-    private ActionCardOverlayPanel actionCardOverlay;
-    private JLabel actionDeckCountLabel;
+    private JPanel actionHandPanel;
+    private JPanel actionHandCardsPanel;
+    private final ArrayList<CardButton> actionHandButtons = new ArrayList<>();
+    private int actionHandCardWidth = 65;
+    private int actionHandCardHeight = 90;
+    private boolean actionHandVisible = true;
+    private ActionCardClickListener actionCardClickListener;
 
     // Affichage des cartes pilées
     private CardButton btnPioche;
@@ -115,6 +119,11 @@ public class GameBoardView extends JPanel {
 
     // Panel de transition lors du changement de joueur
     private PlayerTransitionPanel transitionPanel;
+
+    @FunctionalInterface
+    public interface ActionCardClickListener {
+        void onActionCardClicked(ActionType type, int indexInHand);
+    }
 
     public GameBoardView(ArrayList<PlayerModel> listPlayerModels) {
         this.listPlayer = listPlayerModels;
@@ -301,27 +310,29 @@ public class GameBoardView extends JPanel {
 
         cardsContainer.add(cardsGrid, BorderLayout.CENTER);
 
-        //panel des cartes actions dans la main du joueur
-        JPanel actionDeckPanel = new JPanel(new BorderLayout());
-        actionDeckPanel.setOpaque(false);
+        // panel des cartes actions dans la main du joueur (nouvelle version : liste de cartes)
+        actionHandPanel = new JPanel(new BorderLayout(0, 6));
+        actionHandPanel.setOpaque(false);
 
-        JPanel deckButtonContainer = new JPanel(new BorderLayout());
-        deckButtonContainer.setOpaque(false);
-        deckActionButton = new CardButton();
-        deckActionButton.setAnimationEnabled(false);
-        deckActionButton.setCardSize(65, 90);
-        actionDeckCountLabel = new JLabel("0");
-        actionDeckCountLabel.setFont(patrickFont.deriveFont(Font.BOLD, 14f));
-        actionDeckCountLabel.setForeground(new Color(255, 200, 0)); // couleur dorée
-        actionDeckCountLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        JLabel actionHandLabel = new JLabel("Cartes action", SwingConstants.CENTER);
+        actionHandLabel.setForeground(new Color(255, 224, 120));
+        actionHandLabel.setFont(patrickFont.deriveFont(Font.BOLD, 20f));
+        actionHandPanel.add(actionHandLabel, BorderLayout.NORTH);
 
-        JPanel countPanel = new JPanel();
-        countPanel.setOpaque(false);
-        countPanel.add(actionDeckCountLabel);
+        actionHandCardsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0));
+        actionHandCardsPanel.setOpaque(false);
+        actionHandPanel.add(actionHandCardsPanel, BorderLayout.CENTER);
 
-        deckButtonContainer.add(countPanel, BorderLayout.NORTH);
-        deckButtonContainer.add(deckActionButton, BorderLayout.CENTER);
-        actionDeckPanel.add(deckButtonContainer, BorderLayout.CENTER);
+        /*
+         * ANCIENNE VERSION: overlay de sélection ?
+         * JPanel actionDeckPanel = new JPanel(new BorderLayout());
+         * JPanel deckButtonContainer = new JPanel(new BorderLayout());
+         * deckActionButton = new CardButton();
+         * actionDeckCountLabel = new JLabel("0");
+         * deckButtonContainer.add(actionDeckCountLabel, BorderLayout.NORTH);
+         * deckButtonContainer.add(deckActionButton, BorderLayout.CENTER);
+         * actionDeckPanel.add(deckButtonContainer, BorderLayout.CENTER);
+         */
 
         // creer les 12 CardButton
         for (int row = 0; row < 3; row++) {
@@ -341,7 +352,7 @@ public class GameBoardView extends JPanel {
         gbcActionHand.gridwidth = 4;
         gbcActionHand.insets = new Insets(8, cardSpacing, 6, cardSpacing);
         gbcActionHand.anchor = GridBagConstraints.CENTER;
-        cardsGrid.add(actionDeckPanel, gbcActionHand);
+        cardsGrid.add(actionHandPanel, gbcActionHand);
 
         zonePlateau.add(cardsContainer, BorderLayout.CENTER);
 
@@ -458,10 +469,10 @@ public class GameBoardView extends JPanel {
         transitionPanel = new PlayerTransitionPanel();
         layeredPane.add(transitionPanel, JLayeredPane.POPUP_LAYER);
 
-        //ajouter l'overlay des cartes action
-        actionCardOverlay = new ActionCardOverlayPanel();
-        actionCardOverlay.setVisible(false);
-        layeredPane.add(actionCardOverlay, JLayeredPane.PALETTE_LAYER);
+        // ANCIENNE VERSION: overlay de sélection des cartes action
+        // actionCardOverlay = new ActionCardOverlayPanel();
+        // actionCardOverlay.setVisible(false);
+        // layeredPane.add(actionCardOverlay, JLayeredPane.PALETTE_LAYER);
 
         //ajouter l'astuce des cartes action'
         actionCardTutorialOverlay = new ActionCardTutorialOverlayPanel();
@@ -522,64 +533,66 @@ public class GameBoardView extends JPanel {
      * Met à jour les boutons carte action visibles sans recréer de composants
      */
     public void showActionHand(PlayerModel player) {
+        hideActionDescription();
         ArrayList<ActionCardModel.ActionType> actions = player.getActionHand();
         int actionCount = (actions == null) ? 0 : actions.size();
 
-        //maj le compteur du deck
-        actionDeckCountLabel.setText(String.valueOf(actionCount));
+        actionHandButtons.clear();
+        actionHandCardsPanel.removeAll();
 
-        if (actionCount > 0) {
-            deckActionButton.setVisible(true);
-            String firstActionPath = getCardImagePath(new ActionCardModel(false, actions.get(0)));
-            deckActionButton.setCardImage(firstActionPath);
-        } else {
-            deckActionButton.setVisible(false);
-            deckActionButton.clearImage();
+        if (actions != null) {
+            for (int i = 0; i < actions.size(); i++) {
+                ActionType actionType = actions.get(i);
+                int indexInHand = i;
+
+                CardButton actionBtn = new CardButton();
+                actionBtn.setAnimationEnabled(false);
+                actionBtn.setCardSize(actionHandCardWidth, actionHandCardHeight);
+                actionBtn.setCardImage(getCardImagePath(new ActionCardModel(false, actionType)));
+                actionBtn.setToolTipText(getActionTitle(actionType));
+
+                actionBtn.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        showActionDescription(actionType);
+                    }
+
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        hideActionDescription();
+                    }
+                });
+
+                actionBtn.addActionListener(e -> {
+                    if (actionCardClickListener != null) {
+                        actionCardClickListener.onActionCardClicked(actionType, indexInHand);
+                    }
+                });
+
+                actionHandButtons.add(actionBtn);
+                actionHandCardsPanel.add(actionBtn);
+            }
         }
+
+        actionHandCardsPanel.setVisible(actionHandVisible && actionCount > 0);
+        actionHandPanel.setVisible(actionHandVisible);
+        actionHandCardsPanel.repaint();
     }
 
-    /**
-     * Getters pour que le controller puisse ajouter ses listeners
+    public CardButton[] getActionHandButtons() {
+        return actionHandButtons.toArray(new CardButton[0]);
+    }
+
+    public void setActionCardClickListener(ActionCardClickListener listener) {
+        this.actionCardClickListener = listener;
+    }
+
+    /*
+     * ANCIENNE VERSION: sélection via overla
+     * public CardButton[] getActionCardButtons() { return actionCardOverlay.getActionCardButtons(); }
+     * public void openActionCardOverlay(ArrayList<ActionType> actions) { actionCardOverlay.showActionHand(actions, this); }
+     * public void setActionCardSelectionCallback(Runnable callback) { actionCardOverlay.setOnActionSelected(callback); }
      */
-    public CardButton[] getActionCardButtons() {
-        return actionCardOverlay.getActionCardButtons();
-    }
-
-    public ActionType getActionCardType(int index) {
-        return actionCardOverlay.getActionCardType(index);
-    }
-
-    public int getVisibleActionCount() {
-        return actionCardOverlay.getVisibleActionCount();
-    }
-
-    /**
-     * ouvrir l'overlay des cartes action
-     */
-    public void openActionCardOverlay(ArrayList<ActionCardModel.ActionType> actions) {
-        actionCardOverlay.showActionHand(actions, this);
-    }
-
-    /**
-     *fermer l'overlay des cartes action
-     */
-    public void closeActionCardOverlay() {
-        actionCardOverlay.closeOverlay();
-    }
-
-    /**
-     * obtenir l'index de la carte sélectionnée dans l'overlay
-     */
-    public int getSelectedActionCardIndex() {
-        return actionCardOverlay.getSelectedCardIndex();
-    }
-
-    /**
-     *définir le retour pour quand une carte action est validée
-     */
-    public void setActionCardSelectionCallback(Runnable callback) {
-        actionCardOverlay.setOnActionSelected(callback);
-    }
 
     /**
      * Retourne le chemin de l'image pour une carte
@@ -751,11 +764,8 @@ public class GameBoardView extends JPanel {
         return btnDefausseAction;
     }
 
-    public CardButton getDeckActionButton() {
-        return deckActionButton;
-    }
-
-
+    // ANCIENNE VERSION
+    // public CardButton getDeckActionButton() { return deckActionButton; }
 
     /**
      * Affiche ou masque les pioches d'actions selon le mode de jeu
@@ -767,11 +777,20 @@ public class GameBoardView extends JPanel {
         labPiocheAction.setVisible(visible);
         labDefausseAction.setVisible(visible);
         helpBtn.setVisible(visible);
+        setActionHandVisible(visible);
+        if (!visible) {
+            hideActionDescription();
+        }
     }
 
     public void setActionHandVisible(boolean visible) {
-        deckActionButton.setVisible(visible);
-        actionDeckCountLabel.setVisible(visible);
+        actionHandVisible = visible;
+        if (actionHandPanel != null) {
+            actionHandPanel.setVisible(visible);
+        }
+        if (actionHandCardsPanel != null) {
+            actionHandCardsPanel.setVisible(visible && !actionHandButtons.isEmpty());
+        }
     }
 
     public void setActionGuide(String message) {
@@ -1006,14 +1025,13 @@ public class GameBoardView extends JPanel {
         }
         previewPanel.setCardSize(largeurCarte, hauteurCarte);
 
-        //redimensionner le bouton deck action et les boutons de l'overlay
+        // redimensionner les cartes action sous la main
         int smallCardWidth = (int) (largeurCarte * 0.7);
         int smallCardHeight = (int) (hauteurCarte * 0.7);
-        deckActionButton.setCardSize(smallCardWidth, smallCardHeight);
-
-        CardButton[] overlayButtons = actionCardOverlay.getActionCardButtons();
-        for (CardButton btn : overlayButtons) {
-            btn.setCardSize(largeurCarte, hauteurCarte);
+        actionHandCardWidth = smallCardWidth;
+        actionHandCardHeight = smallCardHeight;
+        for (CardButton btn : actionHandButtons) {
+            btn.setCardSize(actionHandCardWidth, actionHandCardHeight);
         }
 
 
@@ -1051,10 +1069,9 @@ public class GameBoardView extends JPanel {
                 }
             }
         }
-        CardButton[] overlayActionButtons = actionCardOverlay.getActionCardButtons();
-        for (int i = 0; i < overlayActionButtons.length; i++) {
-            if (overlayActionButtons[i] != null) {
-                overlayActionButtons[i].setAnimationEnabled(false);
+        for (CardButton actionButton : actionHandButtons) {
+            if (actionButton != null) {
+                actionButton.setAnimationEnabled(false);
             }
         }
         AnimLoop.remove(nextRoundPanel);

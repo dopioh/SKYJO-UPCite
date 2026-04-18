@@ -19,7 +19,7 @@ import fr.upc.cr1a.view.GameBoardView;
 /**
  * Classe servant a différencier toutes les actions joueurs
  */
-public class HumanTurnController {
+public class HumanTurnController implements GameBoardView.ActionCardClickListener {
 
     private final GameBoardView gameBoardView;
     private final GameManager gameManager;
@@ -95,30 +95,31 @@ public class HumanTurnController {
     }
 
     private void installDeckListeners() {
+        // ANCIENNE VERSION
         //listener pour le deck de cartes actions
-        gameBoardView.getDeckActionButton().addActionListener(e -> {
-            if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) return;
-            if (mainController.isWaitingNextTurn()) return;
-            if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
+        // gameBoardView.getDeckActionButton().addActionListener(e -> {
+        //     if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) return;
+        //     if (mainController.isWaitingNextTurn()) return;
+        //     if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
 
-            PlayerModel player = gameManager.getCurrentPlayer();
-            if (player == null) return;
+        //     PlayerModel player = gameManager.getCurrentPlayer();
+        //     if (player == null) return;
 
-            ArrayList<ActionType> actions = player.getActionHand();
-            if (actions == null || actions.isEmpty()) return;
+        //     ArrayList<ActionType> actions = player.getActionHand();
+        //     if (actions == null || actions.isEmpty()) return;
 
-            //ouvrir l'overlay des cartes action
-            gameBoardView.openActionCardOverlay(actions);
+        //     //ouvrir l'overlay des cartes action
+        //     gameBoardView.openActionCardOverlay(actions);
 
-            //configue le retour quand une carte est selec
-            gameBoardView.setActionCardSelectionCallback(() -> {
-                int selectedIndex = gameBoardView.getSelectedActionCardIndex();
-                if (selectedIndex >= 0 && selectedIndex < actions.size()) {
-                    ActionType type = actions.get(selectedIndex);
-                    onActionCardClicked(type, selectedIndex);
-                }
-            });
-        });
+        //     //configue le retour quand une carte est selec
+        //     gameBoardView.setActionCardSelectionCallback(() -> {
+        //         int selectedIndex = gameBoardView.getSelectedActionCardIndex();
+        //         if (selectedIndex >= 0 && selectedIndex < actions.size()) {
+        //             ActionType type = actions.get(selectedIndex);
+        //             onActionCardClicked(type, selectedIndex);
+        //         }
+        //     });
+        // });
 
         gameBoardView.getBtnPioche().addActionListener(e -> {
             if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) return;
@@ -220,21 +221,22 @@ public class HumanTurnController {
             }
         });
 
+        // ANCIENNE VERSION (mauvaise UX):
         //listener pour ouvrir l'overlay
-        gameBoardView.getDeckActionButton().addActionListener(e -> {
-            if (mainController.isWaitingNextTurn()) return;
-            if (actionMode != ActionMode.NONE) return;
-            if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
+        // gameBoardView.getDeckActionButton().addActionListener(e -> {
+        //     if (mainController.isWaitingNextTurn()) return;
+        //     if (actionMode != ActionMode.NONE) return;
+        //     if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
 
-            PlayerModel player = gameManager.getCurrentPlayer();
-            if (player == null) return;
+        //     PlayerModel player = gameManager.getCurrentPlayer();
+        //     if (player == null) return;
 
-            ArrayList<ActionType> actions = player.getActionHand();
-            if (actions == null || actions.isEmpty()) return;
+        //     ArrayList<ActionType> actions = player.getActionHand();
+        //     if (actions == null || actions.isEmpty()) return;
 
-            //ouvrir l'overlay
-            gameBoardView.openActionCardOverlay(actions);
-        });
+        //     //ouvrir l'overlay
+        //     gameBoardView.openActionCardOverlay(actions);
+        // });
     }
 
     private void installHandListeners() {
@@ -329,7 +331,7 @@ public class HumanTurnController {
     }
 
     private void installActionCardListeners() {
-       
+        gameBoardView.setActionCardClickListener(this);
     }
 
     public void removeAllListeners() {
@@ -376,28 +378,14 @@ public class HumanTurnController {
             }
         }
 
-        // Retire les listeners des cartes action
-        for (int i = 0; i < gameBoardView.getActionCardButtons().length; i++) {
-            var btn = gameBoardView.getActionCardButtons()[i];
-            if (btn != null) {
-                MouseListener[] mouseListeners = btn.getMouseListeners();
-                for (MouseListener listener : mouseListeners) {
-                    btn.removeMouseListener(listener);
-                }
-            }
-        }
-        
-        //retirer le retour du deck action button
-        if (gameBoardView.getDeckActionButton() != null) {
-            ActionListener[] deckListeners = gameBoardView.getDeckActionButton().getActionListeners();
-            for (ActionListener listener : deckListeners) {
-                gameBoardView.getDeckActionButton().removeActionListener(listener);
-            }
-        }
+        // Désactive le callback des cartes action dynamiques
+        gameBoardView.setActionCardClickListener(null);
     }
 
-    private void onActionCardClicked(ActionType type, int indexInHand) {
+    public void onActionCardClicked(ActionType type, int indexInHand) {
         if (mainController.isWaitingNextTurn()) return;
+        if (!gameManager.withActionCard()) return;
+        if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
         if (actionMode != ActionMode.NONE) return;
 
         PlayerModel player = gameManager.getCurrentPlayer();
