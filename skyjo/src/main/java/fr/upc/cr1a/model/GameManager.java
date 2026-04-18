@@ -113,6 +113,7 @@ public class GameManager {
         this.initRevealJustFinished = false;
         this.gameBoardModel = new GameBoardModel(players, frame, this);
         GameBoardView view = this.gameBoardModel.getGameBoardView();
+        view.setHandCardAnimations(frame.isHandCardAnimationsEnabled());
         view.updateCardDisplay(discardPile.getTopCard(), deck.stackSize() > 0);
         frame.add(view, "GAME");
         frame.showPanel("GAME");
@@ -194,6 +195,7 @@ public class GameManager {
 
         this.gameBoardModel = new GameBoardModel(players, frame, this);
         GameBoardView view = this.gameBoardModel.getGameBoardView();
+        view.setHandCardAnimations(frame.isHandCardAnimationsEnabled());
         view.showPlayerCards(players.get(currentPlayerIndex));
         view.updateCardDisplay(
             discardPile.isEmpty() ? null : discardPile.getTopCard(),

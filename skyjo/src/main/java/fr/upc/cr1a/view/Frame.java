@@ -42,6 +42,7 @@ public class Frame extends JFrame{
     private PlayersSetupPanel playersSetupPanel;
     private ConnexionPanel connexionPanel;
     private GameManager currentGame;
+    private boolean handCardAnimationsEnabled = true;
 
     // Controller
     private AccountController account; // sert a rien pour le moment
@@ -175,15 +176,7 @@ public class Frame extends JFrame{
     }
 
     public void showSettingsOverlay() {
-        boolean handAnimationsEnabled = true;
-        if (currentGame != null
-            && currentGame.getGameBoardModel() != null
-            && currentGame.getGameBoardModel().getGameBoardView() != null) {
-            handAnimationsEnabled = currentGame.getGameBoardModel()
-                .getGameBoardView()
-                .isHandCardAnimationsEnabled();
-        }
-        settingsOverlay.getHandCardAnimationsButton().setText(handAnimationsEnabled ? "ON" : "OFF");
+        settingsOverlay.getHandCardAnimationsButton().setText(handCardAnimationsEnabled ? "ON" : "OFF");
         settingsOverlay.setVisible(true);
         settingsOverlay.requestFocusInWindow();
         settingsOverlay.revalidate();
@@ -270,5 +263,13 @@ public class Frame extends JFrame{
 
     public void clearCurrentGame() {
         this.currentGame = null;
+    }
+
+    public boolean isHandCardAnimationsEnabled() {
+        return handCardAnimationsEnabled;
+    }
+
+    public void setHandCardAnimationsEnabled(boolean enabled) {
+        this.handCardAnimationsEnabled = enabled;
     }
 }
