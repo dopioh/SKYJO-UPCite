@@ -49,10 +49,11 @@ Lors du premier tour de chaque manche, chaque joueur doit retourner deux cartes.
 La somme des deux cartes défini le l'ordre des actions des joueurs, celui qui à la somme la plus élévé joue en premier, le deuxième qui à la plus grosse somme joue en deuxième etc..
 
 Ensuite à chaque tour jusqu'à la fin de la manche, chaque joueur peut :
+    - Piocher une carte soit dans la pioche, soit dans la défausse *( si il y en a un )*.   
+    Et remplacer une de ses 12 cartes par la carte pioché.   
+    - Piocher une carte dans la pioche mais ne pas vouloir la jouer, donc la défausser directement.   
+    Dans ce cas, il est necessaire de retourner une carte parmis les 12.  
 
-    - Piocher une carte soit dans la pioche, soit dans la défausse *( si il y en a un )*. Et remplacer une de ses 12 cartes par la carte pioché.   
-    - Piocher une carte dans la pioche mais ne pas vouloir la jouer, donc la défausser directement. Dans ce cas, il est necessaire de retourner une carte parmis les 12.  
-    
 > Si on pioche dans la défausse, on est obliger de la jouer  
 > À noter, la pioche est face caché mais la défausse est face visible pour tous    
 
