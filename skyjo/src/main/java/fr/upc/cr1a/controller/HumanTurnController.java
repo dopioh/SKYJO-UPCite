@@ -19,7 +19,7 @@ import fr.upc.cr1a.view.GameBoardView;
 /**
  * Classe servant a différencier toutes les actions joueurs
  */
-public class HumanTurnController implements GameBoardView.ActionCardClickListener {
+public class HumanTurnController {
 
     private final GameBoardView gameBoardView;
     private final GameManager gameManager;
@@ -331,7 +331,7 @@ public class HumanTurnController implements GameBoardView.ActionCardClickListene
     }
 
     private void installActionCardListeners() {
-        gameBoardView.setActionCardClickListener(this);
+        gameBoardView.setActionCardClickListener((type, indexInHand) -> onActionCardClicked(type, indexInHand));
     }
 
     public void removeAllListeners() {

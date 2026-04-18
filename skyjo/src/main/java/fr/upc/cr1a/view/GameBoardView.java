@@ -588,7 +588,7 @@ public class GameBoardView extends JPanel {
     }
 
     /*
-     * ANCIENNE VERSION: sélection via overla
+     * ANCIENNE VERSION: sélection via overlay
      * public CardButton[] getActionCardButtons() { return actionCardOverlay.getActionCardButtons(); }
      * public void openActionCardOverlay(ArrayList<ActionType> actions) { actionCardOverlay.showActionHand(actions, this); }
      * public void setActionCardSelectionCallback(Runnable callback) { actionCardOverlay.setOnActionSelected(callback); }
