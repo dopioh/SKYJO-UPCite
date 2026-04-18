@@ -46,6 +46,9 @@ build:
       - skyjo/target/classes
     expire_in: 2 days
 
+  except: 
+    - documentation
+
 # ETAPE 2 : TEST - Teste sur plusieurs versions de Java, maven et architectures
 
 test:
@@ -64,6 +67,9 @@ test:
   
   dependencies :
     - build
+  
+  except: 
+    - documentation
 
 # ETAPE 3 : DEPLOIEMENT - Utilise Java 21 pour le deploiement
 

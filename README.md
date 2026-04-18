@@ -42,7 +42,9 @@ java -jar skyjo/target/skyjo-app.jar
 
 Chaque joueur possède 12 cartes face caché devant lui.   
 Les cartes possèdes des valeurs entre **-2** et **12**.   
+
 Lorsque toutes les cartes d'un joueur sont retournées, il y'a un tour supplémentaire pour les autres joueur et c'est la fin de la manche.   
+
 Le but est d'avoir la somme des nombres la plus petites possible (la somme de toutes les valeurs des 12 cartes).  
 Lorsqu'un joueur atteint **100 points** *( à travers une ou plusieurs manches)*, alors la partie est terminée.  
 
@@ -122,15 +124,27 @@ Si vous ne souhaitez pas avoir un compte, vous pouvez toujours jouer en tant qu'
 
 - **Jouer** : Affiche le menu de sélection entre le mode Local et le Multijoueur
 
-    - Local : Vous pouvez configurer le nombres de joueurs *( jusqu'à 8 maximum )*, le noms des ces derniers, dire si se sont des bots ( et choisir le type de bot ) ainsi qu'activer ou non le mode **Skyjo Action**
+    - **Local** : Vous pouvez configurer le nombres de joueurs *( jusqu'à 8 maximum )*, le noms des ces derniers, dire si se sont des bots ( et choisir le type de bot ) ainsi qu'activer ou non le mode **Skyjo Action**
 
-    - Multijoueur : Vous pouvez créer un salon ou bien en rejoindre un déjà existant si il existe un  
+    - **Multijoueur** : Vous pouvez créer un salon ou bien en rejoindre un déjà existant si il existe un  
     > Attention, c'est un mode en Peer-To-Peer et donc vous ne pouvez que détecter que les joueurs qui sont sur le même réseau internet que vous.    
+
     **A FINIR DE REMPLIR LORSQUE MULTIJOUEUR FONCTIONNEL**
 
 ### Déroulement d'une partie
 
+Dans une partie, le pseudo des joueurs s'affichent à gauche, lorsqu'on passe notre curseur dessus, on peut voir les 12 cartes du joueur survolé.  
 
+En haut se trouve des **indications** sur l'action qui doit être faite pour que la partie puisse continuer.
+
+En haut à gauche se trouve le nombre de manche qu'on a fait ( ou si nous somme en **Pre-manche**, donc le retournement de 2 cartes pour chacun). 
+
+En haut à droite on retrouve le nombre de points du joueur actuel dans cette manche.   
+Ainsi que un `?` pour expliquer les **règles de toutes les cartes actions** *( se bouton ne s'affiche que dans le mode action)*. 
+
+Le jeu suit exactement les règles mentionnée **un peu avant**.
+
+À la fin d'un manche se trouve le **classement des joueurs** de la manche qui vient de se terminer, on peut voir leur cartes en survolant leurs pseudos.  
 
 ## Tests
 
