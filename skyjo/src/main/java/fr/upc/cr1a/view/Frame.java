@@ -175,6 +175,15 @@ public class Frame extends JFrame{
     }
 
     public void showSettingsOverlay() {
+        boolean handAnimationsEnabled = true;
+        if (currentGame != null
+            && currentGame.getGameBoardModel() != null
+            && currentGame.getGameBoardModel().getGameBoardView() != null) {
+            handAnimationsEnabled = currentGame.getGameBoardModel()
+                .getGameBoardView()
+                .isHandCardAnimationsEnabled();
+        }
+        settingsOverlay.getHandCardAnimationsButton().setText(handAnimationsEnabled ? "ON" : "OFF");
         settingsOverlay.setVisible(true);
         settingsOverlay.requestFocusInWindow();
         settingsOverlay.revalidate();
