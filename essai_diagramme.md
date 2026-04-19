@@ -22,7 +22,7 @@ flowchart TB
 ---
 
 
-### HUMAIN ET BOT
+### MODEL : HUMAIN ET BOT
 
 ```mermaid
 flowchart TB
@@ -87,7 +87,7 @@ flowchart TB
 
 ---
 
-### MODE EN LIGNE
+### CONTROLLER : MODE EN LIGNE
 
 ```mermaid
 flowchart TB
@@ -106,7 +106,7 @@ flowchart TB
 ```
 ---
 
-### API ET DATABASE
+### CONTROLLER : API ET DATABASE
 
 ```mermaid
 flowchart TB
