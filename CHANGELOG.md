@@ -482,6 +482,8 @@
 
 - Première partie des cartes nombres colorées
 
+- Bouton toggle qui permet d'activer ou non les animations de carte flottante
+
 ### Modified
 
 - Amélioration de la page Paramètres dans le style du Leaderboard
@@ -503,6 +505,8 @@
     - icone correspondant au couleur
     - nom de joueur un peu transparent si c'est pas celui qui joue pour differencier
     - nom deviens ".." après 8 caratrère pour pas dépasser
+
+- Logique d'état pour les cartes flottantes déplacée dans la frame
 
 ### Fixed
 
