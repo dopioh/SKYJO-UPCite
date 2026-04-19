@@ -32,6 +32,7 @@ public class SettingsOverlay extends JComponent {
 
     //Param Graphique
     private JPanel tabGraphiquePanel;
+    private JButton handCardAnimationsButton;
 
     //Param Audio
     private JPanel tabAudioPanel;
@@ -190,13 +191,33 @@ public class SettingsOverlay extends JComponent {
         gbc.weightx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel graphiqueLabel = new JLabel("text", SwingConstants.CENTER);
+        JLabel graphiqueLabel = new JLabel("Animations cartes", SwingConstants.CENTER);
         graphiqueLabel.setForeground(Color.WHITE);
-        graphiqueLabel.setFont(doodleFont.deriveFont(Font.BOLD, 22f));
+        graphiqueLabel.setFont(doodleFont.deriveFont(Font.BOLD, 24f));
 
         gbc.gridy = 0;
-        gbc.insets = new Insets(20, 0, 0, 0);
+        gbc.insets = new Insets(20, 0, 12, 0);
         graphiquePanel.add(graphiqueLabel, gbc);
+
+        final Color aNormal = new Color(65, 140, 58);
+        final Color aHover  = new Color(52, 115, 47);
+
+        JPanel handAnimationsPanel = createHoverRoundedPanel(aNormal, aHover, 18, 44);
+        handCardAnimationsButton = createTextButton("ON", 20f);
+        handAnimationsPanel.add(handCardAnimationsButton);
+
+        handAnimationsPanel.addMouseListener(new MouseAdapter() {
+            @Override public void mousePressed(MouseEvent e) { handCardAnimationsButton.doClick(); }
+        });
+
+        handCardAnimationsButton.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) { handAnimationsPanel.setBackground(aHover);  handAnimationsPanel.repaint(); }
+            @Override public void mouseExited(MouseEvent e)  { handAnimationsPanel.setBackground(aNormal); handAnimationsPanel.repaint(); }
+        });
+
+        gbc.gridy = 1;
+        gbc.insets = new Insets(0, 60, 0, 60);
+        graphiquePanel.add(handAnimationsPanel, gbc);
 
         return graphiquePanel;
     }
@@ -474,6 +495,7 @@ public class SettingsOverlay extends JComponent {
     public JButton getVolumeLeftButton() { return volumeLeftButton;}
     public JButton getVolumeValueButton() { return volumeValueButton;}
     public JButton getVolumeRightButton() { return volumeRightButton;}
+    public JButton getHandCardAnimationsButton() { return handCardAnimationsButton;}
 
     public void setSelectedTabPanel(JComponent tabPanel) {
         selectedTabPanel = (JPanel) tabPanel;

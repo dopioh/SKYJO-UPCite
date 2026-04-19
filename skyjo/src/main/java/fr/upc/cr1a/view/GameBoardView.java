@@ -23,7 +23,7 @@ import fr.upc.cr1a.utils.ImageCache;
 public class GameBoardView extends JPanel {
 
     private static final int cardSpacing = 2; // <----------------
-    private static final boolean EnableHandCardAnimations = true; // DESACTIVER SI LE JEU LAG
+    private boolean handCardAnimationsEnabled = true; // DESACTIVER SI LE JEU LAG
 
     // elements important :
     private ArrayList<PlayerModel> listPlayer; // jusqu'a 8 normalement
@@ -329,7 +329,7 @@ public class GameBoardView extends JPanel {
                 gbc.gridx = col;
                 gbc.gridy = row;
                 CardButton btn = new CardButton();
-                btn.setAnimationEnabled(EnableHandCardAnimations);
+                btn.setAnimationEnabled(handCardAnimationsEnabled);
                 cardButtons[row][col] = btn;
                 cardsGrid.add(btn, gbc);
             }
@@ -1079,6 +1079,25 @@ public class GameBoardView extends JPanel {
         if (turnTimerLabel != null) {
             turnTimerLabel.setVisible(visible);
         }
+    }
+
+    public void setHandCardAnimations(boolean enabled) {
+        handCardAnimationsEnabled = enabled;
+        if (cardButtons == null) {
+            return;
+        }
+
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 4; col++) {
+                if (cardButtons[row][col] != null) {
+                    cardButtons[row][col].setAnimationEnabled(enabled);
+                }
+            }
+        }
+    }
+
+    public boolean isHandCardAnimationsEnabled() {
+        return handCardAnimationsEnabled;
     }
 
     @Override

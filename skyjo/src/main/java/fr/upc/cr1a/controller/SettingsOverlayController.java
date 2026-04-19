@@ -1,6 +1,7 @@
 package fr.upc.cr1a.controller;
 
 import fr.upc.cr1a.view.Frame;
+import fr.upc.cr1a.view.GameBoardView;
 import fr.upc.cr1a.view.SettingsOverlay;
 import fr.upc.cr1a.model.AudioManager;
 
@@ -90,6 +91,26 @@ public class SettingsOverlayController {
             overlay.getSoundButton().setText(newEnabled ? "ON" : "OFF");
         });
 
+        //ON/OFF cartes flottantes
+        overlay.getHandCardAnimationsButton().addActionListener(e -> {
+            GameBoardView boardView = null;
+            var currentGame = frame.getCurrentGame();
+            if (currentGame != null
+            && currentGame.getGameBoardModel() != null
+            && currentGame.getGameBoardModel().getGameBoardView() != null) {
+                boardView = currentGame.getGameBoardModel().getGameBoardView();
+            }
+
+            boolean newEtat = !frame.isHandCardAnimationsEnabled();
+            if (boardView != null) {
+                boardView.setHandCardAnimations(newEtat);
+            }
+            
+            frame.setHandCardAnimationsEnabled(newEtat);
+            overlay.getHandCardAnimationsButton().setText(newEtat ? "ON" : "OFF");
+        
+        });
+
         // Fleche gauche
         overlay.getVolumeLeftButton().addActionListener(e -> {
             int step = Math.max(1, audioManager.getVolume() / 10);
@@ -108,5 +129,6 @@ public class SettingsOverlayController {
 
         overlay.getSoundButton().setText(audioManager.isEnabled() ? "ON" : "OFF");
         overlay.getVolumeValueButton().setText(String.valueOf(Math.max(1, audioManager.getVolume() / 10)));
+        overlay.getHandCardAnimationsButton().setText("ON");
     }
 }
