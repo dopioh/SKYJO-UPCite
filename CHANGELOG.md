@@ -506,6 +506,8 @@
     - nom de joueur un peu transparent si c'est pas celui qui joue pour differencier
     - nom deviens ".." après 8 caratrère pour pas dépasser
 
+- DIAGRAMME et README mis à jour
+
 - Logique d'état pour les cartes flottantes déplacée dans la frame
 
 ### Fixed
