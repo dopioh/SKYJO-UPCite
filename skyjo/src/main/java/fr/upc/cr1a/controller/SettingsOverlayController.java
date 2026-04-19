@@ -96,21 +96,19 @@ public class SettingsOverlayController {
             GameBoardView boardView = null;
             var currentGame = frame.getCurrentGame();
             if (currentGame != null
-                && currentGame.getGameBoardModel() != null
-                && currentGame.getGameBoardModel().getGameBoardView() != null) {
+            && currentGame.getGameBoardModel() != null
+            && currentGame.getGameBoardModel().getGameBoardView() != null) {
                 boardView = currentGame.getGameBoardModel().getGameBoardView();
             }
 
-            boolean currentEtat = boardView != null
-                ? boardView.isHandCardAnimationsEnabled()
-                : "ON".equals(overlay.getHandCardAnimationsButton().getText());
-            boolean newEtat = !currentEtat;
-
+            boolean newEtat = !frame.isHandCardAnimationsEnabled();
             if (boardView != null) {
                 boardView.setHandCardAnimations(newEtat);
             }
-
+            
+            frame.setHandCardAnimationsEnabled(newEtat);
             overlay.getHandCardAnimationsButton().setText(newEtat ? "ON" : "OFF");
+        
         });
 
         // Fleche gauche

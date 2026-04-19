@@ -482,12 +482,13 @@
 
 - Première partie des cartes nombres colorées
 
+- Bouton toggle qui permet d'activer ou non les animations de carte flottante
+
 ### Modified
 
 - Amélioration de la page Paramètres dans le style du Leaderboard
     - Onglet "Jeu" renommé "Graphique", contenu bot supprimé
     - Onglet actif change de couleur
-    - Bouton toggle qui permet d'activer ou non les animations de carte flottante
 
 - Amélioration du menu Pause dans le même style
 
@@ -506,6 +507,8 @@
     - nom deviens ".." après 8 caratrère pour pas dépasser
 
 - Réinstauration des cartes actions sous le jeu
+
+- Logique d'état pour les cartes flottantes déplacée dans la frame
 
 ### Fixed
 
