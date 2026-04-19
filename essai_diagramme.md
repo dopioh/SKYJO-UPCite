@@ -1,4 +1,6 @@
-# DIAGRAMME
+# Architecture du Projet Skyjo
+
+---
 
 ## MODEL
 
@@ -17,6 +19,9 @@ flowchart TB
     I --> K(ScoreCalculator)
 ```
 
+---
+
+
 ### HUMAIN ET BOT
 
 ```mermaid
@@ -31,6 +36,7 @@ flowchart TB
     F --> H(BotRow)
     F --> I(BotLow)
 ```
+---
 
 ## VIEW 
 
@@ -51,6 +57,9 @@ flowchart TB
     K --> |Détails Cartes| M(ActionDescriptionOverlayPanel)
     K --> |Animation Boutique| N(CaseOpeningOverlayPanel)
 ```
+
+---
+
 ## CONTROLLER
 
 ```mermaid
@@ -76,6 +85,8 @@ flowchart TB
     D --> G(...)
 ```
 
+---
+
 ### MODE EN LIGNE
 
 ```mermaid
@@ -93,6 +104,7 @@ flowchart TB
     X <--> |Requêtes Serveur -> Clients| H
     Y <--> |Requêtes Client -> Serveur|G
 ```
+---
 
 ### API ET DATABASE
 
