@@ -508,6 +508,8 @@
 
 - Réinstauration des cartes actions sous le jeu
 
+- DIAGRAMME et README mis à jour
+
 - Logique d'état pour les cartes flottantes déplacée dans la frame
 
 ### Fixed
