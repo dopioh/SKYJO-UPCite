@@ -83,6 +83,9 @@ public class GameBoardView extends JPanel {
     private final ArrayList<CardButton> actionHandButtons = new ArrayList<>();
     private int actionHandCardWidth = 65;
     private int actionHandCardHeight = 90;
+    private static final int actionHandCardsParRow = 5;
+    private static final int actionHandCardGap = 6;
+    private static final double actionHandPetitScale = 0.8;
     private boolean actionHandVisible = true;
     private ActionCardClickListener actionCardClickListener;
 
@@ -319,7 +322,7 @@ public class GameBoardView extends JPanel {
         actionHandLabel.setFont(patrickFont.deriveFont(Font.BOLD, 20f));
         actionHandPanel.add(actionHandLabel, BorderLayout.NORTH);
 
-        actionHandCardsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0));
+        actionHandCardsPanel = new JPanel(new GridBagLayout());
         actionHandCardsPanel.setOpaque(false);
         actionHandPanel.add(actionHandCardsPanel, BorderLayout.CENTER);
 
@@ -531,23 +534,33 @@ public class GameBoardView extends JPanel {
 
     /**
      * Met à jour les boutons carte action visibles sans recréer de composants
+     * utilisation de gridbag pour positionner dynamiquement les actions
+     * 5 par lignes pour le moment et les cartes sont plus petites si a partir de 6 car on saute une ligne
      */
     public void showActionHand(PlayerModel player) {
         hideActionDescription();
         ArrayList<ActionCardModel.ActionType> actions = player.getActionHand();
         int actionCount = (actions == null) ? 0 : actions.size();
+        int displayedCardWidth = getDisplayedActionHandCardWidth(actionCount);
+        int displayedCardHeight = getDisplayedActionHandCardHeight(actionCount);
+        int lastRowIndex = (actionCount - 1) / actionHandCardsParRow;
 
         actionHandButtons.clear();
         actionHandCardsPanel.removeAll();
+
+        GridBagConstraints actionCardGbc = new GridBagConstraints();
+        actionCardGbc.anchor = GridBagConstraints.CENTER;
+        actionCardGbc.fill = GridBagConstraints.NONE;
 
         if (actions != null) {
             for (int i = 0; i < actions.size(); i++) {
                 ActionType actionType = actions.get(i);
                 int indexInHand = i;
+                int row = i / actionHandCardsParRow;
 
                 CardButton actionBtn = new CardButton();
                 actionBtn.setAnimationEnabled(false);
-                actionBtn.setCardSize(actionHandCardWidth, actionHandCardHeight);
+                actionBtn.setCardSize(displayedCardWidth, displayedCardHeight);
                 actionBtn.setCardImage(getCardImagePath(new ActionCardModel(false, actionType)));
                 actionBtn.setToolTipText(getActionTitle(actionType));
 
@@ -570,12 +583,16 @@ public class GameBoardView extends JPanel {
                 });
 
                 actionHandButtons.add(actionBtn);
-                actionHandCardsPanel.add(actionBtn);
+                actionCardGbc.gridx = i % actionHandCardsParRow;
+                actionCardGbc.gridy = row;
+                actionCardGbc.insets = new Insets(0, actionHandCardGap / 2, row < lastRowIndex ? actionHandCardGap : 0, actionHandCardGap / 2);
+                actionHandCardsPanel.add(actionBtn, actionCardGbc);
             }
         }
 
         actionHandCardsPanel.setVisible(actionHandVisible && actionCount > 0);
         actionHandPanel.setVisible(actionHandVisible);
+        actionHandCardsPanel.revalidate();
         actionHandCardsPanel.repaint();
     }
 
@@ -1030,8 +1047,10 @@ public class GameBoardView extends JPanel {
         int smallCardHeight = (int) (hauteurCarte * 0.7);
         actionHandCardWidth = smallCardWidth;
         actionHandCardHeight = smallCardHeight;
+        int displayedCardWidth = getDisplayedActionHandCardWidth(actionHandButtons.size());
+        int displayedCardHeight = getDisplayedActionHandCardHeight(actionHandButtons.size());
         for (CardButton btn : actionHandButtons) {
-            btn.setCardSize(actionHandCardWidth, actionHandCardHeight);
+            btn.setCardSize(displayedCardWidth, displayedCardHeight);
         }
 
 
@@ -1046,6 +1065,26 @@ public class GameBoardView extends JPanel {
 
         zonePlateau.revalidate();
         zonePlateau.repaint();
+    }
+
+    /**
+     * getDisplayedActionHandCardWidth et getDisplayedActionHandCardHeight renvoient la taille d'une carte action
+     * en fonction du nombre de cartes action deja affiché
+     * @param actionCount le nombre de carte action
+     * @return
+     */
+    private int getDisplayedActionHandCardWidth(int actionCount) {
+        if (actionCount > actionHandCardsParRow) {
+            return Math.max(40, (int)Math.round(actionHandCardWidth * actionHandPetitScale));
+        }
+        return actionHandCardWidth;
+    }
+
+    private int getDisplayedActionHandCardHeight(int actionCount) {
+        if (actionCount > actionHandPetitScale) {
+            return Math.max(56, (int)Math.round(actionHandCardHeight * actionHandPetitScale));
+        }
+        return actionHandCardHeight;
     }
 
     public PlayerPreviewPanel getPlayerPreviewPanel() {
