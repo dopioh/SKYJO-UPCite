@@ -153,8 +153,4 @@ public class Host {
         return this.client;
     }
 
-    public GameHost getGameHost(){
-        return this.gameHost;
-    }
-
 }
