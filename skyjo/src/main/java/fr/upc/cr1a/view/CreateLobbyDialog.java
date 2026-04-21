@@ -67,15 +67,11 @@ public class CreateLobbyDialog extends JDialog {
         mainPanel.add(maxPlayersSpinner);
         mainPanel.add(Box.createVerticalStrut(20));
 
-        //mode actions
+        //mode actions (retire en multi online -- on garde l'attribut pour compat interne)
         actionModeCheckbox = new JCheckBox("Activer le mode Actions (cartes spéciales)");
-        actionModeCheckbox.setFont(new Font("Arial", Font.PLAIN, 14));
-        actionModeCheckbox.setBackground(new Color(245, 245, 245));
-        actionModeCheckbox.setAlignmentX(Component.LEFT_ALIGNMENT);
         actionModeCheckbox.setSelected(false);
-
-        mainPanel.add(actionModeCheckbox);
-        mainPanel.add(Box.createVerticalStrut(40));
+        actionModeCheckbox.setVisible(false); // masque en multi online
+        mainPanel.add(Box.createVerticalStrut(20));
 
         //boutons en bas
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
@@ -114,7 +110,8 @@ public class CreateLobbyDialog extends JDialog {
      * retourne si le mode actions est activé
      */
     public boolean isActionMode() {
-        return actionModeCheckbox.isSelected();
+        // Mode Action desactive pour le multijoueur en ligne
+        return false;
     }
 
     /**

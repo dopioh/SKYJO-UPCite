@@ -252,6 +252,19 @@ public class LobbyRoomController {
             return;
         }
 
+        // En multijoueur en ligne : bloquer le lancement si le joueur est seul (aucun autre humain connecte)
+        long humanCount = players.stream().filter(p -> !p.isBot()).count();
+        if (humanCount < 2) {
+            JOptionPane.showMessageDialog(
+                frame,
+                "Vous ne pouvez pas lancer une partie en ligne tout seul.\n" +
+                "Attendez qu'au moins un autre joueur rejoigne le salon.",
+                "Joueur seul",
+                JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
         // Lancer la partie via le réseau
         if (host != null) {
             host.startGame();
@@ -377,11 +390,10 @@ public class LobbyRoomController {
     }
 
     private void updateLobbyInfo() {
-        boolean actionMode = view.getActionModeCheckbox().isSelected();
-
         long readyCount = players.stream().filter(LobbyPlayerModel::isReady).count();
-        String info = String.format("Mode %s • %d prêts",
-            actionMode ? "Actions" : "Classique",
+        String info = String.format("%d / %d joueurs • %d prêts",
+            players.size(),
+            (Integer) view.getMaxPlayersSpinner().getValue(),
             readyCount
         );
 

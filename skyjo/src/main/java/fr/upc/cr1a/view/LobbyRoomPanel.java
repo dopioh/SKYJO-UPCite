@@ -180,13 +180,11 @@ public class LobbyRoomPanel extends JPanel {
         panel.add(maxPlayersPanel);
         panel.add(Box.createVerticalStrut(15));
 
-        //mode actions
+        //mode actions (retire du multi en ligne -- on instancie pour compat mais masque)
         actionModeCheckbox = new JCheckBox("Mode Actions");
-        actionModeCheckbox.setFont(new Font("Arial", Font.PLAIN, 14));
-        actionModeCheckbox.setOpaque(false);
-        actionModeCheckbox.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(actionModeCheckbox);
-        panel.add(Box.createVerticalStrut(20));
+        actionModeCheckbox.setSelected(false);
+        actionModeCheckbox.setVisible(false);
+        panel.add(Box.createVerticalStrut(10));
 
         //section Bots
         JLabel botsLabel = new JLabel("Gérer les bots :");
@@ -211,7 +209,6 @@ public class LobbyRoomPanel extends JPanel {
         JTextArea noteLabel = new JTextArea(
             "En tant qu'hôte, vous pouvez :\n" +
             "• Modifier le nombre max de joueurs\n" +
-            "• Activer/désactiver les actions\n" +
             "• Ajouter des bots\n" +
             "• Retirer des joueurs (bouton ✕)"
         );

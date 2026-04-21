@@ -520,6 +520,8 @@
 
 - Logique d'état pour les cartes flottantes déplacée dans la frame
 
+- Suppression Mode Action en Multijoueur
+
 ### Fixed
 
 - Liste des joueurs maintenant scrollable dans Fin de manche / fin de partie car avec 8 joueurs ça dépassait
