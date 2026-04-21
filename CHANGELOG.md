@@ -484,6 +484,8 @@
 
 - Bouton toggle qui permet d'activer ou non les animations de carte flottante
 
+- Rendu propre pour les descriptions des cartes action (overlay)
+
 ### Modified
 
 - Amélioration de la page Paramètres dans le style du Leaderboard
@@ -511,6 +513,10 @@
 - DIAGRAMME et README mis à jour
 
 - Logique d'état pour les cartes flottantes déplacée dans la frame
+
+- Les textes des descriptions des cartes action passent en Jlabel
+
+- L'affichage des cartes actions piochées passe en GridBag avec des lignes de 5 actions
 
 ### Fixed
 
