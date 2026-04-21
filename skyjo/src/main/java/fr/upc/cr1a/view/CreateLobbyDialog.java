@@ -20,9 +20,10 @@ public class CreateLobbyDialog extends JDialog {
 
     public CreateLobbyDialog(Frame parent) {
         super(parent, "Créer un salon", true);
-        setSize(500, 400);
+        setSize(600, 450);
         setLocationRelativeTo(parent);
         setResizable(false);
+        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -74,7 +75,7 @@ public class CreateLobbyDialog extends JDialog {
         actionModeCheckbox.setSelected(false);
 
         mainPanel.add(actionModeCheckbox);
-        mainPanel.add(Box.createVerticalStrut(30));
+        mainPanel.add(Box.createVerticalStrut(40));
 
         //boutons en bas
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));

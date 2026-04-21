@@ -10,7 +10,9 @@ import java.util.List;
 
 import javax.swing.*;
 
+import fr.upc.cr1a.controller.data.ApiErrorManager;
 import fr.upc.cr1a.controller.data.SendAPI;
+import fr.upc.cr1a.view.ErrorDialog;
 import fr.upc.cr1a.model.*;
 import fr.upc.cr1a.model.player.PlayerAccount;
 import fr.upc.cr1a.model.player.PlayerData;
@@ -64,6 +66,7 @@ public class GameBoardController {
         
         this.humanTurnController = new HumanTurnController(gameBoardView, gameManager, this, gameLoop);
         humanTurnController.installListeners();
+        humanTurnController.disableListenersIfOnlyBots();
         
         gameBoardView.setTimerVisible(timerEnabled);
         gameLoop.setTimerEnabled(timerEnabled);
@@ -119,7 +122,7 @@ public class GameBoardController {
         // Pour le survol et le ckick des preview player
         // y'a un soucis pour les pinned ici -> bug mineur
         int s = 0;
-        for (JButton jb : gameBoardView.getListPlayerButton()) {
+        for (DoodleButton jb : gameBoardView.getListPlayerButton()) {
             int tmp = s;
             jb.addMouseListener(new MouseAdapter() {
                 @Override
@@ -127,9 +130,10 @@ public class GameBoardController {
                     if (tmp == gameManager.getCurrentPlayerIndex()) {
                         return;
                     }
+                    jb.onMouseEnter();
                     gameBoardModel.buttonPlayerCalled(tmp);
                     gameBoardView.showOtherPlayerMain(true);
-                    isPinned = false;   
+                    isPinned = false;
                 }
 
                 @Override
@@ -147,6 +151,9 @@ public class GameBoardController {
 
                 @Override
                 public void mouseExited(MouseEvent e) {
+                    if (tmp != gameManager.getCurrentPlayerIndex()) {
+                        jb.onMouseExit();
+                    }
                     //gameBoardView.setIsPlayer(false);
                     if (!isPinned) {
                         gameBoardView.showOtherPlayerMain(false);
@@ -178,7 +185,7 @@ public class GameBoardController {
 
         boolean isGameOver = gameManager.getGameState() == GameManager.GameState.GAME_ENDED;
         currentRoundEndPanel = new RoundEndPanel(
-            new ArrayList<>(gameManager.getPlayers()), isGameOver
+            new ArrayList<>(gameManager.getPlayers()), isGameOver, gameManager.getLastRoundPlayer()
         );
 
         if (isGameOver) {
@@ -398,6 +405,11 @@ public class GameBoardController {
                 System.out.println("Fin de partie DB: " + (wonGame ? "WIN" : "PERDU"));
             } else {
                 System.out.println("Fin de partie DB: echec applyGameResult");
+                SwingUtilities.invokeLater(() -> ErrorDialog.showError(
+                    gameBoardModel.getFrame(),
+                    "Resultat de partie",
+                    ApiErrorManager.getLastUserMessageOrDefault("Fin de manche OK, mais les recompenses n'ont pas pu etre synchronisees. ZUT ALORS")
+                ));
             }
         }, "db-endgame-rewards").start();
     }

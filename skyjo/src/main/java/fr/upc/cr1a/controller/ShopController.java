@@ -1,9 +1,11 @@
 package fr.upc.cr1a.controller;
 
+import fr.upc.cr1a.controller.data.ApiErrorManager;
 import fr.upc.cr1a.controller.data.SendAPI;
 import fr.upc.cr1a.model.player.PlayerAccount;
 import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.view.DoodleButton;
+import fr.upc.cr1a.view.ErrorDialog;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.ShopPanel;
 
@@ -50,7 +52,7 @@ public class ShopController {
             }
 
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 if (view.isCaseOpeningVisible()) {
                     return;
                 }
@@ -96,6 +98,11 @@ public class ShopController {
             try {
                 PlayerData majdata = SendAPI.buyPack(uuid, packName);
                 if (majdata == null) {
+                    SwingUtilities.invokeLater(() -> ErrorDialog.showError(
+                        frame,
+                        "Boutique",
+                        ApiErrorManager.getLastUserMessageOrDefault("Le pack ne peut pas etre achete maintenant. Retente juste quand t'auras de la tune.")
+                    ));
                     return;
                 }
                 PlayerAccount.actuelAccount = majdata;

@@ -105,4 +105,10 @@ public class MainMenuPanelTest {
         executed = true;
         assertTrue(executed, "Survol de tous les boutons du menu ne doit pas lancer d'exception");
     }
+
+    @Test
+    public void testOpenAccountStats() {
+        panel.openAccountStats();
+        assertTrue(panel.isAccountStatsVisible(), "L'overlay des stats doit etre visible apres ouverture");
+    }
 }

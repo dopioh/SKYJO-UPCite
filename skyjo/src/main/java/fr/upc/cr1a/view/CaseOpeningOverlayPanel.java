@@ -1,5 +1,6 @@
 package fr.upc.cr1a.view;
 
+import fr.upc.cr1a.controller.data.ApiErrorManager;
 import fr.upc.cr1a.controller.data.SendAPI;
 import fr.upc.cr1a.model.player.PlayerAccount;
 import fr.upc.cr1a.model.player.PlayerData;
@@ -18,6 +19,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Objects;
 
 /**
  * Overlay ouverture de pack et ouverture du classeur
@@ -148,7 +150,7 @@ public class CaseOpeningOverlayPanel extends JPanel {
             }
 
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 closeButton.onMouseExit();
                 setVisible(false);
                 repaint();
@@ -158,7 +160,7 @@ public class CaseOpeningOverlayPanel extends JPanel {
 
         addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 handleClasseurClick(e.getPoint());
             }
         });
@@ -597,6 +599,13 @@ public class CaseOpeningOverlayPanel extends JPanel {
             PlayerData majData = SendAPI.unlockSkin(PlayerAccount.actuelAccount.getID(), skinPath);
             if (majData != null) {
                 PlayerAccount.actuelAccount = majData;
+            } else {
+                JOptionPane.showMessageDialog(
+                    null,
+                    ApiErrorManager.getLastUserMessageOrDefault("Ce skin ne peut pas etre debloque tout de suite. Reessaie juste apres, ou pas."),
+                    "Boutique Skyjo",
+                    JOptionPane.ERROR_MESSAGE
+                );
             }
         }
         return true;
@@ -638,6 +647,13 @@ public class CaseOpeningOverlayPanel extends JPanel {
             PlayerData majData = SendAPI.selectSkin(PlayerAccount.actuelAccount.getID(), skinPath);
             if (majData != null) {
                 PlayerAccount.actuelAccount = majData;
+            } else {
+                JOptionPane.showMessageDialog(
+                    null,
+                    ApiErrorManager.getLastUserMessageOrDefault("Impossible d'equiper ce skin maintenant. Reessaie quand tu l'auras (pas très fute fute)."),
+                    "Boutique Skyjo",
+                    JOptionPane.ERROR_MESSAGE
+                );
             }
         }
     }

@@ -155,28 +155,8 @@ public class PlayersSetupPanel extends JPanel {
         scroll.setBorder(null);
         scroll.setOpaque(false);
         scroll.getViewport().setOpaque(false);
+        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
         scroll.getVerticalScrollBar().setUnitIncrement(16);
-        scroll.getVerticalScrollBar().setPreferredSize(new Dimension(6, 0));
-        scroll.getVerticalScrollBar().setUI(new javax.swing.plaf.basic.BasicScrollBarUI() {
-            protected JButton createDecreaseButton(int orientation) {
-                return createZeroButton(); 
-            }
-            protected JButton createIncreaseButton(int orientation) {
-                return createZeroButton(); 
-            }
-            private JButton createZeroButton() {
-                JButton button = new JButton();
-                button.setPreferredSize(new Dimension(0, 0));
-                button.setMinimumSize(new Dimension(0, 0));
-                button.setMaximumSize(new Dimension(0, 0));
-                return button;
-            }
-            @Override
-            protected void configureScrollBarColors() {
-                this.thumbColor = new Color(255, 255, 255, 120);
-                this.trackColor = new Color(0, 0, 0, 0);
-            }
-        });
 
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
@@ -233,7 +213,7 @@ public class PlayersSetupPanel extends JPanel {
         cardsPreviewPanel.setOpaque(false);
         cardsPreviewPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        emptyCardIcon = loadResizedIconFromCache("/cartes/carteVide.png", 200, 220);
+        emptyCardIcon = loadResizedIconFromCache("/cartes/cartevide.png", 200, 220);
         actionCardIcon = loadResizedIconFromCache("/cartes/carteActionDos.png", 200, 220);
 
         cardPreview = new JLabel();
@@ -269,12 +249,10 @@ public class PlayersSetupPanel extends JPanel {
         optionsPanel.add(Box.createVerticalStrut(10));
         optionsPanel.add(optionsContent);
 
-        // Trait de separtation
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, optionsPanel);
-        
         splitPane.setResizeWeight(0.7);
-        splitPane.setDividerLocation(0.5);
-        splitPane.setDividerSize(2);
+        splitPane.setDividerSize(0);
+        splitPane.setEnabled(false);
         splitPane.setBorder(null);
         splitPane.setOpaque(false);
 
@@ -416,7 +394,7 @@ public class PlayersSetupPanel extends JPanel {
             nameField.setCaretColor(Color.WHITE);
             nameField.addMouseListener(new MouseAdapter() {
                 @Override
-                public void mouseClicked(MouseEvent e) {
+                public void mousePressed(MouseEvent e) {
                     if (nameField.getText().equals("Joueur " + playerIndex)) {
                         nameField.setText("");
                     } else {
@@ -441,7 +419,7 @@ public class PlayersSetupPanel extends JPanel {
                 botType.setEnabled(isBot);
                 if (isBot) {
                     nameField.setText("Bot" + playerIndex);
-                    row.setBackground(new Color(195, 197, 64));
+                    row.setBackground(new Color(218, 113, 72));
                 } else {
                     nameField.setText("Joueur " + playerIndex);
                     row.setBackground(new Color(76, 175, 80));
@@ -452,7 +430,7 @@ public class PlayersSetupPanel extends JPanel {
             row.add(botCheck);
             row.add(botType);
             playersContainer.add(row);
-            playersContainer.add(Box.createVerticalStrut(2)); // Mini espacement
+            playersContainer.add(Box.createVerticalStrut(8));
         }
         playersContainer.revalidate();
         playersContainer.repaint();

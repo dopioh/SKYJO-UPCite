@@ -195,7 +195,7 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
         String message = NetworkProtocolServer.UPDATE_CARD_FLIPPED + ":" + id + ":" + col + ":" + row + ":" +valeur;
 
         for (ClientHandler client : connectedClient) {
-            client.sendMessage(message.toString());
+            client.sendMessage(message);
         }
     }
 
@@ -204,7 +204,25 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
         String message = NetworkProtocolServer.UPDATE_TURN_CHANGED + ":" + id;
 
         for (ClientHandler client : connectedClient) {
-            client.sendMessage(message.toString());
+            client.sendMessage(message);
+        }
+    }
+
+    @Override
+    public synchronized void broadcastUpdateDiscardTaken(String id){
+        String message = NetworkProtocolServer.UPDATE_DISCARD_TAKEN + ":" + id;
+
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message);
+        }
+    }
+
+    @Override
+    public void broadcastUpdatePiocheTaken(String id, int numberCard){
+        String message = NetworkProtocolServer.UPDATE_PIOCHE_TAKEN + ":" + id + ":" + numberCard;
+
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message);
         }
     }
 
@@ -212,6 +230,8 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     public GameManager getGameManager(){
         return this.gameManager;
     }
+
+    
 
     // second test client simultané ( faut un host compatible )
     /*

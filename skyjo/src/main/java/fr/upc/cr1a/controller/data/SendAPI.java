@@ -24,8 +24,19 @@ public class SendAPI {
     protected static String urlAPI = "https://api-render-su0t.onrender.com";
 
     protected static HttpClient client = HttpClient.newHttpClient();
+
+    private static boolean isHttpSuccess(HttpResponse<String> response, String context) {
+        if (response.statusCode() == 200) {
+            return true;
+        }
+        ApiErrorManager.setHttpError(context, response.statusCode(), response.body());
+        System.out.println("CODE HTTP " + context + " : " + response.statusCode());
+        System.out.println("API REPOND " + context + " : " + response.body());
+        return false;
+    }
     
     public static void WinGameSolo(int totalPlayers, int classement,String accessToken){
+        ApiErrorManager.clear();
         try {
             String jsonBody = "{" + "\"totalPlayers\": " + totalPlayers + "," + "\"positionClassement\": " + classement + "}";
 
@@ -39,7 +50,11 @@ public class SendAPI {
 
             System.out.println("CODE HTTP WINGAME : " + response.statusCode());
             System.out.println("API REPOND : " + response.body()); // doit return GOOD
+            if (response.statusCode() != 200) {
+                ApiErrorManager.setHttpError("GOOD.la mise a jour de fin de partie", response.statusCode(), response.body());
+            }
         } catch (Exception e) {
+            ApiErrorManager.setNetworkError("la mise a jour de fin de partie", e);
             e.printStackTrace();
         }
         
@@ -49,6 +64,7 @@ public class SendAPI {
      * commande API buyPack qui retire le prix d'un pack selon son nom cote serveur
      */
     public static PlayerData buyPack(String uuid, String packName){
+        ApiErrorManager.clear();
         try {
             Map<String, String> body = new HashMap<>();
             body.put("uuidStr", uuid);
@@ -82,6 +98,7 @@ public class SendAPI {
      * commande API applyGameResult qui applique recompenses/penalites selon resultat et lobby
      */
     public static PlayerData applyGameResult(String uuid, boolean wonGame, List<String> opponents){
+        ApiErrorManager.clear();
         try {
             Map<String, Object> body = new HashMap<>();
             body.put("uuidStr", uuid);
@@ -116,6 +133,7 @@ public class SendAPI {
      * commande API unlockSkin qui debloque un skin dans la DB
      */
     public static PlayerData unlockSkin(String uuid, String skinPath){
+        ApiErrorManager.clear();
         try {
             Map<String, String> body = new HashMap<>();
             body.put("uuidStr", uuid);
@@ -149,6 +167,7 @@ public class SendAPI {
      * commande API selectSkin qui equipe un skin dans la DB
      */
     public static PlayerData selectSkin(String uuid, String skinPath){
+        ApiErrorManager.clear();
         try {
             String jsonBody = "{" + "\"uuidStr\": \"" + uuid + "\"," + "\"skinPath\": \"" + skinPath + "\"}";
 
@@ -175,13 +194,42 @@ public class SendAPI {
     }
 
 
-    // Quoi d'autres comme requetes possible ? 
+    /**
+     * recupere tous les joueurs pour le classement
+     */
+    public static List<PlayerData> getAllPlayers() {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlAPI + "/api/player/leaderboard"))
+                    .header("Content-Type", "application/json")
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("CODE HTTP LEADERBOARD : " + response.statusCode());
+            System.out.println("API REPOND LEADERBOARD : " + response.body());
+
+            if (response.statusCode() == 200) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                PlayerData[] players = gson.fromJson(response.body(), PlayerData[].class);
+                return List.of(players);
+            }
+            return new ArrayList<>();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    // Quoi d'autres comme requetes possible ?
 
     /**
      * Methode pour creer ou actualiser les stats du player en local
      * Enregistre dans PlayeDataModel avec gson
      */
     public static PlayerData getStats(String token, String uuid){
+        ApiErrorManager.clear();
         try {
             HttpRequest request = HttpRequest.newBuilder().uri(URI.create(urlAPI + "/api/player/stats?uuidStr=" + uuid)).header("Content-Type", "application/json").header("Authorization", "Bearer " + token).GET().build();
 
@@ -195,7 +243,7 @@ public class SendAPI {
                 System.out.println("Stats recup : ");
                 System.out.println("id : " + playerData.getID());
                 System.out.println("username : " + playerData.getUsername());
-                System.out.println("rank : " + playerData.getPlayerRank());
+                System.out.println("rank_id : " + playerData.getRankId());
                 System.out.println("elo : " + playerData.getElo());
                 System.out.println("xp : " + playerData.getXp());
                 System.out.println("money : " + playerData.getMoney());

@@ -444,3 +444,86 @@
 - Fix de l'animation hover du `DoodleButton` qui grossisait si le dernier hover datais (reset tick de deltatime)
 
 - Fix du `PlayerPreviewPanel` qui ne s'affichait plus en fin de manche/partie
+
+
+## v.0.11: SPRINT 11
+
+### Added
+
+- Leaderboard
+    - Bouton en haut à droite du menu principal
+    - Joueurs triés par elo
+    - Chiffre colorée pour le top 3
+    - Nom coupé à 24 caractères avec "..."
+    - Animation pendant le chargement
+    - Retry automatique toutes les 5 secondes si l'API ne répond pas
+
+- Overlay des stats du compte connecté dans le menu principal
+
+- Fin Protocols serveur - client(s) 
+- Ajout des panel d'erreur de l'API au serveur
+
+
+### Modified
+
+- MainMenuPanel pour gerer les couches avec l'overlay accountStats
+
+- PlayerData et SendAPI pour le fix du rank
+
+### Fixed
+
+- Fix recuperation money avec getStats dans l'API
+- Fix recuperation rank via l'API
+
+
+## v.0.12: SPRINT 12
+
+### Added
+
+- Première partie des cartes nombres colorées
+
+- Bouton toggle qui permet d'activer ou non les animations de carte flottante
+
+### Modified
+
+- Amélioration de la page Paramètres dans le style du Leaderboard
+    - Onglet "Jeu" renommé "Graphique", contenu bot supprimé
+    - Onglet actif change de couleur
+
+- Amélioration du menu Pause dans le même style
+
+- Boutique
+    - Bouton Retour aligné avec les autres écrans
+    - Changement couleur des icone boutons d'achat
+
+- Amélioration de `PlayerPreviewPanel`
+    - Effet de flou (JH Labs) sur le fond
+    - Panel en jeu légèrement descendu pour pas coller au bar en haut
+
+- Player button
+    - Changement a doodle button
+    - icone correspondant au couleur
+    - nom de joueur un peu transparent si c'est pas celui qui joue pour differencier
+    - nom deviens ".." après 8 caratrère pour pas dépasser
+
+- DIAGRAMME et README mis à jour
+
+- Logique d'état pour les cartes flottantes déplacée dans la frame
+
+### Fixed
+
+- Liste des joueurs maintenant scrollable dans Fin de manche / fin de partie car avec 8 joueurs ça dépassait
+
+- Problème de double click partout dans le projet
+
+- Fix étoiles 
+
+- Fix actions 
+
+- fix bouton
+
+- `PlayerPreviewPanel`
+    - la preview disparait dès que la transition entre joueurs commence
+    - les cartes face cachée utilisent maintenant le skin équipé
+    - accumulation de flou en passant rapidement d'un joueur à l'autre
+    - animation fade ne rejoue plus si le panel était déjà visible (changement rapide entre preview)

@@ -134,6 +134,10 @@ public class Host {
         return lobbyName;
     }
 
+    public GameHost getGameHost(){
+        return this.gameHost;
+    }
+
 
     // setter
 

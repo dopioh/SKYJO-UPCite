@@ -29,10 +29,15 @@ public class RoundEndPanel extends JPanel {
     private List<PlayerModel> sortedPlayers;
     private Image bgImage;
     private BufferedImage cachedBackground;
+    private PlayerModel lastRoundPlayer;
 
     private static Font baseFont;
 
     public RoundEndPanel(List<PlayerModel> players, boolean gameOver) {
+        this(players, gameOver, null);
+    }
+
+    public RoundEndPanel(List<PlayerModel> players, boolean gameOver, PlayerModel lastRoundPlayer) {
         this.gameOver = gameOver;
         setLayout(new BorderLayout());
         setOpaque(true);
@@ -49,19 +54,6 @@ public class RoundEndPanel extends JPanel {
         previewPanel = new PlayerPreviewPanel();
         previewPanel.setVisible(false);
         layeredPane.add(previewPanel, JLayeredPane.PALETTE_LAYER);
-
-        // full screen etc
-        final JPanel contentRef = contentPanel;
-        layeredPane.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                Dimension size = layeredPane.getSize();
-                contentRef.setBounds(0, 0, size.width, size.height);
-                previewPanel.setBounds(size.width / 6, size.height / 10, size.width - size.width / 3, size.height - size.height / 5);
-                layeredPane.revalidate();
-                layeredPane.repaint();
-            }
-        });
 
         // haut : titre à gauche, bouton à droite
         JPanel topBar = new JPanel(new BorderLayout());
@@ -84,6 +76,21 @@ public class RoundEndPanel extends JPanel {
 
         contentPanel.add(topBar, BorderLayout.NORTH);
 
+        // full screen etc
+        final JPanel contentRef = contentPanel;
+        layeredPane.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                Dimension size = layeredPane.getSize();
+                contentRef.setBounds(0, 0, size.width, size.height);
+                int pw = size.width * 2 / 3;
+                int ph = size.height * 3 / 4;
+                previewPanel.setBounds((size.width - pw) / 2, (size.height - ph) / 2, pw, ph);
+                layeredPane.revalidate();
+                layeredPane.repaint();
+            }
+        });
+
         // grande boite transparent en bas de topbar
         sortedPlayers = new ArrayList<>(players);
         sortedPlayers.sort((a, b) -> a.getTotalScore() - b.getTotalScore());
@@ -92,19 +99,56 @@ public class RoundEndPanel extends JPanel {
         bigCard.setLayout(new BoxLayout(bigCard, BoxLayout.Y_AXIS));
         bigCard.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
+        // Label explicatif du calcul
+        JLabel scoreExplanation = new JLabel("Calcul : pts dans la main + carte action");
+        scoreExplanation.setFont(font(16f, Font.ITALIC));
+        scoreExplanation.setForeground(new Color(255, 255, 255, 200));
+        bigCard.add(scoreExplanation);
+        bigCard.add(Box.createVerticalStrut(12));
+
         for (int i = 0; i < sortedPlayers.size(); i++) {
             PlayerModel p = sortedPlayers.get(i);
-            String text = (i + 1) + ".   " + p.getName() + "   —   " + p.getTotalScore() + " pts";
+            
+            //calculer les détails du score
+            int handScore = p.getHand().calculateScore();
+            int actionScore = p.getActionHand().size() * 10;
+            int totalRoundScore = handScore + actionScore;
+            
+            String text = (i + 1) + ".   " + p.getName();
+            if (lastRoundPlayer != null && p.equals(lastRoundPlayer)) {
+                text += " (first)";
+            }
+            text += "   —   " + handScore + " + " + actionScore + " = " + totalRoundScore + " pts";
+            
+            //vérifier si doublement appliqué
+            if (lastRoundPlayer != null && p.equals(lastRoundPlayer)) {
+                //chercher si ce joueur n'est pas le premier de la liste
+                if (i > 0) {
+                    int finalScore = totalRoundScore * 2;
+                    text += " × 2 = " + finalScore + " pts";
+                }
+            }
+            
             JLabel pill = makePill(text);
             playerLabels.add(pill);
             bigCard.add(pill);
             bigCard.add(Box.createVerticalStrut(14));
         }
 
+        JScrollPane scroll = new JScrollPane(bigCard);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.setBorder(null);
+        // scroll vertical si besoin mais jamais horizontal
+        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.getVerticalScrollBar().setPreferredSize(new Dimension(0, 0));
+        scroll.getVerticalScrollBar().setUnitIncrement(16); //vitesse de scroll sinon elle est giga lent par defaut
+
         JPanel cardPadding = new JPanel(new BorderLayout());
         cardPadding.setOpaque(false);
         cardPadding.setBorder(BorderFactory.createEmptyBorder(0, 40, 40, 40));
-        cardPadding.add(bigCard, BorderLayout.CENTER);
+        cardPadding.add(scroll, BorderLayout.CENTER);
         contentPanel.add(cardPadding, BorderLayout.CENTER);
     }
 
@@ -124,8 +168,8 @@ public class RoundEndPanel extends JPanel {
         pill.setOpaque(false);
         pill.setBackground(Color.WHITE);
         pill.setForeground(new Color(50, 50, 50));
-        pill.setFont(font(22f, Font.BOLD));
-        pill.setBorder(BorderFactory.createEmptyBorder(12, 28, 12, 28));
+        pill.setFont(font(24f, Font.BOLD));
+        pill.setBorder(BorderFactory.createEmptyBorder(14, 28, 14, 28));
         pill.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return pill;
     }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 //import javax.swing.Timer;
 
 import fr.upc.cr1a.controller.GameBoardController;
+import fr.upc.cr1a.controller.network.connexion.GameClient;
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
 import fr.upc.cr1a.model.player.PlayerData;
@@ -42,6 +43,7 @@ public class GameManager {
     private boolean initRevealJustFinished = false;
 
     private boolean gameWithAction = false; // true si on utilise les actions
+    private GameClient onlineClient; // si on est en ligne alors on en associe un, sinon ça reste a null
     
     private HashMap<PlayerModel, Integer> afkCounts = new HashMap<>();
     private HashMap<PlayerModel, Boolean> autoControlledPlayers = new HashMap<>();
@@ -76,8 +78,10 @@ public class GameManager {
         if (this.gameWithAction) {
             actionDeck = new PiocheActionModel();
             discardActionPile = new DefausseActionModel();
-            ActionCardModel initActionCard = new ActionCardModel(false, ActionType.REPLACE_CARD_IN_HAND);
+            ActionCardModel initActionCard = (ActionCardModel) actionDeck.getTopCard();
+            actionDeck.removeCardAtTop();
             discardActionPile.addCardAtTop(initActionCard);
+            ensureFaceUp(discardActionPile.getTopCard());
         }
 
         System.out.println("GameManager Called");
@@ -109,6 +113,7 @@ public class GameManager {
         this.initRevealJustFinished = false;
         this.gameBoardModel = new GameBoardModel(players, frame, this);
         GameBoardView view = this.gameBoardModel.getGameBoardView();
+        view.setHandCardAnimations(frame.isHandCardAnimationsEnabled());
         view.updateCardDisplay(discardPile.getTopCard(), deck.stackSize() > 0);
         frame.add(view, "GAME");
         frame.showPanel("GAME");
@@ -119,8 +124,10 @@ public class GameManager {
         if (this.gameWithAction) {
             actionDeck = new PiocheActionModel();
             discardActionPile = new DefausseActionModel();
-            ActionCardModel initActionCard = new ActionCardModel(false, ActionType.REPLACE_CARD_IN_HAND);
+            ActionCardModel initActionCard = (ActionCardModel) actionDeck.getTopCard();
+            actionDeck.removeCardAtTop();
             discardActionPile.addCardAtTop(initActionCard);
+            ensureFaceUp(discardActionPile.getTopCard());
         }
         //Creation des joueurs 
         this.players = new ArrayList<>();
@@ -188,6 +195,7 @@ public class GameManager {
 
         this.gameBoardModel = new GameBoardModel(players, frame, this);
         GameBoardView view = this.gameBoardModel.getGameBoardView();
+        view.setHandCardAnimations(frame.isHandCardAnimationsEnabled());
         view.showPlayerCards(players.get(currentPlayerIndex));
         view.updateCardDisplay(
             discardPile.isEmpty() ? null : discardPile.getTopCard(),
@@ -253,8 +261,10 @@ public class GameManager {
         if (this.gameWithAction) {
             actionDeck = new PiocheActionModel();
             discardActionPile = new DefausseActionModel();
-            ActionCardModel initActionCard = new ActionCardModel(false, ActionType.REPLACE_CARD_IN_HAND);
+            ActionCardModel initActionCard = (ActionCardModel) actionDeck.getTopCard();
+            actionDeck.removeCardAtTop();
             discardActionPile.addCardAtTop(initActionCard);
+            ensureFaceUp(discardActionPile.getTopCard());
         }
 
         currentDrawCard = null;
@@ -357,6 +367,13 @@ public class GameManager {
      */
     public int getCurrentPlayerIndex(){
         return this.currentPlayerIndex;
+    }
+
+    /**
+     * Retourne le joueur qui a déclenché le dernier round
+     */
+    public PlayerModel getLastRoundPlayer(){
+        return (lastRoundPlayer >= 0) ? players.get(lastRoundPlayer) : null;
     }
 
     /*
@@ -494,6 +511,15 @@ public class GameManager {
         ensureFaceUp(cardInHand);
         hand.replaceCard(row, col, currentDrawCard);
         discardPile.addCardAtTop(cardInHand);
+        
+        // Vérifier si la carte jetée est une étoile
+        if (isStarCard(cardInHand)) {
+            ActionCardModel actionCard = grantActionForStar(currentPlayer);
+            if (actionCard != null) {
+                System.out.println("Étoile jetée : carte action gagnée !");
+            }
+        }
+        
         //montrer la nouvelle carte
         if(currentDrawCard.isFaceDown()) currentDrawCard.returnCard();
         if (currentDrawCard.isFaceDown()) {
@@ -546,7 +572,15 @@ public class GameManager {
         turnPhase = TurnPhase.TURN_ENDED;
     }
 
-
+    /**
+     * verifie et déclenche le LAST_ROUND si un joueur a révélé toutes ses cartes
+     */
+    public void checkAndTriggerLastRound() {
+        if (gameState != GameState.LAST_ROUND && lastRoundPlayer == -1 && GameRuleModel.checkEndOfRound(players)) {
+            gameState = GameState.LAST_ROUND;
+            lastRoundPlayer = currentPlayerIndex;
+        }
+    }
     
     /*
     *fonction qui gère la fin de la manche
@@ -569,8 +603,8 @@ public class GameManager {
         //calculer le score de chacun et trouver le joueur avec le score le plus bas
         PlayerModel lowestPlayer = GameRuleModel.findLowestScorePlayer(players);
         
-        //cherche le joueur qui lance la fin de la manche
-        PlayerModel roundEndPlayer = GameRuleModel.findRoundEndPlayer(players);
+        //cherche le joueur qui a déclenché la fin de la manche
+        PlayerModel roundEndPlayer = (lastRoundPlayer >= 0) ? players.get(lastRoundPlayer) : null;
         
         //Applique les scores selon les règles Skyjo
         GameRuleModel.applyRoundScores(players, roundEndPlayer, lowestPlayer);
@@ -602,11 +636,28 @@ public class GameManager {
      */
     public void startNewGame() {
         roundNumber++;
-        currentPlayerIndex = GameRuleModel.getBiggestScorePlayerIndex(players);
+        currentPlayerIndex = 0;
         currentDrawCard = null;
         lastRoundPlayer = -1;  // réinitialiser le déclencheur du dernier tour
         extraTurnsRemaining = 0;  // réinitialiser les tours supplémentaires
+        deck = new PiocheModel(this.gameWithAction);
         discardPile = new DefausseModel();
+
+        //vider les cartes actions de tous les joueurs
+        for (PlayerModel player : players) {
+            player.getActionHand().clear();
+        }
+
+        //vider les cartes actions des decks
+        if (this.gameWithAction) {
+            actionDeck = new PiocheActionModel();
+            discardActionPile = new DefausseActionModel();
+            ActionCardModel initActionCard = (ActionCardModel) actionDeck.getTopCard();
+            actionDeck.removeCardAtTop();
+            discardActionPile.addCardAtTop(initActionCard);
+            ensureFaceUp(discardActionPile.getTopCard());
+        }
+        
         initializeGame();
         ensureFaceUp(discardPile.getTopCard());
         turnPhase = TurnPhase.INIT_REVEAL;
@@ -614,6 +665,15 @@ public class GameManager {
         initRevealStarted = false; //reset
         initRevealJustFinished = false;
         firstPlayerToPlayIndex = 0;
+        
+        //maj du deck et de la défausse
+        if (gameBoardModel != null && gameBoardModel.getGameBoardView() != null) {
+            GameBoardView view = gameBoardModel.getGameBoardView();
+            view.updateCardDisplay(discardPile.getTopCard(), deck.stackSize() > 0);
+            if (gameWithAction) {
+                view.updateActionCardDisplay(discardActionPile.getTopCard(), actionDeck.stackSize() > 0);
+            }
+        }
     }
 
     /**
@@ -640,6 +700,18 @@ public class GameManager {
     
     public void setInitRevealJustFinished(boolean value) {
         this.initRevealJustFinished = value;
+    }
+
+    public GameClient getNetwork(){
+        return this.onlineClient;
+    }
+
+    public void setNetwork(GameClient gameClient){
+        this.onlineClient = gameClient;
+    }
+
+    public void setCurrentDrawCard(CardModel card) {
+        this.currentDrawCard = card;
     }
 
     public int getRoundNumber(){
@@ -695,7 +767,9 @@ public class GameManager {
         }
     }   
 
-    // PARTIE NETWORK
+    public GameBoardModel getGameBoardModel(){
+        return this.gameBoardModel;
+    }
 
     /**
      * Methode exclusive au multijoueur (Cote Client)

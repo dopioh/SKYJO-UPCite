@@ -37,6 +37,7 @@ public class SupabaseAuth {
     private static final HttpClient clientAuth = HttpClient.newHttpClient();
 
     public static boolean connectPlayerByEmail(String email, String password){ // mettre des booleans apres en type retour
+        ApiErrorManager.clear();
         try {
             String jsonBody = "{\"email\": \"" + email + "\", \"password\": \"" + password + "\"}";
 
@@ -51,6 +52,7 @@ public class SupabaseAuth {
             HttpResponse<String> response = clientAuth.send(request, HttpResponse.BodyHandlers.ofString()); // peut lever une exceptions -> obliger try catch
 
             if (response.statusCode() != 200){
+                ApiErrorManager.setHttpError("la connexion", response.statusCode(), response.body());
                 System.out.println("CODE HTTP : " + response.statusCode());
                 System.out.println("SUPABASE REPONSE : " + response.body());
                 return false;
@@ -60,15 +62,23 @@ public class SupabaseAuth {
             String accessToken = getAccesToken(response);
 
             PlayerAccount.actuelAccount = SendAPI.getStats(accessToken, id);
+            if (PlayerAccount.actuelAccount == null) {
+                if (ApiErrorManager.getLastUserMessage() == null) {
+                    ApiErrorManager.setHttpError("la recuperation des donnees du compte", 500, "database");
+                }
+                return false;
+            }
             return true;
             
         } catch (Exception e) {
+            ApiErrorManager.setNetworkError("la connexion", e);
             e.printStackTrace();       
             return false;   
         }
     }
 
     public static boolean connectPlayerByUsername(String username, String password){
+        ApiErrorManager.clear();
         try {
 
             String email = getEmailFromUsername(username);
@@ -76,6 +86,9 @@ public class SupabaseAuth {
             System.out.println(email);
 
             if (email == null || email.equals("NON_TROUVE")) {
+                if (ApiErrorManager.getLastUserMessage() == null) {
+                    ApiErrorManager.setHttpError("la recherche du pseudo", 404, "username introuvable");
+                }
                 System.out.println("Connexion annulee : Pseudo introuvable ou API injoignable.");
                 return false;
             }
@@ -84,6 +97,7 @@ public class SupabaseAuth {
             return connectByMail;
 
         } catch (Exception e) {
+            ApiErrorManager.setNetworkError("la connexion", e);
             e.printStackTrace();
             return false;
         }
@@ -100,15 +114,24 @@ public class SupabaseAuth {
             if (response.statusCode() == 200 && !response.body().equals("NON_TROUVE")) {
                 return response.body(); // L'API renvoie directement l'email en texte clair
             }
+
+            if (response.statusCode() == 200 && response.body().equals("NON_TROUVE")) {
+                ApiErrorManager.setHttpError("la recherche du pseudo", 404, response.body());
+                return null;
+            }
+
+            ApiErrorManager.setHttpError("la recherche du pseudo", response.statusCode(), response.body());
             return null;
             
         } catch (Exception e) {
+            ApiErrorManager.setNetworkError("la recherche du pseudo", e);
             e.printStackTrace();
             return null;
         }
     }
 
     public static boolean createAccount(String email, String username, String password) {
+        ApiErrorManager.clear();
         try {
             String jsonBody = "{\"email\": \"" + email + "\", \"password\": \"" + password + "\", \"data\": {\"username\": \"" + username + "\"}}"; // rajoute l'username en tant que metadata
 
@@ -119,6 +142,7 @@ public class SupabaseAuth {
             HttpResponse<String> response = clientAuth.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200){
+                ApiErrorManager.setHttpError("la creation du compte", response.statusCode(), response.body());
                 System.out.println("HTTP CODE PAS 200 : " + response.statusCode());
                 System.out.println("REPONSE SUPABASE : " + response.body());
                 return false;
@@ -128,10 +152,17 @@ public class SupabaseAuth {
             String accessToken = getAccesToken(response);
 
             PlayerAccount.actuelAccount = SendAPI.getStats(accessToken, id);
+            if (PlayerAccount.actuelAccount == null) {
+                if (ApiErrorManager.getLastUserMessage() == null) {
+                    ApiErrorManager.setHttpError("la recuperation des donnees du compte", 500, "database");
+                }
+                return false;
+            }
 
             return true;
 
         } catch (Exception e) {
+            ApiErrorManager.setNetworkError("la creation du compte", e);
             e.printStackTrace();
             return false;
         }
