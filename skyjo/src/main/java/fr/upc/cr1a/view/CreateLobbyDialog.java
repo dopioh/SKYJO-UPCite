@@ -110,7 +110,7 @@ public class CreateLobbyDialog extends JDialog {
      * retourne si le mode actions est activé
      */
     public boolean isActionMode() {
-        // Mode Action desactive pour le multijoueur en ligne
+        // J'ai enlevé le mode action en ligne , je laisse pour éviter un refactor
         return false;
     }
 

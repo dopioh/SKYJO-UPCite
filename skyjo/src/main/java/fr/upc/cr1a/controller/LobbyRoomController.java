@@ -252,16 +252,10 @@ public class LobbyRoomController {
             return;
         }
 
-        // En multijoueur en ligne : bloquer le lancement si le joueur est seul (aucun autre humain connecte)
+        // 2 joueurs minimum sinon on farm les stats trop facilement en ligne
         long humanCount = players.stream().filter(p -> !p.isBot()).count();
         if (humanCount < 2) {
-            JOptionPane.showMessageDialog(
-                frame,
-                "Vous ne pouvez pas lancer une partie en ligne tout seul.\n" +
-                "Attendez qu'au moins un autre joueur rejoigne le salon.",
-                "Joueur seul",
-                JOptionPane.WARNING_MESSAGE
-            );
+            JOptionPane.showMessageDialog(frame,"Vous ne pouvez pas lancer une partie en ligne tout seul.\n" +"Attendez qu'au moins un autre joueur rejoigne le salon.","Joueur seul",JOptionPane.WARNING_MESSAGE);
             return;
         }
 

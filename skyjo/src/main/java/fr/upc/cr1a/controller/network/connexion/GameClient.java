@@ -103,7 +103,8 @@ public class GameClient implements NetworkProtocolClient{
                         String botType = parts[index++];
                         boolean ready = "1".equals(parts[index++]);
 
-                        PlayerData tmp = new PlayerData(key, name, isBot, isBot ? botType : null);
+                        // botType en lowercase pour matcher les strats dans GameManager
+                        PlayerData tmp = new PlayerData(key, name, isBot, isBot ? botType.toLowerCase() : null);
                         this.listPlayersData.add(tmp);
                         readyStates.add(ready);
                     }

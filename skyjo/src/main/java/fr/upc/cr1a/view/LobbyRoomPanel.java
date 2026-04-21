@@ -180,8 +180,8 @@ public class LobbyRoomPanel extends JPanel {
         panel.add(maxPlayersPanel);
         panel.add(Box.createVerticalStrut(15));
 
-        //mode actions (retire du multi en ligne -- on instancie pour compat mais masque)
-        actionModeCheckbox = new JCheckBox("Mode Actions");
+        //mode actions
+        actionModeCheckbox = new JCheckBox("Mode Action");
         actionModeCheckbox.setSelected(false);
         actionModeCheckbox.setVisible(false);
         panel.add(Box.createVerticalStrut(10));
