@@ -88,7 +88,6 @@ public class GameClient implements NetworkProtocolClient{
             String message;
             while ((message = in.readLine()) != null){
                 if ( message.startsWith("[LOBBY_UPDATE]")){
-                    // Format : [LOBBY_UPDATE]:totalCount:maxPlayers:id:name:isBot:botType:ready:...
                     String[] parts = message.split(":");
                     int totalCount = Integer.parseInt(parts[1]);
                     int maxPlayers = Integer.parseInt(parts[2]);
@@ -274,7 +273,7 @@ public class GameClient implements NetworkProtocolClient{
         GameHost gm = new GameHost(1234);
         gm.startServer();
         
-        UDPBroadcaster.broadcast(1234, "SALEMMMM");
+        UDPBroadcaster.broadcast(1234, "SALEMMMM"); Pas de Salem ici
 
         double deltaTime = System.currentTimeMillis();
 
