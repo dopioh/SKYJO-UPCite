@@ -540,4 +540,6 @@
 
 - La liste de séléction de Lobby s'actualise maintenant à chaque fois qu'on arrive sur la page
 
+- Les host et clients sont synchronisés sur les informations du lobby
+
 - Anciennement les bots ne rejoignait pas la partie lancée en ligne
