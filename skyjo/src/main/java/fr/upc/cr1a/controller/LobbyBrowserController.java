@@ -115,7 +115,7 @@ public class LobbyBrowserController {
     /**
      * Recherche les salons disponibles sur le réseau local via UDP
      */
-    private void loadLobbies() {
+    public void loadLobbies() {
         PlayerData account = PlayerAccount.actuelAccount;
         if (account == null) {
             availableLobbies = new ArrayList<>();

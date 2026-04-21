@@ -47,6 +47,9 @@ public class GameModeSelectionController {
             JOptionPane.showMessageDialog(frame,"Vous devez être connecté avec un compte pour jouer en multijoueur.","Connexion requise",JOptionPane.WARNING_MESSAGE);
             return;
         }
+        if (frame.getLobbyBrowserController() != null) {
+            frame.getLobbyBrowserController().loadLobbies();
+        }
         frame.showPanel("LOBBY_BROWSER");
     }
 

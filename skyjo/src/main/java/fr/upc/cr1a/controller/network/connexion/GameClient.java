@@ -88,26 +88,34 @@ public class GameClient implements NetworkProtocolClient{
             String message;
             while ((message = in.readLine()) != null){
                 if ( message.startsWith("[LOBBY_UPDATE]")){
+                    // Format : [LOBBY_UPDATE]:totalCount:maxPlayers:id:name:isBot:botType:ready:...
                     String[] parts = message.split(":");
-                    int nbrPlayers = Integer.parseInt(parts[1]);
-                    this.modeAction = Boolean.parseBoolean(parts[2]);
+                    int totalCount = Integer.parseInt(parts[1]);
+                    int maxPlayers = Integer.parseInt(parts[2]);
+                    this.modeAction = false; // mode action retire du online
                     this.listPlayersData = new ArrayList<>();
+                    ArrayList<Boolean> readyStates = new ArrayList<>();
 
                     int index = 3;
-                    for (int i = 0 ; i < nbrPlayers ; i++){
-                        String key = parts[index];
-                        index++;
-                        String name = parts[index];
-                        index++;
-                        PlayerData tmp = new PlayerData(key,name);
+                    for (int i = 0 ; i < totalCount ; i++){
+                        String key = parts[index++];
+                        String name = parts[index++];
+                        boolean isBot = "1".equals(parts[index++]);
+                        String botType = parts[index++];
+                        boolean ready = "1".equals(parts[index++]);
+
+                        PlayerData tmp = new PlayerData(key, name, isBot, isBot ? botType : null);
                         this.listPlayersData.add(tmp);
+                        readyStates.add(ready);
                     }
 
                     // Met à jour l'interface du lobby avec les joueurs reçus du serveur
                     ArrayList<PlayerData> snapshot = new ArrayList<>(this.listPlayersData);
+                    ArrayList<Boolean> readySnapshot = new ArrayList<>(readyStates);
+                    int maxPlayersSnapshot = maxPlayers;
                     SwingUtilities.invokeLater(() -> {
                         if (frame.getLobbyRoomController() != null) {
-                            frame.getLobbyRoomController().updatePlayersFromNetwork(snapshot);
+                            frame.getLobbyRoomController().updatePlayersFromNetwork(snapshot, readySnapshot, maxPlayersSnapshot);
                         }
                     });
                 }
@@ -247,6 +255,17 @@ public class GameClient implements NetworkProtocolClient{
     @Override
     public void sendDisquardRequest(String id, int col, int row){
         out.println(id +":"+NetworkProtocolClient.REQ_DISCARD+":"+col +":" + row);
+    }
+
+    /**
+     * Request pour changer l'etat "pret" d'un joueur
+     * STRUCTURE = id:protocol:ready(true/false)
+     */
+    @Override
+    public void sendReadyRequest(String id, boolean ready){
+        if (out != null){
+            out.println(id + ":" + NetworkProtocolClient.REQ_READY + ":" + ready);
+        }
     }
 
     // test host

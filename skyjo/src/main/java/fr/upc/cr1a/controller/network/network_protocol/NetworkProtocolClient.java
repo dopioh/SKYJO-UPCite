@@ -11,6 +11,7 @@ public interface NetworkProtocolClient {
     public static final String REQ_PICK_PIOCHE = "PICK_PIOCHE";
     public static final String REQ_PICK_DEFAUSSE = "PICK_DEFAUSSE";
     public static final String REQ_DISCARD = "DISCARD";
+    public static final String REQ_READY = "READY";
 
     public abstract void sendFlipCardRequest(String id, int col, int row);
 
@@ -19,4 +20,6 @@ public interface NetworkProtocolClient {
     public abstract void sendPickDefausseRequest(String id);
 
     public abstract void sendDisquardRequest(String id, int col, int row);
+
+    public abstract void sendReadyRequest(String id, boolean ready);
 }

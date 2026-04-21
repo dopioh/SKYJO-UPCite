@@ -439,6 +439,12 @@
 
 - Liaison des bot avec le mode de jeu action
 
+- Liaison réseau et UI les classes réseaux (Host, Client, etc..) sur les controllers Swing (Lobby) 
+
+- Possibilité de connexion avec affichage visuel + liste des lobby se met à jour  
+
+- Blocage des comptes invités en mode Multijoueur en Ligne
+
 ### Fixed
 
 - Fix de l'animation hover du `DoodleButton` qui grossisait si le dernier hover datais (reset tick de deltatime)
@@ -463,6 +469,7 @@
 - Fin Protocols serveur - client(s) 
 - Ajout des panel d'erreur de l'API au serveur
 
+- Lancement de la partie en multijoueur en ligne et arrêt broadcast UDP
 
 ### Modified
 
@@ -474,7 +481,10 @@
 
 - Fix recuperation money avec getStats dans l'API
 - Fix recuperation rank via l'API
-
+- Fix message de bienvenue au lobby côté Client
+- Fix variable lisPlayerData (changée en listPlayerData) qui bloquait le lancement du jeu (car NULL)
+- Fix Double création de jeu GameClient et GameHost
+- Fix Connexion Host au lobby qui se connectait en Client et écrasait ses données
 
 ## v.0.12: SPRINT 12
 
@@ -527,3 +537,7 @@
     - les cartes face cachée utilisent maintenant le skin équipé
     - accumulation de flou en passant rapidement d'un joueur à l'autre
     - animation fade ne rejoue plus si le panel était déjà visible (changement rapide entre preview)
+
+- La liste de séléction de Lobby s'actualise maintenant à chaque fois qu'on arrive sur la page
+
+- Anciennement les bots ne rejoignait pas la partie lancée en ligne

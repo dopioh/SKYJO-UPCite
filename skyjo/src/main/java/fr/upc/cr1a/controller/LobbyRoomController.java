@@ -100,7 +100,7 @@ public class LobbyRoomController {
      * Appelé par GameClient quand un LOBBY_UPDATE est reçu du serveur.
      * Remplace la liste de joueurs par celle du réseau.
      */
-    public void updatePlayersFromNetwork(ArrayList<PlayerData> networkPlayers) {
+    public void updatePlayersFromNetwork(ArrayList<PlayerData> networkPlayers, ArrayList<Boolean> readyStates, int maxPlayers) {
         if (networkPlayers == null) return;
 
         players.clear();
@@ -109,12 +109,21 @@ public class LobbyRoomController {
         PlayerData localPlayer = PlayerAccount.actuelAccount;
         String localId = localPlayer != null ? localPlayer.getID() : null;
 
-        for (PlayerData pd : networkPlayers) {
+        for (int i = 0; i < networkPlayers.size(); i++) {
+            PlayerData pd = networkPlayers.get(i);
             boolean playerIsHost = isHost && pd.getID() != null && pd.getID().equals(localId);
             LobbyPlayerModel model = new LobbyPlayerModel(
                 pd.getID(), pd.getUsername(), playerIsHost, pd.isBot()
             );
+            if (readyStates != null && i < readyStates.size() && !pd.isBot()) {
+                model.setReady(readyStates.get(i));
+            }
             addPlayer(model);
+        }
+
+        // sync max players dans la UI si different (surtout cote client)
+        if (!isHost) {
+            view.getMaxPlayersSpinner().setValue(maxPlayers);
         }
 
         updateLobbyInfo();
@@ -176,6 +185,9 @@ public class LobbyRoomController {
 
         if (confirm == JOptionPane.YES_OPTION) {
             cleanup();
+            if (frame.getLobbyBrowserController() != null) {
+                frame.getLobbyBrowserController().loadLobbies();
+            }
             frame.showPanel("LOBBY_BROWSER");
         }
     }
@@ -194,6 +206,14 @@ public class LobbyRoomController {
         PlayerData localPlayer = PlayerAccount.actuelAccount;
         String localId = localPlayer != null ? localPlayer.getID() : "player_local";
         updatePlayerStatus(localId, isReady);
+
+        // Notifier le Host via le reseau pour qu'il broadcast l'etat a tous les clients
+        if (client != null && client.getGameClient() != null) {
+            client.getGameClient().sendReadyRequest(localId, isReady);
+        } else if (host != null && host.getGameHost() != null) {
+            // cote host : mettre a jour directement et broadcast
+            host.getGameHost().setPlayerReady(localId, isReady);
+        }
     }
 
     private void clicStart() {
@@ -266,7 +286,11 @@ public class LobbyRoomController {
 
             // Kick via le réseau si on est host
             if (isHost && host != null) {
-                host.kickPlayer(playerId);
+                if (player.isBot()) {
+                    host.removeBot(playerId);
+                } else {
+                    host.kickPlayer(playerId);
+                }
             }
 
             removePlayer(playerId);
@@ -311,8 +335,16 @@ public class LobbyRoomController {
 
             String botId = "bot_" + System.currentTimeMillis();
             String botName = botStrategyNames[choiceIndex];
-            LobbyPlayerModel bot = new LobbyPlayerModel(botId, botName, false, true);
-            addPlayer(bot);
+
+            // Propager au Host pour que la liste cote serveur contienne aussi les bots
+            // (le broadcast rafraichira automatiquement la UI cote host et cote clients)
+            if (host != null) {
+                host.addBot(botId, botName);
+            } else {
+                // fallback hors reseau
+                LobbyPlayerModel bot = new LobbyPlayerModel(botId, botName, false, true);
+                addPlayer(bot);
+            }
         }
     }
 
@@ -333,10 +365,14 @@ public class LobbyRoomController {
 
         view.updatePlayersCount();
         updateLobbyInfo();
+
+        // Propager aux clients
+        if (isHost && host != null) {
+            host.updateMaxPlayers(newMax);
+        }
     }
 
     private void onActionModeChanged() {
-        boolean actionMode = view.getActionModeCheckbox().isSelected();
         updateLobbyInfo();
     }
 

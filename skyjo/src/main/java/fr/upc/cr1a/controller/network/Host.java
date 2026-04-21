@@ -39,12 +39,13 @@ public class Host {
         //this.port = port;
         this.frame = frame;
         this.gameHost = new GameHost(port,modeAction,frame);
-        
+
         this.nunmberPlayersMax = nbrPlayers;
         this.modeAction = modeAction;
 
         this.lobbyName = lobbyName;
 
+        this.gameHost.setMaxPlayers(nbrPlayers);
         this.gameHost.startServer();
 
         this.client = new Client(frame, PlayerAccount.actuelAccount);
@@ -52,6 +53,25 @@ public class Host {
         GameSession.status = GameSession.STATUS.HOST; // rétablir le statut HOST (écrasé par GameClient.connect)
 
         startBroadcasting();
+    }
+
+    /**
+     * Ajoute un bot au lobby (cote host uniquement)
+     */
+    public void addBot(String id, String botType){
+        gameHost.addBotToLobby(id, botType);
+    }
+
+    public void removeBot(String id){
+        gameHost.removeBotFromLobby(id);
+    }
+
+    /**
+     * Met a jour le nombre de joueurs max et broadcast aux clients
+     */
+    public void updateMaxPlayers(int max){
+        this.nunmberPlayersMax = max;
+        gameHost.setMaxPlayers(max);
     }
 
     /**

@@ -23,9 +23,12 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     private ServerSocket serverSocket; // permet de se recup des requests
     private boolean isRunning = false;
 
-    private ArrayList<ClientHandler> connectedClient = new ArrayList<>(); // pour garder une trace des joueurs connectés 
+    private ArrayList<ClientHandler> connectedClient = new ArrayList<>(); // pour garder une trace des joueurs connectés
 
     private HashMap<String, String> lobbyPlayers = new HashMap<>(); // key = id, value = name
+    private HashMap<String, Boolean> playerReadyState = new HashMap<>(); // id -> ready
+    private HashMap<String, String> lobbyBots = new HashMap<>(); // id -> botType (nom = botType aussi cote ui)
+    private int maxPlayers = 8;
 
     private Thread thread;
 
@@ -98,11 +101,46 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
         }
     }
 
-    public void addPlayerToLobby(String id, String username){  
+    public void addPlayerToLobby(String id, String username){
         lobbyPlayers.put(id, username);
+        playerReadyState.put(id, false);
         System.out.println("[LOBBY] " + username + " a rejoint la salle d'attente !");
 
         broadcastUpdateLobby();
+    }
+
+    /**
+     * Ajoute un bot au lobby et propage aux clients
+     */
+    public void addBotToLobby(String id, String botType){
+        lobbyBots.put(id, botType);
+        System.out.println("[LOBBY] Bot " + botType + " ajoute au lobby.");
+        broadcastUpdateLobby();
+    }
+
+    public void removeBotFromLobby(String id){
+        if (lobbyBots.remove(id) != null) {
+            broadcastUpdateLobby();
+        }
+    }
+
+    /**
+     * Met a jour l'etat "pret" d'un joueur et broadcast
+     */
+    public void setPlayerReady(String id, boolean ready){
+        if (lobbyPlayers.containsKey(id)) {
+            playerReadyState.put(id, ready);
+            broadcastUpdateLobby();
+        }
+    }
+
+    public void setMaxPlayers(int max){
+        this.maxPlayers = max;
+        broadcastUpdateLobby();
+    }
+
+    public int getMaxPlayers(){
+        return this.maxPlayers;
     }
 
     public void kickPlayer(String id){ // plus sécu avec l'id que l'username
@@ -134,6 +172,7 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
 
        if (id != null){
         lobbyPlayers.remove(id); // faut mettre la key
+        playerReadyState.remove(id);
         String msg = "[SERVEUR] " + username + " a quitté le salon";
         System.out.println(msg);
         broadcastInfo(msg);
@@ -155,9 +194,15 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
 
     public void startAGame(){
         ArrayList<PlayerData> listPlayers = new ArrayList<>();
-   
+
         for (String key : lobbyPlayers.keySet()){
             PlayerData tmp = new PlayerData(key, lobbyPlayers.get(key));
+            listPlayers.add(tmp);
+        }
+        // Ajout des bots a la liste des joueurs
+        for (String botId : lobbyBots.keySet()){
+            String botType = lobbyBots.get(botId);
+            PlayerData tmp = new PlayerData(botId, botType, true, botType.toLowerCase());
             listPlayers.add(tmp);
         }
         this.gameManager = new GameManager(frame, listPlayers, modeAction);
@@ -177,11 +222,25 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
 
     @Override
     public synchronized void broadcastUpdateLobby(){
-
-        StringBuilder message = new StringBuilder("[LOBBY_UPDATE]:" + lobbyPlayers.size() + ":" + modeAction);
+        int totalCount = lobbyPlayers.size() + lobbyBots.size();
+        // Format : [LOBBY_UPDATE]:totalCount:maxPlayers:id:name:isBot(0/1):botType:ready(0/1):...
+        StringBuilder message = new StringBuilder("[LOBBY_UPDATE]:" + totalCount + ":" + maxPlayers);
 
         for (String key : lobbyPlayers.keySet()){
-            message.append(":").append(key).append(":").append(lobbyPlayers.get(key));
+            boolean ready = playerReadyState.getOrDefault(key, false);
+            message.append(":").append(key)
+                   .append(":").append(lobbyPlayers.get(key))
+                   .append(":").append("0")
+                   .append(":").append("N")
+                   .append(":").append(ready ? "1" : "0");
+        }
+        for (String botId : lobbyBots.keySet()){
+            String botType = lobbyBots.get(botId);
+            message.append(":").append(botId)
+                   .append(":").append(botType)
+                   .append(":").append("1")
+                   .append(":").append(botType)
+                   .append(":").append("1"); // bots tjrs prets
         }
 
         // On l'envoie à tous les ClientHandlers

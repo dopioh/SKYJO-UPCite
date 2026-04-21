@@ -72,6 +72,15 @@ public class ClientHandler implements Runnable{
                     }
                 }
 
+                if (message.contains(":" + NetworkProtocolClient.REQ_READY + ":")) {
+                    String[] parts = message.split(":");
+                    if (parts.length >= 3) {
+                        String playerId = parts[0];
+                        boolean ready = Boolean.parseBoolean(parts[2]);
+                        gameHost.setPlayerReady(playerId, ready);
+                    }
+                }
+
                 if (message.contains(NetworkProtocolClient.REQ_FLIP_CARD)) {
                     String[] parts = message.split(":");
                     String playerId = parts[0];
