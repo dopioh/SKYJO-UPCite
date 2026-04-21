@@ -1081,7 +1081,7 @@ public class GameBoardView extends JPanel {
     }
 
     private int getDisplayedActionHandCardHeight(int actionCount) {
-        if (actionCount > actionHandPetitScale) {
+        if (actionCount > actionHandCardsParRow) {
             return Math.max(56, (int)Math.round(actionHandCardHeight * actionHandPetitScale));
         }
         return actionHandCardHeight;
