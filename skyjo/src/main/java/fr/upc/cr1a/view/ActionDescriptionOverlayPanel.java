@@ -6,14 +6,18 @@ import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.BasicStroke;
+import java.io.IOException;
+import java.io.InputStream;
+
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.JTextArea;
 
 /**
  * Petit overlay centré pour expliquer l'effet d'une carte action
@@ -21,8 +25,15 @@ import javax.swing.JTextArea;
  */
 public class ActionDescriptionOverlayPanel extends JPanel {
 
+    private static final Color CARD_COLOR = new Color(248, 243, 226, 255);
+    private static final Color CARD_BORDER_COLOR = new Color(54, 45, 34, 215);
+    private static final Color TITLE_COLOR = new Color(46, 38, 26);
+    private static final Color TEXT_COLOR = new Color(38, 33, 25);
+
     private final JLabel titleLabel;
-    private final JTextArea descriptionArea;
+    private final JLabel descriptionLabel;
+    private final Font titleFont;
+    private final Font bodyFont;
 
     private float opaque = 0.0f;
 
@@ -31,28 +42,26 @@ public class ActionDescriptionOverlayPanel extends JPanel {
         setOpaque(false);
         setVisible(false);
 
-        titleLabel = new JLabel("", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        titleLabel.setForeground(Color.BLACK);
+        titleFont = loadFont(26f, Font.BOLD);
+        bodyFont = loadFont(24f, Font.PLAIN);
 
-        descriptionArea = new JTextArea(); // JTextArea permet le retour à la ligne automatique
-        descriptionArea.setEditable(false);
-        descriptionArea.setFocusable(false);
-        descriptionArea.setOpaque(false);
-        descriptionArea.setLineWrap(true); // retour a la ligne automatique
-        descriptionArea.setWrapStyleWord(true); // permet de pas couper les mots entre deux lignes
-        descriptionArea.setFont(new Font("Arial", Font.PLAIN, 14));
-        descriptionArea.setForeground(Color.BLACK);
-        descriptionArea.setBorder(BorderFactory.createEmptyBorder(0, 14, 0, 14));
+        titleLabel = new JLabel("", SwingConstants.CENTER);
+        titleLabel.setFont(titleFont);
+        titleLabel.setForeground(TITLE_COLOR);
+
+        descriptionLabel = new JLabel("", SwingConstants.CENTER);
+        descriptionLabel.setOpaque(false);
+        descriptionLabel.setFont(bodyFont);
+        descriptionLabel.setForeground(TEXT_COLOR);
+        descriptionLabel.setBorder(BorderFactory.createEmptyBorder(0, 14, 0, 14));
 
         add(titleLabel, BorderLayout.NORTH);
-        add(descriptionArea, BorderLayout.CENTER);
+        add(descriptionLabel, BorderLayout.CENTER);
     }
 
     public void showDescription(String title, String description) {
         titleLabel.setText(title);
-        descriptionArea.setText(description);
-        descriptionArea.setCaretPosition(0);
+        descriptionLabel.setText(centrerTexte(description));
         fade(true);
     }
 
@@ -88,14 +97,40 @@ public class ActionDescriptionOverlayPanel extends JPanel {
             repaint();
         });
     }
+    /**
+     * centre le texte dans l'overlay grace a html
+     * @param text le texte a centrer
+     * @return du code html
+     */
+    private String centrerTexte(String text) {
+        // Java reconnait mal la police donc ça prend une police par defaut mais je trouve que ça passe
+        if (text == null) {
+            return "";
+        }
+        return "<html><div style='text-align:center;'>" + text + "</div></html>";
+    }
+
+    private Font loadFont(float size, int style) {
+        try (InputStream stream = getClass().getResourceAsStream("/PatrickHandSC.ttf")) {
+            if (stream != null) {
+                return Font.createFont(Font.TRUETYPE_FONT, stream).deriveFont(style, size);
+            }
+            return new Font("Arial", style, Math.round(size));
+        } catch (FontFormatException | IOException ignored) {
+            return new Font("Arial", style, Math.round(size));
+        }
+    }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setColor(new Color(168, 168, 168));
+        g2.setColor(CARD_COLOR);
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
+        g2.setColor(CARD_BORDER_COLOR);
+        g2.setStroke(new BasicStroke(2f));
+        g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 20, 20);
         g2.dispose();
     }
 
