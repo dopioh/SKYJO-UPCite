@@ -520,7 +520,9 @@
 
 - Logique d'état pour les cartes flottantes déplacée dans la frame
 
-- Suppression Mode Action en Multijoueur
+- Suppression Mode Action en ligne
+
+- Un joueur ne lance jamais seul en ligne
 
 ### Fixed
 
