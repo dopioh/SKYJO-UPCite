@@ -11,6 +11,7 @@ public interface NetworkProtocolServer {
     public static final String UPDATE_PIOCHE_TAKEN = "PIOCHE_TAKE";
     public static final String UPDATE_DISCARD_TAKEN = "DISCARD_TAKEN";
     public static final String UPDATE_DISCARD = "DISCARD";
+    public static final String UPDATE_KICKED = "KICKED";
     
     public abstract void broadcastStartGame();
 

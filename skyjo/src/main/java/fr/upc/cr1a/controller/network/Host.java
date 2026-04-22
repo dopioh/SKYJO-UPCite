@@ -18,7 +18,7 @@ public class Host {
 
     // viens de l'interface user
 
-    private int nunmberPlayersMax;
+    private int numberPlayersMax;
     private boolean modeAction;
 
     private final String lobbyName; // ça ça bouge pas par contre
@@ -40,7 +40,7 @@ public class Host {
         this.frame = frame;
         this.gameHost = new GameHost(port,modeAction,frame);
 
-        this.nunmberPlayersMax = nbrPlayers;
+        this.numberPlayersMax = nbrPlayers;
         this.modeAction = modeAction;
 
         this.lobbyName = lobbyName;
@@ -70,7 +70,7 @@ public class Host {
      * Met a jour le nombre de joueurs max et broadcast aux clients
      */
     public void updateMaxPlayers(int max){
-        this.nunmberPlayersMax = max;
+        this.numberPlayersMax = max;
         gameHost.setMaxPlayers(max);
     }
 
@@ -85,7 +85,8 @@ public class Host {
         this.threadBroadcast = new Thread(() -> {
             while (isBroadcasting) {
                 
-                String message = lobbyName + ":" + nunmberPlayersMax + ":" + modeAction;
+                int currentCount = gameHost.getCurrentPlayerCount();
+                String message = lobbyName + ":" + currentCount + ":" + numberPlayersMax + ":" + modeAction;
                 
                 UDPBroadcaster.broadcast(port, message);
                 
@@ -143,7 +144,7 @@ public class Host {
     // getter 
 
     public int getNbrPlayer(){
-        return nunmberPlayersMax;
+        return numberPlayersMax;
     }
 
     public boolean isModeAction(){
@@ -162,7 +163,7 @@ public class Host {
     // setter
 
     public void setNbrPlayer(int nbrPlayers){
-        this.nunmberPlayersMax = nbrPlayers;
+        this.numberPlayersMax = nbrPlayers;
     }
 
     public void setModeAction(boolean isModeAction){

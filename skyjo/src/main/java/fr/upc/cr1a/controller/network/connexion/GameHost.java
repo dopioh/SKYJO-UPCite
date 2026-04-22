@@ -143,10 +143,19 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
         return this.maxPlayers;
     }
 
+    /**
+     * Renvoie le nombre total de participants au lobby (humains + bots)
+     */
+    public int getCurrentPlayerCount(){
+        return lobbyPlayers.size() + lobbyBots.size();
+    }
+
     public void kickPlayer(String id){ // plus sécu avec l'id que l'username
         for ( ClientHandler client : connectedClient ){
             if (client.getID().equals(id)){
                 String username = client.getUsername();
+                // Notifier le client concerne avant de fermer la connexion
+                client.sendMessage(NetworkProtocolServer.UPDATE_KICKED);
                 removeClient(client, id, username);
                 client.closeClient();
 

@@ -524,6 +524,8 @@
 
 - Un joueur ne lance jamais seul en ligne
 
+- Rafraichir devient "Recherche..." pour éviter des erreurs de superposition
+
 ### Fixed
 
 - Liste des joueurs maintenant scrollable dans Fin de manche / fin de partie car avec 8 joueurs ça dépassait
@@ -547,3 +549,5 @@
 - Les host et clients sont synchronisés sur les informations du lobby
 
 - Anciennement les bots ne rejoignait pas la partie lancée en ligne
+
+- L'expulsion fonctionne bien et notifie le client

@@ -41,6 +41,7 @@ public class GameClient implements NetworkProtocolClient{
 
     private ArrayList<PlayerData> listPlayersData;
     private boolean modeAction;
+    private boolean wasKicked = false;
 
     public GameClient( Frame frame, PlayerData playerData){
         this.frame = frame;
@@ -118,6 +119,22 @@ public class GameClient implements NetworkProtocolClient{
                             frame.getLobbyRoomController().updatePlayersFromNetwork(snapshot, readySnapshot, maxPlayersSnapshot);
                         }
                     });
+                }
+
+                if (message.startsWith(NetworkProtocolServer.UPDATE_KICKED)){
+                    wasKicked = true;
+                    SwingUtilities.invokeLater(() -> {javax.swing.JOptionPane.showMessageDialog(frame,
+                            "Vous avez ete expulsé du salon par l'hôte.",
+                            "Kick",
+                            javax.swing.JOptionPane.WARNING_MESSAGE
+                        );
+                        frame.showPanel("LOBBY_BROWSER");
+                        // Lancer une recherche de lobby apres avoir ete kick
+                        if (frame.getLobbyBrowserController() != null) {
+                            frame.getLobbyBrowserController().loadLobbies();
+                        }
+                    });
+                    break;
                 }
 
                 // NetworkProtocol du serveur qui vont definir des actions pour chaque client

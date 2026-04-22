@@ -31,6 +31,7 @@ public class LobbyBrowserController {
     private List<LobbyModel> availableLobbies;
 
     private Client discoveryClient;
+    private boolean isLoading = false;
 
     public LobbyBrowserController(Frame frame, LobbyBrowserPanel view) {
         this.frame = frame;
@@ -123,7 +124,15 @@ public class LobbyBrowserController {
             return;
         }
 
+        if (isLoading) {
+            return; //Pour éviter l'erreur de double recherche
+        }
+
         cleanupDiscovery();
+        isLoading = true;
+        view.getRefreshButton().setEnabled(false);
+        view.getRefreshButton().setText("Recherche...");
+
         discoveryClient = new Client(frame, account);
 
         discoveryClient.discoverLobbies(2000, () -> {
@@ -133,25 +142,36 @@ public class LobbyBrowserController {
 
             for (Map.Entry<String, String> entry : found.entrySet()) {
                 String ip = entry.getKey();
-                String info = entry.getValue(); // "lobbyName:maxPlayers:modeAction"
+                String info = entry.getValue(); // "lobbyName:currentPlayers:maxPlayers:modeAction"
                 String[] parts = info.split(":");
 
-                if (parts.length >= 3) {
+                if (parts.length >= 4) {
                     String lobbyName = parts[0];
+                    int currentPlayers;
                     int maxPlayers;
                     try {
-                        maxPlayers = Integer.parseInt(parts[1]);
+                        currentPlayers = Integer.parseInt(parts[1]);
+                    } catch (NumberFormatException e) {
+                        currentPlayers = 0;
+                    }
+                    try {
+                        maxPlayers = Integer.parseInt(parts[2]);
                     } catch (NumberFormatException e) {
                         maxPlayers = 8;
                     }
-                    boolean actionMode = Boolean.parseBoolean(parts[2]);
+                    boolean actionMode = Boolean.parseBoolean(parts[3]);
 
                     // On utilise l'IP comme lobbyId (nécessaire pour se connecter)
-                    LobbyModel lobby = new LobbyModel(ip, lobbyName, "Hôte", 0, maxPlayers, actionMode);
+                    LobbyModel lobby = new LobbyModel(ip, lobbyName, "Hôte", currentPlayers, maxPlayers, actionMode);
                     availableLobbies.add(lobby);
                 }
             }
             refreshView();
+
+            // reactiver le bouton rafraichir en fin de recherche
+            isLoading = false;
+            view.getRefreshButton().setEnabled(true);
+            view.getRefreshButton().setText("Rafraîchir");
         });
     }
 
