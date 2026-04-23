@@ -978,26 +978,16 @@ public class GameBoardView extends JPanel {
         zonePlateau.repaint();
     }
 
-    // a redimenssionner dynamiquement plus tard ?
     private void resizeCards() {
         int sizeH = this.getHeight();
         int sizeW = this.getWidth();
 
-        // 95x135 Taille de base
-        int largeurCarte = 95;
-        int hauteurCarte = 135;
-
-        System.out.println(sizeH);
-        System.out.println(sizeW);
-        if (sizeH > 720 || sizeW > 1280) { // ca veut dire qu'on est pas en mode fenetre, et donc on est en full
-                                           // screen..
-            largeurCarte = 95 + 30; // pour les petits ecran type 13 pouces
-            hauteurCarte = 135 + 30;
-            if (sizeH > 1000 || sizeW > 2000) { // pour les gros ecrans types 23/27 pouces
-                largeurCarte = 95 * 2;
-                hauteurCarte = 135 * 2;
-            }
-        }
+        // de combien la fenetre a grandi par rapport a la taille de base
+        double scaleW = (double) sizeW / 1280;
+        double scaleH = (double) sizeH / 720;
+        double scale = scaleW < scaleH ? scaleW : scaleH; // on prend le plus petit scale pour que ça depasse pas
+        int largeurCarte = (int) (95 * scale);
+        int hauteurCarte = (int) (135 * scale);
 
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 4; j++) {
