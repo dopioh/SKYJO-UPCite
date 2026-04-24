@@ -393,13 +393,17 @@ public class GameBoardBotController {
                 return;
             }
 
-            //choisir aléatoirement une action
             int actionIndex = (int) (Math.random() * bot.getActionHand().size());
             ActionType actionType = bot.getActionHand().get(actionIndex);
 
             System.out.println(bot.getName() + " joue l'action: " + actionType);
 
             try {
+                bot.getActionHand().remove(actionIndex);
+                gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, actionType));
+
+                boolean asyncAction = false;
+
                 switch (actionType) {
                     case PLAY_TWO_TURN:
                         gameManager.grantExtraTurn();
@@ -414,7 +418,8 @@ public class GameBoardBotController {
                         break;
 
                     case SPY_ONE_COLUMN:
-                        botSpyOneColumn(bot);
+                        asyncAction = true;
+                        botSpyOneColumn(bot); // finira le tour lui meme apres le délai
                         break;
 
                     case DRAW_THREE_CARD:
@@ -433,18 +438,21 @@ public class GameBoardBotController {
                         break;
                 }
 
-                bot.getActionHand().remove(actionIndex);
-                gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, actionType));
                 gameBoardView.showPlayerCards(bot);
                 mainController.updateAllDecksDisplay();
 
+                if (!asyncAction) {
+                    mainController.setWaitingNextTurn(false);
+                    mainController.requestEndTurnFromBot();
+                }
+
             } catch (Exception ex) {
                 System.err.println("Erreur lors du jeu de l'action: " + ex.getMessage());
+                mainController.setWaitingNextTurn(false);
+                mainController.requestEndTurnFromBot();
             }
-
-            mainController.setWaitingNextTurn(false);
-            mainController.requestEndTurnFromBot();
         });
+
         actionTimer.setRepeats(false);
         activeTimers.add(actionTimer);
         actionTimer.start();
@@ -516,13 +524,21 @@ public class GameBoardBotController {
         gameBoardView.showPlayerCards(bot);
 
         Timer hideTimer = new Timer(2000, e -> {
+            if (pausedState) return;
+
             for (int[] pos : hiddenCards) {
                 CardModel card = hand.getCard(pos[0], pos[1]);
                 if (card != null && !card.isFaceDown()) {
                     card.returnCard();
                 }
             }
+
             gameBoardView.showPlayerCards(bot);
+            mainController.updateAllDecksDisplay();
+
+            // fin de tour ici pour la version desynchronisé
+            mainController.setWaitingNextTurn(false);
+            mainController.requestEndTurnFromBot();
         });
         hideTimer.setRepeats(false);
         activeTimers.add(hideTimer);
