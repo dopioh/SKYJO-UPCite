@@ -212,7 +212,11 @@ public class GameBoardBotController {
                     grantActionForStar(bot);
                 }
                 String drawnPath = gameBoardView.getCardImagePath(drawn);
-                gameBoardView.getBtnPioche().flip(() -> gameBoardView.getBtnPioche().setCardImage(drawnPath));
+                if (gameBoardView.isHandCardAnimationsEnabled()) {
+                    gameBoardView.getBtnPioche().flip(() -> gameBoardView.getBtnPioche().setCardImage(drawnPath));
+                } else {
+                    gameBoardView.getBtnPioche().setCardImage(drawnPath);
+                }
                 mainController.updateAllDecksDisplay();
                 System.out.println(bot.getName() + " pioche : " + drawn.getCardValue());
                 mainController.refreshGuide();

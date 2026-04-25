@@ -484,6 +484,8 @@
 
 - Bouton toggle qui permet d'activer ou non les animations de carte flottante
 
+- Rendu propre pour les descriptions des cartes action (overlay)
+
 ### Modified
 
 - Amélioration de la page Paramètres dans le style du Leaderboard
@@ -506,7 +508,15 @@
     - nom de joueur un peu transparent si c'est pas celui qui joue pour differencier
     - nom deviens ".." après 8 caratrère pour pas dépasser
 
+- Réinstauration des cartes actions sous le jeu
+
+- DIAGRAMME et README mis à jour
+
 - Logique d'état pour les cartes flottantes déplacée dans la frame
+
+- Les textes des descriptions des cartes action passent en Jlabel
+
+- L'affichage des cartes actions piochées passe en GridBag avec des lignes de 5 actions
 
 ### Fixed
 
@@ -542,3 +552,10 @@
 - Le BGM ne rebouclait pas
 
 - Resize dynamique des cartes en plein écran etc
+
+### Modified
+
+- Nouveau toggle graphique dans les parametres
+    - ON/OFF remplacé par HAUT/BAS
+    - par défaut sur linux, le jeu se lance en BAS
+    - BAS désactive le flip et float des cartes
