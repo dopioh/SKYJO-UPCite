@@ -4,6 +4,7 @@ import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
 import fr.upc.cr1a.view.SettingsOverlay;
 import fr.upc.cr1a.model.AudioManager;
+import fr.upc.cr1a.model.GraphicsSettings;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -102,12 +103,13 @@ public class SettingsOverlayController {
             }
 
             boolean newEtat = !frame.isHandCardAnimationsEnabled();
+            GraphicsSettings.setHighQuality(newEtat);
             if (boardView != null) {
                 boardView.setHandCardAnimations(newEtat);
             }
             
             frame.setHandCardAnimationsEnabled(newEtat);
-            overlay.getHandCardAnimationsButton().setText(newEtat ? "ON" : "OFF");
+            overlay.getHandCardAnimationsButton().setText(newEtat ? "HAUT" : "BAS");
         
         });
 
@@ -129,6 +131,6 @@ public class SettingsOverlayController {
 
         overlay.getSoundButton().setText(audioManager.isEnabled() ? "ON" : "OFF");
         overlay.getVolumeValueButton().setText(String.valueOf(Math.max(1, audioManager.getVolume() / 10)));
-        overlay.getHandCardAnimationsButton().setText("ON");
+        overlay.getHandCardAnimationsButton().setText(frame.isHandCardAnimationsEnabled() ? "HAUT" : "BAS");
     }
 }

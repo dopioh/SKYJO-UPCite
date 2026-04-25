@@ -16,6 +16,7 @@ import fr.upc.cr1a.controller.SettingsOverlayController;
 import fr.upc.cr1a.controller.ShopController;
 import fr.upc.cr1a.model.AudioManager;
 import fr.upc.cr1a.model.GameManager;
+import fr.upc.cr1a.model.GraphicsSettings;
 import fr.upc.cr1a.utils.ImageCache;
 
 import java.awt.CardLayout;
@@ -42,7 +43,7 @@ public class Frame extends JFrame{
     private PlayersSetupPanel playersSetupPanel;
     private ConnexionPanel connexionPanel;
     private GameManager currentGame;
-    private boolean handCardAnimationsEnabled = true;
+    private boolean handCardAnimationsEnabled = GraphicsSettings.isHighQuality();
 
     // Controller
     private AccountController account; // sert a rien pour le moment
@@ -176,7 +177,7 @@ public class Frame extends JFrame{
     }
 
     public void showSettingsOverlay() {
-        settingsOverlay.getHandCardAnimationsButton().setText(handCardAnimationsEnabled ? "ON" : "OFF");
+        settingsOverlay.getHandCardAnimationsButton().setText(handCardAnimationsEnabled ? "HAUT" : "BAS");
         settingsOverlay.setVisible(true);
         settingsOverlay.requestFocusInWindow();
         settingsOverlay.revalidate();

@@ -203,7 +203,7 @@ public class SettingsOverlay extends JComponent {
         final Color aHover  = new Color(52, 115, 47);
 
         JPanel handAnimationsPanel = createHoverRoundedPanel(aNormal, aHover, 18, 44);
-        handCardAnimationsButton = createTextButton("ON", 20f);
+        handCardAnimationsButton = createTextButton("HAUT", 20f);
         handAnimationsPanel.add(handCardAnimationsButton);
 
         handAnimationsPanel.addMouseListener(new MouseAdapter() {

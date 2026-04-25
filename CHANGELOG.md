@@ -535,3 +535,12 @@
     - les cartes face cachée utilisent maintenant le skin équipé
     - accumulation de flou en passant rapidement d'un joueur à l'autre
     - animation fade ne rejoue plus si le panel était déjà visible (changement rapide entre preview)
+
+## v.0.13: SPRINT 13
+
+### Modified
+
+- Nouveau toggle graphique dans les parametres
+    - ON/OFF remplacé par HAUT/BAS
+    - par défaut sur linux, le jeu se lance en BAS
+    - BAS désactive le flip et float des cartes
