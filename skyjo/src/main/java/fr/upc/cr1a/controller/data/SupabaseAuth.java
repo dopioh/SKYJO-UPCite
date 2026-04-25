@@ -38,6 +38,8 @@ public class SupabaseAuth {
 
     public static boolean connectPlayerByEmail(String email, String password){ // mettre des booleans apres en type retour
         ApiErrorManager.clear();
+        email = StringController.withoutSpace(email);
+        password = StringController.withoutSpace(password);
         try {
             String jsonBody = "{\"email\": \"" + email + "\", \"password\": \"" + password + "\"}";
 
@@ -79,6 +81,8 @@ public class SupabaseAuth {
 
     public static boolean connectPlayerByUsername(String username, String password){
         ApiErrorManager.clear();
+        username = StringController.withoutSpace(username);
+        password = StringController.withoutSpace(password);
         try {
 
             String email = getEmailFromUsername(username);
@@ -104,6 +108,8 @@ public class SupabaseAuth {
     }
 
     private static String getEmailFromUsername(String username){
+        username = StringController.withoutSpace(username);
+
         try {
             String url = SendAPI.urlAPI + "/api/player/getEmail?username=" + username;
 
@@ -132,6 +138,9 @@ public class SupabaseAuth {
 
     public static boolean createAccount(String email, String username, String password) {
         ApiErrorManager.clear();
+        email = StringController.withoutSpace(email);
+        password = StringController.withoutSpace(password);
+        username = StringController.withoutSpace(username);
         try {
             String jsonBody = "{\"email\": \"" + email + "\", \"password\": \"" + password + "\", \"data\": {\"username\": \"" + username + "\"}}"; // rajoute l'username en tant que metadata
 
