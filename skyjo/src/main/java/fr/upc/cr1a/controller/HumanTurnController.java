@@ -130,7 +130,11 @@ public class HumanTurnController {
             if (drawn.isFaceDown()) drawn.returnCard();
 
             String drawnPath = gameBoardView.getCardImagePath(drawn);
-            gameBoardView.getBtnPioche().flip(() -> gameBoardView.getBtnPioche().setCardImage(drawnPath));
+            if (gameBoardView.isHandCardAnimationsEnabled()) {
+                gameBoardView.getBtnPioche().flip(() -> gameBoardView.getBtnPioche().setCardImage(drawnPath));
+            } else {
+                gameBoardView.getBtnPioche().setCardImage(drawnPath);
+            }
             gameBoardView.showCursorCard(drawnPath);
             gameBoardView.updateDiscardOnly(
                 gameManager.getDiscardPile().isEmpty() ? null : gameManager.getDiscardPile().getTopCard()
