@@ -47,6 +47,7 @@ public class GameBoardController {
     private boolean pauseOpen = false;
     private TimeoutTurnController timeoutTurnController;
     private boolean alreadyReward = false;
+    private AudioManager audio;
 
     /**
      * Initialise la view et le Model du GameBoard
@@ -82,9 +83,11 @@ public class GameBoardController {
             }
         });
 
-        gameBoardView.getPauseOverlay().getBtnResume().addActionListener(e -> closePauseOverlay());
+        audio = gameBoardModel.getFrame().getAudioManager();
+        gameBoardView.getPauseOverlay().getBtnResume().addActionListener(e -> { audio.playSfx("/sfx/button_click.wav"); closePauseOverlay(); });
 
         gameBoardView.getPauseOverlay().getBtnQuit().addActionListener(e -> {
+            audio.playSfx("/sfx/back.wav");
             int confirm = JOptionPane.showConfirmDialog(gameBoardModel.getFrame(),"Voulez-vous quitter la partie ?","Retour au menu",JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 closePauseOverlay();
@@ -93,6 +96,7 @@ public class GameBoardController {
         });
 
         gameBoardView.getPauseOverlay().getBtnSettings().addActionListener(e -> {
+            audio.playSfx("/sfx/button_click.wav");
             gameBoardModel.getFrame().showSettingsOverlay();
         });
 
@@ -193,6 +197,7 @@ public class GameBoardController {
         }
 
         frame.add(currentRoundEndPanel, "ROUND_END");
+        if (!isGameOver) audio.playBgm("/music/elevator_bgm.wav");
         frame.showPanel("ROUND_END");
 
         // hover sur les joueurs -> preview de leur main
@@ -244,6 +249,8 @@ public class GameBoardController {
      * Relance une nouvelle manche apres clic sur Continuer
      */
     private void ContinueRound() {
+        String[] bgms = {"/music/game_bgm1.wav", "/music/game_bgm2.wav"};
+        audio.playBgm(bgms[(int)(Math.random() * 2)]);
         gameManager.startNewGame();
         gameBoardView.setMancheLabel("Pré-Manche");
         waitingNextTurn = false;
@@ -274,6 +281,8 @@ public class GameBoardController {
     /**
      * getter/setter pour waitingNextTurn
      */
+    public AudioManager getAudio() { return audio; }
+
     public void setWaitingNextTurn(boolean waiting) {
         this.waitingNextTurn = waiting;
     }

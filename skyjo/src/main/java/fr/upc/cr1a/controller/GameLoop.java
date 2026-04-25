@@ -89,6 +89,7 @@ public class GameLoop {
             gameManager.firstPlayer();
             PlayerModel firstPlayer = gameManager.getCurrentPlayer();
             gameBoardView.setMancheLabel(gameManager.getRoundNumber());
+            humanController.getAudio().playSfx("/sfx/player_change.wav");
             gameBoardView.showPlayerTransition(firstPlayer, () -> startCurrentFlow());
             return;
         }
@@ -98,6 +99,7 @@ public class GameLoop {
     private void continueInitRevealFlow() {
         if (!gameActive) return;
         PlayerModel currentPlayer = gameManager.getCurrentPlayer();
+        humanController.getAudio().playSfx("/sfx/player_change.wav");
         gameBoardView.showPlayerTransition(currentPlayer, () -> {
             if (!gameActive) return;
 
@@ -137,6 +139,7 @@ public class GameLoop {
             return;
         }
         PlayerModel nextPlayer = gameManager.getCurrentPlayer();
+        humanController.getAudio().playSfx("/sfx/player_change.wav");
         gameBoardView.showPlayerTransition(nextPlayer, () -> startCurrentFlow());
     }
 

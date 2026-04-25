@@ -2,6 +2,7 @@ package fr.upc.cr1a.view;
 
 import fr.upc.cr1a.controller.data.ApiErrorManager;
 import fr.upc.cr1a.controller.data.SendAPI;
+import fr.upc.cr1a.model.AudioManager;
 import fr.upc.cr1a.model.player.PlayerAccount;
 import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
@@ -29,6 +30,8 @@ public class CaseOpeningOverlayPanel extends JPanel {
     private static final String DEFAULT_SKIN_PATH = "/cartes/carteDos.png";
     private static ArrayList<String> unlockedSkinPaths = new ArrayList<>();
     private static String selectedSkinPath = DEFAULT_SKIN_PATH;
+    private static AudioManager audioManager;
+    public static void setAudioManager(AudioManager am) { audioManager = am; }
     
 
     private static final int[][] PACK_CHANCES = {
@@ -138,6 +141,7 @@ public class CaseOpeningOverlayPanel extends JPanel {
         resultDescriptionFont = textFont.deriveFont(22f);
 
         closeButton = new DoodleButton("Fermer", ButtonColor.RED, 180, 58);
+        closeButton.setSfxPath("/sfx/back.wav");
         closeButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -342,6 +346,7 @@ public class CaseOpeningOverlayPanel extends JPanel {
 
             Rectangle buttonBounds = getEquipButtonBounds(x, y, CLASSEUR_TILE_WIDTH, CLASSEUR_TILE_HEIGHT);
             if (buttonBounds.contains(clickPoint)) {
+                if (audioManager != null) audioManager.playSfx("/sfx/card_click.wav");
                 setSelectedSkinPath(clickedSkin.path);
                 repaint();
                 return;

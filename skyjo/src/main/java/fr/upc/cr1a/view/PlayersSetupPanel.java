@@ -38,6 +38,7 @@ public class PlayersSetupPanel extends JPanel {
         topBar.setOpaque(false);
         topBar.setBorder(BorderFactory.createEmptyBorder(12, 12, 0, 12));
         btnBack = new DoodleButton("Retour", ButtonColor.RED, 220, 60, "/Button/retour.png");
+        btnBack.setSfxPath("/sfx/back.wav");
         btnBack.setFontSize(32f);
         btnBack.setIconSide(DoodleButton.IconSide.LEFT);
         topBar.add(btnBack);

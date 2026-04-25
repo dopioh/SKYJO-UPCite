@@ -56,6 +56,7 @@ public class ShopPanel extends JPanel {
         leftColumn.setLayout(new BoxLayout(leftColumn, BoxLayout.Y_AXIS));
 
         backBtn = new DoodleButton("Retour", ButtonColor.RED, 220, 60, "/Button/retour.png");
+        backBtn.setSfxPath("/sfx/back.wav");
         backBtn.setFontSize(32f);
         backBtn.setIconSide(DoodleButton.IconSide.LEFT);
         backBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
