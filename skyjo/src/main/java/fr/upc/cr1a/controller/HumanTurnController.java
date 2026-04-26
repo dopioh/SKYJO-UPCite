@@ -126,6 +126,7 @@ public class HumanTurnController {
             if (mainController.isWaitingNextTurn()) return;
             if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
 
+            mainController.getAudio().playSfx("/sfx/card_click.wav");
             CardModel drawn = gameManager.drawDeck();
             if (drawn.isFaceDown()) drawn.returnCard();
 
@@ -187,6 +188,7 @@ public class HumanTurnController {
             PlayerModel player = gameManager.getCurrentPlayer();
             if (player == null) return;
 
+            mainController.getAudio().playSfx("/sfx/card_click.wav");
             ActionCardModel actionCard = gameManager.drawActionRewardCard();
             if (actionCard == null) {
                 gameBoardView.setActionGuide("Aucune carte action disponible.");
@@ -398,6 +400,7 @@ public class HumanTurnController {
         PlayerModel player = gameManager.getCurrentPlayer();
         if (player == null) return;
 
+        mainController.getAudio().playSfx("/sfx/defausse.wav");
         ActionCardModel c = new ActionCardModel(false, type);
 
         switch (type) {
