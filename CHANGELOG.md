@@ -538,7 +538,13 @@
 
 ## v.0.13: SPRINT 13
 
+### Added
+
+- Noms pour les rangs des joueurs affichés dans AccountStatsOverlay et LeaderBoard
+
 ### Modified
+
+- Modif LeaderBoard pour remplacer le numero des rangs par leur nom
 
 - Nouveau toggle graphique dans les parametres
     - ON/OFF remplacé par HAUT/BAS
