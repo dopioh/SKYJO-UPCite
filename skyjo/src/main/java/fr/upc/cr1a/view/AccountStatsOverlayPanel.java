@@ -44,28 +44,28 @@ public class AccountStatsOverlayPanel extends JPanel {
     private final Font valueFont;
     private final Font infoFont;
 
-    private static String getRealRankName(int rankId, int elo) {
+    public static String getRealRankName(int rankId) {
         switch (rankId) {
             case 0:
-                return "Debutant - " + elo + " Elo";
+                return "Debutant";
             case 1:
-                return "Noob - " + elo + " Elo";
+                return "Noob";
             case 2:
-                return "Apprenti - " + elo + " Elo";
+                return "Apprenti";
             case 3:
-                return "Tryhard - " + elo + " Elo";
+                return "Tryhard";
             case 4:
-                return "As du jeu - " + elo + " Elo";
+                return "As du jeu";
             case 5:
-                return "Genie du skyjo - " + elo + " Elo";
+                return "Genie du skyjo";
             case 6:
-                return "Maitre du skyjo - " + elo + " Elo";
+                return "Maitre du skyjo";
             case 7:
-                return "Grand-Maitre du skyjo - " + elo + " Elo";
+                return "Grand-Maitre du skyjo";
             case 8:
-                return "GOAT du skyjo - " + elo + " Elo";
+                return "GOAT du skyjo";
             case 9:
-                return "TRICHEUR - " + elo + " Elo";
+                return "TRICHEUR";
             default:
                 return "Inconnu";
         }
@@ -176,7 +176,7 @@ public class AccountStatsOverlayPanel extends JPanel {
         String[] labels = { "Pseudo", "Rang", "Elo", "Argent"};
         String[] values = {
             safeText(account.getUsername(), "Inconnu"),
-            getRealRankName(account.getRankId(), account.getElo()),
+            getRealRankName(account.getRankId()),
             String.valueOf(account.getElo()),
             account.getMoney() + " $"
         };
