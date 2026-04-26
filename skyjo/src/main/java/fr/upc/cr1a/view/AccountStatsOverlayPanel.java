@@ -1,17 +1,27 @@
 package fr.upc.cr1a.view;
 
-import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
-import fr.upc.cr1a.model.player.PlayerAccount;
-import fr.upc.cr1a.model.player.PlayerData;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.io.InputStream;
+
+import javax.swing.JPanel;
+
+import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
+import fr.upc.cr1a.model.player.PlayerAccount;
+import fr.upc.cr1a.model.player.PlayerData;
 
 /**
  * Overlay des stats
@@ -33,6 +43,33 @@ public class AccountStatsOverlayPanel extends JPanel {
     private final Font labelFont;
     private final Font valueFont;
     private final Font infoFont;
+
+    private static String getRealRankName(int rankId, int elo) {
+        switch (rankId) {
+            case 0:
+                return "Debutant - " + elo + " Elo";
+            case 1:
+                return "Noob - " + elo + " Elo";
+            case 2:
+                return "Apprenti - " + elo + " Elo";
+            case 3:
+                return "Tryhard - " + elo + " Elo";
+            case 4:
+                return "As du jeu - " + elo + " Elo";
+            case 5:
+                return "Genie du skyjo - " + elo + " Elo";
+            case 6:
+                return "Maitre du skyjo - " + elo + " Elo";
+            case 7:
+                return "Grand-Maitre du skyjo - " + elo + " Elo";
+            case 8:
+                return "GOAT du skyjo - " + elo + " Elo";
+            case 9:
+                return "TRICHEUR - " + elo + " Elo";
+            default:
+                return "Inconnu";
+        }
+    }
 
     public AccountStatsOverlayPanel() {
         setOpaque(false);
@@ -139,7 +176,7 @@ public class AccountStatsOverlayPanel extends JPanel {
         String[] labels = { "Pseudo", "Rang", "Elo", "Argent"};
         String[] values = {
             safeText(account.getUsername(), "Inconnu"),
-            String.valueOf(account.getRankId()),
+            getRealRankName(account.getRankId(), account.getElo()),
             String.valueOf(account.getElo()),
             account.getMoney() + " $"
         };
