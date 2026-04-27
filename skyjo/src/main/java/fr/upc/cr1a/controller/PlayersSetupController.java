@@ -2,6 +2,7 @@ package fr.upc.cr1a.controller;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 //import java.awt.event.ActionEvent;
 //import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -41,9 +42,12 @@ public class PlayersSetupController {
             @Override public void mouseExited(MouseEvent e)  { back.onMouseExit(); }
             @Override public void mousePressed(MouseEvent e) { frame.showPanel("GAME_MODE"); }
         });
+        view.getBtnLaunch().setSfxPath("/sfx/UIclick.wav");
         addListeners(view.getBtnLaunch(), () -> lancerPartie());
 
+        view.getActionModeToggle().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         view.getActionModeToggle().addActionListener(e -> {
+            audio.playSfx("/sfx/button_click.wav");
             view.updateCardPreview(view.isSkyjoActionEnabled());
             System.out.println("Cartes action : " + view.isSkyjoActionEnabled());
         });
@@ -51,6 +55,7 @@ public class PlayersSetupController {
         for (Component comp : view.getPlayerCountButtonPanel().getComponents()) {
             if (comp instanceof JButton button) {
                 button.addActionListener(e -> {
+                    audio.playSfx("/sfx/button_click.wav");
                     int value = Integer.parseInt(button.getActionCommand());
                     view.setSelectedPlayerCount(value);
                     view.rebuildPlayerRows(value);
@@ -125,7 +130,6 @@ public class PlayersSetupController {
             }
             @Override
             public void mousePressed(MouseEvent e) {
-                audio.playSfx("/sfx/UIclick.wav");
                 action.run();
             }
         });
@@ -171,6 +175,8 @@ public class PlayersSetupController {
         }
         
         boolean actionMode = view.isSkyjoActionEnabled();
+        String[] bgms = {"/music/game_bgm1.wav", "/music/game_bgm2.wav"};
+        audio.playBgm(bgms[(int)(Math.random() * 2)]);
         GameManager game = new GameManager(frame, players, actionMode);
         frame.setCurrentGame(game);
     }

@@ -536,7 +536,22 @@
     - accumulation de flou en passant rapidement d'un joueur à l'autre
     - animation fade ne rejoue plus si le panel était déjà visible (changement rapide entre preview)
 
+
 ## v.0.13: SPRINT 13
+
+### Added
+
+- Sons/BGM partout
+    - 4 BGM : main menu, pendant la partie (aléatoire entre 2 bgm), fin de manche
+    - 11 SFX : clic bouton, retour, flip de carte, échange, défausse, cartes action, boutique, changement de joueur...
+    - Les sons sont préchargés au démarrage
+    - `DoodleButton` joue automatiquement un son par défaut
+
+### Fixed
+
+- Le BGM ne rebouclait pas
+
+- Resize dynamique des cartes en plein écran etc
 
 ### Modified
 

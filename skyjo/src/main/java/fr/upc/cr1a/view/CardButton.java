@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.*;
 
 import fr.upc.cr1a.model.AnimLoop;
+import fr.upc.cr1a.model.AudioManager;
 import fr.upc.cr1a.utils.ImageCache;
 
 /**
@@ -21,6 +22,9 @@ public class CardButton extends JButton {
     private static final int CropTop = 147;
     private static final int CropBottom = 147;
 
+
+    private static AudioManager audioManager;
+    public static void setAudioManager(AudioManager am) { audioManager = am; }
 
     private static final java.util.HashMap<String, BufferedImage> imageCache = new java.util.HashMap<>();
     private static final java.util.LinkedHashSet<CardButton> cartesAnimees = new java.util.LinkedHashSet<>(); //LinkedHashSet = pas de doublon, garde l'ordre de arrivée pour eviter des bugs
@@ -214,6 +218,7 @@ public class CardButton extends JButton {
 
     // retourne la carte : rétrécit jusqu'à 0, appelle onChange au milieu, reagrandit
     public void flip(Runnable onChange) {
+        if (audioManager != null) audioManager.playSfx("/sfx/card_flip.wav");
         flipScale = 1.0;
         flipExpanding = false;
         AnimLoop.add(flipKey, dt -> {
