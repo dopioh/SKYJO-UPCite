@@ -544,3 +544,7 @@
     - ON/OFF remplacé par HAUT/BAS
     - par défaut sur linux, le jeu se lance en BAS
     - BAS désactive le flip et float des cartes
+
+### Fixed
+
+- Fix Erreurs Tests Linux
