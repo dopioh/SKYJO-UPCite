@@ -68,6 +68,7 @@ public class GameBoardModel {
                 game.stopGame();
             }
             frame.clearCurrentGame();
+            frame.getAudioManager().playBgm("/music/main_menu.wav");
             frame.showPanel("MENU");
         }
     }

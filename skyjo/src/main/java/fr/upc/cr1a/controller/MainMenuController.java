@@ -38,6 +38,7 @@ public class MainMenuController {
         this.view = view;
         this.audio = frame.getAudioManager();
         this.accountController = frame.getAccountController();
+        audio.playBgm("/music/main_menu.wav");
 
         // listeners
         ajouterListeners(view.getShopButton(), () -> clicShop());
@@ -54,6 +55,7 @@ public class MainMenuController {
         frame.getLeaderboard().getBackButton().addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                audio.playSfx("/sfx/back.wav");
                 leaderboardLoading = false; // arrete la boucle de retry si le player sort pendant le chargement
                 frame.hideLeaderboard();
             }

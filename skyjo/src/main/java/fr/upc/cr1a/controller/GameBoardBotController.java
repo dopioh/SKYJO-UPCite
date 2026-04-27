@@ -195,6 +195,7 @@ public class GameBoardBotController {
 
             if (takeDiscard && discardCard != null) {
                 //prend de la défausse
+                mainController.getAudio().playSfx("/sfx/defausse.wav");
                 gameBoardView.getBtnDefausse().lift();
                 CardModel taken = gameManager.takeDiscard();
                 mainController.refreshGuide();
@@ -257,6 +258,7 @@ public class GameBoardBotController {
                 //échange après pioche
                 int[] position = strategy.CardToExchange(botHand, drawCard);
                 if (position[0] != -1 && position[1] != -1) {
+                    mainController.getAudio().playSfx("/sfx/card_click.wav");
                     gameManager.exchangeCardInHand(position[0], position[1]);
                     System.out.println(bot.getName() + " échange [" + position[1] + "," + position[0] + "]");
 
@@ -271,6 +273,7 @@ public class GameBoardBotController {
                 }
             } else {
                 //jeter la carte piochée puis révéler une carte
+                mainController.getAudio().playSfx("/sfx/defausse.wav");
                 gameManager.discardDrawCard();
                 gameBoardView.getBtnDefausse().animatePress();
                 gameBoardView.updateCardDisplay(
@@ -330,6 +333,7 @@ public class GameBoardBotController {
             //doit échanger une carte
             int[] position = strategy.CardToExchange(botHand, drawCard);
             if (position[0] != -1 && position[1] != -1) {
+                mainController.getAudio().playSfx("/sfx/card_click.wav");
                 gameManager.exchangeCardInHand(position[0], position[1]);
                 System.out.println(bot.getName() + " échange [" + position[1] + "," + position[0] + "]");
 
@@ -470,6 +474,7 @@ public class GameBoardBotController {
         CardModel card1 = hand.getCard(row1, col1);
         CardModel card2 = hand.getCard(row2, col2);
 
+        mainController.getAudio().playSfx("/sfx/teleport.wav");
         hand.replaceCard(row1, col1, card2);
         hand.replaceCard(row2, col2, card1);
     }
@@ -496,6 +501,7 @@ public class GameBoardBotController {
         CardModel opCard = target.getHand().getCard(opRow, opCol);
 
         if (myCard != null && opCard != null) {
+            mainController.getAudio().playSfx("/sfx/teleport.wav");
             bot.getHand().replaceCard(myRow, myCol, opCard);
             target.getHand().replaceCard(opRow, opCol, myCard);
         }

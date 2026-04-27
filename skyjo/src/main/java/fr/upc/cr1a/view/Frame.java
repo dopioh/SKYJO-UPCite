@@ -102,6 +102,9 @@ public class Frame extends JFrame{
 
         //Contrôleurs
         audioManager = new AudioManager();
+        DoodleButton.setAudioManager(audioManager);
+        CardButton.setAudioManager(audioManager);
+        CaseOpeningOverlayPanel.setAudioManager(audioManager);
         new SettingsOverlayController(settingsOverlay, this, audioManager);
         new MainMenuController(this, mainMenuPanel);
         new ShopController(this, shopPanel);
@@ -141,7 +144,17 @@ public class Frame extends JFrame{
             );
             // son : ouvre et ferme chaque clip pour que Java initialise le mixer audio
             try {
-                String[] sfx = { "/sfx/UIclick.wav", "/sfx/round.wav" };
+                String[] sfx = {
+                    "/sfx/UIclick.wav", "/sfx/round.wav",
+                    "/sfx/button_click.wav", "/sfx/back.wav",
+                    "/sfx/card_flip.wav", "/sfx/card_click.wav",
+                    "/sfx/defausse.wav", "/sfx/teleport.wav",
+                    "/sfx/harp.wav", "/sfx/player_change.wav",
+                    "/music/elevator_bgm.wav",
+                    "/sfx/money_buy.wav", "/sfx/classeur.wav",
+                    "/sfx/volume.wav",
+                    "/music/main_menu.wav", "/music/game_bgm1.wav", "/music/game_bgm2.wav"
+                };
                 for (String path : sfx) {
                     var url = Frame.class.getResource(path);
                     if (url == null) continue;

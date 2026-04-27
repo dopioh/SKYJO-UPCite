@@ -115,6 +115,7 @@ public class ConnexionPanel extends JPanel {
 
     private DoodleButton makeBackButton() {
         DoodleButton btn = new DoodleButton("Retour", ButtonColor.RED, 180, 60);
+        btn.setSfxPath("/sfx/back.wav");
         btn.setFontSize(28f);
         addHover(btn);
         btn.addMouseListener(new MouseAdapter() {
