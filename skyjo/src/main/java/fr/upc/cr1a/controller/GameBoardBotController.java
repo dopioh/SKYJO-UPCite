@@ -393,20 +393,20 @@ public class GameBoardBotController {
                 return;
             }
 
+            //choisir aléatoirement une action
             int actionIndex = (int) (Math.random() * bot.getActionHand().size());
             ActionType actionType = bot.getActionHand().get(actionIndex);
 
             System.out.println(bot.getName() + " joue l'action: " + actionType);
 
+
             try {
-                bot.getActionHand().remove(actionIndex);
-                gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, actionType));
-
-                boolean asyncAction = false;
-
                 switch (actionType) {
                     case PLAY_TWO_TURN:
                         gameManager.grantExtraTurn();
+                        System.out.println("[BOT INFO] GrandExtraTurn Called");
+                        //gameManager.grantExtraTurn();
+                        //handleBotTurn();
                         break;
 
                     case REPLACE_CARD_IN_HAND:
@@ -418,8 +418,7 @@ public class GameBoardBotController {
                         break;
 
                     case SPY_ONE_COLUMN:
-                        asyncAction = true;
-                        botSpyOneColumn(bot); // finira le tour lui meme apres le délai
+                        botSpyOneColumn(bot);
                         break;
 
                     case DRAW_THREE_CARD:
@@ -438,21 +437,18 @@ public class GameBoardBotController {
                         break;
                 }
 
+                bot.getActionHand().remove(actionIndex);
+                gameManager.getDiscardActionPile().addCardAtTop(new ActionCardModel(false, actionType));
                 gameBoardView.showPlayerCards(bot);
                 mainController.updateAllDecksDisplay();
 
-                if (!asyncAction) {
-                    mainController.setWaitingNextTurn(false);
-                    mainController.requestEndTurnFromBot();
-                }
-
             } catch (Exception ex) {
                 System.err.println("Erreur lors du jeu de l'action: " + ex.getMessage());
-                mainController.setWaitingNextTurn(false);
-                mainController.requestEndTurnFromBot();
             }
-        });
 
+            mainController.setWaitingNextTurn(false);
+            mainController.requestEndTurnFromBot();
+        });
         actionTimer.setRepeats(false);
         activeTimers.add(actionTimer);
         actionTimer.start();

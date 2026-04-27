@@ -78,7 +78,7 @@ public class PiocheModel extends CardStackModel {
                     this.getStack().add(new NumberCardModel(true, value, color, false));
                 }
             }
-            int starCount = 15;
+            int starCount = 55;
             for (int j = 0; j < starCount; j++) {
                 this.getStack().add(new NumberCardModel(true, 0, "starcolor", true));
             }

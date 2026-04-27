@@ -405,7 +405,7 @@ public class GameManager {
     public void grantExtraTurn() {
         // PLAY_TWO_TURN = 2 tours au total pour le joueur courant, donc 1 tour supplémentaire
         this.extraTurnsRemaining += 1;
-        //System.out.println("tour bonus restant ? : "+  extraTurnsRemaining);
+        System.out.println("tour bonus restant ? : "+  extraTurnsRemaining);
     }
 
     /*
