@@ -82,6 +82,7 @@ public class AccountStatsOverlayPanel extends JPanel {
         infoFont = loadFont(20f, Font.PLAIN);
 
         closeButton = new DoodleButton("Fermer", ButtonColor.RED, 180, 58);
+        closeButton.setSfxPath("/sfx/back.wav");
         closeButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {

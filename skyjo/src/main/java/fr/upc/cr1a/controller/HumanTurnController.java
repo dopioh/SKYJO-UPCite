@@ -126,6 +126,7 @@ public class HumanTurnController {
             if (mainController.isWaitingNextTurn()) return;
             if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
 
+            mainController.getAudio().playSfx("/sfx/card_click.wav");
             CardModel drawn = gameManager.drawDeck();
             if (drawn.isFaceDown()) drawn.returnCard();
 
@@ -155,6 +156,7 @@ public class HumanTurnController {
             if (gameManager.getTurnPhase() == GameManager.TurnPhase.DRAW_DECISION) {
                 if (gameManager.getDiscardPile().isEmpty()) return;
 
+                mainController.getAudio().playSfx("/sfx/defausse.wav");
                 CardModel taken = gameManager.takeDiscard();
                 String takenPath = gameBoardView.getCardImagePath(taken);
                 gameBoardView.getBtnDefausse().animatePressLight();
@@ -166,6 +168,7 @@ public class HumanTurnController {
             }
 
             if (gameManager.getTurnPhase() == GameManager.TurnPhase.CARD_DRAW_FROM_DECK) {
+                mainController.getAudio().playSfx("/sfx/defausse.wav");
                 gameManager.discardDrawCard();
                 gameBoardView.getBtnDefausse().animatePressLight();
                 waitingReveal = true;
@@ -185,6 +188,7 @@ public class HumanTurnController {
             PlayerModel player = gameManager.getCurrentPlayer();
             if (player == null) return;
 
+            mainController.getAudio().playSfx("/sfx/card_click.wav");
             ActionCardModel actionCard = gameManager.drawActionRewardCard();
             if (actionCard == null) {
                 gameBoardView.setActionGuide("Aucune carte action disponible.");
@@ -311,6 +315,7 @@ public class HumanTurnController {
                     if (gameManager.getTurnPhase() == GameManager.TurnPhase.CARD_DRAW_FROM_DECK
                             || gameManager.getTurnPhase() == GameManager.TurnPhase.CARD_TAKE_FROM_DISCARD) {
 
+                        mainController.getAudio().playSfx("/sfx/card_click.wav");
                         gameManager.exchangeCardInHand(c, r);
                         gameBoardView.hideCursorCard();
                         gameBoardView.showPlayerCards(currentPlayer);
@@ -395,6 +400,7 @@ public class HumanTurnController {
         PlayerModel player = gameManager.getCurrentPlayer();
         if (player == null) return;
 
+        mainController.getAudio().playSfx("/sfx/defausse.wav");
         ActionCardModel c = new ActionCardModel(false, type);
 
         switch (type) {
@@ -517,6 +523,7 @@ public class HumanTurnController {
                     }
                 }
 
+                mainController.getAudio().playSfx("/sfx/harp.wav");
                 gameBoardView.showPlayerCards(player);
                 gameBoardView.setActionGuide("Colonne " + col + " révélée ! (3 secondes...)");
                 actionMode = ActionMode.NONE;
@@ -555,6 +562,7 @@ public class HumanTurnController {
                 CardModel secondCard = player.getHand().getCard(row, col);
                 if (firstCard == null || secondCard == null) return;
 
+                mainController.getAudio().playSfx("/sfx/teleport.wav");
                 player.getHand().replaceCard(replaceFirstRow, replaceFirstCol, secondCard);
                 player.getHand().replaceCard(row, col, firstCard);
 
@@ -655,6 +663,7 @@ public class HumanTurnController {
             return;
         }
 
+        mainController.getAudio().playSfx("/sfx/teleport.wav");
         currentPlayer.getHand().replaceCard(tradeOwnRow, tradeOwnCol, targetCard);
         targetPlayer.getHand().replaceCard(targetRow, targetCol, myCard);
 

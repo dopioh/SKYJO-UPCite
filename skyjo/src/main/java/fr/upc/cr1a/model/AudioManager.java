@@ -20,7 +20,7 @@ import java.net.URL;
 public class AudioManager {
     private Clip bgmClip;
     private boolean enabled = true; 
-    private int volume = 80; 
+    private int volume = 50;
 
     /**
      * Joue une musique de fond en boucle 
@@ -118,7 +118,7 @@ public class AudioManager {
         this.enabled = enabled;
         applyToClip(bgmClip);
         if (!enabled && bgmClip != null) bgmClip.stop();
-        if (enabled && bgmClip != null && !bgmClip.isRunning()) bgmClip.start();
+        if (enabled && bgmClip != null && !bgmClip.isRunning()) bgmClip.loop(Clip.LOOP_CONTINUOUSLY);
     }
 
     public void setVolume(int volume) {
