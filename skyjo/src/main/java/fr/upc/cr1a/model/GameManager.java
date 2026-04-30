@@ -380,6 +380,16 @@ public class GameManager {
     *passe au joueur suivant
     */
     public void nextPlayer() {
+        //System.out.println("tour bonus restant ? : "+  extraTurnsRemaining);
+
+        // si le joueur a des tours supplémentaires (mais pas pour le joueur qui a déclenché LAST_ROUND)
+        if (extraTurnsRemaining > 0) {
+            extraTurnsRemaining--;
+            
+            if (gameState != GameState.LAST_ROUND || currentPlayerIndex != lastRoundPlayer) {
+                return;
+            }
+        }
         currentPlayerIndex++;
         //revenir au premier si le dernier joueur a joué
         if (currentPlayerIndex >= players.size()) {
@@ -390,17 +400,12 @@ public class GameManager {
             endRound();
             return;
         }
-
-        // si le joueur a des tours supplémentaires (mais pas pour le joueur qui a déclenché LAST_ROUND)
-        if (extraTurnsRemaining > 0) {
-            extraTurnsRemaining--;
-            return;
-        }
     }
 
     public void grantExtraTurn() {
         // PLAY_TWO_TURN = 2 tours au total pour le joueur courant, donc 1 tour supplémentaire
         this.extraTurnsRemaining += 1;
+        System.out.println("tour bonus restant ? : "+  extraTurnsRemaining);
     }
 
     /*

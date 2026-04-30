@@ -407,10 +407,14 @@ public class GameBoardBotController {
 
             System.out.println(bot.getName() + " joue l'action: " + actionType);
 
+
             try {
                 switch (actionType) {
                     case PLAY_TWO_TURN:
                         gameManager.grantExtraTurn();
+                        System.out.println("[BOT INFO] GrandExtraTurn Called");
+                        //gameManager.grantExtraTurn();
+                        //handleBotTurn();
                         break;
 
                     case REPLACE_CARD_IN_HAND:
@@ -526,13 +530,21 @@ public class GameBoardBotController {
         gameBoardView.showPlayerCards(bot);
 
         Timer hideTimer = new Timer(2000, e -> {
+            if (pausedState) return;
+
             for (int[] pos : hiddenCards) {
                 CardModel card = hand.getCard(pos[0], pos[1]);
                 if (card != null && !card.isFaceDown()) {
                     card.returnCard();
                 }
             }
+
             gameBoardView.showPlayerCards(bot);
+            mainController.updateAllDecksDisplay();
+
+            // fin de tour ici pour la version desynchronisé
+            mainController.setWaitingNextTurn(false);
+            mainController.requestEndTurnFromBot();
         });
         hideTimer.setRepeats(false);
         activeTimers.add(hideTimer);
