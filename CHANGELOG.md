@@ -439,6 +439,12 @@
 
 - Liaison des bot avec le mode de jeu action
 
+- Liaison réseau et UI les classes réseaux (Host, Client, etc..) sur les controllers Swing (Lobby) 
+
+- Possibilité de connexion avec affichage visuel + liste des lobby se met à jour  
+
+- Blocage des comptes invités en mode Multijoueur en Ligne
+
 ### Fixed
 
 - Fix de l'animation hover du `DoodleButton` qui grossisait si le dernier hover datais (reset tick de deltatime)
@@ -463,6 +469,7 @@
 - Fin Protocols serveur - client(s) 
 - Ajout des panel d'erreur de l'API au serveur
 
+- Lancement de la partie en multijoueur en ligne et arrêt broadcast UDP
 
 ### Modified
 
@@ -474,7 +481,10 @@
 
 - Fix recuperation money avec getStats dans l'API
 - Fix recuperation rank via l'API
-
+- Fix message de bienvenue au lobby côté Client
+- Fix variable lisPlayerData (changée en listPlayerData) qui bloquait le lancement du jeu (car NULL)
+- Fix Double création de jeu GameClient et GameHost
+- Fix Connexion Host au lobby qui se connectait en Client et écrasait ses données
 
 ## v.0.12: SPRINT 12
 
@@ -518,6 +528,12 @@
 
 - L'affichage des cartes actions piochées passe en GridBag avec des lignes de 5 actions
 
+- Suppression Mode Action en ligne
+
+- Un joueur ne lance jamais seul en ligne
+
+- Rafraichir devient "Recherche..." pour éviter des erreurs de superposition
+
 ### Fixed
 
 - Liste des joueurs maintenant scrollable dans Fin de manche / fin de partie car avec 8 joueurs ça dépassait
@@ -535,3 +551,41 @@
     - les cartes face cachée utilisent maintenant le skin équipé
     - accumulation de flou en passant rapidement d'un joueur à l'autre
     - animation fade ne rejoue plus si le panel était déjà visible (changement rapide entre preview)
+
+- La liste de séléction de Lobby s'actualise maintenant à chaque fois qu'on arrive sur la page
+
+- Les host et clients sont synchronisés sur les informations du lobby
+
+- Anciennement les bots ne rejoignait pas la partie lancée en ligne
+
+- L'expulsion fonctionne bien et notifie le client
+
+## v.0.13: SPRINT 13
+
+### Added
+
+- Noms pour les rangs des joueurs affichés dans AccountStatsOverlay et LeaderBoard
+
+- Sons/BGM partout
+    - 4 BGM : main menu, pendant la partie (aléatoire entre 2 bgm), fin de manche
+    - 11 SFX : clic bouton, retour, flip de carte, échange, défausse, cartes action, boutique, changement de joueur...
+    - Les sons sont préchargés au démarrage
+    - `DoodleButton` joue automatiquement un son par défaut
+
+### Fixed
+
+- Le BGM ne rebouclait pas
+
+- Resize dynamique des cartes en plein écran etc
+
+- Fix Erreurs Tests Linux
+
+### Modified
+
+- Modif LeaderBoard pour remplacer le numero des rangs par leur nom
+
+- Nouveau toggle graphique dans les parametres
+    - ON/OFF remplacé par HAUT/BAS
+    - par défaut sur linux, le jeu se lance en BAS
+    - BAS désactive le flip et float des cartes
+

@@ -4,6 +4,7 @@ import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
 import fr.upc.cr1a.view.SettingsOverlay;
 import fr.upc.cr1a.model.AudioManager;
+import fr.upc.cr1a.model.GraphicsSettings;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -37,6 +38,7 @@ public class SettingsOverlayController {
         //Bouton Fermer
         overlay.getBackButton().addMouseListener(new MouseAdapter() {
             @Override public void mousePressed(MouseEvent e) {
+                audioManager.playSfx("/sfx/back.wav");
                 frame.hideSettingsOverlay();
             }
         });
@@ -59,16 +61,19 @@ public class SettingsOverlayController {
         var cl = overlay.getCardLayout();
         var content = overlay.getContentPanel();
         overlay.getTabGraphique().addActionListener(e -> {
+            audioManager.playSfx("/sfx/button_click.wav");
             cl.show(content, "GRAPHIQUE");
             overlay.setSelectedTabPanel(overlay.getTabGraphiquePanel());
         });
 
         overlay.getTabAudio().addActionListener(e -> {
+            audioManager.playSfx("/sfx/button_click.wav");
             cl.show(content, "AUDIO");
             overlay.setSelectedTabPanel(overlay.getTabAudioPanel());
         });
 
         overlay.getTabAutres().addActionListener(e -> {
+            audioManager.playSfx("/sfx/button_click.wav");
             cl.show(content, "AUTRES");
             overlay.setSelectedTabPanel(overlay.getTabAutresPanel());
         });
@@ -80,12 +85,14 @@ public class SettingsOverlayController {
 
         //Activer/OFF le plein ecran
         overlay.getFullscreenButton().addActionListener(e -> {
+            audioManager.playSfx("/sfx/button_click.wav");
             frame.toggleFullscreen();
             overlay.getFullscreenButton().setText(frame.isFullscreen() ? "ON" : "OFF");
         });
 
         //ON OFF Son
         overlay.getSoundButton().addActionListener(e -> {
+            audioManager.playSfx("/sfx/button_click.wav");
             boolean newEnabled = !audioManager.isEnabled();
             audioManager.setEnabled(newEnabled);
             overlay.getSoundButton().setText(newEnabled ? "ON" : "OFF");
@@ -93,6 +100,7 @@ public class SettingsOverlayController {
 
         //ON/OFF cartes flottantes
         overlay.getHandCardAnimationsButton().addActionListener(e -> {
+            audioManager.playSfx("/sfx/button_click.wav");
             GameBoardView boardView = null;
             var currentGame = frame.getCurrentGame();
             if (currentGame != null
@@ -102,12 +110,13 @@ public class SettingsOverlayController {
             }
 
             boolean newEtat = !frame.isHandCardAnimationsEnabled();
+            GraphicsSettings.setHighQuality(newEtat);
             if (boardView != null) {
                 boardView.setHandCardAnimations(newEtat);
             }
             
             frame.setHandCardAnimationsEnabled(newEtat);
-            overlay.getHandCardAnimationsButton().setText(newEtat ? "ON" : "OFF");
+            overlay.getHandCardAnimationsButton().setText(newEtat ? "HAUT" : "BAS");
         
         });
 
@@ -117,6 +126,7 @@ public class SettingsOverlayController {
             step = Math.max(1, step - 1);
             audioManager.setVolume(step * 10);
             overlay.getVolumeValueButton().setText(String.valueOf(step));
+            audioManager.playSfx("/sfx/volume.wav");
         });
 
         // Fleche droite
@@ -125,10 +135,11 @@ public class SettingsOverlayController {
             step = Math.min(10, step + 1);
             audioManager.setVolume(step * 10);
             overlay.getVolumeValueButton().setText(String.valueOf(step));
+            audioManager.playSfx("/sfx/volume.wav");
         }); 
 
         overlay.getSoundButton().setText(audioManager.isEnabled() ? "ON" : "OFF");
         overlay.getVolumeValueButton().setText(String.valueOf(Math.max(1, audioManager.getVolume() / 10)));
-        overlay.getHandCardAnimationsButton().setText("ON");
+        overlay.getHandCardAnimationsButton().setText(frame.isHandCardAnimationsEnabled() ? "HAUT" : "BAS");
     }
 }

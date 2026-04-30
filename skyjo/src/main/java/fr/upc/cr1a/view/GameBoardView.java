@@ -1,20 +1,42 @@
 package fr.upc.cr1a.view;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.RenderingHints;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import fr.upc.cr1a.model.ActionCardModel;
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.AnimLoop;
 import fr.upc.cr1a.model.CardModel;
+import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
+import fr.upc.cr1a.model.GraphicsSettings;
 import fr.upc.cr1a.model.NumberCardModel;
 import fr.upc.cr1a.model.PlayerHandModel;
 import fr.upc.cr1a.model.PlayerModel;
-import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
 import fr.upc.cr1a.utils.ImageCache;
 
 /**
@@ -23,7 +45,7 @@ import fr.upc.cr1a.utils.ImageCache;
 public class GameBoardView extends JPanel {
 
     private static final int cardSpacing = 2; // <----------------
-    private boolean handCardAnimationsEnabled = true; // DESACTIVER SI LE JEU LAG
+    private boolean handCardAnimationsEnabled = GraphicsSettings.isHighQuality();
 
     // elements important :
     private ArrayList<PlayerModel> listPlayer; // jusqu'a 8 normalement
@@ -752,7 +774,13 @@ public class GameBoardView extends JPanel {
     }
 
     // animation flip : appelle 'onChange' quand on voit plus la carte
-    public void flipCardAt(int row, int col, Runnable onChange) {
+    public void flipCardAt(int row, int col, Runnable onChange) { // wtf is runnable
+        if (!handCardAnimationsEnabled) {
+            if (onChange != null) {
+                onChange.run();
+            }
+            return;
+        }
         cardButtons[row][col].flip(onChange);
     }
 
@@ -1014,26 +1042,16 @@ public class GameBoardView extends JPanel {
         zonePlateau.repaint();
     }
 
-    // a redimenssionner dynamiquement plus tard ?
     private void resizeCards() {
         int sizeH = this.getHeight();
         int sizeW = this.getWidth();
 
-        // 95x135 Taille de base
-        int largeurCarte = 95;
-        int hauteurCarte = 135;
-
-        System.out.println(sizeH);
-        System.out.println(sizeW);
-        if (sizeH > 720 || sizeW > 1280) { // ca veut dire qu'on est pas en mode fenetre, et donc on est en full
-                                           // screen..
-            largeurCarte = 95 + 30; // pour les petits ecran type 13 pouces
-            hauteurCarte = 135 + 30;
-            if (sizeH > 1000 || sizeW > 2000) { // pour les gros ecrans types 23/27 pouces
-                largeurCarte = 95 * 2;
-                hauteurCarte = 135 * 2;
-            }
-        }
+        // de combien la fenetre a grandi par rapport a la taille de base
+        double scaleW = (double) sizeW / 1280;
+        double scaleH = (double) sizeH / 720;
+        double scale = scaleW < scaleH ? scaleW : scaleH; // on prend le plus petit scale pour que ça depasse pas
+        int largeurCarte = (int) (95 * scale);
+        int hauteurCarte = (int) (135 * scale);
 
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 4; j++) {

@@ -16,6 +16,7 @@ import fr.upc.cr1a.controller.SettingsOverlayController;
 import fr.upc.cr1a.controller.ShopController;
 import fr.upc.cr1a.model.AudioManager;
 import fr.upc.cr1a.model.GameManager;
+import fr.upc.cr1a.model.GraphicsSettings;
 import fr.upc.cr1a.utils.ImageCache;
 
 import java.awt.CardLayout;
@@ -42,7 +43,7 @@ public class Frame extends JFrame{
     private PlayersSetupPanel playersSetupPanel;
     private ConnexionPanel connexionPanel;
     private GameManager currentGame;
-    private boolean handCardAnimationsEnabled = true;
+    private boolean handCardAnimationsEnabled = GraphicsSettings.isHighQuality();
 
     // Controller
     private AccountController account; // sert a rien pour le moment
@@ -101,6 +102,9 @@ public class Frame extends JFrame{
 
         //Contrôleurs
         audioManager = new AudioManager();
+        DoodleButton.setAudioManager(audioManager);
+        CardButton.setAudioManager(audioManager);
+        CaseOpeningOverlayPanel.setAudioManager(audioManager);
         new SettingsOverlayController(settingsOverlay, this, audioManager);
         new MainMenuController(this, mainMenuPanel);
         new ShopController(this, shopPanel);
@@ -140,7 +144,17 @@ public class Frame extends JFrame{
             );
             // son : ouvre et ferme chaque clip pour que Java initialise le mixer audio
             try {
-                String[] sfx = { "/sfx/UIclick.wav", "/sfx/round.wav" };
+                String[] sfx = {
+                    "/sfx/UIclick.wav", "/sfx/round.wav",
+                    "/sfx/button_click.wav", "/sfx/back.wav",
+                    "/sfx/card_flip.wav", "/sfx/card_click.wav",
+                    "/sfx/defausse.wav", "/sfx/teleport.wav",
+                    "/sfx/harp.wav", "/sfx/player_change.wav",
+                    "/music/elevator_bgm.wav",
+                    "/sfx/money_buy.wav", "/sfx/classeur.wav",
+                    "/sfx/volume.wav",
+                    "/music/main_menu.wav", "/music/game_bgm1.wav", "/music/game_bgm2.wav"
+                };
                 for (String path : sfx) {
                     var url = Frame.class.getResource(path);
                     if (url == null) continue;
@@ -176,7 +190,7 @@ public class Frame extends JFrame{
     }
 
     public void showSettingsOverlay() {
-        settingsOverlay.getHandCardAnimationsButton().setText(handCardAnimationsEnabled ? "ON" : "OFF");
+        settingsOverlay.getHandCardAnimationsButton().setText(handCardAnimationsEnabled ? "HAUT" : "BAS");
         settingsOverlay.setVisible(true);
         settingsOverlay.requestFocusInWindow();
         settingsOverlay.revalidate();

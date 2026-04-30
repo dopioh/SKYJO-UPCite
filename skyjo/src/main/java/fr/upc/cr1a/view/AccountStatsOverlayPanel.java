@@ -1,17 +1,27 @@
 package fr.upc.cr1a.view;
 
-import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
-import fr.upc.cr1a.model.player.PlayerAccount;
-import fr.upc.cr1a.model.player.PlayerData;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.io.InputStream;
+
+import javax.swing.JPanel;
+
+import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
+import fr.upc.cr1a.model.player.PlayerAccount;
+import fr.upc.cr1a.model.player.PlayerData;
 
 /**
  * Overlay des stats
@@ -34,6 +44,33 @@ public class AccountStatsOverlayPanel extends JPanel {
     private final Font valueFont;
     private final Font infoFont;
 
+    public static String getRealRankName(int rankId) {
+        switch (rankId) {
+            case 0:
+                return "Debutant";
+            case 1:
+                return "Noob";
+            case 2:
+                return "Apprenti";
+            case 3:
+                return "Tryhard";
+            case 4:
+                return "As du jeu";
+            case 5:
+                return "Genie du skyjo";
+            case 6:
+                return "Maitre du skyjo";
+            case 7:
+                return "Grand-Maitre du skyjo";
+            case 8:
+                return "GOAT du skyjo";
+            case 9:
+                return "TRICHEUR";
+            default:
+                return "Inconnu";
+        }
+    }
+
     public AccountStatsOverlayPanel() {
         setOpaque(false);
         setLayout(null);
@@ -45,6 +82,7 @@ public class AccountStatsOverlayPanel extends JPanel {
         infoFont = loadFont(20f, Font.PLAIN);
 
         closeButton = new DoodleButton("Fermer", ButtonColor.RED, 180, 58);
+        closeButton.setSfxPath("/sfx/back.wav");
         closeButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -139,7 +177,7 @@ public class AccountStatsOverlayPanel extends JPanel {
         String[] labels = { "Pseudo", "Rang", "Elo", "Argent"};
         String[] values = {
             safeText(account.getUsername(), "Inconnu"),
-            String.valueOf(account.getRankId()),
+            getRealRankName(account.getRankId()),
             String.valueOf(account.getElo()),
             account.getMoney() + " $"
         };

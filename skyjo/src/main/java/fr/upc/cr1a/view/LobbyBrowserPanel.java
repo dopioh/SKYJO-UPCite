@@ -50,6 +50,7 @@ public class LobbyBrowserPanel extends JPanel {
         JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         leftPanel.setOpaque(false);
         backBtn = new DoodleButton("Retour", ButtonColor.RED, 220, 60, "/Button/retour.png");
+        backBtn.setSfxPath("/sfx/back.wav");
         backBtn.setFontSize(32f);
         backBtn.setIconSide(DoodleButton.IconSide.LEFT);
         leftPanel.add(backBtn);
