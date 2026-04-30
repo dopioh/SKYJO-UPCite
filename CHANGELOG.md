@@ -580,6 +580,12 @@
 
 - Fix Erreurs Tests Linux
 
+- Les espaces ne sont plus pris en compte pour la création/connexion
+
+- fix du `SPY_ONE_ACTION` pour les bots qui ne faisaient rien
+
+- fix du `PLAY_TWO_TURN` pour les humains qui ne donné qu'un seul tour en plus
+
 ### Modified
 
 - Modif LeaderBoard pour remplacer le numero des rangs par leur nom
