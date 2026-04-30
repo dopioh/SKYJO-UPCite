@@ -564,6 +564,8 @@
 
 ### Added
 
+- Noms pour les rangs des joueurs affichés dans AccountStatsOverlay et LeaderBoard
+
 - Sons/BGM partout
     - 4 BGM : main menu, pendant la partie (aléatoire entre 2 bgm), fin de manche
     - 11 SFX : clic bouton, retour, flip de carte, échange, défausse, cartes action, boutique, changement de joueur...
@@ -579,6 +581,8 @@
 - Fix Erreurs Tests Linux
 
 ### Modified
+
+- Modif LeaderBoard pour remplacer le numero des rangs par leur nom
 
 - Nouveau toggle graphique dans les parametres
     - ON/OFF remplacé par HAUT/BAS
