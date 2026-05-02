@@ -32,7 +32,7 @@ public class GameBoardController {
     GameBoardView gameBoardView;
     GameManager gameManager;
 
-    private boolean timerEnabled = false;
+    private boolean timerEnabled =(GameSession.status == GameSession.STATUS.HOST|| GameSession.status == GameSession.STATUS.CLIENT);
     private GameLoop gameLoop;
     private HumanTurnController humanTurnController;
 
@@ -215,16 +215,22 @@ public class GameBoardController {
             });
         }
 
-        // bouton Continuer
+        // Le Host choisit de continuer la game (Ici) On peut aussi mettre un timer?
+        // Les CLIENTS attendent UPDATE_NEW_ROUND du host.
         if (!isGameOver && currentRoundEndPanel.getBtnContinuer() != null) {
-            currentRoundEndPanel.getBtnContinuer().addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseEntered(MouseEvent e) { currentRoundEndPanel.getBtnContinuer().onMouseEnter(); }
-                @Override
-                public void mouseExited(MouseEvent e) { currentRoundEndPanel.getBtnContinuer().onMouseExit(); }
-                @Override
-                public void mousePressed(MouseEvent e) { ContinueRound(); }
-            });
+            if (GameSession.status == GameSession.STATUS.CLIENT) {
+                currentRoundEndPanel.getBtnContinuer().setEnabled(false);
+                currentRoundEndPanel.getBtnContinuer().setVisible(false);
+            } else {
+                currentRoundEndPanel.getBtnContinuer().addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseEntered(MouseEvent e) { currentRoundEndPanel.getBtnContinuer().onMouseEnter(); }
+                    @Override
+                    public void mouseExited(MouseEvent e) { currentRoundEndPanel.getBtnContinuer().onMouseExit(); }
+                    @Override
+                    public void mousePressed(MouseEvent e) { ContinueRound(); }
+                });
+            }
         }
 
         // bouton Menu
@@ -241,13 +247,32 @@ public class GameBoardController {
     }
 
     /**
-     * Relance une nouvelle manche apres clic sur Continuer
+     * Relance une nouvelle manche apres clic sur Continuer.
+     * En multi (HOST) : genere un seed et le broadcast pour synchroniser le deck.
      */
     private void ContinueRound() {
-        gameManager.startNewGame();
+        long seed = new java.util.Random().nextLong();
+        // Broadcast AVANT de demarrer localement, pour que le client puisse traiter
+        // UPDATE_NEW_ROUND quand il arrive (le seed sera applique chez tous).
+        if (GameSession.status == GameSession.STATUS.HOST) {
+            try {
+                fr.upc.cr1a.controller.network.Host host = gameBoardModel.getFrame().getLobbyRoomController().getHost();
+                if (host != null && host.getGameHost() != null) {
+                    host.getGameHost().broadcastNewRound(seed);
+                }
+            } catch (Exception ignored) {}
+        }
+        startLocalNewRound(seed);
+    }
+
+    /**
+     * Reset local pour une nouvelle manche 
+     */
+    public void startLocalNewRound(long seed) {
+        gameManager.startNewGame(seed);
         gameBoardView.setMancheLabel("Pré-Manche");
         waitingNextTurn = false;
-        humanTurnController.resetTurnState();
+        if (humanTurnController != null) humanTurnController.resetTurnState();
         gameBoardView.showPlayerCards(gameManager.getCurrentPlayer());
         updateAllDecksDisplay();
         Frame frame = gameBoardModel.getFrame();
@@ -303,6 +328,21 @@ public class GameBoardController {
 
     public void requestEndTurnFromBot() {
         gameLoop.proceedAfterAction();
+    }
+
+    public GameLoop getGameLoop() {
+        return gameLoop;
+    }
+
+    /**
+     * Appele apres un TURN_CHANGED reseau : si on est host et que le nouveau joueur courant est un bot, lance son tour.
+     */
+    public void triggerBotTurnIfNeeded() {
+        if (GameSession.status != GameSession.STATUS.HOST) return;
+        PlayerModel cp = gameManager.getCurrentPlayer();
+        if (!(cp instanceof BotModel)) return;
+        if (botController == null) return;
+        SwingUtilities.invokeLater(() -> botController.handleBotTurn());
     }
 
     public void showRoundEndScreenFromLoop() {
@@ -379,7 +419,11 @@ public class GameBoardController {
 
         PlayerModel dbPlayer = findConnectedDbPlayer(listPlayerInGame);
         if (dbPlayer == null) {
-            System.out.println("elo et money non appliques car joueur DB introuvable");
+            System.out.println("Elo et Money non appliqués car joueur DB introuvable");
+            if (currentRoundEndPanel != null) {
+                final RoundEndPanel panelRef = currentRoundEndPanel;
+                SwingUtilities.invokeLater(() -> panelRef.showStatsError("Compte non connecté : pas de récompense"));
+            }
             return;
         }
 
@@ -397,19 +441,36 @@ public class GameBoardController {
 
         List<String> opponentTypes = buildOpponentTypes(opponents);
 
+        final int oldElo = PlayerAccount.actuelAccount.getElo();
+        final int oldXp = PlayerAccount.actuelAccount.getXp();
+        final int oldMoney = PlayerAccount.actuelAccount.getMoney();
+        final fr.upc.cr1a.view.RoundEndPanel panelRef = currentRoundEndPanel;
+
         String dbUuid = PlayerAccount.actuelAccount.getID();
         new Thread(() -> {
             PlayerData updated = SendAPI.applyGameResult(dbUuid, wonGame, opponentTypes);
             if (updated != null) {
                 PlayerAccount.actuelAccount = updated;
-                System.out.println("Fin de partie DB: " + (wonGame ? "WIN" : "PERDU"));
+                System.out.println("Fin de partie: " + (wonGame ? "WIN" : "PERDU"));
+                final int newElo = updated.getElo();
+                final int newXp = updated.getXp();
+                final int newMoney = updated.getMoney();
+                SwingUtilities.invokeLater(() -> {
+                    if (panelRef != null) {
+                        panelRef.updateStats(newElo, newXp, newMoney,newElo - oldElo, newXp - oldXp, newMoney - oldMoney);
+                    }
+                });
             } else {
-                System.out.println("Fin de partie DB: echec applyGameResult");
-                SwingUtilities.invokeLater(() -> ErrorDialog.showError(
-                    gameBoardModel.getFrame(),
-                    "Resultat de partie",
-                    ApiErrorManager.getLastUserMessageOrDefault("Fin de manche OK, mais les recompenses n'ont pas pu etre synchronisees. ZUT ALORS")
-                ));
+                System.out.println("Fin de partie: echec applyGameResult");
+                SwingUtilities.invokeLater(() -> {
+                    if (panelRef != null) {
+                        panelRef.showStatsError(
+                            ApiErrorManager.getLastUserMessageOrDefault("Synchronisation des récompenses impossible")
+                        );
+                    }
+                    ErrorDialog.showError(gameBoardModel.getFrame(),"Resultat de partie",ApiErrorManager.getLastUserMessageOrDefault("Fin de manche ,les récompenses n'ont pas pu etre synchronisées.")
+                    );
+                });
             }
         }, "db-endgame-rewards").start();
     }

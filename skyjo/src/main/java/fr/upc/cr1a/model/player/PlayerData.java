@@ -65,6 +65,7 @@ public class PlayerData {
      */
     public PlayerData(String id, boolean isBot, String botType){
         this.id = id;
+        this.username = id;
         this.rank_id = 1;
         this.elo = 0;
         this.xp = 0;

@@ -4,6 +4,7 @@ import javax.swing.Timer;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolServer;
 import fr.upc.cr1a.model.ActionCardModel;
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.BotHandModel;
@@ -11,6 +12,8 @@ import fr.upc.cr1a.model.BotModel;
 import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.GameManager;
 import fr.upc.cr1a.model.GameRuleModel;
+import fr.upc.cr1a.model.GameSession;
+import fr.upc.cr1a.model.NumberCardModel;
 import fr.upc.cr1a.model.PlayerModel;
 import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
 import fr.upc.cr1a.view.GameBoardView;
@@ -33,6 +36,36 @@ public class GameBoardBotController {
         this.gameBoardView = gameBoardView;
         this.gameManager = gameManager;
         this.mainController = mainController;
+    }
+
+    /**
+     * Renvoie l'instance NetworkProtocolServer (GameHost) si l'on est host, sinon null.
+     * Utilise pour relayer aux clients les actions jouees par les bots.
+     */
+    private NetworkProtocolServer hostServer() {
+        if (GameSession.status != GameSession.STATUS.HOST) return null;
+        try {
+            fr.upc.cr1a.controller.network.Host h =
+                gameManager.getGameBoardModel().getFrame().getLobbyRoomController().getHost();
+            return (h != null) ? h.getGameHost() : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void broadcastCardFlippedIfHost(String playerId, int col, int row, CardModel card) {
+        NetworkProtocolServer s = hostServer();
+        if (s == null) return;
+        int val = (card instanceof NumberCardModel) ? ((NumberCardModel) card).getCardValue() : -1;
+        s.broadcastCardFlipped(playerId, col, row, val);
+    }
+
+    private void broadcastTurnChangedIfHost() {
+        NetworkProtocolServer s = hostServer();
+        if (s == null) return;
+        PlayerModel cp = gameManager.getCurrentPlayer();
+        if (cp == null) return;
+        s.broadcastTurnChanged(cp.getPlayerData().getID(), gameManager.getTurnPhase().name());
     }
 
     /**
@@ -59,6 +92,9 @@ public class GameBoardBotController {
      *regarde si c'est un bot et lance son tour
      */
     public void handleBotTurn() {
+        //seul le host pilote les bots ; les clients recoivent les broadcasts.
+        if (GameSession.status == GameSession.STATUS.CLIENT) return;
+
         PlayerModel currentPlayer = gameManager.getCurrentPlayer();
         //rien faire si c'est pas un bot
         if (!(currentPlayer instanceof BotModel)) {
@@ -129,6 +165,9 @@ public class GameBoardBotController {
                 grantActionForStar(bot);
                 mainController.updateAllDecksDisplay();
             }
+            // Broadcast multi et appliquent la revelation
+            broadcastCardFlippedIfHost(bot.getPlayerData().getID(), col, row, firstRevealed);
+            broadcastTurnChangedIfHost();
             gameBoardView.flipCardAt(row, col, () -> gameBoardView.showPlayerCards(bot));
             mainController.updateAllDecksDisplay();
             mainController.refreshGuide();
@@ -149,6 +188,9 @@ public class GameBoardBotController {
                     if (GameManager.isStarCard(secondRevealed)) {
                         grantActionForStar(bot);
                     }
+                    // Broadcast multi
+                    broadcastCardFlippedIfHost(bot.getPlayerData().getID(), col2, row2, secondRevealed);
+                    broadcastTurnChangedIfHost();
                     gameBoardView.flipCardAt(row2, col2, () -> gameBoardView.showPlayerCards(bot));
                     mainController.updateAllDecksDisplay();
                     mainController.refreshGuide();
@@ -197,6 +239,12 @@ public class GameBoardBotController {
                 //prend de la défausse
                 gameBoardView.getBtnDefausse().lift();
                 CardModel taken = gameManager.takeDiscard();
+                // Broadcast multi : le client voit la defausse retiree + la phase CARD_TAKE_FROM_DISCARD
+                NetworkProtocolServer srv = hostServer();
+                if (srv != null) {
+                    srv.broadcastUpdateDiscardTaken(bot.getPlayerData().getID());
+                    broadcastTurnChangedIfHost();
+                }
                 mainController.refreshGuide();
                 mainController.setWaitingNextTurn(false);
 
@@ -210,6 +258,8 @@ public class GameBoardBotController {
                 if (GameManager.isStarCard(drawn)) {
                     grantActionForStar(bot);
                 }
+                // Broadcast multi : on propage seulement la phase (la valeur piochee reste privee au bot/host)
+                broadcastTurnChangedIfHost();
                 String drawnPath = gameBoardView.getCardImagePath(drawn);
                 gameBoardView.getBtnPioche().flip(() -> gameBoardView.getBtnPioche().setCardImage(drawnPath));
                 mainController.updateAllDecksDisplay();
@@ -253,11 +303,25 @@ public class GameBoardBotController {
                 //échange après pioche
                 int[] position = strategy.CardToExchange(botHand, drawCard);
                 if (position[0] != -1 && position[1] != -1) {
-                    gameManager.exchangeCardInHand(position[0], position[1]);
-                    System.out.println(bot.getName() + " échange [" + position[1] + "," + position[0] + "]");
+                    int col = position[0];
+                    int row = position[1];
+                    int newValue = (drawCard instanceof NumberCardModel)
+                            ? ((NumberCardModel) drawCard).getCardValue() : -1;
+                    CardModel oldHand = botHand.getCard(row, col);
+                    int discardedValue = (oldHand instanceof NumberCardModel)
+                            ? ((NumberCardModel) oldHand).getCardValue() : -1;
+
+                    gameManager.exchangeCardInHand(col, row);
+                    System.out.println(bot.getName() + " échange [" + row + "," + col + "]");
+
+                    // Broadcast multi : les clients reconstruisent main + defausse
+                    NetworkProtocolServer srv = hostServer();
+                    if (srv != null) {
+                        srv.broadcastExchange(bot.getPlayerData().getID(), col, row, newValue, discardedValue);
+                    }
 
                     gameBoardView.showPlayerCards(bot);
-                    gameBoardView.animatePressAt(position[1], position[0]);
+                    gameBoardView.animatePressAt(row, col);
                     gameBoardView.updateCardDisplay(
                             gameManager.getDiscardPile().getTopCard(),
                             gameManager.getDeck().stackSize() > 0);
@@ -267,7 +331,14 @@ public class GameBoardBotController {
                 }
             } else {
                 //jeter la carte piochée puis révéler une carte
+                int discardedValue = (drawCard instanceof NumberCardModel)? ((NumberCardModel) drawCard).getCardValue() : -1;
                 gameManager.discardDrawCard();
+                // Broadcast multi : defausse mise a jour + nouvelle phase CARD_DISCARD_FROM_DRAW
+                NetworkProtocolServer srv = hostServer();
+                if (srv != null) {
+                    srv.broadcastUpdateDiscardDraw(bot.getPlayerData().getID(), discardedValue);
+                    broadcastTurnChangedIfHost();
+                }
                 gameBoardView.getBtnDefausse().animatePress();
                 gameBoardView.updateCardDisplay(
                         gameManager.getDiscardPile().getTopCard(),
@@ -284,6 +355,9 @@ public class GameBoardBotController {
                     if (GameManager.isStarCard(revealedCard)) {
                         grantActionForStar(bot);
                     }
+
+                    // Broadcast de la revelation [pos = [row, col]]
+                    broadcastCardFlippedIfHost(bot.getPlayerData().getID(), pos[1], pos[0], revealedCard);
 
                     //regarde et supprimer les colonnes/lignes identiques
                     GameRuleModel.removeIdenticalColumns(botHand, gameManager.getDiscardPile(), bot);
@@ -326,15 +400,24 @@ public class GameBoardBotController {
             //doit échanger une carte
             int[] position = strategy.CardToExchange(botHand, drawCard);
             if (position[0] != -1 && position[1] != -1) {
-                gameManager.exchangeCardInHand(position[0], position[1]);
-                System.out.println(bot.getName() + " échange [" + position[1] + "," + position[0] + "]");
+                int col = position[0];
+                int row = position[1];
+                // Capture pour broadcast EXCHANGE
+                int newValue = (drawCard instanceof NumberCardModel)? ((NumberCardModel) drawCard).getCardValue() : -1;CardModel oldHand = botHand.getCard(row, col);
+                int discardedValue = (oldHand instanceof NumberCardModel)? ((NumberCardModel) oldHand).getCardValue() : -1;
+
+                gameManager.exchangeCardInHand(col, row);
+                System.out.println(bot.getName() + " échange [" + row + "," + col + "]");
+
+                NetworkProtocolServer srv = hostServer();
+                if (srv != null) {
+                    srv.broadcastExchange(bot.getPlayerData().getID(), col, row, newValue, discardedValue);
+                }
 
                 gameBoardView.showPlayerCards(bot);
-                gameBoardView.animatePressAt(position[1], position[0]);
+                gameBoardView.animatePressAt(row, col);
                 gameBoardView.getBtnDefausse().resetLift();
-                gameBoardView.updateCardDisplay(
-                        gameManager.getDiscardPile().getTopCard(),
-                        gameManager.getDeck().stackSize() > 0);
+                gameBoardView.updateCardDisplay(gameManager.getDiscardPile().getTopCard(),gameManager.getDeck().stackSize() > 0);
                 mainController.refreshGuide();
             }
             mainController.setWaitingNextTurn(false);

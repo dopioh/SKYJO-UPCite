@@ -22,6 +22,10 @@ import java.util.List;
  */
 public class LobbyRoomController {
 
+    private static final String[] BOT_DISPLAY_NAMES = {
+        "Alice", "Bob", "Bili", "Mei", "Hugo", "Nass", "Ian", "Charlie"
+    };
+
     private final Frame frame;
     private final LobbyRoomPanel view;
     private List<LobbyPlayerModel> players;
@@ -56,6 +60,14 @@ public class LobbyRoomController {
      */
     public void setNetworkHost(Host host) {
         this.host = host;
+    }
+
+    public Host getHost() {
+        return this.host;
+    }
+
+    public Client getClient() {
+        return this.client;
     }
 
     /**
@@ -341,17 +353,41 @@ public class LobbyRoomController {
             }
 
             String botId = "bot_" + System.currentTimeMillis();
-            String botName = botStrategyNames[choiceIndex];
+            String botType = botStrategyNames[choiceIndex];
+            String displayName = pickFreeBotDisplayName();
 
             // Propager au Host pour que la liste cote serveur contienne aussi les bots
             // (le broadcast rafraichira automatiquement la UI cote host et cote clients)
             if (host != null) {
-                host.addBot(botId, botName);
+                host.addBot(botId, displayName, botType);
             } else {
                 // fallback hors reseau
-                LobbyPlayerModel bot = new LobbyPlayerModel(botId, botName, false, true);
+                LobbyPlayerModel bot = new LobbyPlayerModel(botId, displayName, false, true);
                 addPlayer(bot);
             }
+        }
+    }
+
+    /**
+     * Choisit un prenom libre dans BOT_DISPLAY_NAMES (non deja utilise par un joueur/bot du lobby).
+     * Si tout est pris,un numéro mais ca ne devrait jamais arriver
+     */
+    private String pickFreeBotDisplayName() {
+        java.util.Set<String> taken = new java.util.HashSet<>();
+        for (LobbyPlayerModel p : players) {
+            if (p.getPlayerName() != null) taken.add(p.getPlayerName());
+        }
+        for (String candidate : BOT_DISPLAY_NAMES) {
+            if (!taken.contains(candidate)) return candidate;
+        }
+        // tous pris : suffixe numerique
+        int i = 2;
+        while (true) {
+            for (String candidate : BOT_DISPLAY_NAMES) {
+                String numbered = candidate + " " + i;
+                if (!taken.contains(numbered)) return numbered;
+            }
+            i++;
         }
     }
 

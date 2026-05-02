@@ -27,7 +27,19 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
 
     private HashMap<String, String> lobbyPlayers = new HashMap<>(); // key = id, value = name
     private HashMap<String, Boolean> playerReadyState = new HashMap<>(); // id -> ready
-    private HashMap<String, String> lobbyBots = new HashMap<>(); // id -> botType (nom = botType aussi cote ui)
+    private HashMap<String, BotInfo> lobbyBots = new HashMap<>(); // id -> (displayName, botType)
+
+    /**
+     * Represente un bot dans le lobby
+     */
+    public static class BotInfo {
+        public final String displayName;
+        public final String botType;
+        public BotInfo(String displayName, String botType) {
+            this.displayName = displayName;
+            this.botType = botType;
+        }
+    }
     private int maxPlayers = 8;
 
     private Thread thread;
@@ -35,6 +47,7 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     private boolean modeAction;
     private GameManager gameManager;
     private Frame frame;
+    private long gameSeed; // seed de la partie courante (pour synchro deck host/clients)
 
     public GameHost(int port, boolean modeAction, Frame frame){ // rajouter le nom d'un salon et toutes les infos necessaire egalement
         this.port = port;
@@ -110,12 +123,19 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     }
 
     /**
-     * Ajoute un bot au lobby et propage aux clients
+     * Ajoute un bot au lobby et propage aux clients (nom d'affichage + type de strategie).
+     */
+    public void addBotToLobby(String id, String displayName, String botType){
+        lobbyBots.put(id, new BotInfo(displayName, botType));
+        System.out.println("[LOBBY] Bot " + displayName + " (" + botType + ") ajouté au lobby.");
+        broadcastUpdateLobby();
+    }
+
+    /**
+     * Ancienne signature conservee pour compat : le "botType" sert aussi de nom d'affichage.
      */
     public void addBotToLobby(String id, String botType){
-        lobbyBots.put(id, botType);
-        System.out.println("[LOBBY] Bot " + botType + " ajoute au lobby.");
-        broadcastUpdateLobby();
+        addBotToLobby(id, botType, botType);
     }
 
     public void removeBotFromLobby(String id){
@@ -210,11 +230,13 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
         }
         // Ajout des bots a la liste des joueurs
         for (String botId : lobbyBots.keySet()){
-            String botType = lobbyBots.get(botId);
-            PlayerData tmp = new PlayerData(botId, botType, true, botType.toLowerCase());
+            BotInfo info = lobbyBots.get(botId);
+            PlayerData tmp = new PlayerData(botId, info.displayName, true, info.botType.toLowerCase());
             listPlayers.add(tmp);
         }
-        this.gameManager = new GameManager(frame, listPlayers, modeAction);
+        this.gameSeed = new java.util.Random().nextLong();
+        this.gameManager = new GameManager(frame, listPlayers, modeAction, this.gameSeed);
+        this.gameManager.setLocalPlayer(fr.upc.cr1a.model.player.PlayerAccount.actuelAccount);
         frame.setCurrentGame(gameManager);
     }
 
@@ -222,7 +244,8 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
 
     @Override
     public synchronized void broadcastStartGame(){
-        String message = NetworkProtocolServer.UPDATE_START_GAME;
+        // [UPDATE_START_GAME:seed]
+        String message = NetworkProtocolServer.UPDATE_START_GAME + ":" + this.gameSeed;
 
         for (ClientHandler client : connectedClient) {
             client.sendMessage(message.toString());
@@ -244,11 +267,11 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
                    .append(":").append(ready ? "1" : "0");
         }
         for (String botId : lobbyBots.keySet()){
-            String botType = lobbyBots.get(botId);
+            BotInfo info = lobbyBots.get(botId);
             message.append(":").append(botId)
-                   .append(":").append(botType)
+                   .append(":").append(info.displayName)
                    .append(":").append("1")
-                   .append(":").append(botType)
+                   .append(":").append(info.botType)
                    .append(":").append("1"); // bots tjrs prets
         }
 
@@ -268,8 +291,8 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     }
 
     @Override
-    public synchronized void broadcastTurnChanged(String id){
-        String message = NetworkProtocolServer.UPDATE_TURN_CHANGED + ":" + id;
+    public synchronized void broadcastTurnChanged(String id, String phase){
+        String message = NetworkProtocolServer.UPDATE_TURN_CHANGED + ":" + id + ":" + phase;
 
         for (ClientHandler client : connectedClient) {
             client.sendMessage(message);
@@ -289,6 +312,62 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     public void broadcastUpdatePiocheTaken(String id, int numberCard){
         String message = NetworkProtocolServer.UPDATE_PIOCHE_TAKEN + ":" + id + ":" + numberCard;
 
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message);
+        }
+    }
+
+    @Override
+    public synchronized void broadcastUpdateDiscardDraw(String id, int valeur){
+        String message = NetworkProtocolServer.UPDATE_DISCARD_DRAW + ":" + id + ":" + valeur;
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message);
+        }
+    }
+
+    @Override
+    public synchronized void broadcastGameEnded(String lastRoundPlayerId){
+        // [GAME_ENDED:lastRoundPlayerId]  (vide si null pour conserver le format)
+        String idPart = (lastRoundPlayerId != null) ? lastRoundPlayerId : "";
+        String message = NetworkProtocolServer.UPDATE_GAME_ENDED + ":" + idPart;
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message);
+        }
+    }
+
+    @Override
+    public synchronized void broadcastRoundEnded(String lastRoundPlayerId){
+        // Format : ROUND_ENDED:lastRoundPlayerId  (vide si null pour conserver le format)
+        String idPart = (lastRoundPlayerId != null) ? lastRoundPlayerId : "";
+        String message = NetworkProtocolServer.UPDATE_ROUND_ENDED + ":" + idPart;
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message);
+        }
+    }
+
+    @Override
+    public synchronized void broadcastNewRound(long seed){
+        // Format : NEW_ROUND:seed
+        this.gameSeed = seed;
+        String message = NetworkProtocolServer.UPDATE_NEW_ROUND + ":" + seed;
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message);
+        }
+    }
+
+    @Override
+    public synchronized void broadcastAfkReplaced(String playerId){
+        // Format : AFK_REPLACED:playerId
+        String message = NetworkProtocolServer.UPDATE_AFK_REPLACED + ":" + playerId;
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message);
+        }
+    }
+
+    @Override
+    public synchronized void broadcastExchange(String id, int col, int row, int newValue, int discardedValue){
+        String message = NetworkProtocolServer.UPDATE_EXCHANGE + ":" + id + ":" + col + ":" + row
+                + ":" + newValue + ":" + discardedValue;
         for (ClientHandler client : connectedClient) {
             client.sendMessage(message);
         }

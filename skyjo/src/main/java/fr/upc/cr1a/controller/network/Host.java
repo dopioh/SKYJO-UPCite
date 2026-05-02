@@ -56,10 +56,17 @@ public class Host {
     }
 
     /**
-     * Ajoute un bot au lobby (cote host uniquement)
+     * Ajoute un bot au lobby (cote host uniquement) avec un nom d'affichage et un type de strategie separe.
+     */
+    public void addBot(String id, String displayName, String botType){
+        gameHost.addBotToLobby(id, displayName, botType);
+    }
+
+    /**
+     * Ajout un bot au lobby
      */
     public void addBot(String id, String botType){
-        gameHost.addBotToLobby(id, botType);
+        gameHost.addBotToLobby(id, botType, botType);
     }
 
     public void removeBot(String id){
@@ -120,8 +127,12 @@ public class Host {
      */
     public void startGame(){
         stopBroadcasting();
-        gameHost.broadcastStartGame();
+        // Creer la partie cote host pour éviter d'avoir une partie par appareil
         gameHost.startAGame();
+        gameHost.broadcastStartGame();
+        if (gameHost.getGameManager() != null && client != null && client.getGameClient() != null) {
+            gameHost.getGameManager().setNetwork(client.getGameClient());
+        }
     }
 
     /**

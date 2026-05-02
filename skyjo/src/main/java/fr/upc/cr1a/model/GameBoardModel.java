@@ -63,6 +63,24 @@ public class GameBoardModel {
     public void retourMenuCalled(){
         System.out.println("Retour au menu");
         if (frame != null) {
+            // Si host en multi : prevenir les clients + fermer le serveur proprement
+            if (fr.upc.cr1a.model.GameSession.status == fr.upc.cr1a.model.GameSession.STATUS.HOST
+                && frame.getLobbyRoomController() != null
+                && frame.getLobbyRoomController().getHost() != null) {
+                fr.upc.cr1a.controller.network.Host host = frame.getLobbyRoomController().getHost();
+                if (host.getGameHost() != null) {
+                    host.getGameHost().broadcastGameEnded(null);
+                }
+                host.quit();
+                fr.upc.cr1a.model.GameSession.status = fr.upc.cr1a.model.GameSession.STATUS.OFFLINE;
+            } else if (fr.upc.cr1a.model.GameSession.status == fr.upc.cr1a.model.GameSession.STATUS.CLIENT
+                && frame.getLobbyRoomController() != null
+                && frame.getLobbyRoomController().getClient() != null) {
+                // Cote client : se deconnecter proprement
+                frame.getLobbyRoomController().getClient().disconnect();
+                fr.upc.cr1a.model.GameSession.status = fr.upc.cr1a.model.GameSession.STATUS.OFFLINE;
+            }
+
             GameManager  game = frame.getCurrentGame();
             if (game != null) {
                 game.stopGame();

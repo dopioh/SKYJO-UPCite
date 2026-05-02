@@ -96,23 +96,30 @@ public class ClientHandler implements Runnable{
                     if (game != null && game.getCurrentPlayer().getPlayerData().getID().equals(playerId)) { 
                         GameManager.TurnPhase phase = game.getTurnPhase();
                         
-                        // cas du retournement de cartes PRE MANCHE
+                        //retournement de cartes PRE MANCHE
                         if (phase == GameManager.TurnPhase.INIT_REVEAL) {
+                            CardModel card = game.getCurrentPlayer().getHand().getCard(row, col);
+                            String previousPlayerId = playerId;
+
                             boolean success = game.revealInitCard(col, row);
 
                             if (success) {
-                                CardModel card = game.getCurrentPlayer().getHand().getCard(row, col);
                                 if (card instanceof NumberCardModel) {
                                     int val = ((NumberCardModel) card).getCardValue();
-                                    
-                                    // braodcast de la carte retourné
-                                    gameHost.broadcastCardFlipped(playerId, col, row, val);
+                                    gameHost.broadcastCardFlipped(previousPlayerId, col, row, val);
                                 }
-                                
-                                gameHost.broadcastTurnChanged(game.getCurrentPlayer().getPlayerData().getID());
+
+                                String newCurrentId = game.getCurrentPlayer().getPlayerData().getID();
+                                boolean playerChanged = !newCurrentId.equals(previousPlayerId);
+                                if (playerChanged) {
+                                    triggerProceedAfterAction(game);
+                                } else {
+                                    gameHost.broadcastTurnChanged(newCurrentId, game.getTurnPhase().name());
+                                }
                             }
-                        } 
-                        // cas du retournement obligatoire apres avoir jeté une pioche
+                        }
+
+                        // apres avoir jeté une pioche
 
                         else if (phase == GameManager.TurnPhase.CARD_DISCARD_FROM_DRAW) {
 
@@ -123,9 +130,7 @@ public class ClientHandler implements Runnable{
                                 int val = ((NumberCardModel) card).getCardValue();
                                 gameHost.broadcastCardFlipped(playerId, col, row, val);
                             }
-                            
-                            game.nextPlayer();
-                            gameHost.broadcastTurnChanged(game.getCurrentPlayer().getPlayerData().getID());
+                            triggerProceedAfterAction(game);
                         }
                     }
                 }
@@ -142,13 +147,14 @@ public class ClientHandler implements Runnable{
                             
                             // execution dans le jeu
                             game.takeDiscard();
-                            gameHost.broadcastUpdateDiscardTaken(playerId); 
+                            gameHost.broadcastUpdateDiscardTaken(playerId);
+                            gameHost.broadcastTurnChanged(playerId, game.getTurnPhase().name());
                         }
                     }
                 }
 
-                // Echanger une carte ( jeter dans la defausse )
-                else if (message.contains(NetworkProtocolClient.REQ_DISCARD)) {
+                // Echanger une carte [id:DISCARD:col:row]
+                else if (message.contains(":" + NetworkProtocolClient.REQ_DISCARD + ":")) {
                     String[] parts = message.split(":");
                     String playerId = parts[0];
                     int col = Integer.parseInt(parts[2]);
@@ -157,21 +163,42 @@ public class ClientHandler implements Runnable{
                     GameManager game = gameHost.getGameManager();
                     if (game != null && game.getCurrentPlayer().getPlayerData().getID().equals(playerId)) {
                         GameManager.TurnPhase phase = game.getTurnPhase();
-                        
+
                         // verifie que le joueur a une pioche en main
                         if (phase == GameManager.TurnPhase.CARD_TAKE_FROM_DISCARD || phase == GameManager.TurnPhase.CARD_DRAW_FROM_DECK) {
-                            game.exchangeCardInHand(col, row);
-                            
-                            // on revele la carte a tlm
-                            CardModel card = game.getCurrentPlayer().getHand().getCard(row, col);
-                            if (card instanceof NumberCardModel) {
-                                int val = ((NumberCardModel) card).getCardValue();
-                                gameHost.broadcastCardFlipped(playerId, col, row, val);
+                            int newValue = -1; // Carte qu'on vient d'avoir
+                            int discardedValue = -1; // Carte d'avant 
+                            CardModel drawn = game.getCurrentDrawCard();
+                            if (drawn instanceof NumberCardModel) {
+                                newValue = ((NumberCardModel) drawn).getCardValue();
                             }
-                            
-                            // Le tour est fini
-                            game.nextPlayer();
-                            gameHost.broadcastTurnChanged(game.getCurrentPlayer().getPlayerData().getID());
+                            CardModel oldHand = game.getCurrentPlayer().getHand().getCard(row, col);
+                            if (oldHand instanceof NumberCardModel) {
+                                discardedValue = ((NumberCardModel) oldHand).getCardValue();
+                            }
+
+                            game.exchangeCardInHand(col, row);
+                            gameHost.broadcastExchange(playerId, col, row, newValue, discardedValue);
+                            triggerProceedAfterAction(game);
+                        }
+                    }
+                }
+                
+                else if (message.contains(":" + NetworkProtocolClient.REQ_DISCARD_DRAW)) {
+                    String[] parts = message.split(":");
+                    String playerId = parts[0];
+
+                    GameManager game = gameHost.getGameManager();
+                    if (game != null && game.getCurrentPlayer().getPlayerData().getID().equals(playerId)) {
+                        if (game.getTurnPhase() == GameManager.TurnPhase.CARD_DRAW_FROM_DECK) {
+                            CardModel drawn = game.getCurrentDrawCard();
+                            int val = -1;
+                            if (drawn instanceof NumberCardModel) {
+                                val = ((NumberCardModel) drawn).getCardValue();
+                            }
+                            game.discardDrawCard();
+                            gameHost.broadcastUpdateDiscardDraw(playerId, val);
+                            gameHost.broadcastTurnChanged(playerId, game.getTurnPhase().name());
                         }
                     }
                 }
@@ -185,13 +212,15 @@ public class ClientHandler implements Runnable{
                         if (game.getTurnPhase() == GameManager.TurnPhase.DRAW_DECISION) {
                             CardModel drawnCard = game.drawDeck();
                             
+                            // Bug la carte ne se retournait pas
+                            if (drawnCard != null && drawnCard.isFaceDown()) drawnCard.returnCard();
 
                             if (drawnCard instanceof NumberCardModel) {
                                 int val = ((NumberCardModel) drawnCard).getCardValue();
                                 sendMessage("UPDATE_DRAWN_CARD:" + val); // pas dans NetworkProtocol pour le moment car requete unique à un joueur
                             }
-                            
-                            gameHost.broadcastTurnChanged(playerId);
+
+                            gameHost.broadcastTurnChanged(playerId, game.getTurnPhase().name());
                         }
                     }
                 }
@@ -224,6 +253,26 @@ public class ClientHandler implements Runnable{
 
     public String getUsername(){
         return this.username;
+    }
+
+    /**
+     * Appelle GameLoop.proceedAfterAction() sur pour avoir la meme chose qu'en local
+     */
+    private void triggerProceedAfterAction(GameManager game){
+        try {
+            if (game.getGameBoardModel() != null
+                && game.getGameBoardModel().getGameBoardController() != null
+                && game.getGameBoardModel().getGameBoardController().getGameLoop() != null) {
+                javax.swing.SwingUtilities.invokeLater(() ->
+                    game.getGameBoardModel().getGameBoardController().getGameLoop().proceedAfterAction()
+                );
+                return;
+            }
+        } catch (Exception e) {
+        }
+        game.nextPlayer();
+        game.startTurn();
+        gameHost.broadcastTurnChanged(game.getCurrentPlayer().getPlayerData().getID(), game.getTurnPhase().name());
     }
 
     // test client ( ne marche que si y'a un host correspondant)

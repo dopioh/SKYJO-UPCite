@@ -12,6 +12,7 @@ import fr.upc.cr1a.controller.GameBoardController;
 //import fr.upc.cr1a.controller.network.UDP.UDPBroadcaster;
 import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolClient;
 import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolServer;
+import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.GameManager;
 import fr.upc.cr1a.model.GameSession;
 import fr.upc.cr1a.model.NumberCardModel;
@@ -141,11 +142,23 @@ public class GameClient implements NetworkProtocolClient{
 
                 if (message.startsWith(NetworkProtocolServer.UPDATE_START_GAME)){
                     System.out.println("[SYSTEM] message start with \""+NetworkProtocolServer.UPDATE_START_GAME+"\"");
+                    // [UPDATE_START_GAME:seed] pour éviter plusieurs decks de cartes différents sur les appareils 
+                    String[] sgParts = message.split(":");
+                    long seed = 0L;
+                    boolean hasSeed = false;
+                    if (sgParts.length >= 2) {
+                        try { seed = Long.parseLong(sgParts[1]); hasSeed = true; }
+                        catch (NumberFormatException e) {}
+                    }
+                    final long finalSeed = seed;
+                    final boolean finalHasSeed = hasSeed;
                     // Seuls les CLIENTS créent le GameManager ici ; le HOST le crée via GameHost.startAGame()
                     if (GameSession.status != GameSession.STATUS.HOST) {
-                        SwingUtilities.invokeLater(() -> {
-                            GameManager game = new GameManager(this.frame, this.listPlayersData, this.modeAction);
+                        SwingUtilities.invokeLater(() -> {GameManager game = finalHasSeed
+                                ? new GameManager(this.frame, this.listPlayersData, this.modeAction, finalSeed)
+                                : new GameManager(this.frame, this.listPlayersData, this.modeAction);
                             game.setNetwork(this);
+                            game.setLocalPlayer(fr.upc.cr1a.model.player.PlayerAccount.actuelAccount);
                             frame.setCurrentGame(game);
                             System.out.println("[SYSTEM] Game launched (client side)");
                         });
@@ -154,29 +167,28 @@ public class GameClient implements NetworkProtocolClient{
 
                 if (message.startsWith(NetworkProtocolServer.UPDATE_CARD_FLIPPED)){
                     String[] parts = message.split(":");
-                    
                     String id = parts[1];
                     int col = Integer.parseInt(parts[2]);
                     int row = Integer.parseInt(parts[3]);
                     int valeur = Integer.parseInt(parts[4]);
-                    
                     GameManager game = frame.getCurrentGame();
-                    
                     if (game != null) {
-                        game.forceRevealCardFromNetwork(id, col, row, valeur);
+                        if (GameSession.status != GameSession.STATUS.HOST) {
+                            game.forceRevealCardFromNetwork(id, col, row, valeur);
+                        } else {
+                            game.animateRevealFromNetwork(id, row, col);
+                        }
                     }
                 }
 
                 if(message.startsWith(NetworkProtocolServer.UPDATE_TURN_CHANGED)){
                     String[] parts = message.split(":");
-                    
                     if (parts.length >= 2) {
                         String idJoueurActif = parts[1];
-                        
+                        String phaseName = (parts.length >= 3) ? parts[2] : null;
                         GameManager game = frame.getCurrentGame();
-                        
                         if (game != null) {
-                            game.forceTurnFromNetwork(idJoueurActif);
+                            game.forceTurnFromNetwork(idJoueurActif, phaseName);
                         }
                     }
                 }
@@ -184,43 +196,179 @@ public class GameClient implements NetworkProtocolClient{
                 if (message.startsWith(NetworkProtocolServer.UPDATE_DISCARD_TAKEN)) {
                     //String[] parts = message.split(":");
                     //String playerId = parts[1];
-                    
                     GameManager game = frame.getCurrentGame();
                     if (game != null) {
-     
-                        // tlm fait l'action localement
-                        game.takeDiscard();
-                        
+                        if (GameSession.status != GameSession.STATUS.HOST) {
+                            game.takeDiscard();
+                        }
 
                         if (game.getGameBoardModel() != null) {
-                            game.getGameBoardModel().getGameBoardController().updateAllDecksDisplay(); // mettra une carte au hasard, il faut attendre la view pour tester
-                            game.getGameBoardModel().getGameBoardController().refreshGuide();
+                            SwingUtilities.invokeLater(() -> {
+                                GameBoardController c = game.getGameBoardModel().getGameBoardController();
+                                GameBoardView v = game.getGameBoardModel().getGameBoardView();
+                                c.updateAllDecksDisplay();
+                                c.refreshGuide();
+                                // Seul le joueur actif voit la carte sous le curseur
+                                if (game.isLocalPlayerTurn() && v != null) {
+                                    CardModel drawn = game.getCurrentDrawCard();
+                                    if (drawn != null) {
+                                        v.showCursorCard(v.getCardImagePath(drawn));
+                                    }
+                                }
+                            });
                         }
                     }
                 }
 
+                if (message.startsWith(NetworkProtocolServer.UPDATE_EXCHANGE)) {
+                    //[EXCHANGE:playerId:col:row:newValue:discardedValue]
+                    String[] parts = message.split(":");
+                    if (parts.length >= 6) {
+                        String id = parts[1];
+                        int col = Integer.parseInt(parts[2]);
+                        int row = Integer.parseInt(parts[3]);
+                        int newValue = Integer.parseInt(parts[4]);
+                        int discardedValue = Integer.parseInt(parts[5]);
+
+                        GameManager game = frame.getCurrentGame();
+                        if (game != null) {
+                            if (GameSession.status != GameSession.STATUS.HOST) {
+                                game.forceExchangeFromNetwork(id, col, row, newValue, discardedValue);
+                            }
+                            if (game.getGameBoardModel() != null) {
+                                SwingUtilities.invokeLater(() -> {
+                                    GameBoardController c = game.getGameBoardModel().getGameBoardController();
+                                    GameBoardView v = game.getGameBoardModel().getGameBoardView();
+                                    c.updateAllDecksDisplay();
+                                    c.refreshGuide();
+                                    if (v != null) {
+                                        v.hideCursorCard();
+                                        v.showPlayerCards(game.getCurrentPlayer());
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+
+                if (message.startsWith(NetworkProtocolServer.UPDATE_DISCARD_DRAW)) {
+                    // Le joueur actif a jete la carte piochee
+                    GameManager game = frame.getCurrentGame();
+                    if (game != null) {
+                        // Le host a deja applique via ClientHandler
+                        if (GameSession.status != GameSession.STATUS.HOST) {
+                            game.discardDrawCard();
+                        }
+                        if (game.getGameBoardModel() != null) {
+                            SwingUtilities.invokeLater(() -> {
+                                GameBoardController c = game.getGameBoardModel().getGameBoardController();
+                                GameBoardView v = game.getGameBoardModel().getGameBoardView();
+                                c.updateAllDecksDisplay();
+                                c.refreshGuide();
+                                if (v != null) {
+                                    v.hideCursorCard();
+                                }
+                            });
+                        }
+                    }
+                }
+
+                if (message.startsWith(NetworkProtocolServer.UPDATE_ROUND_ENDED)) {
+                    //la manche est terminee, on affiche le RoundEndPanel.
+                    //  [ROUND_ENDED:lastRoundPlayerId]
+                    String[] reParts = message.split(":");
+                    final String lrpId = (reParts.length >= 2 && !reParts[1].isEmpty()) ? reParts[1] : null;
+                    SwingUtilities.invokeLater(() -> {
+                        GameManager game = frame.getCurrentGame();
+                        if (game == null) return;
+                        if (game.getGameBoardModel() == null|| game.getGameBoardModel().getGameBoardController() == null) return;
+                        game.finalizeRoundFromNetwork(lrpId);
+                        game.getGameBoardModel().getGameBoardController().showRoundEndScreenFromLoop();
+                    });
+                    continue;
+                }
+
+                if (message.startsWith(NetworkProtocolServer.UPDATE_NEW_ROUND)) {
+                    String[] nrParts = message.split(":");
+                    long seed = 0L;
+                    if (nrParts.length >= 2) {
+                        try { seed = Long.parseLong(nrParts[1]); } catch (NumberFormatException ignored) {}
+                    }
+                    final long finalSeed = seed;
+                    SwingUtilities.invokeLater(() -> {
+                        GameManager game = frame.getCurrentGame();
+                        if (game == null) return;
+                        if (game.getGameBoardModel() == null
+                            || game.getGameBoardModel().getGameBoardController() == null) return;
+                        game.getGameBoardModel().getGameBoardController().startLocalNewRound(finalSeed);
+                    });
+                    continue;
+                }
+
+                // Remplacé par un bot message
+                if (message.startsWith(NetworkProtocolServer.UPDATE_AFK_REPLACED)) {
+                    //[AFK_REPLACED:playerId]
+                    String[] afkParts = message.split(":");
+                    final String afkPlayerId = (afkParts.length >= 2) ? afkParts[1] : null;
+                    SwingUtilities.invokeLater(() -> {
+                        if (afkPlayerId != null&& playerData != null&& afkPlayerId.equals(playerData.getID())) {
+                            javax.swing.JOptionPane.showMessageDialog(frame,"AFK : vous êtes remplacé par un bot.","Inactivité",javax.swing.JOptionPane.WARNING_MESSAGE);
+                        }
+                    });
+                    continue;
+                }
+
+                if (message.startsWith(NetworkProtocolServer.UPDATE_GAME_ENDED)) {
+                    // Format : GAME_ENDED:lastRoundPlayerId (peut etre vide)
+                    String[] geParts = message.split(":");
+                    final String lrpId = (geParts.length >= 2 && !geParts[1].isEmpty()) ? geParts[1] : null;
+                    SwingUtilities.invokeLater(() -> {
+                        GameManager game = frame.getCurrentGame();
+                        if (game == null|| game.getGameBoardModel() == null|| game.getGameBoardModel().getGameBoardController() == null) {
+                            // retour direct au menu si pas de partie active
+                            GameSession.status = GameSession.STATUS.OFFLINE;
+                            frame.showPanel("MENU");
+                            return;
+                        }
+                        game.finalizeRoundFromNetwork(lrpId);
+                        game.setGameStateNetwork(GameManager.GameState.GAME_ENDED);
+                        // Afficher RoundEndPanel mais fin de partie au lieu de pouvoir continuer
+                        game.getGameBoardModel().getGameBoardController().showRoundEndScreenFromLoop();
+                    });
+                    break;
+                }
+
                 // requete secrete ( broadcast que le client handler concerné normalement)
-                if (message.startsWith("UPDATE_DRAWN_CARD")) { // valeur de la pioche 
+                if (message.startsWith("UPDATE_DRAWN_CARD")) { // valeur de la pioche
                     String[] parts = message.split(":");
                     int valeur = Integer.parseInt(parts[1]);
 
                     GameManager game = frame.getCurrentGame();
                     if (game != null) {
-                        NumberCardModel vraieCarte = new NumberCardModel(false, valeur);
-                        
-                        
-                        game.setCurrentDrawCard(vraieCarte); // ça set que dans la main du client concerné 
-                        
-                        // phase de choix entre echanger ou jeter
-                        game.setTurnPhase(GameManager.TurnPhase.CARD_DRAW_FROM_DECK);
-                        
+                        if (GameSession.status != GameSession.STATUS.HOST) {
+                            NumberCardModel vraieCarte = new NumberCardModel(false, valeur);
+                            game.setCurrentDrawCard(vraieCarte);
+                            // phase de choix entre echanger ou jeter
+                            game.setTurnPhase(GameManager.TurnPhase.CARD_DRAW_FROM_DECK);
+                        }
 
                         if (game.getGameBoardModel() != null) {
                             GameBoardView view = game.getGameBoardModel().getGameBoardView();
                             GameBoardController controller = game.getGameBoardModel().getGameBoardController();
-                            
-                            controller.refreshGuide(); 
-                            view.showCursorCard(view.getCardImagePath(vraieCarte)); // carte sous la souris du joueur
+
+                            SwingUtilities.invokeLater(() -> {
+                                controller.refreshGuide();
+                                CardModel drawn = game.getCurrentDrawCard();
+                                if (drawn != null) {
+                                    if (drawn.isFaceDown()) drawn.returnCard();
+                                    String drawnPath = view.getCardImagePath(drawn);
+                                    view.getBtnPioche().flip(() -> view.getBtnPioche().setCardImage(drawnPath));
+                                    view.showCursorCard(drawnPath);
+                                    view.updateDiscardOnly(
+                                        game.getDiscardPile().isEmpty() ? null : game.getDiscardPile().getTopCard()
+                                    );
+                                }
+                            });
                         }
                     }
                 }
@@ -272,6 +420,17 @@ public class GameClient implements NetworkProtocolClient{
     @Override
     public void sendDisquardRequest(String id, int col, int row){
         out.println(id +":"+NetworkProtocolClient.REQ_DISCARD+":"+col +":" + row);
+    }
+
+    /**
+     * Requete pour jeter la carte piochee sans l'echanger.
+     * STRUCTURE = id:protocol
+     */
+    @Override
+    public void sendDiscardDrawRequest(String id){
+        if (out != null){
+            out.println(id + ":" + NetworkProtocolClient.REQ_DISCARD_DRAW);
+        }
     }
 
     /**

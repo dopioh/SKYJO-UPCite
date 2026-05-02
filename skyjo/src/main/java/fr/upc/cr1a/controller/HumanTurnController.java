@@ -7,11 +7,13 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import javax.swing.Timer;
 
+import fr.upc.cr1a.controller.network.connexion.GameClient;
 import fr.upc.cr1a.model.ActionCardModel;
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.GameManager;
 import fr.upc.cr1a.model.GameRuleModel;
+import fr.upc.cr1a.model.GameSession;
 import fr.upc.cr1a.model.PlayerHandModel;
 import fr.upc.cr1a.model.PlayerModel;
 import fr.upc.cr1a.view.GameBoardView;
@@ -56,6 +58,36 @@ public class HumanTurnController {
         this.gameManager = gameManager;
         this.mainController = mainController;
         this.gameLoop = gameLoop;
+    }
+
+    /**
+     * Multi-joueur en cours (host ou client, pas OFFLINE).
+     */
+    private boolean isOnline() {
+        return GameSession.status == GameSession.STATUS.HOST
+            || GameSession.status == GameSession.STATUS.CLIENT;
+    }
+
+    /**
+     * True si on doit ignorer l'input (multi et ce n'est pas le tour du joueur local).
+     */
+    private boolean blockedByTurn() {
+        return isOnline() && !gameManager.isLocalPlayerTurn();
+    }
+
+    /**
+     * ID du joueur local pour les requetes reseau.
+     */
+    private String localId() {
+        return gameManager.getLocalPlayer() != null ? gameManager.getLocalPlayer().getID() : null;
+    }
+
+    /**
+     * Raccourci pour obtenir le GameClient quand on est en multi.
+     * En HOST, passe par le Client de l'hote (loopback) qui a le meme playerId.
+     */
+    private GameClient network() {
+        return gameManager.getNetwork();
     }
 
     public void installListeners() {
@@ -124,6 +156,14 @@ public class HumanTurnController {
             if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) return;
             if (mainController.isWaitingNextTurn()) return;
             if (gameManager.getTurnPhase() != GameManager.TurnPhase.DRAW_DECISION) return;
+            //seul le joueur dont c'est le tour peut jouer, et uniquement via le reseau
+            if (blockedByTurn()) return;
+            if (isOnline()) {
+                if (network() != null && localId() != null) {
+                    network().sendPickPiocheRequest(localId());
+                }
+                return; // Pas d'execution local
+            }
 
             CardModel drawn = gameManager.drawDeck();
             if (drawn.isFaceDown()) drawn.returnCard();
@@ -146,9 +186,17 @@ public class HumanTurnController {
         gameBoardView.getBtnDefausse().addActionListener(e -> {
             if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) return;
             if (mainController.isWaitingNextTurn()) return;
+            if (blockedByTurn()) return;
 
             if (gameManager.getTurnPhase() == GameManager.TurnPhase.DRAW_DECISION) {
                 if (gameManager.getDiscardPile().isEmpty()) return;
+
+                if (isOnline()) {
+                    if (network() != null && localId() != null) {
+                        network().sendPickDefausseRequest(localId());
+                    }
+                    return;
+                }
 
                 CardModel taken = gameManager.takeDiscard();
                 String takenPath = gameBoardView.getCardImagePath(taken);
@@ -161,6 +209,15 @@ public class HumanTurnController {
             }
 
             if (gameManager.getTurnPhase() == GameManager.TurnPhase.CARD_DRAW_FROM_DECK) {
+                if (isOnline()) {
+                    if (network() != null && localId() != null) {
+                        network().sendDiscardDrawRequest(localId());
+                    }
+                    waitingReveal = true;
+                    gameBoardView.hideCursorCard();
+                    mainController.refreshGuide();
+                    return;
+                }
                 gameManager.discardDrawCard();
                 gameBoardView.getBtnDefausse().animatePressLight();
                 waitingReveal = true;
@@ -255,6 +312,28 @@ public class HumanTurnController {
                     if (currentPlayer == null) return;
 
                     CardModel card = currentPlayer.getHand().getCard(r, c);
+
+                    // bloquer quand ce n'est pas le tour du joueur local
+                    if (blockedByTurn()) return;
+
+                    // tout clic carte passe par le reseau (INIT_REVEAL, retournement post-pioche, echange)
+                    if (isOnline() && network() != null && localId() != null) {
+                        GameManager.TurnPhase phase = gameManager.getTurnPhase();
+                        if (phase == GameManager.TurnPhase.INIT_REVEAL
+                            || phase == GameManager.TurnPhase.CARD_DISCARD_FROM_DRAW) {
+                            network().sendFlipCardRequest(localId(), c, r);
+                            return;
+                        }
+                        if (phase == GameManager.TurnPhase.CARD_DRAW_FROM_DECK
+                            || phase == GameManager.TurnPhase.CARD_TAKE_FROM_DISCARD) {
+                            network().sendDisquardRequest(localId(), c, r);
+                            gameBoardView.hideCursorCard();
+                            return;
+                        }
+                        // phase DRAW_DECISION ou autre 
+                        mainController.refreshGuide();
+                        return;
+                    }
 
                     if (gameManager.getTurnPhase() == GameManager.TurnPhase.INIT_REVEAL) {
                         PlayerModel revealedPlayer = gameBoardView.getCurrentPlayer();

@@ -1,6 +1,7 @@
 package fr.upc.cr1a.model;
 
 import java.util.Collections;
+import java.util.Random;
 
 /**
  * @author Nassim
@@ -9,7 +10,25 @@ import java.util.Collections;
  */
 public class PiocheModel extends CardStackModel {
 
+    /**
+     * Random utilise pour les melanges. Permet de seeder pour synchroniser host/clients en multi.
+     */
+    private final Random rng;
+
     public PiocheModel(boolean action) {
+        this(action, new Random().nextLong());
+    }
+
+    /**
+     * Constructeur seed : permet d'obtenir le meme ordre de cartes sur deux machines differentes
+     * (host + clients en multijoueur) Le seed est diffusé via START_GAME
+     */
+    public PiocheModel(boolean action, long seed) {
+        this.rng = new Random(seed);
+        initStack(action);
+    }
+
+    private void initStack(boolean action) {
         if (!action) {
             int[] counts = {
                 5,  // -2
@@ -43,7 +62,7 @@ public class PiocheModel extends CardStackModel {
                     this.getStack().add(new NumberCardModel(true, value, color, false));
                 }
             }
-            Collections.shuffle(this.getStack());
+            Collections.shuffle(this.getStack(), rng);
         }
         else {
             int[] counts = {
@@ -82,7 +101,7 @@ public class PiocheModel extends CardStackModel {
             for (int j = 0; j < starCount; j++) {
                 this.getStack().add(new NumberCardModel(true, 0, "starcolor", true));
             }
-            Collections.shuffle(this.getStack());
+            Collections.shuffle(this.getStack(), rng);
         }
     }
 
@@ -98,7 +117,7 @@ public class PiocheModel extends CardStackModel {
                 defausse.getStack().remove(0);
             }
         }
-        Collections.shuffle(this.getStack());
+        Collections.shuffle(this.getStack(), rng);
     }
 
 }
