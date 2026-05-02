@@ -1007,8 +1007,6 @@ public class GameManager {
                             }
                         });
                     }
-                    gameBoardModel.getGameBoardController().triggerBotTurnIfNeeded();
-
                     if (fr.upc.cr1a.model.GameSession.status == fr.upc.cr1a.model.GameSession.STATUS.CLIENT
                         && playerChanged
                         && gameBoardModel.getGameBoardController().getGameLoop() != null) {

@@ -376,10 +376,27 @@ public class GameClient implements NetworkProtocolClient{
 
         } catch (Exception e) {
             System.out.println("[CLIENT] Déconnecté du serveur.");
-            GameSession.status = GameSession.STATUS.OFFLINE;
             e.printStackTrace();
         } finally {
+            boolean wasInGame = (frame != null && frame.getCurrentGame() != null);
+            boolean previouslyConnected = (GameSession.status == GameSession.STATUS.CLIENT);
             disconnect();
+            if (!wasKicked && wasInGame && previouslyConnected) {
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        javax.swing.JOptionPane.showMessageDialog(
+                            frame,
+                            "L'hôte s'est déconnecté. Retour au menu.",
+                            "Connexion perdue",
+                            javax.swing.JOptionPane.WARNING_MESSAGE
+                        );
+                    } catch (Exception ignored) {}
+                    GameManager g = frame.getCurrentGame();
+                    if (g != null) g.stopGame();
+                    frame.clearCurrentGame();
+                    frame.showPanel("MENU");
+                });
+            }
         }
     }
 

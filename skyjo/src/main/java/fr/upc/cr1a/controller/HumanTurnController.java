@@ -69,10 +69,30 @@ public class HumanTurnController {
     }
 
     /**
-     * True si on doit ignorer l'input (multi et ce n'est pas le tour du joueur local).
+     * True si on doit ignorer l'input :
+     *  - en multi et ce n'est pas le tour du joueur local
+     *  - le joueur local est AFK
      */
     private boolean blockedByTurn() {
-        return isOnline() && !gameManager.isLocalPlayerTurn();
+        if (isOnline() && !gameManager.isLocalPlayerTurn()) return true;
+        PlayerModel localPm = findLocalPlayerModel();
+        if (localPm != null && gameManager.isAutoControlled(localPm)) return true;
+        return false;
+    }
+
+    /**
+     * Retrouve le PlayerModel du joueur local
+     */
+    private PlayerModel findLocalPlayerModel() {
+        if (gameManager.getLocalPlayer() == null) return null;
+        String lid = gameManager.getLocalPlayer().getID();
+        if (lid == null) return null;
+        for (PlayerModel p : gameManager.getPlayers()) {
+            if (p.getPlayerData() != null && lid.equals(p.getPlayerData().getID())) {
+                return p;
+            }
+        }
+        return null;
     }
 
     /**

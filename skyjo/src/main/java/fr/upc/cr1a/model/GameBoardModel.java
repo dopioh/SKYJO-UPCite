@@ -6,6 +6,7 @@ import fr.upc.cr1a.controller.GameBoardController;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
 import fr.upc.cr1a.view.PlayerPreviewPanel;
+import fr.upc.cr1a.controller.network.Host;
 
 /**
  * Gere la logique du Plateau de jeu
@@ -64,21 +65,27 @@ public class GameBoardModel {
         System.out.println("Retour au menu");
         if (frame != null) {
             // Si host en multi : prevenir les clients + fermer le serveur proprement
-            if (fr.upc.cr1a.model.GameSession.status == fr.upc.cr1a.model.GameSession.STATUS.HOST
+            if (GameSession.status == GameSession.STATUS.HOST
                 && frame.getLobbyRoomController() != null
                 && frame.getLobbyRoomController().getHost() != null) {
-                fr.upc.cr1a.controller.network.Host host = frame.getLobbyRoomController().getHost();
+                Host host = frame.getLobbyRoomController().getHost();
                 if (host.getGameHost() != null) {
                     host.getGameHost().broadcastGameEnded(null);
                 }
-                host.quit();
-                fr.upc.cr1a.model.GameSession.status = fr.upc.cr1a.model.GameSession.STATUS.OFFLINE;
-            } else if (fr.upc.cr1a.model.GameSession.status == fr.upc.cr1a.model.GameSession.STATUS.CLIENT
+                // Laisser le temps aux clients de recevoir GAME_ENDED avant de fermer les sockets,
+                // sinon la fermeture brutale peut couper le message TCP en transit.
+                Host hostRef = host;
+                new Thread(() -> {
+                    try { Thread.sleep(300); } catch (InterruptedException ignored) {}
+                    hostRef.quit();
+                }, "host-delayed-quit").start();
+                GameSession.status = GameSession.STATUS.OFFLINE;
+            } else if (GameSession.status == GameSession.STATUS.CLIENT
                 && frame.getLobbyRoomController() != null
                 && frame.getLobbyRoomController().getClient() != null) {
                 // Cote client : se deconnecter proprement
                 frame.getLobbyRoomController().getClient().disconnect();
-                fr.upc.cr1a.model.GameSession.status = fr.upc.cr1a.model.GameSession.STATUS.OFFLINE;
+                GameSession.status = GameSession.STATUS.OFFLINE;
             }
 
             GameManager  game = frame.getCurrentGame();
@@ -86,6 +93,11 @@ public class GameBoardModel {
                 game.stopGame();
             }
             frame.clearCurrentGame();
+            // Nettoyer les references reseau du LobbyRoomController pour permettre une nouvelle partie
+            if (frame.getLobbyRoomController() != null) {
+                frame.getLobbyRoomController().setNetworkHost(null);
+                frame.getLobbyRoomController().setNetworkClient(null);
+            }
             frame.showPanel("MENU");
         }
     }

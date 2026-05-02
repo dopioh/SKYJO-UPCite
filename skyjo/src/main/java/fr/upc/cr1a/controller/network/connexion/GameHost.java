@@ -88,7 +88,9 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     public void run(){
 
         try {
-            serverSocket = new ServerSocket(port);
+            serverSocket = new java.net.ServerSocket();
+            serverSocket.setReuseAddress(true);
+            serverSocket.bind(new java.net.InetSocketAddress(port));
             System.out.println("[SERVEUR] Serveur démarré sur le port " + port);
 
             while (isRunning) {
