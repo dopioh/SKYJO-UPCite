@@ -200,8 +200,8 @@ public class Leaderboard extends JComponent {
             center.setOpaque(false);
             center.add(new JLabel(avatar));
             String name = p.getUsername();
-            if (name.length() > 24) { // max 24 caractere
-                name = name.substring(0, 24) + "...";
+            if (name.length() > 18) { // max 18 caractere
+                name = name.substring(0, 18) + "...";
             }
             JLabel nameLabel = new JLabel(name);
             nameLabel.setForeground(Color.WHITE);
@@ -224,7 +224,7 @@ public class Leaderboard extends JComponent {
             };
             rankBadge.setOpaque(false);
             rankBadge.setLayout(new GridBagLayout());
-            rankBadge.setPreferredSize(new Dimension(36, 26));
+            rankBadge.setPreferredSize(new Dimension(110, 26));
             JLabel rankLabel2 = new JLabel(AccountStatsOverlayPanel.getRealRankName(p.getRankId()), SwingConstants.CENTER);
             rankLabel2.setForeground(new Color(80, 168, 74));
             rankLabel2.setFont(doodleFont.deriveFont(Font.BOLD, 16f));
