@@ -138,11 +138,13 @@ public class SettingsOverlayController {
             audioManager.playSfx("/sfx/volume.wav");
         }); 
 
+        // HELP BUTTON
         overlay.getHelpButton().addActionListener(e -> {
             String state = overlay.getHelpButton().getText();
             if ( state.equals("OFF")){
-                overlay.getHelpButton().setText("ON");
-                frame.getHelpController().toggleHelp(true);
+                //overlay.getHelpButton().setText("ON");
+                boolean b = frame.getHelpController().toggleHelp(true);
+                if (b){overlay.getHelpButton().setText("ON");}
                 //frame.getHelpOverlay().showPanel(true);
             } else {
                 overlay.getHelpButton().setText("OFF");

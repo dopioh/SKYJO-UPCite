@@ -135,15 +135,17 @@ public class HelpController {
     }
 
 
-    public void toggleHelp(boolean active) {
+    public boolean toggleHelp(boolean active) {
         GameManager gm = frame.getCurrentGame();
-        if ( gm == null){return;}
+        if ( gm == null){return false;}
         if (active) {
             this.helpOverlay.showPanel(true);
             chooseAndShow(); 
+            return true;
         } else {
             helpOverlay.showPanel(false);
             helpOverlay.clearHighlight(); 
+            return false;
         }
     }
 

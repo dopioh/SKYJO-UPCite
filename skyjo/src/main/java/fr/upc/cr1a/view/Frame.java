@@ -301,4 +301,8 @@ public class Frame extends JFrame{
     public void setHandCardAnimationsEnabled(boolean enabled) {
         this.handCardAnimationsEnabled = enabled;
     }
+
+    public SettingsOverlay getSettingsOverlay(){
+        return this.settingsOverlay;
+    }
 }

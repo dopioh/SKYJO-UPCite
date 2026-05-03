@@ -29,7 +29,7 @@ public class GameBoardModel {
         this.listPlayer = listPlayerModels;
         this.frame = frame;
         this.gameManager = gameManager;
-        this.gameBoardView = new GameBoardView(listPlayerModels);
+        this.gameBoardView = new GameBoardView(listPlayerModels, frame);
         this.playerPreviewPanel = gameBoardView.getPlayerPreviewPanel();
         this.gameBoardController = new GameBoardController(this, gameBoardView, gameManager);
     }
@@ -62,7 +62,8 @@ public class GameBoardModel {
 
     public void retourMenuCalled(){
         System.out.println("Retour au menu");
-        gameBoardController.getHelpController().getHelpOverlay().showPanel(false);
+        frame.getSettingsOverlay().getHelpButton().setText("OFF");
+        frame.getHelpController().toggleHelp(false);
         if (frame != null) {
             GameManager  game = frame.getCurrentGame();
             if (game != null) {
