@@ -10,7 +10,7 @@ import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
 
 //import java.awt.Frame;
-
+import java.util.ArrayList;
 import fr.upc.cr1a.view.help_ingame.HelpOverlay;
 
 import fr.upc.cr1a.controller.HumanTurnController.ActionMode;
@@ -31,12 +31,12 @@ public class HelpController {
 
     public void chooseAndShow(){
         helpOverlay.clearHighlight();
-        System.out.println("[HelpController] ddebug 1");
+        //System.out.println("[HelpController] ddebug 1");
 
         GameManager gameManager = frame.getCurrentGame();
         GameBoardView gameBoardView = gameManager.getGameBoardModel().getGameBoardView();
         if (gameManager == null || gameBoardView == null){return;}
-        System.out.println("[HelpController] ddebug 2");
+        //System.out.println("[HelpController] ddebug 2");
         TurnPhase phase = gameManager.getTurnPhase();
         switch (phase) {
             case INIT_REVEAL:
@@ -51,21 +51,51 @@ public class HelpController {
                 if (am != ActionMode.NONE){
                     switch (am) {
                     case SPY_ONE_COLUMN:
-
-                    case REPLACE_CARD_FIRST:    
+                        System.out.println("[HelpController] SPY_ONE_COLUMN ");
+                        Component[][] a0 = gameBoardView.getCardButtons();
+                        helpOverlay.addTargetComponent(a0);
+                        break;
+                    case REPLACE_CARD_FIRST:  
+                        System.out.println("[ACTION_MODE] REPLACE_CARD_FIRST !!!!!!!!!!!!!");
+                        Component[][] o0 = gameBoardView.getCardButtons();
+                        helpOverlay.addTargetComponent(o0);
+                        break;
                     case REPLACE_CARD_SECOND:
+                        System.out.println("[ACTION_MODE] REPLACE_CARD_SECOND !!!!!!!!!!!!!!!!!!");
+                        Component[][] o1 = gameBoardView.getCardButtons();
+                        helpOverlay.addTargetComponent(o1);
+                        break;
                     case TRADE_SELECT_OWN_CARD: 
+                        System.out.println("[ACTION_MODE] TRADE_SELECT_OWN_CARD");
+                        Component[][] a1 = gameBoardView.getCardButtons();
+                        helpOverlay.addTargetComponent(a1);
+                        break;
                     case TRADE_SELECT_TARGET_PLAYER:
+                        System.out.println("[ACTION_MODE] TRADE_SELECT_TARGET_PLAYER");
+                        helpOverlay.addTargetComponent(gameBoardView.getListPlayerButton(), gameManager.getCurrentPlayer().getName());
+                        break;
                     case TRADE_SELECT_TARGET_CARD:
+                        System.out.println("[ACTION_MODE] TRADE_SELECT_TARGET_CARD");
+                        Component[][] a2 = gameBoardView.getCardButtons();
+                        helpOverlay.addTargetComponent(a2);
+                        break;
                     case ALL_PLAYERS_DROP_SELECT_TARGET:
+                        System.out.println("[ACTION_MODE] ALL_PLAYERS_DROP_SELECT_TARGET");
+                        helpOverlay.addTargetComponent(gameBoardView.getListPlayerButton(), gameManager.getCurrentPlayer().getName());
+                        break;
                     case ALL_PLAYERS_DROP_SELECT_CARD:
+                        System.out.println("[ACTION_MODE] ALL_PLAYERS_DROP_SELECT_CARD");
+                        Component[][] a3 = gameBoardView.getCardButtons();
+                        helpOverlay.addTargetComponent(a3);
+                        break;
                     default:
+                        System.out.println("[ACTION_MODE] default ? ");
                         break;
                     }
                     break;
                 }
                 //helpOverlay.clearHighlight();
-                System.out.println("[HelpController] case DRAW_DECISION de chooseAndShow activé");
+                //System.out.println("[HelpController] case DRAW_DECISION de chooseAndShow activé");
                 Component tmp = gameBoardView.getBtnPioche();
                 Component tmp2 = gameBoardView.getBtnDefausse();
                 helpOverlay.addTargetComponent(tmp);
@@ -99,7 +129,7 @@ public class HelpController {
             // Où sont les phases des cartes actions ?
             default:
                 //helpOverlay.clearHighlight();
-                System.out.println("[HelpController] ddebug 3");
+                //System.out.println("[HelpController] ddebug 3");
                 break;
         }
     }

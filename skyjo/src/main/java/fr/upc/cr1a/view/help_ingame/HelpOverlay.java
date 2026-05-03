@@ -1,6 +1,9 @@
 package fr.upc.cr1a.view.help_ingame;
 
 import javax.swing.*;
+
+import fr.upc.cr1a.view.DoodleButton;
+
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
@@ -40,11 +43,24 @@ public class HelpOverlay extends JPanel{
             this.repaint();    
         }
     }
+
     public void addTargetComponent(Component[] target) {
         if ( target == null ) return;
         for ( int i = 0 ; i < target.length ; i++){
             this.targetComponents.add(target[i]);
             this.isHighlighting = true;
+        }
+        this.revalidate();  
+        this.repaint();   
+    }
+
+    public void addTargetComponent(ArrayList<DoodleButton> target, String namePlayerActif) {
+        if ( target == null ) return;
+        for ( int i = 0 ; i < target.size() ; i++){
+            if (!target.get(i).getText().equals(namePlayerActif)){
+                this.targetComponents.add(target.get(i));
+                this.isHighlighting = true;
+            }
         }
         this.revalidate();  
         this.repaint();   

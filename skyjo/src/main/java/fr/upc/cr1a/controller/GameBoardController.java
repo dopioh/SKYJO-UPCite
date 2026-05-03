@@ -461,4 +461,8 @@ public class GameBoardController {
     public HumanTurnController getHumanTurnController() {
         return this.humanTurnController;
     }
+
+    public HelpController getHelpController(){
+        return this.helpController;
+    }
 }

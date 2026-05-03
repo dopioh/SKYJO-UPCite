@@ -62,6 +62,7 @@ public class GameBoardModel {
 
     public void retourMenuCalled(){
         System.out.println("Retour au menu");
+        gameBoardController.getHelpController().getHelpOverlay().showPanel(false);
         if (frame != null) {
             GameManager  game = frame.getCurrentGame();
             if (game != null) {

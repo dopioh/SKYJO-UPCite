@@ -502,6 +502,7 @@ public class HumanTurnController {
                 System.out.println("carte " + type + " activée ! (pas encore implémentée en graphique)");
                 break;
         }
+        mainController.getHelpController().chooseAndShow();
     }
 
     private void handleActionModeClick(int row, int col) {
@@ -586,14 +587,17 @@ public class HumanTurnController {
                 tradeOwnRow = row;
                 tradeOwnCol = col;
                 actionMode = ActionMode.TRADE_SELECT_TARGET_PLAYER;
+                mainController.getHelpController().chooseAndShow();
                 gameBoardView.setActionGuide("TRADE : Clique un joueur cible à gauche (modifiable)");
                 break;
 
             case TRADE_SELECT_TARGET_PLAYER:
+                mainController.getHelpController().chooseAndShow();
                 gameBoardView.setActionGuide("TRADE : Choisis d'abord un joueur à gauche");
                 break;
 
             case TRADE_SELECT_TARGET_CARD:
+                mainController.getHelpController().chooseAndShow();
                 completeTrade(row, col);
                 break;
 
@@ -646,6 +650,7 @@ public class HumanTurnController {
         gameBoardView.setActionHandVisible(false);
         gameBoardView.showPlayerCards(target);
         actionMode = ActionMode.TRADE_SELECT_TARGET_CARD;
+        mainController.getHelpController().chooseAndShow();
         gameBoardView.setActionGuide("TRADE : Clique une carte de " + target.getName() + " (tu peux changer de cible)");
     }
 
