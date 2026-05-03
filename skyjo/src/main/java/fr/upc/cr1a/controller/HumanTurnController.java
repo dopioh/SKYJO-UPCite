@@ -29,7 +29,7 @@ public class HumanTurnController {
     private boolean waitingReveal = false;
 
     // stuff cartes actions
-    private enum ActionMode {
+    public enum ActionMode { // obliger de mettre public pour help in game
         NONE,
         SPY_ONE_COLUMN,
         REPLACE_CARD_FIRST,
@@ -828,5 +828,9 @@ public class HumanTurnController {
         gameBoardView.setActionHandVisible(true);
         gameBoardView.showOtherPlayerMain(false);
         gameBoardView.hideActionDescription();
+    }
+
+    public ActionMode getActionMode() {
+        return this.actionMode;
     }
 }
