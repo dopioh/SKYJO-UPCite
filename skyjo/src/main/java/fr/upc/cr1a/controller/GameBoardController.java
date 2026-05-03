@@ -188,8 +188,9 @@ public class GameBoardController {
         }
 
         boolean isGameOver = gameManager.getGameState() == GameManager.GameState.GAME_ENDED;
+        PlayerModel lowestScorePlayer = fr.upc.cr1a.model.ScoreCalculator.getLowestScorePlayer(gameManager.getPlayers());
         currentRoundEndPanel = new RoundEndPanel(
-            new ArrayList<>(gameManager.getPlayers()), isGameOver, gameManager.getLastRoundPlayer()
+            new ArrayList<>(gameManager.getPlayers()), isGameOver, gameManager.getLastRoundPlayer(), lowestScorePlayer
         );
 
         if (isGameOver) {

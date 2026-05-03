@@ -852,9 +852,11 @@ public class GameBoardView extends JPanel {
 
     public void updatePoints() {
         if (currentPlayer != null) {
+            // Affiche le score total accumulé + le score des cartes visibles de la manche actuelle
+            int totalScore = currentPlayer.getTotalScore();
             int liveScore = currentPlayer.getHand().getVisibleCardScore();
-            int totalWithLive = currentPlayer.getTotalScore() + liveScore;
-            pointsLabel.setText(totalWithLive + " P");
+            int displayScore = totalScore + liveScore;
+            pointsLabel.setText(displayScore + " P");
         }
     }
 
