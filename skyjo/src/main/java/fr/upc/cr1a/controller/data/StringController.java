@@ -16,7 +16,7 @@ public class StringController {
                 System.out.println("Suppression de l'espace au début : " + word);
             }
             if ( word.endsWith(" ")){
-                word = word.substring(word.length() - 1, word.length());
+                word = word.substring(0, word.length() - 1);
                 System.out.println("Suppression de l'espace à la fin : " + word);
             }
         }
