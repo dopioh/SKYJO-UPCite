@@ -121,6 +121,10 @@ public class HelpController {
                 helpOverlay.addTargetComponent(tmp6); // surcharge
 
                 break;
+            case CARD_DISCARD_FROM_DRAW:
+                Component[][] tmp9 = gameBoardView.getCardButtons();
+                helpOverlay.addTargetComponent(tmp9);
+                break;
             case CARD_TAKE_FROM_DISCARD:
                 //helpOverlay.clearHighlight();
                 Component[][] tmp7 = gameBoardView.getCardButtons();
