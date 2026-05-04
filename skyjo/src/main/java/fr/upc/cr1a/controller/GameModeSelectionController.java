@@ -24,6 +24,7 @@ public class GameModeSelectionController {
         ajouterListeners(view.getLocalButton(), () -> clicLocal());
         ajouterListeners(view.getMultiButton(), () -> clicMulti());
         ajouterListeners(view.getBackButton(), () -> clicRetour());
+        ajouterListeners(view.getTutorialButton(), () -> clicTutorial());
     }
 
     // ajoute hover + clic sur les DoodleButtons
@@ -48,5 +49,11 @@ public class GameModeSelectionController {
     private void clicRetour() {
         // Retour au menu principal
         frame.showPanel("MENU");
+    }
+
+    private void clicTutorial() {
+        // Affiche le tutoriel
+        TutorialController tc = new TutorialController(frame.getTutorialModel(), frame.getTutorialView(), frame.getTutorialModeSelectionView());
+        tc.showTutorial();
     }
 }
