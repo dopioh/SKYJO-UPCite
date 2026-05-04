@@ -70,7 +70,7 @@ public class PlayerModel {
      * @return le score total de la manche avec les actions
      */
     public int calculateRoundScore(){
-        int handScore = hand.calculateScore();
+        int handScore = getHand().getVisibleCardScore();
         int actionScore = actionHand.size() * 10; // +10 pts par carte action
         return handScore + actionScore;
     }
