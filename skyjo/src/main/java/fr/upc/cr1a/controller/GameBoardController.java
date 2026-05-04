@@ -12,7 +12,7 @@ import javax.swing.*;
 
 import fr.upc.cr1a.controller.data.ApiErrorManager;
 import fr.upc.cr1a.controller.data.SendAPI;
-import fr.upc.cr1a.view.ErrorDialog;
+import fr.upc.cr1a.controller.help_ingame.HelpController;
 import fr.upc.cr1a.model.*;
 import fr.upc.cr1a.model.player.PlayerAccount;
 import fr.upc.cr1a.model.player.PlayerData;
@@ -49,6 +49,8 @@ public class GameBoardController {
     private boolean alreadyReward = false;
     private AudioManager audio;
 
+    private HelpController helpController;
+
     /**
      * Initialise la view et le Model du GameBoard
      */
@@ -56,6 +58,7 @@ public class GameBoardController {
         this.gameBoardModel = gameBoardModel;
         this.gameBoardView = gameBoardView;
         this.gameManager = gameManager;
+        this.helpController = gameManager.getHelpController();
         this.botController = new GameBoardBotController(gameBoardView, gameManager, this);
 
         this.gameLoop = new GameLoop(gameManager, gameBoardView);
@@ -277,6 +280,10 @@ public class GameBoardController {
             case INIT_REVEAL -> gameBoardView.setActionGuide(gameManager.getCurrentPlayer().getName()
                     + " doit réveler 2 cartes (" + gameManager.getInitRevealCount() + ")");
         }
+        // refresh l'aide si c'est activé
+        if (this.helpController != null && this.helpController.getHelpOverlay().isActive()) {
+            this.helpController.chooseAndShow();
+        }
     }
 
     /**
@@ -450,5 +457,13 @@ public class GameBoardController {
             }
         }
         return null;
+    }
+
+    public HumanTurnController getHumanTurnController() {
+        return this.humanTurnController;
+    }
+
+    public HelpController getHelpController(){
+        return this.helpController;
     }
 }

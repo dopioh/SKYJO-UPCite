@@ -138,6 +138,21 @@ public class SettingsOverlayController {
             audioManager.playSfx("/sfx/volume.wav");
         }); 
 
+        // HELP BUTTON
+        overlay.getHelpButton().addActionListener(e -> {
+            String state = overlay.getHelpButton().getText();
+            if ( state.equals("OFF")){
+                //overlay.getHelpButton().setText("ON");
+                boolean b = frame.getHelpController().toggleHelp(true);
+                if (b){overlay.getHelpButton().setText("ON");}
+                //frame.getHelpOverlay().showPanel(true);
+            } else {
+                overlay.getHelpButton().setText("OFF");
+                frame.getHelpController().toggleHelp(false);
+                //frame.getHelpOverlay().showPanel(false);
+            }
+        });
+
         overlay.getSoundButton().setText(audioManager.isEnabled() ? "ON" : "OFF");
         overlay.getVolumeValueButton().setText(String.valueOf(Math.max(1, audioManager.getVolume() / 10)));
         overlay.getHandCardAnimationsButton().setText(frame.isHandCardAnimationsEnabled() ? "HAUT" : "BAS");
