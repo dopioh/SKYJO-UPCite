@@ -119,7 +119,19 @@ public class SendAPI {
             System.out.println("CODE HTTP APPLYGAMERESULT : " + response.statusCode());
             System.out.println("API REPOND APPLYGAMERESULT : " + response.body());
 
+            int maxTentatives = 4; // 4 tentative de reessaie donc 5 au total
+            int tentatives = 1;
+
+            while (response.statusCode() == 500 && tentatives <= maxTentatives) { // pour contrer l'erreur 500 
+                tentatives++;
+                System.out.println("[ERROR 500] Requête echouée, "+ tentatives + "eme tentative..." );
+                response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 200){break;} // histoire d'eviter le sleep si ça marche
+                Thread.sleep(500);
+            }
+
             if (response.statusCode() == 200) {
+                System.out.println("Points de la partie distribués !");
                 return gson.fromJson(response.body(), PlayerData.class);
             }
             return null;
@@ -235,7 +247,16 @@ public class SendAPI {
 
             System.out.println("REPONSE ?");
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            
+            int maxTentatives = 3; // 3 tentative de reessaie donc 4 au total
+            int tentatives = 1;
+
+            while (response.statusCode() == 500 && tentatives <= maxTentatives) { // pour contrer l'erreur 500 
+                tentatives++;
+                System.out.println("[ERROR 500] Requête echouée, "+ tentatives + "eme tentative..." );
+                response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 200){break;} // histoire d'eviter le sleep si ça marche
+                Thread.sleep(500);
+            }
 
             if (response.statusCode() == 200){
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
