@@ -14,9 +14,12 @@ import fr.upc.cr1a.controller.MainMenuController;
 import fr.upc.cr1a.controller.PlayersSetupController;
 import fr.upc.cr1a.controller.SettingsOverlayController;
 import fr.upc.cr1a.controller.ShopController;
+import fr.upc.cr1a.controller.help_ingame.HelpController;
 import fr.upc.cr1a.model.AudioManager;
 import fr.upc.cr1a.model.GameManager;
+import fr.upc.cr1a.model.GraphicsSettings;
 import fr.upc.cr1a.utils.ImageCache;
+import fr.upc.cr1a.view.help_ingame.HelpOverlay;
 
 import java.awt.CardLayout;
 import java.awt.Rectangle;
@@ -42,13 +45,15 @@ public class Frame extends JFrame{
     private PlayersSetupPanel playersSetupPanel;
     private ConnexionPanel connexionPanel;
     private GameManager currentGame;
-    private boolean handCardAnimationsEnabled = true;
+    private HelpOverlay helpOverlay;
+    private boolean handCardAnimationsEnabled = GraphicsSettings.isHighQuality();
 
     // Controller
     private AccountController account; // sert a rien pour le moment
     private ConnexionController connexionController;
     private LobbyRoomController lobbyRoomController;
     private LobbyBrowserController lobbyBrowserController;
+    private HelpController helpController;
 
 
     public Frame() {
@@ -92,6 +97,12 @@ public class Frame extends JFrame{
         leaderboard = new Leaderboard();
         getLayeredPane().add(leaderboard, JLayeredPane.POPUP_LAYER);
 
+        // Overlay help in game 
+        this.helpOverlay = new HelpOverlay();
+        //add(playersSetupPanel, "HELP_OVERLAY");
+        getLayeredPane().add(helpOverlay, JLayeredPane.POPUP_LAYER);
+        helpOverlay.setBounds(0, 0, getWidth(), getHeight());
+
         // redimentionnement
         addComponentListener(new java.awt.event.ComponentAdapter() {
             @Override
@@ -102,6 +113,9 @@ public class Frame extends JFrame{
 
         //Contrôleurs
         audioManager = new AudioManager();
+        DoodleButton.setAudioManager(audioManager);
+        CardButton.setAudioManager(audioManager);
+        CaseOpeningOverlayPanel.setAudioManager(audioManager);
         new SettingsOverlayController(settingsOverlay, this, audioManager);
         new MainMenuController(this, mainMenuPanel);
         new ShopController(this, shopPanel);
@@ -109,6 +123,7 @@ public class Frame extends JFrame{
         lobbyBrowserController = new LobbyBrowserController(this, lobbyBrowserPanel);
         lobbyRoomController = new LobbyRoomController(this, lobbyRoomPanel);
         new PlayersSetupController(this, playersSetupPanel);
+        this.helpController = new HelpController(this);
 
         this.connexionController = new ConnexionController(this, connexionPanel);
 
@@ -141,7 +156,17 @@ public class Frame extends JFrame{
             );
             // son : ouvre et ferme chaque clip pour que Java initialise le mixer audio
             try {
-                String[] sfx = { "/sfx/UIclick.wav", "/sfx/round.wav" };
+                String[] sfx = {
+                    "/sfx/UIclick.wav", "/sfx/round.wav",
+                    "/sfx/button_click.wav", "/sfx/back.wav",
+                    "/sfx/card_flip.wav", "/sfx/card_click.wav",
+                    "/sfx/defausse.wav", "/sfx/teleport.wav",
+                    "/sfx/harp.wav", "/sfx/player_change.wav",
+                    "/music/elevator_bgm.wav",
+                    "/sfx/money_buy.wav", "/sfx/classeur.wav",
+                    "/sfx/volume.wav",
+                    "/music/main_menu.wav", "/music/game_bgm1.wav", "/music/game_bgm2.wav"
+                };
                 for (String path : sfx) {
                     var url = Frame.class.getResource(path);
                     if (url == null) continue;
@@ -177,7 +202,7 @@ public class Frame extends JFrame{
     }
 
     public void showSettingsOverlay() {
-        settingsOverlay.getHandCardAnimationsButton().setText(handCardAnimationsEnabled ? "ON" : "OFF");
+        settingsOverlay.getHandCardAnimationsButton().setText(handCardAnimationsEnabled ? "HAUT" : "BAS");
         settingsOverlay.setVisible(true);
         settingsOverlay.requestFocusInWindow();
         settingsOverlay.revalidate();
@@ -258,6 +283,10 @@ public class Frame extends JFrame{
         return this.lobbyBrowserController;
     }
 
+    // help in game
+    public HelpController getHelpController(){return this.helpController;}
+    public HelpOverlay getHelpOverlay(){return this.helpOverlay;}
+
     public void setCurrentGame(GameManager game) {
         this.currentGame = game;
     }
@@ -276,5 +305,9 @@ public class Frame extends JFrame{
 
     public void setHandCardAnimationsEnabled(boolean enabled) {
         this.handCardAnimationsEnabled = enabled;
+    }
+
+    public SettingsOverlay getSettingsOverlay(){
+        return this.settingsOverlay;
     }
 }

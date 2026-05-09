@@ -2,6 +2,7 @@ package fr.upc.cr1a.controller;
 
 import fr.upc.cr1a.controller.data.ApiErrorManager;
 import fr.upc.cr1a.controller.data.SendAPI;
+import fr.upc.cr1a.model.AudioManager;
 import fr.upc.cr1a.model.player.PlayerAccount;
 import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.view.DoodleButton;
@@ -20,18 +21,22 @@ public class ShopController {
 
     private final Frame frame;
     private final ShopPanel view;
+    private final AudioManager audio;
     private boolean achatEnCours = false;
 
     public ShopController(Frame frame, ShopPanel view) {
         this.frame = frame;
         this.view = view;
+        this.audio = frame.getAudioManager();
 
         addButtonListeners(view.getBackButton(), () -> clicRetour());
         addButtonListeners(view.getClasseurButton(), () -> clicClasseur());
 
+        view.getClasseurButton().setSfxPath(null);
         DoodleButton[] buyButtons = view.getBuyButtons();
         for (int i = 0; i < buyButtons.length; i++) {
             int packNumber = i + 1;
+            buyButtons[i].setSfxPath(null); // pour effacer le son par defaut de doodlebutton
             addButtonListeners(buyButtons[i], () -> clicAcheter(packNumber));
         }
     }
@@ -80,6 +85,7 @@ public class ShopController {
             if (view.getMoney() < price) {
                 return;
             }
+            audio.playSfx("/sfx/money_buy.wav");
             view.startCaseOpening(packNumber);
             view.setMoney(view.getMoney() - price);
             view.refreshMoneyButton();
@@ -107,6 +113,7 @@ public class ShopController {
                 }
                 PlayerAccount.actuelAccount = majdata;
                 SwingUtilities.invokeLater(() -> {
+                    audio.playSfx("/sfx/money_buy.wav");
                     view.startCaseOpening(packNumber);
                     view.setMoney(majdata.getMoney());
                     view.refreshMoneyButton();
@@ -118,6 +125,7 @@ public class ShopController {
     }
 
     private void clicClasseur() {
+        audio.playSfx("/sfx/classeur.wav");
         view.openClasseur();
     }
 }

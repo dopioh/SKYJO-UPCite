@@ -30,6 +30,7 @@ public class RoundEndPanel extends JPanel {
     private Image bgImage;
     private BufferedImage cachedBackground;
     private PlayerModel lastRoundPlayer;
+    private PlayerModel lowestScorePlayer;
 
     // Encadré stats (uniquement en game over) : ELO / XP / Money + deltas
     private JPanel statsCard;
@@ -48,11 +49,14 @@ public class RoundEndPanel extends JPanel {
     private int initialMoney;
 
     public RoundEndPanel(List<PlayerModel> players, boolean gameOver) {
-        this(players, gameOver, null);
+        this(players, gameOver, null, null);
     }
 
     public RoundEndPanel(List<PlayerModel> players, boolean gameOver, PlayerModel lastRoundPlayer) {
-        // On lit le PlayerAccount local (chque machine) pour personnaliser l'affichage
+        this(players, gameOver, lastRoundPlayer, null);
+    }
+
+    public RoundEndPanel(List<PlayerModel> players, boolean gameOver, PlayerModel lastRoundPlayer, PlayerModel lowestScorePlayer) {
         if (fr.upc.cr1a.model.player.PlayerAccount.actuelAccount != null) {
             this.localUsername  = fr.upc.cr1a.model.player.PlayerAccount.actuelAccount.getUsername();
             this.initialElo     = fr.upc.cr1a.model.player.PlayerAccount.actuelAccount.getElo();
@@ -65,6 +69,8 @@ public class RoundEndPanel extends JPanel {
             this.initialMoney   = 0;
         }
         this.gameOver = gameOver;
+        this.lastRoundPlayer = lastRoundPlayer;
+        this.lowestScorePlayer = lowestScorePlayer;
         setLayout(new BorderLayout());
         setOpaque(true);
         bgImage = ImageCache.get("/background.png");
@@ -129,7 +135,6 @@ public class RoundEndPanel extends JPanel {
 
         // grande boite transparent en bas de topbar
         sortedPlayers = new ArrayList<>(players);
-        sortedPlayers.sort((a, b) -> a.getTotalScore() - b.getTotalScore());
 
         JPanel bigCard = makeCard();
         bigCard.setLayout(new BoxLayout(bigCard, BoxLayout.Y_AXIS));
@@ -146,9 +151,16 @@ public class RoundEndPanel extends JPanel {
             PlayerModel p = sortedPlayers.get(i);
             
             //calculer les détails du score
-            int handScore = p.getHand().calculateScore();
+            int handScore = p.getHand().getVisibleCardScore();
             int actionScore = p.getActionHand().size() * 10;
             int totalRoundScore = handScore + actionScore;
+            
+            //vérifier si doublement a été appliqué
+            boolean hasDoubled = (lastRoundPlayer != null && p.equals(lastRoundPlayer) && lowestScorePlayer != null && !p.equals(lowestScorePlayer));
+            int appliedRoundScore = hasDoubled ? totalRoundScore * 2 : totalRoundScore;
+            
+            //le score total après la manche
+            int scoreTotalAfter = p.getTotalScore();
             
             String text = (i + 1) + ".   " + p.getName();
             if (lastRoundPlayer != null && p.equals(lastRoundPlayer)) {
@@ -157,14 +169,13 @@ public class RoundEndPanel extends JPanel {
             text += "   —   " + handScore + " + " + actionScore + " = " + totalRoundScore + " pts";
             
             //vérifier si doublement appliqué
-            if (lastRoundPlayer != null && p.equals(lastRoundPlayer)) {
-                //chercher si ce joueur n'est pas le premier de la liste
-                if (i > 0) {
-                    int finalScore = totalRoundScore * 2;
-                    text += " × 2 = " + finalScore + " pts";
-                }
+            if (hasDoubled) {
+                text += " × 2 = " + appliedRoundScore + " pts";
             }
             
+            // calculer score avant cette manche
+            int scoreBefore = scoreTotalAfter - appliedRoundScore;
+            text += "   |   Total : " + scoreBefore + " + " + appliedRoundScore + " = " + scoreTotalAfter + " pts";
             JLabel pill = makePill(text);
             playerLabels.add(pill);
             bigCard.add(pill);

@@ -12,7 +12,7 @@ import javax.swing.*;
 
 import fr.upc.cr1a.controller.data.ApiErrorManager;
 import fr.upc.cr1a.controller.data.SendAPI;
-import fr.upc.cr1a.view.ErrorDialog;
+import fr.upc.cr1a.controller.help_ingame.HelpController;
 import fr.upc.cr1a.model.*;
 import fr.upc.cr1a.model.player.PlayerAccount;
 import fr.upc.cr1a.model.player.PlayerData;
@@ -47,6 +47,9 @@ public class GameBoardController {
     private boolean pauseOpen = false;
     private TimeoutTurnController timeoutTurnController;
     private boolean alreadyReward = false;
+    private AudioManager audio;
+
+    private HelpController helpController;
 
     /**
      * Initialise la view et le Model du GameBoard
@@ -55,6 +58,7 @@ public class GameBoardController {
         this.gameBoardModel = gameBoardModel;
         this.gameBoardView = gameBoardView;
         this.gameManager = gameManager;
+        this.helpController = gameManager.getHelpController();
         this.botController = new GameBoardBotController(gameBoardView, gameManager, this);
 
         this.gameLoop = new GameLoop(gameManager, gameBoardView);
@@ -82,7 +86,6 @@ public class GameBoardController {
             }
         });
 
-        // Affichage de l'overlay avec "Tab"
         gameBoardView.setFocusTraversalKeysEnabled(false);
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0, false), "showScores");
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0, true),  "hideScores");
@@ -99,9 +102,11 @@ public class GameBoardController {
             }
         });
 
-        gameBoardView.getPauseOverlay().getBtnResume().addActionListener(e -> closePauseOverlay());
+        audio = gameBoardModel.getFrame().getAudioManager();
+        gameBoardView.getPauseOverlay().getBtnResume().addActionListener(e -> { audio.playSfx("/sfx/button_click.wav"); closePauseOverlay(); });
 
         gameBoardView.getPauseOverlay().getBtnQuit().addActionListener(e -> {
+            audio.playSfx("/sfx/back.wav");
             int confirm = JOptionPane.showConfirmDialog(gameBoardModel.getFrame(),"Voulez-vous quitter la partie ?","Retour au menu",JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 closePauseOverlay();
@@ -110,6 +115,7 @@ public class GameBoardController {
         });
 
         gameBoardView.getPauseOverlay().getBtnSettings().addActionListener(e -> {
+            audio.playSfx("/sfx/button_click.wav");
             gameBoardModel.getFrame().showSettingsOverlay();
         });
 
@@ -201,8 +207,9 @@ public class GameBoardController {
         }
 
         boolean isGameOver = gameManager.getGameState() == GameManager.GameState.GAME_ENDED;
+        PlayerModel lowestScorePlayer = fr.upc.cr1a.model.ScoreCalculator.getLowestScorePlayer(gameManager.getPlayers());
         currentRoundEndPanel = new RoundEndPanel(
-            new ArrayList<>(gameManager.getPlayers()), isGameOver, gameManager.getLastRoundPlayer()
+            new ArrayList<>(gameManager.getPlayers()), isGameOver, gameManager.getLastRoundPlayer(), lowestScorePlayer
         );
 
         if (isGameOver) {
@@ -210,6 +217,7 @@ public class GameBoardController {
         }
 
         frame.add(currentRoundEndPanel, "ROUND_END");
+        if (!isGameOver) audio.playBgm("/music/elevator_bgm.wav");
         frame.showPanel("ROUND_END");
 
         // hover sur les joueurs -> preview de leur main
@@ -269,8 +277,6 @@ public class GameBoardController {
      */
     private void ContinueRound() {
         long seed = new java.util.Random().nextLong();
-        // Broadcast AVANT de demarrer localement, pour que le client puisse traiter
-        // UPDATE_NEW_ROUND quand il arrive (le seed sera applique chez tous).
         if (GameSession.status == GameSession.STATUS.HOST) {
             try {
                 fr.upc.cr1a.controller.network.Host host = gameBoardModel.getFrame().getLobbyRoomController().getHost();
@@ -283,9 +289,11 @@ public class GameBoardController {
     }
 
     /**
-     * Reset local pour une nouvelle manche 
+     * Reset local pour une nouvelle manche
      */
     public void startLocalNewRound(long seed) {
+        String[] bgms = {"/music/game_bgm1.wav", "/music/game_bgm2.wav"};
+        audio.playBgm(bgms[(int)(Math.random() * 2)]);
         gameManager.startNewGame(seed);
         gameBoardView.setMancheLabel("Pré-Manche");
         waitingNextTurn = false;
@@ -311,11 +319,17 @@ public class GameBoardController {
             case INIT_REVEAL -> gameBoardView.setActionGuide(gameManager.getCurrentPlayer().getName()
                     + " doit réveler 2 cartes (" + gameManager.getInitRevealCount() + ")");
         }
+        // refresh l'aide si c'est activé
+        if (this.helpController != null && this.helpController.getHelpOverlay().isActive()) {
+            this.helpController.chooseAndShow();
+        }
     }
 
     /**
      * getter/setter pour waitingNextTurn
      */
+    public AudioManager getAudio() { return audio; }
+
     public void setWaitingNextTurn(boolean waiting) {
         this.waitingNextTurn = waiting;
     }
@@ -533,5 +547,13 @@ public class GameBoardController {
             }
         }
         return null;
+    }
+
+    public HumanTurnController getHumanTurnController() {
+        return this.humanTurnController;
+    }
+
+    public HelpController getHelpController(){
+        return this.helpController;
     }
 }

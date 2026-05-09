@@ -494,6 +494,8 @@
 
 - Bouton toggle qui permet d'activer ou non les animations de carte flottante
 
+- Rendu propre pour les descriptions des cartes action (overlay)
+
 ### Modified
 
 - Amélioration de la page Paramètres dans le style du Leaderboard
@@ -516,9 +518,15 @@
     - nom de joueur un peu transparent si c'est pas celui qui joue pour differencier
     - nom deviens ".." après 8 caratrère pour pas dépasser
 
+- Réinstauration des cartes actions sous le jeu
+
 - DIAGRAMME et README mis à jour
 
 - Logique d'état pour les cartes flottantes déplacée dans la frame
+
+- Les textes des descriptions des cartes action passent en Jlabel
+
+- L'affichage des cartes actions piochées passe en GridBag avec des lignes de 5 actions
 
 - Suppression Mode Action en ligne
 
@@ -551,3 +559,47 @@
 - Anciennement les bots ne rejoignait pas la partie lancée en ligne
 
 - L'expulsion fonctionne bien et notifie le client
+
+## v.0.13: SPRINT 13
+
+### Added
+
+- Noms pour les rangs des joueurs affichés dans AccountStatsOverlay et LeaderBoard
+
+- Sons/BGM partout
+    - 4 BGM : main menu, pendant la partie (aléatoire entre 2 bgm), fin de manche
+    - 11 SFX : clic bouton, retour, flip de carte, échange, défausse, cartes action, boutique, changement de joueur...
+    - Les sons sont préchargés au démarrage
+    - `DoodleButton` joue automatiquement un son par défaut
+
+- Aides (activable dans les parametres) qui highlight les actions possibles pour le joueur ( fonctionne avec le mode action aussi) 
+
+### Fixed
+
+- Le BGM ne rebouclait pas
+
+- Resize dynamique des cartes en plein écran etc
+
+- Fix Erreurs Tests Linux
+
+- Les espaces ne sont plus pris en compte pour la création/connexion
+
+- fix du `SPY_ONE_ACTION` pour les bots qui ne faisaient rien
+
+- fix du `PLAY_TWO_TURN` pour les humains qui ne donné qu'un seul tour en plus
+
+### Modified
+
+- Modif LeaderBoard pour remplacer le numero des rangs par leur nom
+
+- Nouveau toggle graphique dans les parametres
+    - ON/OFF remplacé par HAUT/BAS
+    - par défaut sur linux, le jeu se lance en BAS
+    - BAS désactive le flip et float des cartes
+
+
+## v.0.14: SPRINT 14
+
+### Fixed 
+
+- Fix API error 500

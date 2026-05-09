@@ -14,6 +14,8 @@ import java.util.ArrayList;
  */
 public class PlayerData {
 
+    public static final int MAX_RANK_ID = 4;
+
     private final String id; // id unique qui permettra de retrouver le player dans la db
     private String username;
     private int rank_id; // Faire une enum Rang ? Ou une classe ? String pour le moment
@@ -130,5 +132,14 @@ public class PlayerData {
 
     public String getUsername(){
         return this.username;
+    }
+
+    /**
+     * on cappe le rang du joueur si il depasse le rang max, il retournera au rang max
+     */
+    public void capperRang() {
+        if (this.rank_id > MAX_RANK_ID) {
+            this.rank_id = MAX_RANK_ID;
+        }
     }
 }

@@ -1,6 +1,7 @@
 package fr.upc.cr1a.view;
 
 import fr.upc.cr1a.model.AnimLoop;
+import fr.upc.cr1a.model.AudioManager;
 import fr.upc.cr1a.model.DoodleButtonModel;
 import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
 
@@ -29,6 +30,12 @@ import java.awt.image.BufferedImage;
 public class DoodleButton extends JComponent {
 
     public enum IconSide { LEFT, RIGHT }
+
+    private static AudioManager audioManager;
+    public static void setAudioManager(AudioManager am) { audioManager = am; }
+
+    private String sfxPath = "/sfx/button_click.wav";
+    public void setSfxPath(String path) { this.sfxPath = path; }
 
     private DoodleButtonModel model;
     private Font font;
@@ -71,6 +78,12 @@ public class DoodleButton extends JComponent {
         setPreferredSize(new Dimension(w + 20, h + 20));
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         loadResources();
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                if (audioManager != null && sfxPath != null && !sfxPath.isBlank()) audioManager.playSfx(sfxPath);
+            }
+        });
     }
 
     // charge police, scribble, icone
@@ -242,10 +255,13 @@ public class DoodleButton extends JComponent {
 
     // setters
     public void setActive(boolean active) { this.active = active; repaint(); }
-    public String getText() { return model.getText(); }
     public void setCouleur(ButtonColor c) { model.setColor(c); repaint(); }
     public void setText(String t) { model.setText(t); repaint(); }
     public void setImage(String path) { model.setImagePath(path); loadIcon(path); repaint(); }
     public void setIconSide(IconSide side) { this.iconSide = side; repaint(); }
     public void setFontSize(float size) { this.fontSize = size; loadResources(); repaint(); }
+
+    // getter 
+    public String getText() { return model.getText(); }
+    public DoodleButtonModel getDoodleButtonModel(){return this.model;}
 }

@@ -237,6 +237,7 @@ public class GameBoardBotController {
 
             if (takeDiscard && discardCard != null) {
                 //prend de la défausse
+                mainController.getAudio().playSfx("/sfx/defausse.wav");
                 gameBoardView.getBtnDefausse().lift();
                 CardModel taken = gameManager.takeDiscard();
                 // Broadcast multi : le client voit la defausse retiree + la phase CARD_TAKE_FROM_DISCARD
@@ -261,7 +262,11 @@ public class GameBoardBotController {
                 // Broadcast multi : on propage seulement la phase (la valeur piochee reste privee au bot/host)
                 broadcastTurnChangedIfHost();
                 String drawnPath = gameBoardView.getCardImagePath(drawn);
-                gameBoardView.getBtnPioche().flip(() -> gameBoardView.getBtnPioche().setCardImage(drawnPath));
+                if (gameBoardView.isHandCardAnimationsEnabled()) {
+                    gameBoardView.getBtnPioche().flip(() -> gameBoardView.getBtnPioche().setCardImage(drawnPath));
+                } else {
+                    gameBoardView.getBtnPioche().setCardImage(drawnPath);
+                }
                 mainController.updateAllDecksDisplay();
                 System.out.println(bot.getName() + " pioche : " + drawn.getCardValue());
                 mainController.refreshGuide();
@@ -311,10 +316,10 @@ public class GameBoardBotController {
                     int discardedValue = (oldHand instanceof NumberCardModel)
                             ? ((NumberCardModel) oldHand).getCardValue() : -1;
 
+                    mainController.getAudio().playSfx("/sfx/card_click.wav");
                     gameManager.exchangeCardInHand(col, row);
                     System.out.println(bot.getName() + " échange [" + row + "," + col + "]");
 
-                    // Broadcast multi : les clients reconstruisent main + defausse
                     NetworkProtocolServer srv = hostServer();
                     if (srv != null) {
                         srv.broadcastExchange(bot.getPlayerData().getID(), col, row, newValue, discardedValue);
@@ -332,6 +337,7 @@ public class GameBoardBotController {
             } else {
                 //jeter la carte piochée puis révéler une carte
                 int discardedValue = (drawCard instanceof NumberCardModel)? ((NumberCardModel) drawCard).getCardValue() : -1;
+                mainController.getAudio().playSfx("/sfx/defausse.wav");
                 gameManager.discardDrawCard();
                 // Broadcast multi : defausse mise a jour + nouvelle phase CARD_DISCARD_FROM_DRAW
                 NetworkProtocolServer srv = hostServer();
@@ -402,10 +408,11 @@ public class GameBoardBotController {
             if (position[0] != -1 && position[1] != -1) {
                 int col = position[0];
                 int row = position[1];
-                // Capture pour broadcast EXCHANGE
-                int newValue = (drawCard instanceof NumberCardModel)? ((NumberCardModel) drawCard).getCardValue() : -1;CardModel oldHand = botHand.getCard(row, col);
+                int newValue = (drawCard instanceof NumberCardModel)? ((NumberCardModel) drawCard).getCardValue() : -1;
+                CardModel oldHand = botHand.getCard(row, col);
                 int discardedValue = (oldHand instanceof NumberCardModel)? ((NumberCardModel) oldHand).getCardValue() : -1;
 
+                mainController.getAudio().playSfx("/sfx/card_click.wav");
                 gameManager.exchangeCardInHand(col, row);
                 System.out.println(bot.getName() + " échange [" + row + "," + col + "]");
 
@@ -482,10 +489,14 @@ public class GameBoardBotController {
 
             System.out.println(bot.getName() + " joue l'action: " + actionType);
 
+
             try {
                 switch (actionType) {
                     case PLAY_TWO_TURN:
                         gameManager.grantExtraTurn();
+                        System.out.println("[BOT INFO] GrandExtraTurn Called");
+                        //gameManager.grantExtraTurn();
+                        //handleBotTurn();
                         break;
 
                     case REPLACE_CARD_IN_HAND:
@@ -549,6 +560,7 @@ public class GameBoardBotController {
         CardModel card1 = hand.getCard(row1, col1);
         CardModel card2 = hand.getCard(row2, col2);
 
+        mainController.getAudio().playSfx("/sfx/teleport.wav");
         hand.replaceCard(row1, col1, card2);
         hand.replaceCard(row2, col2, card1);
     }
@@ -575,6 +587,7 @@ public class GameBoardBotController {
         CardModel opCard = target.getHand().getCard(opRow, opCol);
 
         if (myCard != null && opCard != null) {
+            mainController.getAudio().playSfx("/sfx/teleport.wav");
             bot.getHand().replaceCard(myRow, myCol, opCard);
             target.getHand().replaceCard(opRow, opCol, myCard);
         }
@@ -599,13 +612,21 @@ public class GameBoardBotController {
         gameBoardView.showPlayerCards(bot);
 
         Timer hideTimer = new Timer(2000, e -> {
+            if (pausedState) return;
+
             for (int[] pos : hiddenCards) {
                 CardModel card = hand.getCard(pos[0], pos[1]);
                 if (card != null && !card.isFaceDown()) {
                     card.returnCard();
                 }
             }
+
             gameBoardView.showPlayerCards(bot);
+            mainController.updateAllDecksDisplay();
+
+            // fin de tour ici pour la version desynchronisé
+            mainController.setWaitingNextTurn(false);
+            mainController.requestEndTurnFromBot();
         });
         hideTimer.setRepeats(false);
         activeTimers.add(hideTimer);

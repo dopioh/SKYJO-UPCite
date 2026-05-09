@@ -5,6 +5,7 @@ import java.util.HashMap;
 //import javax.swing.Timer;
 
 import fr.upc.cr1a.controller.GameBoardController;
+import fr.upc.cr1a.controller.help_ingame.HelpController;
 import fr.upc.cr1a.controller.network.connexion.GameClient;
 import fr.upc.cr1a.model.ActionCardModel.ActionType;
 import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
@@ -49,6 +50,7 @@ public class GameManager {
     private HashMap<PlayerModel, Integer> afkCounts = new HashMap<>();
     private HashMap<PlayerModel, Boolean> autoControlledPlayers = new HashMap<>();
 
+    private HelpController helpController;
     /*
     *classe local enum pour gérer les états du jeu
     */
@@ -75,6 +77,7 @@ public class GameManager {
     */
     public GameManager(Frame frame, boolean action){
         // On l'utilise quand ce gamemanager ??
+        this.helpController = frame.getHelpController();
         this.gameWithAction = action;
         if (this.gameWithAction) {
             actionDeck = new PiocheActionModel();
@@ -129,6 +132,7 @@ public class GameManager {
      */
     public GameManager(Frame frame, List<PlayerData> playersData, boolean action, long seed){
         this.gameWithAction = action;
+        this.helpController = frame.getHelpController();
         if (this.gameWithAction) {
             actionDeck = new PiocheActionModel();
             discardActionPile = new DefausseActionModel();
@@ -440,6 +444,16 @@ public class GameManager {
     *passe au joueur suivant
     */
     public void nextPlayer() {
+        //System.out.println("tour bonus restant ? : "+  extraTurnsRemaining);
+
+        // si le joueur a des tours supplémentaires (mais pas pour le joueur qui a déclenché LAST_ROUND)
+        if (extraTurnsRemaining > 0) {
+            extraTurnsRemaining--;
+            
+            if (gameState != GameState.LAST_ROUND || currentPlayerIndex != lastRoundPlayer) {
+                return;
+            }
+        }
         currentPlayerIndex++;
         //revenir au premier si le dernier joueur a joué
         if (currentPlayerIndex >= players.size()) {
@@ -450,17 +464,12 @@ public class GameManager {
             endRound();
             return;
         }
-
-        // si le joueur a des tours supplémentaires (mais pas pour le joueur qui a déclenché LAST_ROUND)
-        if (extraTurnsRemaining > 0) {
-            extraTurnsRemaining--;
-            return;
-        }
     }
 
     public void grantExtraTurn() {
         // PLAY_TWO_TURN = 2 tours au total pour le joueur courant, donc 1 tour supplémentaire
         this.extraTurnsRemaining += 1;
+        System.out.println("tour bonus restant ? : "+  extraTurnsRemaining);
     }
 
     /*
@@ -1036,5 +1045,9 @@ public class GameManager {
 
     public void setAutoControlled(PlayerModel player, boolean value) {
         autoControlledPlayers.put(player, value);
+    }
+
+    public HelpController getHelpController(){
+        return this.helpController;
     }
 }

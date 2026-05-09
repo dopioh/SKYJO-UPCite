@@ -1,14 +1,36 @@
 package fr.upc.cr1a.view;
 
-import fr.upc.cr1a.model.AnimLoop;
-import fr.upc.cr1a.model.player.PlayerData;
-import fr.upc.cr1a.utils.ImageCache;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
+
+import fr.upc.cr1a.model.AnimLoop;
+import fr.upc.cr1a.model.player.PlayerData;
+import fr.upc.cr1a.utils.ImageCache;
 
 /**
  * Overlay classement des joueurs
@@ -178,8 +200,8 @@ public class Leaderboard extends JComponent {
             center.setOpaque(false);
             center.add(new JLabel(avatar));
             String name = p.getUsername();
-            if (name.length() > 24) { // max 24 caractere
-                name = name.substring(0, 24) + "...";
+            if (name.length() > 18) { // max 18 caractere
+                name = name.substring(0, 18) + "...";
             }
             JLabel nameLabel = new JLabel(name);
             nameLabel.setForeground(Color.WHITE);
@@ -202,8 +224,8 @@ public class Leaderboard extends JComponent {
             };
             rankBadge.setOpaque(false);
             rankBadge.setLayout(new GridBagLayout());
-            rankBadge.setPreferredSize(new Dimension(36, 26));
-            JLabel rankLabel2 = new JLabel(String.valueOf(p.getRankId()), SwingConstants.CENTER);
+            rankBadge.setPreferredSize(new Dimension(110, 26));
+            JLabel rankLabel2 = new JLabel(AccountStatsOverlayPanel.getRealRankName(p.getRankId()), SwingConstants.CENTER);
             rankLabel2.setForeground(new Color(80, 168, 74));
             rankLabel2.setFont(doodleFont.deriveFont(Font.BOLD, 16f));
             rankBadge.add(rankLabel2, new GridBagConstraints());
