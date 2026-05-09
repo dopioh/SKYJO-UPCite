@@ -8,9 +8,9 @@ import java.util.HashMap;
 import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolServer;
 import fr.upc.cr1a.model.GameManager;
 import fr.upc.cr1a.model.GameSession;
-//import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.view.Frame;
+import fr.upc.cr1a.model.player.PlayerAccount;
 
 /**
  * Sert à heberger un serveur sur le pc d'un joueur
@@ -237,8 +237,8 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
             listPlayers.add(tmp);
         }
         this.gameSeed = new java.util.Random().nextLong();
-        this.gameManager = new GameManager(frame, listPlayers, modeAction, this.gameSeed);
-        this.gameManager.setLocalPlayer(fr.upc.cr1a.model.player.PlayerAccount.actuelAccount);
+        this.gameManager = new GameManager(frame, listPlayers, false, this.gameSeed);
+        this.gameManager.setLocalPlayer(PlayerAccount.actuelAccount);
         frame.setCurrentGame(gameManager);
     }
 

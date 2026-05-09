@@ -111,7 +111,8 @@ public class ClientHandler implements Runnable{
 
                                 String newCurrentId = game.getCurrentPlayer().getPlayerData().getID();
                                 boolean playerChanged = !newCurrentId.equals(previousPlayerId);
-                                if (playerChanged) {
+                                boolean phaseChanged = (game.getTurnPhase() != GameManager.TurnPhase.INIT_REVEAL);
+                                if (playerChanged || phaseChanged) {
                                     triggerProceedAfterAction(game);
                                 } else {
                                     gameHost.broadcastTurnChanged(newCurrentId, game.getTurnPhase().name());

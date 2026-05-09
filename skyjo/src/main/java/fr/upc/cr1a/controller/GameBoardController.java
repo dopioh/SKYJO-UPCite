@@ -82,6 +82,23 @@ public class GameBoardController {
             }
         });
 
+        // Affichage de l'overlay avec "Tab"
+        gameBoardView.setFocusTraversalKeysEnabled(false);
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0, false), "showScores");
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0, true),  "hideScores");
+        am.put("showScores", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showScoresOverlay();
+            }
+        });
+        am.put("hideScores", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                hideScoresOverlay();
+            }
+        });
+
         gameBoardView.getPauseOverlay().getBtnResume().addActionListener(e -> closePauseOverlay());
 
         gameBoardView.getPauseOverlay().getBtnQuit().addActionListener(e -> {
@@ -369,6 +386,21 @@ public class GameBoardController {
         gameBoardView.showPauseOverlay(pauseOpen);
         setWaitingNextTurn(pauseOpen);
         gameLoop.setPaused(pauseOpen);
+    }
+
+    private boolean scoreboardShowing = false;
+
+    private void showScoresOverlay() {
+        if (scoreboardShowing) return;
+        scoreboardShowing = true;
+        ScoreboardOverlayPanel panel = new ScoreboardOverlayPanel(gameManager.getPlayers());
+        gameBoardView.showScoreboardOverlay(panel);
+    }
+
+    private void hideScoresOverlay() {
+        if (!scoreboardShowing) return;
+        scoreboardShowing = false;
+        gameBoardView.hideScoreboardOverlay();
     }
 
     private void closePauseOverlay() {

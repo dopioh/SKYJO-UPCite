@@ -1007,7 +1007,7 @@ public class GameManager {
                             }
                         });
                     }
-                    if (fr.upc.cr1a.model.GameSession.status == fr.upc.cr1a.model.GameSession.STATUS.CLIENT
+                    if (GameSession.status == GameSession.STATUS.CLIENT
                         && playerChanged
                         && gameBoardModel.getGameBoardController().getGameLoop() != null) {
                         gameBoardModel.getGameBoardController().getGameLoop().restartCountdownForNetworkTurn();

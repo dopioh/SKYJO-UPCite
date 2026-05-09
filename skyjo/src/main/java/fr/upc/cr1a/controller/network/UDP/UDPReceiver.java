@@ -36,8 +36,10 @@ public class UDPReceiver implements Runnable{
 
     @Override
     public void run(){
-        try (DatagramSocket socket = new DatagramSocket(listenPort)) {
-            
+        try (DatagramSocket socket = new DatagramSocket(null)) {
+            socket.setReuseAddress(true);
+            socket.bind(new java.net.InetSocketAddress(listenPort));
+
             // si au bout de 1 sec il recoit rien, ça declenche une erreur et ça debloque le thread
             socket.setSoTimeout(1000); // en ms
             

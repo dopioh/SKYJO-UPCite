@@ -16,6 +16,7 @@ import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.GameManager;
 import fr.upc.cr1a.model.GameSession;
 import fr.upc.cr1a.model.NumberCardModel;
+import fr.upc.cr1a.model.player.PlayerAccount;
 import fr.upc.cr1a.model.player.PlayerData;
 
 import java.io.*;
@@ -43,6 +44,7 @@ public class GameClient implements NetworkProtocolClient{
     private ArrayList<PlayerData> listPlayersData;
     private boolean modeAction;
     private boolean wasKicked = false;
+    private boolean gameEndedReceived = false;
 
     public GameClient( Frame frame, PlayerData playerData){
         this.frame = frame;
@@ -158,7 +160,7 @@ public class GameClient implements NetworkProtocolClient{
                                 ? new GameManager(this.frame, this.listPlayersData, this.modeAction, finalSeed)
                                 : new GameManager(this.frame, this.listPlayersData, this.modeAction);
                             game.setNetwork(this);
-                            game.setLocalPlayer(fr.upc.cr1a.model.player.PlayerAccount.actuelAccount);
+                            game.setLocalPlayer(PlayerAccount.actuelAccount);
                             frame.setCurrentGame(game);
                             System.out.println("[SYSTEM] Game launched (client side)");
                         });
@@ -320,6 +322,7 @@ public class GameClient implements NetworkProtocolClient{
 
                 if (message.startsWith(NetworkProtocolServer.UPDATE_GAME_ENDED)) {
                     // Format : GAME_ENDED:lastRoundPlayerId (peut etre vide)
+                    gameEndedReceived = true; // pour eviter la popup "host deconnecte"
                     String[] geParts = message.split(":");
                     final String lrpId = (geParts.length >= 2 && !geParts[1].isEmpty()) ? geParts[1] : null;
                     SwingUtilities.invokeLater(() -> {
@@ -381,7 +384,8 @@ public class GameClient implements NetworkProtocolClient{
             boolean wasInGame = (frame != null && frame.getCurrentGame() != null);
             boolean previouslyConnected = (GameSession.status == GameSession.STATUS.CLIENT);
             disconnect();
-            if (!wasKicked && wasInGame && previouslyConnected) {
+            // Popup uniquement si la coupure n'est pas attendue : pas de kick et pas de GAME_ENDED.
+            if (!wasKicked && !gameEndedReceived && wasInGame && previouslyConnected) {
                 SwingUtilities.invokeLater(() -> {
                     try {
                         javax.swing.JOptionPane.showMessageDialog(
@@ -394,6 +398,10 @@ public class GameClient implements NetworkProtocolClient{
                     GameManager g = frame.getCurrentGame();
                     if (g != null) g.stopGame();
                     frame.clearCurrentGame();
+                    if (frame.getLobbyRoomController() != null) {
+                        frame.getLobbyRoomController().setNetworkHost(null);
+                        frame.getLobbyRoomController().setNetworkClient(null);
+                    }
                     frame.showPanel("MENU");
                 });
             }

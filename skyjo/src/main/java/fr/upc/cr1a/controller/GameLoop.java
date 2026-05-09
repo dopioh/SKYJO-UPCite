@@ -99,11 +99,11 @@ public class GameLoop {
 
     private void continueInitRevealFlow() {
         if (!gameActive) return;
-        // Multi : on est passe au joueur suivant dans la phase INIT_REVEAL
-        broadcastTurnChangedIfHost();
         PlayerModel currentPlayer = gameManager.getCurrentPlayer();
         gameBoardView.showPlayerTransition(currentPlayer, () -> {
             if (!gameActive) return;
+
+            broadcastTurnChangedIfHost(); // Changement car le timer est déréglé
 
             if (humanController != null) {
                 humanController.refreshGuide();
