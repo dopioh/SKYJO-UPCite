@@ -50,6 +50,17 @@ public class SendAPI {
 
             System.out.println("CODE HTTP WINGAME : " + response.statusCode());
             System.out.println("API REPOND : " + response.body()); // doit return GOOD
+
+            int maxTentatives = 4; // 4 tentative de reessaie donc 5 au total
+            int tentatives = 1;
+
+            while (response.statusCode() == 500 && tentatives <= maxTentatives) { // pour contrer l'erreur 500 
+                tentatives++;
+                System.out.println("[ERROR 500] Requête echouée, "+ tentatives + "eme tentative..." );
+                response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 200){break;} 
+                Thread.sleep(500);
+            }
             if (response.statusCode() != 200) {
                 ApiErrorManager.setHttpError("GOOD.la mise a jour de fin de partie", response.statusCode(), response.body());
             }
@@ -83,6 +94,17 @@ public class SendAPI {
 
             System.out.println("CODE HTTP BUYPACK : " + response.statusCode());
             System.out.println("API REPOND BUYPACK : " + response.body());
+
+            int maxTentatives = 4; // 4 tentative de reessaie donc 5 au total
+            int tentatives = 1;
+
+            while (response.statusCode() == 500 && tentatives <= maxTentatives) { // pour contrer l'erreur 500 
+                tentatives++;
+                System.out.println("[ERROR 500] Requête echouée, "+ tentatives + "eme tentative..." );
+                response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 200){break;} 
+                Thread.sleep(500);
+            }
 
             if (response.statusCode() == 200) {
                 return gson.fromJson(response.body(), PlayerData.class);
@@ -165,6 +187,17 @@ public class SendAPI {
             System.out.println("CODE HTTP UNLOCKSKIN : " + response.statusCode());
             System.out.println("API REPOND UNLOCKSKIN : " + response.body());
 
+            int maxTentatives = 4; // 4 tentative de reessaie donc 5 au total
+            int tentatives = 1;
+
+            while (response.statusCode() == 500 && tentatives <= maxTentatives) { // pour contrer l'erreur 500 
+                tentatives++;
+                System.out.println("[ERROR 500] Requête echouée, "+ tentatives + "eme tentative..." );
+                response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 200){break;} 
+                Thread.sleep(500);
+            }
+
             if (response.statusCode() == 200) {
                 return gson.fromJson(response.body(), PlayerData.class);
             }
@@ -193,6 +226,17 @@ public class SendAPI {
 
             System.out.println("CODE HTTP SELECTSKIN : " + response.statusCode());
             System.out.println("API REPOND SELECTSKIN : " + response.body());
+
+            int maxTentatives = 4; // 4 tentative de reessaie donc 5 au total
+            int tentatives = 1;
+
+            while (response.statusCode() == 500 && tentatives <= maxTentatives) { // pour contrer l'erreur 500 
+                tentatives++;
+                System.out.println("[ERROR 500] Requête echouée, "+ tentatives + "eme tentative..." );
+                response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 200){break;} 
+                Thread.sleep(500);
+            }
 
             if (response.statusCode() == 200) {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
