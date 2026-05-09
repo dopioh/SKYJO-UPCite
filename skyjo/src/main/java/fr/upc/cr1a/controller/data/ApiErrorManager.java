@@ -74,7 +74,7 @@ public final class ApiErrorManager {
             case 403 -> "Acces bloque pour " + safeContext + ".";
             case 404 -> "On n'a rien trouve pour " + safeContext + ".";
             case 409 -> "Cet email ou ce pseudo est deja pris. Essaie une autre carte d'identite.";
-            case 422 -> "Format invalide. Ajuste les infos et retente.";
+            case 422 -> "  Format invalide. \n  Le mot de passe doit faire au minimum 6 caractères.";
             case 429 -> "Trop de tentatives d'un coup. Fais une petite pause et reessaie.";
             case 500 -> "Le serveur Skyjo a melange les cartes. Reessaie un peu plus tard.";
             case 502, 503, 504 -> "Serveur indisponible pour l'instant. Reviens dans quelques instants.";

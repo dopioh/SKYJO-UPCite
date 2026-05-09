@@ -597,3 +597,9 @@
     - par défaut sur linux, le jeu se lance en BAS
     - BAS désactive le flip et float des cartes
 
+
+## v.0.14: SPRINT 14
+
+### Fixed 
+
+- Fix API error 500
