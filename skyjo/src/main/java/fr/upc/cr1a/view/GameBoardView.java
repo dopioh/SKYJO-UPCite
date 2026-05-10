@@ -38,6 +38,7 @@ import fr.upc.cr1a.model.NumberCardModel;
 import fr.upc.cr1a.model.PlayerHandModel;
 import fr.upc.cr1a.model.PlayerModel;
 import fr.upc.cr1a.utils.ImageCache;
+import fr.upc.cr1a.view.help_ingame.HelpOverlay;
 
 /**
  * Vue graphique du plateau de jeu avec affichage des cartes et boutons joueurs
@@ -70,6 +71,8 @@ public class GameBoardView extends JPanel {
     private CursorCardView cursorCardView;
     private ActionDescriptionOverlayPanel actionDescriptionOverlay;
     private ActionCardTutorialOverlayPanel actionCardTutorialOverlay;
+
+    private Frame frame;
 
     // 3 couleurs pour l'instant peut etre 8 un jour mais la pas le temps
     private static final Color[] PLAYER_COLORS = {
@@ -145,12 +148,15 @@ public class GameBoardView extends JPanel {
     // Panel de transition lors du changement de joueur
     private PlayerTransitionPanel transitionPanel;
 
+    private HelpOverlay helpOverlay;
+
     @FunctionalInterface
     public interface ActionCardClickListener {
         void onActionCardClicked(ActionType type, int indexInHand);
     }
 
-    public GameBoardView(ArrayList<PlayerModel> listPlayerModels) {
+    public GameBoardView(ArrayList<PlayerModel> listPlayerModels, Frame frame) {
+        this.frame = frame;
         this.listPlayer = listPlayerModels;
         this.buttonlistPlayer = new ArrayList<>();
         this.cardButtons = new CardButton[3][4];
@@ -509,6 +515,9 @@ public class GameBoardView extends JPanel {
         cursorCardView.setOverlayBounds(getWidth(), getHeight());
         layeredPane.add(cursorCardView.getOverlay(), JLayeredPane.DRAG_LAYER);
 
+        helpOverlay = frame.getHelpOverlay();
+        layeredPane.add(helpOverlay, JLayeredPane.PALETTE_LAYER);
+
         // BOUTTONS PLAYERS ( a gauche )
         playerButton();
 
@@ -852,9 +861,11 @@ public class GameBoardView extends JPanel {
 
     public void updatePoints() {
         if (currentPlayer != null) {
+            // Affiche le score total accumulé + le score des cartes visibles de la manche actuelle
+            int totalScore = currentPlayer.getTotalScore();
             int liveScore = currentPlayer.getHand().getVisibleCardScore();
-            int totalWithLive = currentPlayer.getTotalScore() + liveScore;
-            pointsLabel.setText(totalWithLive + " P");
+            int displayScore = totalScore + liveScore;
+            pointsLabel.setText(displayScore + " P");
         }
     }
 

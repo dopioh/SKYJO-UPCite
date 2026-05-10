@@ -44,6 +44,7 @@ public class SettingsOverlay extends JComponent {
     //Param autres
     private JPanel tabAutresPanel;
     private JButton fullscreenButton;
+    private JButton helpButton;
 
     public SettingsOverlay() {
         setOpaque(false);
@@ -373,9 +374,38 @@ public class SettingsOverlay extends JComponent {
         });
 
         gbcA.gridy = 1;
-        gbcA.insets = new Insets(0, 60, 0, 60);
+        gbcA.insets = new Insets(0, 60, 20, 60);
         autresPanel.add(fullScreenPanel, gbcA);
 
+
+        // Label "Aides"
+        gbcA.insets = new Insets(0, 60, 10, 60);
+        gbcA.gridy = 2;
+        JLabel helpLabel = new JLabel("Aides", SwingConstants.CENTER);
+        helpLabel.setForeground(Color.WHITE);
+        helpLabel.setFont(doodleFont.deriveFont(Font.BOLD, 24f));
+        autresPanel.add(helpLabel, gbcA);
+
+        // Bouton "ON/OFF" de Aides
+        gbcA.insets = new Insets(0, 60, 0, 60);
+        gbcA.gridy = 3;
+        
+        JPanel helpButtonPanel = createHoverRoundedPanel(fsNormal, fsHover, 18, 44);
+        helpButton = createTextButton("OFF", 20f);
+
+        helpButtonPanel.add(helpButton, gbcA);
+
+        helpButtonPanel.addMouseListener(new MouseAdapter() {
+            @Override public void mousePressed(MouseEvent e) { helpButton.doClick(); }
+        });
+
+        helpButton.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) { helpButtonPanel.setBackground(fsHover);  helpButtonPanel.repaint(); }
+            @Override public void mouseExited(MouseEvent e)  { helpButtonPanel.setBackground(fsNormal); helpButtonPanel.repaint(); }
+        });
+
+        autresPanel.add(helpButtonPanel, gbcA);
+        
         return autresPanel;
     }
 
@@ -496,6 +526,7 @@ public class SettingsOverlay extends JComponent {
     public JButton getVolumeValueButton() { return volumeValueButton;}
     public JButton getVolumeRightButton() { return volumeRightButton;}
     public JButton getHandCardAnimationsButton() { return handCardAnimationsButton;}
+    public JButton getHelpButton(){ return helpButton;}
 
     public void setSelectedTabPanel(JComponent tabPanel) {
         selectedTabPanel = (JPanel) tabPanel;

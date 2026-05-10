@@ -255,10 +255,13 @@ public class DoodleButton extends JComponent {
 
     // setters
     public void setActive(boolean active) { this.active = active; repaint(); }
-    public String getText() { return model.getText(); }
     public void setCouleur(ButtonColor c) { model.setColor(c); repaint(); }
     public void setText(String t) { model.setText(t); repaint(); }
     public void setImage(String path) { model.setImagePath(path); loadIcon(path); repaint(); }
     public void setIconSide(IconSide side) { this.iconSide = side; repaint(); }
     public void setFontSize(float size) { this.fontSize = size; loadResources(); repaint(); }
+
+    // getter 
+    public String getText() { return model.getText(); }
+    public DoodleButtonModel getDoodleButtonModel(){return this.model;}
 }

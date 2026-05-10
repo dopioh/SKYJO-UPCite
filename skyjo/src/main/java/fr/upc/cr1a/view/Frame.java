@@ -14,11 +14,13 @@ import fr.upc.cr1a.controller.MainMenuController;
 import fr.upc.cr1a.controller.PlayersSetupController;
 import fr.upc.cr1a.controller.SettingsOverlayController;
 import fr.upc.cr1a.controller.ShopController;
+import fr.upc.cr1a.controller.help_ingame.HelpController;
 import fr.upc.cr1a.model.AudioManager;
 import fr.upc.cr1a.model.GameManager;
 import fr.upc.cr1a.model.GraphicsSettings;
 import fr.upc.cr1a.model.TutorialModel;
 import fr.upc.cr1a.utils.ImageCache;
+import fr.upc.cr1a.view.help_ingame.HelpOverlay;
 
 import java.awt.CardLayout;
 import java.awt.Rectangle;
@@ -47,12 +49,14 @@ public class Frame extends JFrame{
     private PlayersSetupPanel playersSetupPanel;
     private ConnexionPanel connexionPanel;
     private GameManager currentGame;
+    private HelpOverlay helpOverlay;
     private boolean handCardAnimationsEnabled = GraphicsSettings.isHighQuality();
 
     // Controller
     private AccountController account; // sert a rien pour le moment
     private ConnexionController connexionController;
     private LobbyRoomController lobbyRoomController;
+    private HelpController helpController;
 
 
     public Frame() {
@@ -106,6 +110,12 @@ public class Frame extends JFrame{
         tutorialView.setVisible(false);
         getLayeredPane().add(tutorialView, JLayeredPane.DRAG_LAYER);
 
+        // Overlay help in game 
+        this.helpOverlay = new HelpOverlay();
+        //add(playersSetupPanel, "HELP_OVERLAY");
+        getLayeredPane().add(helpOverlay, JLayeredPane.POPUP_LAYER);
+        helpOverlay.setBounds(0, 0, getWidth(), getHeight());
+
         // redimentionnement
         addComponentListener(new java.awt.event.ComponentAdapter() {
             @Override
@@ -128,6 +138,7 @@ public class Frame extends JFrame{
         new LobbyBrowserController(this, lobbyBrowserPanel);
         lobbyRoomController = new LobbyRoomController(this, lobbyRoomPanel);
         new PlayersSetupController(this, playersSetupPanel);
+        this.helpController = new HelpController(this);
 
         this.connexionController = new ConnexionController(this, connexionPanel);
 
@@ -287,6 +298,10 @@ public class Frame extends JFrame{
 
     }
 
+    // help in game
+    public HelpController getHelpController(){return this.helpController;}
+    public HelpOverlay getHelpOverlay(){return this.helpOverlay;}
+
     public void setCurrentGame(GameManager game) {
         this.currentGame = game;
     }
@@ -305,5 +320,9 @@ public class Frame extends JFrame{
 
     public void setHandCardAnimationsEnabled(boolean enabled) {
         this.handCardAnimationsEnabled = enabled;
+    }
+
+    public SettingsOverlay getSettingsOverlay(){
+        return this.settingsOverlay;
     }
 }

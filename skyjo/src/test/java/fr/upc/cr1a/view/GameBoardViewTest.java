@@ -15,12 +15,16 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import fr.upc.cr1a.view.help_ingame.HelpOverlay;
+
 @ExtendWith(MockitoExtension.class)
 public class GameBoardViewTest {
+    HelpOverlay helpOverlay = new HelpOverlay();
 
     @Mock private PlayerModel mockPlayer1;
     @Mock private PlayerModel mockPlayer2;
     @Mock private PlayerHandModel mockHand;
+    @Mock private Frame mockFrame;
 
     private GameBoardView view;
     private ArrayList<PlayerModel> players;
@@ -33,10 +37,13 @@ public class GameBoardViewTest {
 
         when(mockPlayer1.getName()).thenReturn("MeiMei");
         when(mockPlayer2.getName()).thenReturn("NassNass");
+        when(mockPlayer1.getHand()).thenReturn(mockHand);
+        when(mockFrame.getHelpOverlay()).thenReturn(helpOverlay);
 
         when(mockPlayer1.getHand()).thenReturn(mockHand); // pour eviter les null exceptions
+        when(mockFrame.getHelpOverlay()).thenReturn(helpOverlay);
 
-        view = new GameBoardView(players);
+        view = new GameBoardView(players,mockFrame);
     }
 
     @Test

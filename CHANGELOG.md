@@ -572,6 +572,8 @@
     - Les sons sont préchargés au démarrage
     - `DoodleButton` joue automatiquement un son par défaut
 
+- Aides (activable dans les parametres) qui highlight les actions possibles pour le joueur ( fonctionne avec le mode action aussi) 
+
 ### Fixed
 
 - Le BGM ne rebouclait pas
@@ -595,3 +597,9 @@
     - par défaut sur linux, le jeu se lance en BAS
     - BAS désactive le flip et float des cartes
 
+
+## v.0.14: SPRINT 14
+
+### Fixed 
+
+- Fix API error 500

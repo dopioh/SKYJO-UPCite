@@ -74,9 +74,9 @@ public final class ApiErrorManager {
             case 403 -> "Acces bloque pour " + safeContext + ".";
             case 404 -> "On n'a rien trouve pour " + safeContext + ".";
             case 409 -> "Cet email ou ce pseudo est deja pris. Essaie une autre carte d'identite.";
-            case 422 -> "Format invalide. Ajuste les infos et retente.";
+            case 422 -> msgError422(responseBody);
             case 429 -> "Trop de tentatives d'un coup. Fais une petite pause et reessaie.";
-            case 500 -> "Le serveur Skyjo a melange les cartes. Reessaie un peu plus tard.";
+            case 500 -> msgError500(responseBody);
             case 502, 503, 504 -> "Serveur indisponible pour l'instant. Reviens dans quelques instants.";
             default -> {
                 if (body.contains("password") || body.contains("invalid login")) {
@@ -91,5 +91,27 @@ public final class ApiErrorManager {
                 yield "Le serveur a renvoye un code " + statusCode + " pendant " + safeContext + ".";
             }
         };
+    }
+
+    public static String msgError500(String response){
+        if (response != null && response.contains("stats_player_username_key") && response.contains("already exists")) {
+            return "  Pseudo déjà pris, veuillez en choisir un autre.";
+        }
+        return "  Le serveur Skyjo est en train de mélanger ses cartes. \n  Reessaie un peu plus tard.";
+    }
+
+    public static String msgError422(String response){
+        if (response != null && response.contains("user_already_exists") ) {
+            return "  Vous avez déjà un compte avec cette adresse mail. \n  Veuillez vous connecter avec.";
+        }
+
+        if ( response != null && response.contains("anonymous_provider_disabled")){
+            return "  Le mail ne doit pas être vide.";
+        }
+
+        if(response != null && response.contains("error_code\":\"weak_password")){
+            return "  Votre mot de passe est trop faible.\n  Il doit faire au minimum 6 caractères.";
+        }
+        return "  Format Invalide.";
     }
 }
