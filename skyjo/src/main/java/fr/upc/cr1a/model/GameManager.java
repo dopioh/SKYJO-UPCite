@@ -995,6 +995,9 @@ public class GameManager {
                 boolean playerChanged = (this.currentPlayerIndex != i);
                 this.currentPlayerIndex = i;
 
+                // Capture de la phase precedente pour detecter la fin de l'INIT_REVEAL
+                TurnPhase previousPhase = this.turnPhase;
+
                 // Applique la phase authoritaire venue du serveur
                 if (phaseName != null) {
                     try {
@@ -1002,11 +1005,14 @@ public class GameManager {
                     } catch (IllegalArgumentException e) {}
                 }
 
+                boolean initToPlay = (previousPhase == TurnPhase.INIT_REVEAL && this.turnPhase != TurnPhase.INIT_REVEAL);
+
                 if (gameBoardModel != null && gameBoardModel.getGameBoardController() != null) {
                     gameBoardModel.getGameBoardController().refreshGuide();
 
                     final PlayerModel newPlayer = players.get(i);
-                    if (playerChanged && gameBoardModel.getGameBoardView() != null) {
+                    boolean shouldShowTransition = (playerChanged || initToPlay);
+                    if (shouldShowTransition && gameBoardModel.getGameBoardView() != null) {
                         final GameBoardView gv = gameBoardModel.getGameBoardView();
                         gv.showPlayerTransition(newPlayer, () -> {
                             gv.showPlayerCards(newPlayer);
@@ -1016,9 +1022,7 @@ public class GameManager {
                             }
                         });
                     }
-                    if (GameSession.status == GameSession.STATUS.CLIENT
-                        && playerChanged
-                        && gameBoardModel.getGameBoardController().getGameLoop() != null) {
+                    if (GameSession.status == GameSession.STATUS.CLIENT && (playerChanged || initToPlay) && gameBoardModel.getGameBoardController().getGameLoop() != null) {
                         gameBoardModel.getGameBoardController().getGameLoop().restartCountdownForNetworkTurn();
                     }
                 }

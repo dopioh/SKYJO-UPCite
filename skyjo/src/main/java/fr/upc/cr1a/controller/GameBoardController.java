@@ -8,6 +8,9 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.awt.KeyboardFocusManager;
+import java.awt.KeyEventDispatcher;
+
 import javax.swing.*;
 
 import fr.upc.cr1a.controller.data.ApiErrorManager;
@@ -86,21 +89,8 @@ public class GameBoardController {
             }
         });
 
-        gameBoardView.setFocusTraversalKeysEnabled(false);
-        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0, false), "showScores");
-        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0, true),  "hideScores");
-        am.put("showScores", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showScoresOverlay();
-            }
-        });
-        am.put("hideScores", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                hideScoresOverlay();
-            }
-        });
+        // Tab pour scoreboard
+        installTabScoreboardDispatcher();
 
         audio = gameBoardModel.getFrame().getAudioManager();
         gameBoardView.getPauseOverlay().getBtnResume().addActionListener(e -> { audio.playSfx("/sfx/button_click.wav"); closePauseOverlay(); });
@@ -390,6 +380,11 @@ public class GameBoardController {
         if (gameBoardView != null) {
             gameBoardView.cleanup();
         }
+        // Desinstaller le dispatcher Tab pour eviter qu'il reste actif dans le menu
+        if (tabDispatcher != null) {
+            KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(tabDispatcher);
+            tabDispatcher = null;
+        }
         AnimLoop.clearAll();
         setWaitingNextTurn(true);
     }
@@ -403,11 +398,38 @@ public class GameBoardController {
     }
 
     private boolean scoreboardShowing = false;
+    private KeyEventDispatcher tabDispatcher;
+
+    private void installTabScoreboardDispatcher() {
+        java.awt.KeyboardFocusManager fm = java.awt.KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        tabDispatcher = e -> {
+            if (e.getKeyCode() != KeyEvent.VK_TAB) return false;
+            // n'agit que si la view du jeu est visible 
+            if (gameBoardView == null || !gameBoardView.isShowing()) return false;
+            // ignorer si un dialog est ouvert
+            if (currentRoundEndPanel != null && currentRoundEndPanel.isShowing()) return false;
+
+            if (e.getID() == KeyEvent.KEY_PRESSED) {
+                showScoresOverlay();
+                e.consume();
+                return true;
+            } else if (e.getID() == KeyEvent.KEY_RELEASED) {
+                hideScoresOverlay();
+                e.consume();
+                return true;
+            }
+            return false;
+        };
+        fm.addKeyEventDispatcher(tabDispatcher);
+    }
 
     private void showScoresOverlay() {
         if (scoreboardShowing) return;
         scoreboardShowing = true;
-        ScoreboardOverlayPanel panel = new ScoreboardOverlayPanel(gameManager.getPlayers());
+        ScoreboardOverlayPanel panel = new ScoreboardOverlayPanel(
+            gameManager.getPlayers(),
+            gameManager.getRoundNumber()
+        );
         gameBoardView.showScoreboardOverlay(panel);
     }
 

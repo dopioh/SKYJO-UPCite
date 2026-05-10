@@ -238,12 +238,12 @@ public class RoundEndPanel extends JPanel {
 
         // Elo uniquement en multi (pas de gain/perte ELO en solo, juste XP + money)
         if (isOnline) {
-            eloLabel = makeStatLine("ELO", String.valueOf(initialElo), "x");
+            eloLabel = makeStatLine("ELO", String.valueOf(initialElo), null);
             statsCard.add(eloLabel);
             statsCard.add(Box.createVerticalStrut(4));
         }
-        xpLabel    = makeStatLine("XP",       String.valueOf(initialXp),    "x");
-        moneyLabel = makeStatLine("Pièces",   String.valueOf(initialMoney), "x");
+        xpLabel    = makeStatLine("XP",       String.valueOf(initialXp),    null);
+        moneyLabel = makeStatLine("Pièces",   String.valueOf(initialMoney), null);
         statsCard.add(xpLabel);
         statsCard.add(Box.createVerticalStrut(4));
         statsCard.add(moneyLabel);
@@ -287,7 +287,6 @@ public class RoundEndPanel extends JPanel {
     }
 
     public void updateStats(int elo, int xp, int money, int deltaElo, int deltaXp, int deltaMoney) {
-        // Si pas de game-over panel construit, on sort
         if (xpLabel == null) return;
         // ELO uniquement affiche en multi (eloLabel peut etre null en solo)
         if (eloLabel != null) {

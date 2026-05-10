@@ -15,6 +15,13 @@ public class ScoreboardOverlayPanel extends JPanel {
     private static Font baseFont;
 
     public ScoreboardOverlayPanel(List<PlayerModel> players) {
+        this(players, -1);
+    }
+
+    /**
+     * @param currentRoundNumber numero de la manche en cours
+     */
+    public ScoreboardOverlayPanel(List<PlayerModel> players, int currentRoundNumber) {
         setOpaque(false);
         setLayout(new GridBagLayout());
 
@@ -38,39 +45,56 @@ public class ScoreboardOverlayPanel extends JPanel {
         title.setForeground(Color.WHITE);
         card.add(title, BorderLayout.NORTH);
 
-        // tableau : 1 colonne joueur + N colonnes manches + 1 colonne total
-        int maxRounds = 0;
+        // Manches finies enregistrees dans l'historique
+        int historySize = 0;
         for (PlayerModel p : players) {
-            maxRounds = Math.max(maxRounds, p.getRoundScoreHistory().size());
+            historySize = Math.max(historySize, p.getRoundScoreHistory().size());
         }
 
-        JPanel grid = new JPanel(new GridLayout(players.size() + 1, maxRounds + 2, 4, 4));
+        boolean showCurrent = (currentRoundNumber > 0) && (currentRoundNumber > historySize);
+        int totalRoundCols = historySize + (showCurrent ? 1 : 0);
+
+        JPanel grid = new JPanel(new GridLayout(players.size() + 1, totalRoundCols + 2, 4, 4));
         grid.setOpaque(false);
 
         // header
         grid.add(makeHeaderCell("Joueur"));
-        for (int r = 1; r <= maxRounds; r++) {
+        for (int r = 1; r <= historySize; r++) {
             grid.add(makeHeaderCell("M" + r));
+        }
+        if (showCurrent) {
+            grid.add(makeHeaderCell("M" + currentRoundNumber + "*"));
         }
         grid.add(makeHeaderCell("Total"));
 
-        // tri par total croissant 
+        // tri par total croissant (le total inclut la manche en cours pour un classement live)
         List<PlayerModel> sorted = new ArrayList<>(players);
-        sorted.sort((a, b) -> a.getTotalScore() - b.getTotalScore());
+        sorted.sort((a, b) -> {
+            int aTotal = a.getTotalScore() + (showCurrent ? a.calculateRoundScore() : 0);
+            int bTotal = b.getTotalScore() + (showCurrent ? b.calculateRoundScore() : 0);
+            return aTotal - bTotal;
+        });
 
         for (PlayerModel p : sorted) {
             grid.add(makeNameCell(p.getName()));
             ArrayList<Integer> history = p.getRoundScoreHistory();
-            for (int r = 0; r < maxRounds; r++) {
+            for (int r = 0; r < historySize; r++) {
                 String txt = (r < history.size()) ? String.valueOf(history.get(r)) : "—";
                 grid.add(makeValueCell(txt, false));
             }
-            grid.add(makeValueCell(String.valueOf(p.getTotalScore()), true));
+            if (showCurrent) {
+                int liveScore = p.calculateRoundScore();
+                grid.add(makeLiveCell(String.valueOf(liveScore)));
+            }
+            int totalDisplayed = p.getTotalScore() + (showCurrent ? p.calculateRoundScore() : 0);
+            grid.add(makeValueCell(String.valueOf(totalDisplayed), true));
         }
 
         card.add(grid, BorderLayout.CENTER);
 
-        JLabel hint = new JLabel("Relache Tab pour fermer");
+        String hintText = showCurrent? "M" + currentRoundNumber + "* = manche en cours ..."
+            : "Relache Tab pour fermer";
+        JLabel hint = new JLabel(hintText);
         hint.setFont(font(14f, Font.ITALIC));
         hint.setForeground(new Color(255, 255, 255, 160));
         card.add(hint, BorderLayout.SOUTH);
@@ -98,6 +122,14 @@ public class ScoreboardOverlayPanel extends JPanel {
         JLabel l = new JLabel(text, SwingConstants.CENTER);
         l.setForeground(isTotal ? new Color(255, 220, 120) : Color.WHITE);
         l.setFont(font(18f, isTotal ? Font.BOLD : Font.PLAIN));
+        l.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
+        return l;
+    }
+
+    private JLabel makeLiveCell(String text) {
+        JLabel l = new JLabel(text, SwingConstants.CENTER);
+        l.setForeground(new Color(140, 220, 255));
+        l.setFont(font(18f, Font.ITALIC));
         l.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
         return l;
     }
