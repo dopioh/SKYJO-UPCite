@@ -12,6 +12,8 @@ import javax.swing.*;
 import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
 import fr.upc.cr1a.model.PlayerModel;
 import fr.upc.cr1a.utils.ImageCache;
+import fr.upc.cr1a.model.player.PlayerAccount;
+import fr.upc.cr1a.model.GameSession;
 
 /**
  * Panel affiché entre les manches avec classement des joueurs et bouton continuer/menu
@@ -57,11 +59,11 @@ public class RoundEndPanel extends JPanel {
     }
 
     public RoundEndPanel(List<PlayerModel> players, boolean gameOver, PlayerModel lastRoundPlayer, PlayerModel lowestScorePlayer) {
-        if (fr.upc.cr1a.model.player.PlayerAccount.actuelAccount != null) {
-            this.localUsername  = fr.upc.cr1a.model.player.PlayerAccount.actuelAccount.getUsername();
-            this.initialElo     = fr.upc.cr1a.model.player.PlayerAccount.actuelAccount.getElo();
-            this.initialXp      = fr.upc.cr1a.model.player.PlayerAccount.actuelAccount.getXp();
-            this.initialMoney   = fr.upc.cr1a.model.player.PlayerAccount.actuelAccount.getMoney();
+        if (PlayerAccount.actuelAccount != null) {
+            this.localUsername  = PlayerAccount.actuelAccount.getUsername();
+            this.initialElo     = PlayerAccount.actuelAccount.getElo();
+            this.initialXp      = PlayerAccount.actuelAccount.getXp();
+            this.initialMoney   = PlayerAccount.actuelAccount.getMoney();
         } else {
             this.localUsername  = "Invité";
             this.initialElo     = 0;
@@ -140,8 +142,10 @@ public class RoundEndPanel extends JPanel {
         bigCard.setLayout(new BoxLayout(bigCard, BoxLayout.Y_AXIS));
         bigCard.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Label explicatif du calcul
-        JLabel scoreExplanation = new JLabel("Calcul : pts dans la main + carte action");
+        boolean isOnline = (GameSession.status == GameSession.STATUS.HOST || GameSession.status == GameSession.STATUS.CLIENT);
+
+        String calcText = isOnline ? "Calcul : pts dans la main" : "Calcul : pts dans la main + carte action";
+        JLabel scoreExplanation = new JLabel(calcText);
         scoreExplanation.setFont(font(16f, Font.ITALIC));
         scoreExplanation.setForeground(new Color(255, 255, 255, 200));
         bigCard.add(scoreExplanation);
@@ -149,30 +153,34 @@ public class RoundEndPanel extends JPanel {
 
         for (int i = 0; i < sortedPlayers.size(); i++) {
             PlayerModel p = sortedPlayers.get(i);
-            
+
             //calculer les détails du score
             int handScore = p.getHand().getVisibleCardScore();
-            int actionScore = p.getActionHand().size() * 10;
+            int actionScore = isOnline ? 0 : p.getActionHand().size() * 10;
             int totalRoundScore = handScore + actionScore;
-            
+
             //vérifier si doublement a été appliqué
             boolean hasDoubled = (lastRoundPlayer != null && p.equals(lastRoundPlayer) && lowestScorePlayer != null && !p.equals(lowestScorePlayer));
             int appliedRoundScore = hasDoubled ? totalRoundScore * 2 : totalRoundScore;
-            
+
             //le score total après la manche
             int scoreTotalAfter = p.getTotalScore();
-            
+
             String text = (i + 1) + ".   " + p.getName();
             if (lastRoundPlayer != null && p.equals(lastRoundPlayer)) {
                 text += " (first)";
             }
-            text += "   —   " + handScore + " + " + actionScore + " = " + totalRoundScore + " pts";
-            
+            if (isOnline) {
+                text += "   —   " + totalRoundScore + " pts";
+            } else {
+                text += "   —   " + handScore + " + " + actionScore + " = " + totalRoundScore + " pts";
+            }
+
             //vérifier si doublement appliqué
             if (hasDoubled) {
                 text += " × 2 = " + appliedRoundScore + " pts";
             }
-            
+
             // calculer score avant cette manche
             int scoreBefore = scoreTotalAfter - appliedRoundScore;
             text += "   |   Total : " + scoreBefore + " + " + appliedRoundScore + " = " + scoreTotalAfter + " pts";
@@ -226,11 +234,16 @@ public class RoundEndPanel extends JPanel {
         statsCard.add(statsTitleLabel);
         statsCard.add(Box.createVerticalStrut(8));
 
-        eloLabel   = makeStatLine("ELO",      String.valueOf(initialElo),   "x");
+        boolean isOnline = (GameSession.status == GameSession.STATUS.HOST || GameSession.status == GameSession.STATUS.CLIENT);
+
+        // Elo uniquement en multi (pas de gain/perte ELO en solo, juste XP + money)
+        if (isOnline) {
+            eloLabel = makeStatLine("ELO", String.valueOf(initialElo), "x");
+            statsCard.add(eloLabel);
+            statsCard.add(Box.createVerticalStrut(4));
+        }
         xpLabel    = makeStatLine("XP",       String.valueOf(initialXp),    "x");
         moneyLabel = makeStatLine("Pièces",   String.valueOf(initialMoney), "x");
-        statsCard.add(eloLabel);
-        statsCard.add(Box.createVerticalStrut(4));
         statsCard.add(xpLabel);
         statsCard.add(Box.createVerticalStrut(4));
         statsCard.add(moneyLabel);
@@ -274,10 +287,14 @@ public class RoundEndPanel extends JPanel {
     }
 
     public void updateStats(int elo, int xp, int money, int deltaElo, int deltaXp, int deltaMoney) {
-        if (eloLabel == null) return;
-        eloLabel.setText(formatStatHtml("ELO", String.valueOf(elo), "x"));
-        xpLabel.setText(formatStatHtml("XP", String.valueOf(xp), "x"));
-        moneyLabel.setText(formatStatHtml("Pièces", String.valueOf(money), "x"));
+        // Si pas de game-over panel construit, on sort
+        if (xpLabel == null) return;
+        // ELO uniquement affiche en multi (eloLabel peut etre null en solo)
+        if (eloLabel != null) {
+            eloLabel.setText(formatStatHtml("ELO", String.valueOf(elo), formatDelta(deltaElo)));
+        }
+        xpLabel.setText(formatStatHtml("XP", String.valueOf(xp), formatDelta(deltaXp)));
+        moneyLabel.setText(formatStatHtml("Pièces", String.valueOf(money), formatDelta(deltaMoney)));
         if (statusLabel != null) {
             statusLabel.setText("Mis à jour");
             statusLabel.setForeground(new Color(180, 255, 200, 220));

@@ -486,6 +486,15 @@ public class GameBoardController {
         }
 
         List<String> opponentTypes = buildOpponentTypes(opponents);
+        List<Integer> opponentElos = new ArrayList<>();
+        for (PlayerModel opp : opponents) {
+            if (opp instanceof BotModel) {
+                opponentElos.add(0);
+            } else {
+                int e = (opp.getPlayerData() != null) ? opp.getPlayerData().getElo() : 0;
+                opponentElos.add(e);
+            }
+        }
 
         final int oldElo = PlayerAccount.actuelAccount.getElo();
         final int oldXp = PlayerAccount.actuelAccount.getXp();
@@ -494,7 +503,7 @@ public class GameBoardController {
 
         String dbUuid = PlayerAccount.actuelAccount.getID();
         new Thread(() -> {
-            PlayerData updated = SendAPI.applyGameResult(dbUuid, wonGame, opponentTypes);
+            PlayerData updated = SendAPI.applyGameResult(dbUuid, wonGame, opponentTypes, opponentElos);
             if (updated != null) {
                 PlayerAccount.actuelAccount = updated;
                 System.out.println("Fin de partie: " + (wonGame ? "WIN" : "PERDU"));
