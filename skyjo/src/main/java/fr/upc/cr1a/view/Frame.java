@@ -22,7 +22,12 @@ import fr.upc.cr1a.utils.ImageCache;
 import fr.upc.cr1a.view.help_ingame.HelpOverlay;
 
 import java.awt.CardLayout;
+import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.Image;
+
+import java.awt.Taskbar;
 
 /**
  * Classe qui sert a instancier la fenetre de jeu (JFrame)
@@ -60,6 +65,26 @@ public class Frame extends JFrame{
         //final boolean hideLoginTemporarily = false; // y'en a plus besoin mtn y'a une session inviter (c'est un peu la meme chose que ca pour le moment..)
 
         setTitle("SKYJO");
+
+        // icone d'app : ( pas dans le cache psq faut qu'elle soit direct accessible pour lancer le jeu)
+        Image iconApp = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/app_icon.png"));
+        if (iconApp != null) {
+            this.setIconImage(iconApp);
+            System.out.println("[DEBUG] icon app non null");
+            try {
+                if (Taskbar.isTaskbarSupported()) { // verifie OS qui a une taskbar ? mac os 
+                    Taskbar taskbar = Taskbar.getTaskbar();
+                    if (taskbar.isSupported(Taskbar.Feature.ICON_IMAGE)) {
+                        taskbar.setIconImage(iconApp);
+                        System.out.println("[DEBUG] Icône du Dock macOS modifiée avec succès.");
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("[DEBUG] Erreur lors du changement d'icône du Dock : " + e.getMessage());
+            }
+        }
+        //System.out.println(iconApp.getClass());
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1280, 720);
         setLocationRelativeTo(null);
