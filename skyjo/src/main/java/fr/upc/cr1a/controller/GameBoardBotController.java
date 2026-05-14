@@ -331,7 +331,7 @@ public class GameBoardBotController {
             BotStrategyInterface strategy = bot.getStrategy();
             CardModel drawCard = gameManager.getCurrentDrawCard();
 
-            // Vérifier que drawCard n'est pas null avant l'échange
+            //vérifier que drawCard n'est pas null avant l'échange
             if (drawCard == null) {
                 mainController.setWaitingNextTurn(false);
                 mainController.requestEndTurnFromBot();
