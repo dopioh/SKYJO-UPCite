@@ -147,7 +147,7 @@ public class AccountStatsOverlayPanel extends JPanel {
         closeButton.setEnabled(true);
         closeButton.onMouseExit();
         
-        // Afficher le bouton de déconnexion seulement si connecté (pas en invité/null)
+        //Afficher le bouton de déconnexion seulement si connecté
         boolean isConnected = PlayerAccount.actuelAccount != null;
         disconnectButton.setEnabled(isConnected);
         disconnectButton.setVisible(isConnected);
@@ -292,7 +292,7 @@ public class AccountStatsOverlayPanel extends JPanel {
         Dimension closeButtonSize = closeButton.getPreferredSize();
         Dimension disconnectButtonSize = disconnectButton.getPreferredSize();
         
-        // Placer le bouton "Fermer" en haut à droite
+        //placer le bouton Fermer en haut à droite
         closeButton.setBounds(
             card.x + card.width - closeButtonSize.width - 18,
             card.y + 14,
@@ -300,7 +300,7 @@ public class AccountStatsOverlayPanel extends JPanel {
             closeButtonSize.height
         );
         
-        // Placer le bouton "Déconnexion" en bas à droite
+        //placer le bouton Déconnexion en bas à droite
         disconnectButton.setBounds(
             card.x + card.width - disconnectButtonSize.width - 18,
             card.y + card.height - disconnectButtonSize.height - 18,
@@ -319,13 +319,13 @@ public class AccountStatsOverlayPanel extends JPanel {
         );
         
         if (result == JOptionPane.YES_OPTION) {
-            // Déconnecter le joueur
+            //déconnecter le joueur
             PlayerAccount.actuelAccount = null;
             
-            // Fermer l'overlay
+            //fermer l'overlay
             setVisible(false);
             
-            // Rediriger vers l'écran de connexion
+            //rediriger vers l'écran de connexion
             if (frame != null) {
                 frame.showPanel("CONNEXION");
             }
