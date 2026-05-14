@@ -45,6 +45,12 @@ public class GameClient implements NetworkProtocolClient{
     private boolean modeAction;
     private boolean wasKicked = false;
     private boolean gameEndedReceived = false;
+    // True si le local player a recu UPDATE_AFK_REPLACED pour lui-meme. Permet de filtrer
+    // le fallback "Host disconnected" si la coupure suit l'AFK (par ex. timeout TCP cote OS).
+    private boolean afkReplacedSelf = false;
+    // True quand on est entre un ROUND_ENDED et un NEW_ROUND : si la connexion drop dans cette
+    // fenetre, on suppose une fin de partie/transition et on n'affiche pas la popup parasite.
+    private boolean roundEndedRecently = false;
 
     public GameClient( Frame frame, PlayerData playerData){
         this.frame = frame;
@@ -278,6 +284,7 @@ public class GameClient implements NetworkProtocolClient{
                 if (message.startsWith(NetworkProtocolServer.UPDATE_ROUND_ENDED)) {
                     //la manche est terminee, on affiche le RoundEndPanel.
                     //  [ROUND_ENDED:lastRoundPlayerId]
+                    roundEndedRecently = true;
                     String[] reParts = message.split(":");
                     final String lrpId = (reParts.length >= 2 && !reParts[1].isEmpty()) ? reParts[1] : null;
                     SwingUtilities.invokeLater(() -> {
@@ -291,6 +298,7 @@ public class GameClient implements NetworkProtocolClient{
                 }
 
                 if (message.startsWith(NetworkProtocolServer.UPDATE_NEW_ROUND)) {
+                    roundEndedRecently = false;
                     String[] nrParts = message.split(":");
                     long seed = 0L;
                     if (nrParts.length >= 2) {
@@ -312,8 +320,11 @@ public class GameClient implements NetworkProtocolClient{
                     //[AFK_REPLACED:playerId]
                     String[] afkParts = message.split(":");
                     final String afkPlayerId = (afkParts.length >= 2) ? afkParts[1] : null;
+                    if (afkPlayerId != null && playerData != null && afkPlayerId.equals(playerData.getID())) {
+                        afkReplacedSelf = true;
+                    }
                     SwingUtilities.invokeLater(() -> {
-                        if (afkPlayerId != null&& playerData != null&& afkPlayerId.equals(playerData.getID())) {
+                        if (afkPlayerId != null && playerData != null && afkPlayerId.equals(playerData.getID())) {
                             javax.swing.JOptionPane.showMessageDialog(frame,"AFK : vous êtes remplacé par un bot.","Inactivité",javax.swing.JOptionPane.WARNING_MESSAGE);
                         }
                     });
@@ -384,8 +395,9 @@ public class GameClient implements NetworkProtocolClient{
             boolean wasInGame = (frame != null && frame.getCurrentGame() != null);
             boolean previouslyConnected = (GameSession.status == GameSession.STATUS.CLIENT);
             disconnect();
-            // Popup uniquement si la coupure n'est pas attendue : pas de kick et pas de GAME_ENDED.
-            if (!wasKicked && !gameEndedReceived && wasInGame && previouslyConnected) {
+            boolean unexpectedDisconnect = !wasKicked && !gameEndedReceived && wasInGame && previouslyConnected;
+            boolean silentReturn = afkReplacedSelf || roundEndedRecently;
+            if (unexpectedDisconnect && !silentReturn) {
                 SwingUtilities.invokeLater(() -> {
                     try {
                         javax.swing.JOptionPane.showMessageDialog(
@@ -395,6 +407,17 @@ public class GameClient implements NetworkProtocolClient{
                             javax.swing.JOptionPane.WARNING_MESSAGE
                         );
                     } catch (Exception ignored) {}
+                    GameManager g = frame.getCurrentGame();
+                    if (g != null) g.stopGame();
+                    frame.clearCurrentGame();
+                    if (frame.getLobbyRoomController() != null) {
+                        frame.getLobbyRoomController().setNetworkHost(null);
+                        frame.getLobbyRoomController().setNetworkClient(null);
+                    }
+                    frame.showPanel("MENU");
+                });
+            } else if (unexpectedDisconnect && silentReturn) {
+                SwingUtilities.invokeLater(() -> {
                     GameManager g = frame.getCurrentGame();
                     if (g != null) g.stopGame();
                     frame.clearCurrentGame();

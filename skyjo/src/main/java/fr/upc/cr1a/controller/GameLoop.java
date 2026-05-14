@@ -284,6 +284,10 @@ public class GameLoop {
     }
 
     public void setPaused(boolean paused) {
+        boolean isMulti = (GameSession.status == GameSession.STATUS.HOST || GameSession.status == GameSession.STATUS.CLIENT);
+        if (isMulti) {
+            return;
+        }
         this.paused = paused;
         if (paused) {
             stopTurnCountdown();
