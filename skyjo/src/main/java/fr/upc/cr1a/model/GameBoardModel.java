@@ -6,6 +6,7 @@ import fr.upc.cr1a.controller.GameBoardController;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
 import fr.upc.cr1a.view.PlayerPreviewPanel;
+import fr.upc.cr1a.controller.network.Host;
 
 /**
  * Gere la logique du Plateau de jeu
@@ -65,11 +66,39 @@ public class GameBoardModel {
         frame.getSettingsOverlay().getHelpButton().setText("OFF");
         frame.getHelpController().toggleHelp(false);
         if (frame != null) {
+            // Si host en multi : prevenir les clients + fermer le serveur proprement
+            if (GameSession.status == GameSession.STATUS.HOST
+                && frame.getLobbyRoomController() != null
+                && frame.getLobbyRoomController().getHost() != null) {
+                Host host = frame.getLobbyRoomController().getHost();
+                if (host.getGameHost() != null) {
+                    host.getGameHost().broadcastGameEnded(null);
+                }
+                // Laisser le temps aux clients de recevoir GAME_ENDED avant de fermer les sockets,
+                // sinon la fermeture brutale peut couper le message TCP en transit.
+                Host hostRef = host;
+                new Thread(() -> {
+                    try { Thread.sleep(300); } catch (InterruptedException ignored) {}
+                    hostRef.quit();
+                }, "host-delayed-quit").start();
+                GameSession.status = GameSession.STATUS.OFFLINE;
+            } else if (GameSession.status == GameSession.STATUS.CLIENT
+                && frame.getLobbyRoomController() != null
+                && frame.getLobbyRoomController().getClient() != null) {
+                // Cote client : se deconnecter proprement
+                frame.getLobbyRoomController().getClient().disconnect();
+                GameSession.status = GameSession.STATUS.OFFLINE;
+            }
+
             GameManager  game = frame.getCurrentGame();
             if (game != null) {
                 game.stopGame();
             }
             frame.clearCurrentGame();
+            if (frame.getLobbyRoomController() != null) {
+                frame.getLobbyRoomController().setNetworkHost(null);
+                frame.getLobbyRoomController().setNetworkClient(null);
+            }
             frame.getAudioManager().playBgm("/music/main_menu.wav");
             frame.showPanel("MENU");
         }

@@ -67,26 +67,22 @@ public class CreateLobbyDialog extends JDialog {
         mainPanel.add(maxPlayersSpinner);
         mainPanel.add(Box.createVerticalStrut(20));
 
-        //mode actions
+        //mode actions (retire en multi online -- on garde l'attribut pour compat interne)
         actionModeCheckbox = new JCheckBox("Activer le mode Actions (cartes spéciales)");
-        actionModeCheckbox.setFont(new Font("Arial", Font.PLAIN, 14));
-        actionModeCheckbox.setBackground(new Color(245, 245, 245));
-        actionModeCheckbox.setAlignmentX(Component.LEFT_ALIGNMENT);
         actionModeCheckbox.setSelected(false);
-
-        mainPanel.add(actionModeCheckbox);
-        mainPanel.add(Box.createVerticalStrut(40));
+        actionModeCheckbox.setVisible(false); // masque en multi online
+        mainPanel.add(Box.createVerticalStrut(20));
 
         //boutons en bas
-        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
-       buttonsPanel.setBackground(new Color(245, 245, 245));
+        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        buttonsPanel.setOpaque(false);
         buttonsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         buttonsPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
 
-        cancelBtn = new DoodleButton("Annuler", ButtonColor.RED, 180, 60);
-        cancelBtn.setFontSize(32f);
-        createBtn = new DoodleButton("Créer", ButtonColor.GREEN, 180, 60);
-        createBtn.setFontSize(32f);
+        cancelBtn = new DoodleButton("Annuler", ButtonColor.RED, 150, 50);
+        cancelBtn.setFontSize(28f);
+        createBtn = new DoodleButton("Créer", ButtonColor.GREEN, 150, 50);
+        createBtn.setFontSize(28f);
 
         buttonsPanel.add(cancelBtn);
         buttonsPanel.add(createBtn);
@@ -114,7 +110,8 @@ public class CreateLobbyDialog extends JDialog {
      * retourne si le mode actions est activé
      */
     public boolean isActionMode() {
-        return actionModeCheckbox.isSelected();
+        // J'ai enlevé le mode action en ligne , je laisse pour éviter un refactor
+        return false;
     }
 
     /**

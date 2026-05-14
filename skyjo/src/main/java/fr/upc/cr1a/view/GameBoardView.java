@@ -345,10 +345,10 @@ public class GameBoardView extends JPanel {
         actionHandPanel = new JPanel(new BorderLayout(0, 6));
         actionHandPanel.setOpaque(false);
 
-        JLabel actionHandLabel = new JLabel("Cartes action", SwingConstants.CENTER);
-        actionHandLabel.setForeground(new Color(255, 224, 120));
-        actionHandLabel.setFont(patrickFont.deriveFont(Font.BOLD, 20f));
-        actionHandPanel.add(actionHandLabel, BorderLayout.NORTH);
+        // JLabel actionHandLabel = new JLabel("Cartes actions", SwingConstants.CENTER);
+        // actionHandLabel.setForeground(new Color(255, 224, 120));
+        // actionHandLabel.setFont(patrickFont.deriveFont(Font.BOLD, 20f));
+        // actionHandPanel.add(actionHandLabel, BorderLayout.NORTH);
 
         actionHandCardsPanel = new JPanel(new GridBagLayout());
         actionHandCardsPanel.setOpaque(false);
@@ -1158,6 +1158,28 @@ public class GameBoardView extends JPanel {
     public void showPauseOverlay(boolean visible) {
         pauseOverlay.setVisible(visible);
         pauseOverlay.repaint();
+    }
+
+    private ScoreboardOverlayPanel currentScoreboard;
+
+    public void showScoreboardOverlay(ScoreboardOverlayPanel panel) {
+        hideScoreboardOverlay(); // nettoyer une eventuelle precedente instance
+        currentScoreboard = panel;
+        if (panel == null) return;
+        Dimension size = layeredPane.getSize();
+        panel.setBounds(0, 0, size.width, size.height);
+        layeredPane.add(panel, JLayeredPane.DRAG_LAYER);
+        layeredPane.revalidate();
+        layeredPane.repaint();
+    }
+
+    public void hideScoreboardOverlay() {
+        if (currentScoreboard != null) {
+            layeredPane.remove(currentScoreboard);
+            layeredPane.revalidate();
+            layeredPane.repaint();
+            currentScoreboard = null;
+        }
     }
 
     public void setTimerVisible(boolean visible) {
