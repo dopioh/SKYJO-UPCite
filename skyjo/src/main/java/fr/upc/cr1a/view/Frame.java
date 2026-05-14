@@ -70,7 +70,7 @@ public class Frame extends JFrame{
         connexionPanel = new ConnexionPanel();
         add(connexionPanel, "CONNEXION");
 
-        mainMenuPanel = new MainMenuPanel();
+        mainMenuPanel = new MainMenuPanel(this);
         add(mainMenuPanel, "MENU");
 
         shopPanel = new ShopPanel();
