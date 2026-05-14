@@ -1160,6 +1160,28 @@ public class GameBoardView extends JPanel {
         pauseOverlay.repaint();
     }
 
+    private ScoreboardOverlayPanel currentScoreboard;
+
+    public void showScoreboardOverlay(ScoreboardOverlayPanel panel) {
+        hideScoreboardOverlay(); // nettoyer une eventuelle precedente instance
+        currentScoreboard = panel;
+        if (panel == null) return;
+        Dimension size = layeredPane.getSize();
+        panel.setBounds(0, 0, size.width, size.height);
+        layeredPane.add(panel, JLayeredPane.DRAG_LAYER);
+        layeredPane.revalidate();
+        layeredPane.repaint();
+    }
+
+    public void hideScoreboardOverlay() {
+        if (currentScoreboard != null) {
+            layeredPane.remove(currentScoreboard);
+            layeredPane.revalidate();
+            layeredPane.repaint();
+            currentScoreboard = null;
+        }
+    }
+
     public void setTimerVisible(boolean visible) {
         if (turnTimerLabel != null) {
             turnTimerLabel.setVisible(visible);

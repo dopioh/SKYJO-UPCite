@@ -67,6 +67,22 @@ public class PlayerData {
      */
     public PlayerData(String id, boolean isBot, String botType){
         this.id = id;
+        this.username = id;
+        this.rank_id = 1;
+        this.elo = 0;
+        this.xp = 0;
+        this.money = 0;
+        this.isBot = isBot;
+        this.botType = botType;
+        this.skins = null;
+    }
+
+    /**
+     * Constructeur complet utilisé pour reconstruire un joueur (ou un bot) reçu via le réseau
+     */
+    public PlayerData(String id, String name, boolean isBot, String botType){
+        this.id = id;
+        this.username = name;
         this.rank_id = 1;
         this.elo = 0;
         this.xp = 0;

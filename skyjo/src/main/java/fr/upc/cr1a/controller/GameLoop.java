@@ -1,7 +1,9 @@
 package fr.upc.cr1a.controller;
 
+import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolServer;
 import fr.upc.cr1a.model.BotModel;
 import fr.upc.cr1a.model.GameManager;
+import fr.upc.cr1a.model.GameSession;
 import fr.upc.cr1a.model.PlayerModel;
 import fr.upc.cr1a.view.GameBoardView;
 import javax.swing.Timer;
@@ -12,7 +14,7 @@ import javax.swing.Timer;
  */
 public class GameLoop {
     
-    private static final int TURN_DURATION_SECONDS = 5; // Test de Timer ICI
+    private static final int TURN_DURATION_SECONDS = 20; // Test de Timer ICI
     private boolean timerEnabled; 
 
     private Timer turnCountdownTimer;
@@ -103,6 +105,8 @@ public class GameLoop {
         gameBoardView.showPlayerTransition(currentPlayer, () -> {
             if (!gameActive) return;
 
+            broadcastTurnChangedIfHost(); // Changement car le timer est déréglé
+
             if (humanController != null) {
                 humanController.refreshGuide();
             }
@@ -133,6 +137,12 @@ public class GameLoop {
         gameManager.nextPlayer();
         if (gameManager.getGameState() == GameManager.GameState.ROUND_ENDED
                 || gameManager.getGameState() == GameManager.GameState.GAME_ENDED) {
+            // Multi : prevenir les clients que la partie / manche est terminee
+            if (gameManager.getGameState() == GameManager.GameState.GAME_ENDED) {
+                broadcastGameEndedIfHost();
+            } else {
+                broadcastRoundEndedIfHost();
+            }
             if (humanController != null) {
                 humanController.showRoundEndScreenFromLoop();
             }
@@ -149,10 +159,12 @@ public class GameLoop {
         if (gameManager.getTurnPhase() != GameManager.TurnPhase.INIT_REVEAL) {
             gameManager.startTurn();
         }
-        
+        broadcastTurnChangedIfHost();
+
         PlayerModel currentPlayer = gameManager.getCurrentPlayer();
         gameBoardView.showPlayerCards(currentPlayer);
-        if (!(currentPlayer instanceof BotModel) && gameManager.isAutoControlled(currentPlayer)) {
+        boolean isClient = (GameSession.status == GameSession.STATUS.CLIENT);
+        if (!isClient && !(currentPlayer instanceof BotModel) && gameManager.isAutoControlled(currentPlayer)) {
             stopTurnCountdown();
             gameBoardView.setTurnTimerText("--");
             Timer autoPlayDelay = new Timer(800, e -> {
@@ -194,10 +206,20 @@ public class GameLoop {
             gameBoardView.setTurnTimerText(""+remainingSeconds);
             if (remainingSeconds <= 0) {
                 turnCountdownTimer.stop();
+                if (GameSession.status == GameSession.STATUS.CLIENT) return;
                 handleTurnTimeout();
             }
         });
         turnCountdownTimer.start();
+    }
+
+    /**
+     * Recommence le timer
+     */
+    public void restartCountdownForNetworkTurn() {
+        if (!timerEnabled) return;
+        if (!gameActive) return;
+        startTurnCountdown();
     }
 
     private void stopTurnCountdown() {
@@ -220,6 +242,7 @@ public class GameLoop {
         if (!timerEnabled) return;
         if (paused) return;
         if (!isGameActive()) return;
+        if (GameSession.status == GameSession.STATUS.CLIENT) return;
         stopTurnCountdown();
         if (humanController != null) {
             humanController.setWaitingNextTurn(true);
@@ -231,16 +254,40 @@ public class GameLoop {
             }
             return;
         }
-        gameManager.registerAfkTurn(currentPlayer);       
+        gameManager.registerAfkTurn(currentPlayer);
+        boolean wasAuto = gameManager.isAutoControlled(currentPlayer);
         if (gameManager.getAfkCount(currentPlayer) >= 2) {
             gameManager.setAutoControlled(currentPlayer, true);
+            // Si on vient juste de franchir le seuil cote HOST, prevenir tous les clients
+            //le client concerné affichera "AFK : vous etes remplace par un bot"
+            if (!wasAuto && GameSession.status == GameSession.STATUS.HOST) {
+                broadcastAfkReplacedIfHost(currentPlayer.getPlayerData().getID());
+            }
         }
         if(timeoutController != null) {
             timeoutController.handleTimeoutForCurrentPlayer();
         }
     }
 
+    private void broadcastAfkReplacedIfHost(String playerId) {
+        if (GameSession.status != GameSession.STATUS.HOST) return;
+        try {
+            fr.upc.cr1a.controller.network.Host h =
+                gameManager.getGameBoardModel().getFrame().getLobbyRoomController().getHost();
+            if (h == null) return;
+            NetworkProtocolServer srv = h.getGameHost();
+            if (srv == null) return;
+            srv.broadcastAfkReplaced(playerId);
+        } catch (Exception e) {
+            
+        }
+    }
+
     public void setPaused(boolean paused) {
+        boolean isMulti = (GameSession.status == GameSession.STATUS.HOST || GameSession.status == GameSession.STATUS.CLIENT);
+        if (isMulti) {
+            return;
+        }
         this.paused = paused;
         if (paused) {
             stopTurnCountdown();
@@ -287,5 +334,55 @@ public class GameLoop {
         } else {
             startTurnCountdown();
         }
+    }
+
+    /**
+     * Broadcast TURN_CHANGED aux clients si on est host, avec le joueur et la phase courante.
+     */
+    private void broadcastTurnChangedIfHost() {
+        if (GameSession.status != GameSession.STATUS.HOST) return;
+        try {
+            fr.upc.cr1a.controller.network.Host h =
+                gameManager.getGameBoardModel().getFrame().getLobbyRoomController().getHost();
+            if (h == null) return;
+            NetworkProtocolServer srv = h.getGameHost();
+            if (srv == null) return;
+            PlayerModel cp = gameManager.getCurrentPlayer();
+            if (cp == null) return;
+            srv.broadcastTurnChanged(cp.getPlayerData().getID(), gameManager.getTurnPhase().name());
+        } catch (Exception e) {}
+    }
+
+    private void broadcastRoundEndedIfHost() {
+        if (GameSession.status != GameSession.STATUS.HOST) return;
+        try {
+            fr.upc.cr1a.controller.network.Host h =
+                gameManager.getGameBoardModel().getFrame().getLobbyRoomController().getHost();
+            if (h == null) return;
+            NetworkProtocolServer srv = h.getGameHost();
+            if (srv == null) return;
+            // Inclure le declencheur de fin de manche pour que les clients puissent l'afficher
+            PlayerModel lrp = gameManager.getLastRoundPlayer();
+            String lrpId = (lrp != null) ? lrp.getPlayerData().getID() : null;
+            srv.broadcastRoundEnded(lrpId);
+        } catch (Exception e) {}
+    }
+
+    /**
+     * Broadcast UPDATE_GAME_ENDED aux clients quand on est host
+     */
+    private void broadcastGameEndedIfHost() {
+        if (GameSession.status != GameSession.STATUS.HOST) return;
+        try {
+            fr.upc.cr1a.controller.network.Host h =
+                gameManager.getGameBoardModel().getFrame().getLobbyRoomController().getHost();
+            if (h == null) return;
+            NetworkProtocolServer srv = h.getGameHost();
+            if (srv == null) return;
+            // Inclure le declencheur de fin de manche pour le RoundEndPanel cote client
+            PlayerModel lrp = gameManager.getLastRoundPlayer();
+            String lrpId = (lrp != null) ? lrp.getPlayerData().getID() : null;
+            srv.broadcastGameEnded(lrpId);
+        } catch (Exception e) {}
     }
 }

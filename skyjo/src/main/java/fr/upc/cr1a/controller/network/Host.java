@@ -1,8 +1,8 @@
 package fr.upc.cr1a.controller.network;
 
 import fr.upc.cr1a.controller.network.UDP.UDPBroadcaster;
-//import fr.upc.cr1a.controller.network.connexion.GameClient;
 import fr.upc.cr1a.controller.network.connexion.GameHost;
+import fr.upc.cr1a.model.GameSession;
 import fr.upc.cr1a.model.player.PlayerAccount;
 import fr.upc.cr1a.view.Frame;
 
@@ -18,7 +18,7 @@ public class Host {
 
     // viens de l'interface user
 
-    private int nunmberPlayersMax;
+    private int numberPlayersMax;
     private boolean modeAction;
 
     private final String lobbyName; // ça ça bouge pas par contre
@@ -39,18 +39,46 @@ public class Host {
         //this.port = port;
         this.frame = frame;
         this.gameHost = new GameHost(port,modeAction,frame);
-        
-        this.nunmberPlayersMax = nbrPlayers;
+
+        this.numberPlayersMax = nbrPlayers;
         this.modeAction = modeAction;
 
         this.lobbyName = lobbyName;
 
+        this.gameHost.setMaxPlayers(nbrPlayers);
         this.gameHost.startServer();
 
-        this.client = new Client(PlayerAccount.actuelAccount);
+        this.client = new Client(frame, PlayerAccount.actuelAccount);
         client.connect("localhost"); // l'host va se connecter sur son propre pc donc localhost
+        GameSession.status = GameSession.STATUS.HOST; // rétablir le statut HOST (écrasé par GameClient.connect)
 
         startBroadcasting();
+    }
+
+    /**
+     * Ajoute un bot au lobby (cote host uniquement) avec un nom d'affichage et un type de strategie separe.
+     */
+    public void addBot(String id, String displayName, String botType){
+        gameHost.addBotToLobby(id, displayName, botType);
+    }
+
+    /**
+     * Ajout un bot au lobby
+     */
+    public void addBot(String id, String botType){
+        gameHost.addBotToLobby(id, botType, botType);
+    }
+
+    public void removeBot(String id){
+        gameHost.removeBotFromLobby(id);
+    }
+
+    /**
+     * Met a jour le nombre de joueurs max et broadcast aux clients
+     */
+    public void updateMaxPlayers(int max){
+        this.numberPlayersMax = max;
+        gameHost.setMaxPlayers(max);
     }
 
     /**
@@ -64,7 +92,8 @@ public class Host {
         this.threadBroadcast = new Thread(() -> {
             while (isBroadcasting) {
                 
-                String message = lobbyName + ":" + nunmberPlayersMax + ":" + modeAction;
+                int currentCount = gameHost.getCurrentPlayerCount();
+                String message = lobbyName + ":" + currentCount + ":" + numberPlayersMax + ":" + modeAction;
                 
                 UDPBroadcaster.broadcast(port, message);
                 
@@ -94,10 +123,24 @@ public class Host {
     }
 
     /**
+     * Lance la partie : arrête le broadcast, prévient tous les clients, et crée le GameManager coté host
+     */
+    public void startGame(){
+        stopBroadcasting();
+        // Creer la partie cote host pour éviter d'avoir une partie par appareil
+        gameHost.startAGame();
+        gameHost.broadcastStartGame();
+        if (gameHost.getGameManager() != null && client != null && client.getGameClient() != null) {
+            gameHost.getGameManager().setNetwork(client.getGameClient());
+        }
+    }
+
+    /**
      * Quand l'hote se deconnecte ( avec la methode ici),
      * Alors ça deconnecte egalement tous les joueurs du lobby proprement
      */
     public void quit(){
+        stopBroadcasting();
         gameHost.stopServer();
     }
 
@@ -112,7 +155,7 @@ public class Host {
     // getter 
 
     public int getNbrPlayer(){
-        return nunmberPlayersMax;
+        return numberPlayersMax;
     }
 
     public boolean isModeAction(){
@@ -131,11 +174,15 @@ public class Host {
     // setter
 
     public void setNbrPlayer(int nbrPlayers){
-        this.nunmberPlayersMax = nbrPlayers;
+        this.numberPlayersMax = nbrPlayers;
     }
 
     public void setModeAction(boolean isModeAction){
         this.modeAction = isModeAction;
+    }
+
+    public Client getClient(){
+        return this.client;
     }
 
 }

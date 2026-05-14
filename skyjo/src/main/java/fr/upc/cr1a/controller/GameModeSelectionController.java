@@ -1,9 +1,11 @@
 package fr.upc.cr1a.controller;
 
+import fr.upc.cr1a.model.player.PlayerAccount;
 import fr.upc.cr1a.view.DoodleButton;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameModeSelectionPanel;
 
+import javax.swing.JOptionPane;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -41,7 +43,13 @@ public class GameModeSelectionController {
     }
 
     private void clicMulti() {
-        //redirige vers le navigateur de salons P2P
+        if (PlayerAccount.actuelAccount == null) {
+            JOptionPane.showMessageDialog(frame,"Vous devez être connecté avec un compte pour jouer en multijoueur.","Connexion requise",JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (frame.getLobbyBrowserController() != null) {
+            frame.getLobbyBrowserController().loadLobbies();
+        }
         frame.showPanel("LOBBY_BROWSER");
     }
 

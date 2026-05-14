@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.swing.Timer;
 
+import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolServer;
 import fr.upc.cr1a.model.ActionCardModel;
 import fr.upc.cr1a.model.BotHandModel;
 import fr.upc.cr1a.model.BotLow;
@@ -11,6 +12,8 @@ import fr.upc.cr1a.model.BotModel;
 import fr.upc.cr1a.model.CardModel;
 import fr.upc.cr1a.model.GameManager;
 import fr.upc.cr1a.model.GameRuleModel;
+import fr.upc.cr1a.model.GameSession;
+import fr.upc.cr1a.model.NumberCardModel;
 import fr.upc.cr1a.model.PlayerModel;
 import fr.upc.cr1a.model.interfaces.BotStrategyInterface;
 import fr.upc.cr1a.view.GameBoardView;
@@ -33,6 +36,40 @@ public class TimeoutTurnController {
         this.gameManager = gameManager;
         this.mainController = mainController;
         this.gameLoop = gameLoop;
+    }
+
+    /**
+     * Renvoie le NetworkProtocolServer si on est host, sinon null. Utilise pour broadcaster
+     * les coups joues par l'auto-play AFK afin de synchroniser les clients.
+     */
+    private NetworkProtocolServer hostServer() {
+        if (GameSession.status != GameSession.STATUS.HOST) return null;
+        try {
+            fr.upc.cr1a.controller.network.Host h =
+                gameManager.getGameBoardModel().getFrame().getLobbyRoomController().getHost();
+            return (h != null) ? h.getGameHost() : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void broadcastCardFlippedIfHost(String playerId, int col, int row, CardModel card) {
+        NetworkProtocolServer s = hostServer();
+        if (s == null) return;
+        int val = (card instanceof NumberCardModel) ? ((NumberCardModel) card).getCardValue() : -1;
+        s.broadcastCardFlipped(playerId, col, row, val);
+    }
+
+    private void broadcastTurnPhaseIfHost() {
+        NetworkProtocolServer s = hostServer();
+        if (s == null) return;
+        PlayerModel cp = gameManager.getCurrentPlayer();
+        if (cp == null) return;
+        s.broadcastTurnChanged(cp.getPlayerData().getID(), gameManager.getTurnPhase().name());
+    }
+
+    private int valueOf(CardModel c) {
+        return (c instanceof NumberCardModel) ? ((NumberCardModel) c).getCardValue() : -1;
     }
 
     /**
@@ -85,11 +122,17 @@ public class TimeoutTurnController {
             mainController.requestEndTurnFromBot();
             return;
         }
+        // capturer l'id avant revealInitCard car le joueur courant peut changer apres 2 reveals
+        String revealingId = displayedPlayer.getPlayerData().getID();
         boolean ok = gameManager.revealInitCard(pos[1], pos[0]);
         if (!ok) {
             mainController.requestEndTurnFromBot();
             return;
         }
+        // Broadcast UPDATE_CARD_FLIPPED pour que les clients voient la carte revealee
+        CardModel revealedCard = displayedPlayer.getHand().getCard(pos[0], pos[1]);
+        broadcastCardFlippedIfHost(revealingId, pos[1], pos[0], revealedCard);
+
         gameBoardView.showPlayerCards(displayedPlayer);
         mainController.updateAllDecksDisplay();
         mainController.refreshGuide();
@@ -114,8 +157,15 @@ public class TimeoutTurnController {
 
         boolean takeDiscard = discardCard != null && strategy.TakeFromDiscard(botHand, discardCard);
 
+        String pid = player.getPlayerData().getID();
         if (takeDiscard) {
             CardModel taken = gameManager.takeDiscard();
+            // Broadcast aux clients : carte prise dans la defausse + nouvelle phase
+            NetworkProtocolServer s = hostServer();
+            if (s != null) {
+                s.broadcastUpdateDiscardTaken(pid);
+                s.broadcastTurnChanged(pid, gameManager.getTurnPhase().name());
+            }
             String takenPath = gameBoardView.getCardImagePath(taken);
             gameBoardView.getBtnDefausse().setCardImage(takenPath);
             gameBoardView.showCursorCard(takenPath);
@@ -129,6 +179,7 @@ public class TimeoutTurnController {
         if (drawn.isFaceDown()) {
             drawn.returnCard();
         }
+        broadcastTurnPhaseIfHost();
 
         String drawnPath = gameBoardView.getCardImagePath(drawn);
         gameBoardView.getBtnPioche().setCardImage(drawnPath);
@@ -153,12 +204,24 @@ public class TimeoutTurnController {
         }
 
         boolean exchange = strategy.ExchangeDrawCard(botHand, drawCard);
+        String pid = player.getPlayerData().getID();
 
         if (exchange) {
             int[] position = strategy.CardToExchange(botHand, drawCard);
 
             if (position[0] != -1 && position[1] != -1) {
-                gameManager.exchangeCardInHand(position[0], position[1]);
+                int col = position[0];
+                int row = position[1];
+                int newValue = valueOf(drawCard);
+                CardModel oldCard = player.getHand().getCard(row, col);
+                int discardedValue = valueOf(oldCard);
+
+                gameManager.exchangeCardInHand(col, row);
+                // Broadcast aux clients
+                NetworkProtocolServer s = hostServer();
+                if (s != null) {
+                    s.broadcastExchange(pid, col, row, newValue, discardedValue);
+                }
                 gameBoardView.hideCursorCard();
                 gameBoardView.showPlayerCards(player);
                 mainController.updateAllDecksDisplay();
@@ -168,7 +231,14 @@ public class TimeoutTurnController {
             }
         }
 
+        int discardedValue = valueOf(drawCard);
         gameManager.discardDrawCard();
+        // Broadcast aux clients : carte piochee jetee + nouvelle phase (CARD_DISCARD_FROM_DRAW)
+        NetworkProtocolServer s = hostServer();
+        if (s != null) {
+            s.broadcastUpdateDiscardDraw(pid, discardedValue);
+            s.broadcastTurnChanged(pid, gameManager.getTurnPhase().name());
+        }
         gameBoardView.hideCursorCard();
         mainController.updateAllDecksDisplay();
         mainController.refreshGuide();
@@ -190,9 +260,20 @@ public class TimeoutTurnController {
         }
 
         int[] position = strategy.CardToExchange(botHand, drawCard);
+        String pid = player.getPlayerData().getID();
 
         if (position[0] != -1 && position[1] != -1) {
-            gameManager.exchangeCardInHand(position[0], position[1]);
+            int col = position[0];
+            int row = position[1];
+            int newValue = valueOf(drawCard);
+            CardModel oldCard = player.getHand().getCard(row, col);
+            int discardedValue = valueOf(oldCard);
+
+            gameManager.exchangeCardInHand(col, row);
+            NetworkProtocolServer s = hostServer();
+            if (s != null) {
+                s.broadcastExchange(pid, col, row, newValue, discardedValue);
+            }
         }
 
         gameBoardView.hideCursorCard();
@@ -212,6 +293,8 @@ public class TimeoutTurnController {
         if (pos != null) {
             player.getHand().revealCard(pos[0], pos[1]);
             CardModel revealedCard = player.getHand().getCard(pos[0], pos[1]);
+            // Broadcast UPDATE_CARD_FLIPPED pour que les clients voient la carte revealee
+            broadcastCardFlippedIfHost(player.getPlayerData().getID(), pos[1], pos[0], revealedCard);
             if (GameManager.isStarCard(revealedCard)) {
                 ActionCardModel actionCard = gameManager.grantActionForStar(player);
                 if (actionCard != null) {
