@@ -393,16 +393,11 @@ public class GameBoardController {
         if(currentRoundEndPanel != null && currentRoundEndPanel.isShowing()) return;
         pauseOpen = !pauseOpen;
         gameBoardView.showPauseOverlay(pauseOpen);
-        // En multi : pause purement visuelle (overlay), on ne bloque pas les inputs
-        // ni le timer (la partie continue pour les autres joueurs).
-        boolean isMulti = (GameSession.status == GameSession.STATUS.HOST
-                        || GameSession.status == GameSession.STATUS.CLIENT);
+        boolean isMulti = (GameSession.status == GameSession.STATUS.HOST || GameSession.status == GameSession.STATUS.CLIENT);
         if (!isMulti) {
             setWaitingNextTurn(pauseOpen);
             gameLoop.setPaused(pauseOpen);
         }
-        // En multi, setPaused est de toute facon un no-op (cf GameLoop.setPaused),
-        // mais on evite aussi setWaitingNextTurn pour ne pas bloquer les inputs.
     }
 
     private boolean scoreboardShowing = false;
