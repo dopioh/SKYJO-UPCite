@@ -6,6 +6,7 @@ import fr.upc.cr1a.controller.network.UDP.ServerListener;
 import fr.upc.cr1a.controller.network.UDP.UDPReceiver;
 import fr.upc.cr1a.controller.network.connexion.GameClient;
 import fr.upc.cr1a.model.player.PlayerData;
+import fr.upc.cr1a.view.Frame;
 
 /**
  * Classe pour se connecter à un serveur (Host)
@@ -15,49 +16,73 @@ public class Client {
 
     private GameClient gameClient;
 
-    private UDPReceiver receiver; // gere le broadcast coté client 
+    private UDPReceiver receiver;
 
     private final static int port = 1234;
 
     private HashMap<String,String> lobbyfound;
 
+    private Frame frame;
+    private PlayerData playerData;
+
     /**
-     * Le playerData vient de la db quand on se connecte, donc il faut bloquer le mode multijoueur pour les joueurs invités
-     * le playerData du joueur actuel (connecté) est dispo dans PlayerAccount (seule variable globale)
-     * @param playerData
+     * @param frame la fenetre principale
+     * @param playerData le playerData du joueur actuel (connecté)
      */
-    public Client(PlayerData playerData){
+    public Client(Frame frame, PlayerData playerData){
+        this.frame = frame;
+        this.playerData = playerData;
+        this.lobbyfound = new HashMap<>();
+        this.gameClient = new GameClient(frame, playerData);
+    }
 
-        this.lobbyfound = new HashMap<>(); // ip et String d'info : "mode action : nombre joueurs : etc.."
+    /**
+     * Recherche les salons disponibles sur le réseau local (non bloquant)
+     * @param durationMs durée de recherche en millisecondes
+     * @param onComplete callback exécuté sur l'EDT à la fin de la recherche
+     */
+    public void discoverLobbies(int durationMs, Runnable onComplete){
+        lobbyfound.clear();
 
-        UDPReceiver receiver = new UDPReceiver(port, new ServerListener() { // pq -> ça marche pas ??? c'est une interface fonctionnel pourtant
+        this.receiver = new UDPReceiver(port, new ServerListener() {
             @Override
             public void foundServer(String msg, String ip) {
                 if (!lobbyfound.containsKey(ip)){
                     lobbyfound.put(ip, msg);
-
-                    //System.out.println("[INFO] NOUVEAU SALON : " + msg + " (IP: " + ip + ")"); // pas besoin de le mettre ici, ca print deja a partir de l'UDPCLIENT
                 }
             }
         });
         receiver.start();
-        double deltaTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - deltaTime < 2000 ){} // cherche pdt 2 secondes et apres arrete, on peut modif la valeur si on se rends compte qu'il galere a trouver tous les serveur en 2 secondes
-        receiver.stop();
+
+        new Thread(() -> {
+            try {
+                Thread.sleep(durationMs);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            receiver.stop();
+            if (onComplete != null){
+                javax.swing.SwingUtilities.invokeLater(onComplete);
+            }
+        }, "LobbyDiscovery").start();
     }
 
     /**
-     * Methode pour connecter le Client à un des serveurs trouver par le broadcast et stocker dans la HashMap
-     * @param ip de l'Host qu'on recuper grace au receiver juste en haut
+     * Connecte le Client à un Host via TCP
+     * @param ip de l'Host
+     * @return true si la connexion a réussi
      */
-    public void connect(String ip){
-        gameClient.connect(ip, port);
+    public boolean connect(String ip){
+        return gameClient.connect(ip, port);
     }
 
     /**
-     * Fait quitter le client du lobby proprement ( ferme ses ports et ses threads ouverts)
+     * Déconnecte proprement le client
      */
     public void disconnect(){
+        if (receiver != null){
+            receiver.stop();
+        }
         gameClient.disconnect();
     }
 

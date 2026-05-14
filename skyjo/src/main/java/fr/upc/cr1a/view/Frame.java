@@ -57,6 +57,7 @@ public class Frame extends JFrame{
     private AccountController account; // sert a rien pour le moment
     private ConnexionController connexionController;
     private LobbyRoomController lobbyRoomController;
+    private LobbyBrowserController lobbyBrowserController;
     private HelpController helpController;
 
 
@@ -144,7 +145,7 @@ public class Frame extends JFrame{
         new MainMenuController(this, mainMenuPanel);
         new ShopController(this, shopPanel);
         new GameModeSelectionController(this, gameModeSelectionPanel);
-        new LobbyBrowserController(this, lobbyBrowserPanel);
+        lobbyBrowserController = new LobbyBrowserController(this, lobbyBrowserPanel);
         lobbyRoomController = new LobbyRoomController(this, lobbyRoomPanel);
         new PlayersSetupController(this, playersSetupPanel);
         this.helpController = new HelpController(this);
@@ -301,6 +302,10 @@ public class Frame extends JFrame{
     public LobbyRoomController getLobbyRoomController(){
         return this.lobbyRoomController;
 
+    }
+
+    public LobbyBrowserController getLobbyBrowserController(){
+        return this.lobbyBrowserController;
     }
 
     // help in game

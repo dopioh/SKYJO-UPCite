@@ -116,16 +116,25 @@ public class SendAPI {
         }
     }
 
+    
+    public static PlayerData applyGameResult(String uuid, boolean wonGame, List<String> opponents){
+        return applyGameResult(uuid, wonGame, opponents, null);
+    }
+
     /**
      * commande API applyGameResult qui applique recompenses/penalites selon resultat et lobby
+     * @param opponentElos Elo de chaque adversaire
      */
-    public static PlayerData applyGameResult(String uuid, boolean wonGame, List<String> opponents){
+    public static PlayerData applyGameResult(String uuid, boolean wonGame, List<String> opponents, List<Integer> opponentElos){
         ApiErrorManager.clear();
         try {
             Map<String, Object> body = new HashMap<>();
             body.put("uuidStr", uuid);
             body.put("result", wonGame ? "win" : "loss");
             body.put("opponents", opponents == null ? new ArrayList<>() : opponents);
+            if (opponentElos != null) {
+                body.put("opponentElos", opponentElos);
+            }
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String jsonBody = gson.toJson(body);
