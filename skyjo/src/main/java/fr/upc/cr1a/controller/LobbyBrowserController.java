@@ -133,45 +133,52 @@ public class LobbyBrowserController {
         view.getRefreshButton().setEnabled(false);
         view.getRefreshButton().setText("Recherche...");
 
-        discoveryClient = new Client(frame, account);
+        final Client localClient = new Client(frame, account);
+        discoveryClient = localClient;
 
-        discoveryClient.discoverLobbies(2000, () -> {
-            // callback sur l'EDT après 2 secondes de recherche
-            Map<String, String> found = discoveryClient.getLobbyAvailable();
-            availableLobbies = new ArrayList<>();
-
-            for (Map.Entry<String, String> entry : found.entrySet()) {
-                String ip = entry.getKey();
-                String info = entry.getValue(); // "lobbyName:currentPlayers:maxPlayers:modeAction"
-                String[] parts = info.split(":");
-
-                if (parts.length >= 4) {
-                    String lobbyName = parts[0];
-                    int currentPlayers;
-                    int maxPlayers;
-                    try {
-                        currentPlayers = Integer.parseInt(parts[1]);
-                    } catch (NumberFormatException e) {
-                        currentPlayers = 0;
-                    }
-                    try {
-                        maxPlayers = Integer.parseInt(parts[2]);
-                    } catch (NumberFormatException e) {
-                        maxPlayers = 8;
-                    }
-                    boolean actionMode = Boolean.parseBoolean(parts[3]);
-
-                    // On utilise l'IP comme lobbyId (nécessaire pour se connecter)
-                    LobbyModel lobby = new LobbyModel(ip, lobbyName, "Hôte", currentPlayers, maxPlayers, actionMode);
-                    availableLobbies.add(lobby);
+        localClient.discoverLobbies(2000, () -> {
+            try {
+                if (discoveryClient != localClient) {
+                    return;
                 }
-            }
-            refreshView();
+                Map<String, String> found = localClient.getLobbyAvailable();
+                availableLobbies = new ArrayList<>();
 
-            // reactiver le bouton rafraichir en fin de recherche
-            isLoading = false;
-            view.getRefreshButton().setEnabled(true);
-            view.getRefreshButton().setText("Rafraîchir");
+                for (Map.Entry<String, String> entry : found.entrySet()) {
+                    String ip = entry.getKey();
+                    String info = entry.getValue(); // "lobbyName:currentPlayers:maxPlayers:modeAction"
+                    String[] parts = info.split(":");
+
+                    if (parts.length >= 4) {
+                        String lobbyName = parts[0];
+                        int currentPlayers;
+                        int maxPlayers;
+                        try {
+                            currentPlayers = Integer.parseInt(parts[1]);
+                        } catch (NumberFormatException e) {
+                            currentPlayers = 0;
+                        }
+                        try {
+                            maxPlayers = Integer.parseInt(parts[2]);
+                        } catch (NumberFormatException e) {
+                            maxPlayers = 8;
+                        }
+                        boolean actionMode = Boolean.parseBoolean(parts[3]);
+
+                        // On utilise l'IP comme lobbyId (nécessaire pour se connecter)
+                        LobbyModel lobby = new LobbyModel(ip, lobbyName, "Hôte", currentPlayers, maxPlayers, actionMode);
+                        availableLobbies.add(lobby);
+                    }
+                }
+                refreshView();
+            } catch (Exception ex) {
+                System.err.println("[LOBBY] erreur callback discoverLobbies: " + ex.getMessage());
+            } finally {
+                // Toujours debloquer le bouton, meme en cas d'exception ou d'annulation.
+                isLoading = false;
+                view.getRefreshButton().setEnabled(true);
+                view.getRefreshButton().setText("Rafraîchir");
+            }
         });
     }
 
@@ -231,12 +238,25 @@ public class LobbyBrowserController {
     }
 
     /**
-     * Nettoie le client de découverte s'il existe
+     * Nettoie le client de découverte s'il existe + reset l'etat de chargement.
+     * Indispensable pour eviter que le bouton "Rafraichir" reste bloque "Recherche..."
+     * apres une interruption (navigation, deconnexion, exception dans la callback).
      */
     private void cleanupDiscovery() {
         if (discoveryClient != null) {
-            discoveryClient.disconnect();
+            try {
+                discoveryClient.disconnect();
+            } catch (Exception ignored) {}
             discoveryClient = null;
+        }
+        // toujours reset le flag : meme si la callback de discoverLobbies est encore en attente,
+        // elle verifiera que discoveryClient != localClient et retournera sans toucher au flag.
+        if (isLoading) {
+            isLoading = false;
+            if (view.getRefreshButton() != null) {
+                view.getRefreshButton().setEnabled(true);
+                view.getRefreshButton().setText("Rafraîchir");
+            }
         }
     }
 }
