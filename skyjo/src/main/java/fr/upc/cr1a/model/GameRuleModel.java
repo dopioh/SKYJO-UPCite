@@ -241,22 +241,31 @@ public class GameRuleModel {
      */
     public static void applyRoundScores(ArrayList<PlayerModel> players, PlayerModel roundEndPlayer, PlayerModel lowestPlayer) {
         int roundEndPlayerScore = 0;
-        
+        // Score effectif (apres doublement eventuel) pour stocker dans l'historique
+        java.util.HashMap<PlayerModel, Integer> effectiveRoundScore = new java.util.HashMap<>();
+
         //applique le score à tout le monde
         for (PlayerModel player : players) {
             int score = player.calculateRoundScore();
             player.addScore(score);
-            
+            effectiveRoundScore.put(player, score);
+
             //stocker le score du joueur qui a déclenché LAST_ROUND
             if (player == roundEndPlayer) {
                 roundEndPlayerScore = score;
             }
         }
-        
+
         //double le score du joueur qui a lancé la fin de la manche s'il n'a pas le meilleur score
         if (roundEndPlayer != null && lowestPlayer != null && roundEndPlayer != lowestPlayer) {
-            roundEndPlayer.addScore(roundEndPlayerScore); 
+            roundEndPlayer.addScore(roundEndPlayerScore);
+            effectiveRoundScore.put(roundEndPlayer, roundEndPlayerScore * 2);
             System.out.println("[SCORE] " + roundEndPlayer.getName() + " a ses points doubles : +" + roundEndPlayerScore + " x2");
+        }
+
+        // Historique par manche (utilise pour le panel Tab)
+        for (PlayerModel player : players) {
+            player.recordRoundScore(effectiveRoundScore.getOrDefault(player, 0));
         }
     }
 

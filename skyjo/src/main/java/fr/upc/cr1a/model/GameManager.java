@@ -45,6 +45,7 @@ public class GameManager {
 
     private boolean gameWithAction = false; // true si on utilise les actions
     private GameClient onlineClient; // si on est en ligne alors on en associe un, sinon ça reste a null
+    private PlayerData localPlayer; // identite du joueur local (pour autoriser/bloquer les inputs en multi)
     
     private HashMap<PlayerModel, Integer> afkCounts = new HashMap<>();
     private HashMap<PlayerModel, Boolean> autoControlledPlayers = new HashMap<>();
@@ -123,6 +124,13 @@ public class GameManager {
     }
 
     public GameManager(Frame frame, List<PlayerData> playersData, boolean action){
+        this(frame, playersData, action, new java.util.Random().nextLong());
+    }
+
+    /**
+     * Constructeur seed : permet d'avoir le meme deck sur host et clients en multi.
+     */
+    public GameManager(Frame frame, List<PlayerData> playersData, boolean action, long seed){
         this.gameWithAction = action;
         this.helpController = frame.getHelpController();
         if (this.gameWithAction) {
@@ -169,7 +177,7 @@ public class GameManager {
         this.currentPlayerIndex = 0;
         this.firstPlayerToPlayIndex = 0; // le joueur qui commence la manche
         this.lastRoundPlayer = -1;
-        this.deck = new PiocheModel(this.gameWithAction);
+        this.deck = new PiocheModel(this.gameWithAction, seed);
         this.discardPile = new DefausseModel();
         this.currentDrawCard = null;
         this.gameState = GameState.WAITING_FOR_PLAYERS;
@@ -281,6 +289,58 @@ public class GameManager {
     //getters
     public GameState getGameState(){
         return gameState;
+    }
+
+    /**
+     * Force le gameState cote client lors d'une mise a jour reseau
+     */
+    public void setGameStateNetwork(GameState state){
+        this.gameState = state;
+    }
+
+    /**
+     * Cote client : finalise la manche a partir des donnees reseau
+     * Reproduit la logique de endRound() : revele toutes les cartes, applique les scores,
+     * positionne lastRoundPlayer et le gameState (ROUND_ENDED ou GAME_ENDED) en local
+     * pour que le RoundEndPanel affiche le bon classement et le bon declencheur.
+     */
+    public void finalizeRoundFromNetwork(String lastRoundPlayerId){
+        // retrouver l'index du joueur qui a declenche la fin de manche
+        int idx = -1;
+        if (lastRoundPlayerId != null) {
+            for (int i = 0; i < players.size(); i++) {
+                if (players.get(i).getPlayerData().getID().equals(lastRoundPlayerId)) {
+                    idx = i;
+                    break;
+                }
+            }
+        }
+        this.lastRoundPlayer = idx;
+
+        // reveler toutes les cartes face cachee de tous les joueurs (visuel + identique au host)
+        for (PlayerModel player : players) {
+            PlayerHandModel hand = player.getHand();
+            for (int row = 0; row < hand.getRows(); row++) {
+                for (int col = 0; col < hand.getColumns(); col++) {
+                    CardModel card = hand.getCard(row, col);
+                    if (card != null && card.isFaceDown()) {
+                        card.returnCard();
+                    }
+                }
+            }
+        }
+
+        // 3calculer le joueur avec le score le plus bas et appliquer les scores Skyjo
+        PlayerModel lowestPlayer = GameRuleModel.findLowestScorePlayer(players);
+        PlayerModel roundEndPlayer = (lastRoundPlayer >= 0) ? players.get(lastRoundPlayer) : null;
+        GameRuleModel.applyRoundScores(players, roundEndPlayer, lowestPlayer);
+
+        // positionner le state local en fonction de la regle de fin de partie
+        if (GameRuleModel.isGameOver(players)) {
+            this.gameState = GameState.GAME_ENDED;
+        } else {
+            this.gameState = GameState.ROUND_ENDED;
+        }
     }
 
     public TurnPhase getTurnPhase(){
@@ -644,12 +704,20 @@ public class GameManager {
      * Recommence une nouvelle manche, le joueur avec la plus haute somme de cartes visibles après INIT_REVEAL commence
      */
     public void startNewGame() {
+        startNewGame(new java.util.Random().nextLong());
+    }
+
+    /**
+     * Lance une nouvelle manche avec un seed deterministe (utilise en multi pour synchroniser
+     * le deck entre host et clients).
+     */
+    public void startNewGame(long seed) {
         roundNumber++;
         currentPlayerIndex = 0;
         currentDrawCard = null;
         lastRoundPlayer = -1;  // réinitialiser le déclencheur du dernier tour
         extraTurnsRemaining = 0;  // réinitialiser les tours supplémentaires
-        deck = new PiocheModel(this.gameWithAction);
+        deck = new PiocheModel(this.gameWithAction, seed);
         discardPile = new DefausseModel();
 
         //vider les cartes actions de tous les joueurs
@@ -717,6 +785,29 @@ public class GameManager {
 
     public void setNetwork(GameClient gameClient){
         this.onlineClient = gameClient;
+    }
+
+    /**
+     * Definit le joueur local (utilise pour gater les inputs en multi).
+     */
+    public void setLocalPlayer(PlayerData localPlayer){
+        this.localPlayer = localPlayer;
+    }
+
+    public PlayerData getLocalPlayer(){
+        return this.localPlayer;
+    }
+
+    /**
+     * Retourne true si le joueur local (PlayerAccount actuel) est le joueur dont c'est le tour.
+     * En solo (localPlayer null), renvoie true par defaut.
+     */
+    public boolean isLocalPlayerTurn(){
+        if (localPlayer == null) return true; // solo / offline
+        PlayerModel current = getCurrentPlayer();
+        if (current == null || current.getPlayerData() == null) return false;
+        String currentId = current.getPlayerData().getID();
+        return currentId != null && currentId.equals(localPlayer.getID());
     }
 
     public void setCurrentDrawCard(CardModel card) {
@@ -798,33 +889,141 @@ public class GameManager {
 
             NumberCardModel vraieCarte = new NumberCardModel(false, cardValue);
             targetPlayer.getHand().replaceCard(row, col, vraieCarte);
-            
+            GameRuleModel.removeIdenticalColumns(targetPlayer.getHand(), discardPile, targetPlayer);
+            GameRuleModel.removeIdenticalRows(targetPlayer.getHand(), discardPile, targetPlayer);
+
             if (gameBoardModel != null && gameBoardModel.getGameBoardView() != null) {
-                gameBoardModel.getGameBoardView().showPlayerCards(getCurrentPlayer());
+                final PlayerModel revealed = targetPlayer;
+                final GameBoardView gv = gameBoardModel.getGameBoardView();
+                final int rr = row, cc = col;
+                javax.swing.SwingUtilities.invokeLater(() -> {
+                    PlayerModel displayed = gv.getCurrentPlayer();
+                    if (displayed == revealed) {
+                        gv.flipCardAt(rr, cc, () -> gv.showPlayerCards(revealed));
+                    } else {
+                        gv.showPlayerCards(revealed);
+                    }
+                    if (gameBoardModel.getGameBoardController() != null) {
+                        gameBoardModel.getGameBoardController().updateAllDecksDisplay();
+                        gameBoardModel.getGameBoardController().refreshGuide();
+                    }
+                });
             }
         }
     }
 
     /**
-     * Force le changement de tour d'apres une request Host
+     * Cote HOST uniquement : le model est deja a jour, on joue juste l'animation flip
+     * si la grille actuellement affichee est celle du joueur qui revele.
+     */
+    public void animateRevealFromNetwork(String playerId, int row, int col) {
+        if (gameBoardModel == null || gameBoardModel.getGameBoardView() == null) return;
+        PlayerModel target = null;
+        for (PlayerModel p : players) {
+            if (p.getPlayerData().getID().equals(playerId)) { target = p; break; }
+        }
+        if (target == null) return;
+        final PlayerModel revealed = target;
+        final GameBoardView gv = gameBoardModel.getGameBoardView();
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            if (gv.getCurrentPlayer() == revealed) {
+                gv.flipCardAt(row, col, () -> gv.showPlayerCards(revealed));
+            } else {
+                gv.showPlayerCards(revealed);
+            }
+            if (gameBoardModel.getGameBoardController() != null) {
+                gameBoardModel.getGameBoardController().updateAllDecksDisplay();
+                gameBoardModel.getGameBoardController().refreshGuide();
+            }
+        });
+    }
+
+    /**
+     * Applique un echange de cartes recu du serveur (cote client non-HOST).
+     * Clear le currentDrawCard, place newValue en main[row,col] et pousse discardedValue
+     * en sommet de defausse. Applique aussi les regles de suppression de colonnes/lignes identiques.
+     */
+    public void forceExchangeFromNetwork(String playerId, int col, int row, int newValue, int discardedValue) {
+        PlayerModel target = null;
+        for (PlayerModel p : players) {
+            if (p.getPlayerData().getID().equals(playerId)) {
+                target = p;
+                break;
+            }
+        }
+        if (target == null) return;
+
+        // La carte qui arrive dans la main
+        NumberCardModel nouvelle = new NumberCardModel(false, newValue);
+        target.getHand().replaceCard(row, col, nouvelle);
+
+        // L'ancienne carte part a la defausse
+        NumberCardModel jetee = new NumberCardModel(false, discardedValue);
+        if (discardPile != null) {
+            discardPile.addCardAtTop(jetee);
+        }
+
+        // Plus de carte sous la main : le tour va changer
+        currentDrawCard = null;
+
+        GameRuleModel.removeIdenticalColumns(target.getHand(), discardPile, target);
+        GameRuleModel.removeIdenticalRows(target.getHand(), discardPile, target);
+
+        if (gameBoardModel != null && gameBoardModel.getGameBoardView() != null) {
+            gameBoardModel.getGameBoardView().showPlayerCards(getCurrentPlayer());
+        }
+    }
+
+    /**
+     * Force le changement de tour d'apres une request Host (surcharge compat : suppose DRAW_DECISION).
      */
     public void forceTurnFromNetwork(String playerId) {
+        forceTurnFromNetwork(playerId, TurnPhase.DRAW_DECISION.name());
+    }
+
+    /**
+     * Force le changement de tour ET la phase autoritaire d'apres une request Host.
+     * L'animation de transition ne se declenche que quand le joueur actif change reellement.
+     *
+     * @param playerId id du joueur actif apres le changement
+     * @param phaseName nom de l'enum TurnPhase authoritaire ; si null ou invalide on garde l'etat local
+     */
+    public void forceTurnFromNetwork(String playerId, String phaseName) {
         for (int i = 0; i < players.size(); i++) {
             if (players.get(i).getPlayerData().getID().equals(playerId)) {
-                
-                this.currentPlayerIndex = i;
-                
-                this.turnPhase = TurnPhase.DRAW_DECISION;
-                
-                if (gameBoardModel != null && gameBoardModel.getGameBoardController() != null) {
-                    gameBoardModel.getGameBoardController().refreshGuide(); // pour afficher les bonnes indications pour DRAW DECISION
-                    
 
-                    if (gameBoardModel.getGameBoardView() != null) {
-                        gameBoardModel.getGameBoardView().showPlayerTransition(players.get(i), () -> {
-                            // pour lancer l'animation du changement de round
-                            // besoin d'attendre l'implementation de l'interface graphique
+                boolean playerChanged = (this.currentPlayerIndex != i);
+                this.currentPlayerIndex = i;
+
+                // Capture de la phase precedente pour detecter la fin de l'INIT_REVEAL
+                TurnPhase previousPhase = this.turnPhase;
+
+                // Applique la phase authoritaire venue du serveur
+                if (phaseName != null) {
+                    try {
+                        this.turnPhase = TurnPhase.valueOf(phaseName);
+                    } catch (IllegalArgumentException e) {}
+                }
+
+                boolean initToPlay = (previousPhase == TurnPhase.INIT_REVEAL && this.turnPhase != TurnPhase.INIT_REVEAL);
+
+                if (gameBoardModel != null && gameBoardModel.getGameBoardController() != null) {
+                    gameBoardModel.getGameBoardController().refreshGuide();
+
+                    final PlayerModel newPlayer = players.get(i);
+                    boolean shouldShowTransition = (playerChanged || initToPlay);
+                    if (shouldShowTransition && gameBoardModel.getGameBoardView() != null) {
+                        final GameBoardView gv = gameBoardModel.getGameBoardView();
+                        gv.showPlayerTransition(newPlayer, () -> {
+                            gv.showPlayerCards(newPlayer);
+                            if (gameBoardModel.getGameBoardController() != null) {
+                                gameBoardModel.getGameBoardController().updateAllDecksDisplay();
+                                gameBoardModel.getGameBoardController().refreshGuide();
+                            }
                         });
+                    }
+                    if (GameSession.status == GameSession.STATUS.CLIENT && (playerChanged || initToPlay) && gameBoardModel.getGameBoardController().getGameLoop() != null) {
+                        gameBoardModel.getGameBoardController().getGameLoop().restartCountdownForNetworkTurn();
                     }
                 }
                 break;

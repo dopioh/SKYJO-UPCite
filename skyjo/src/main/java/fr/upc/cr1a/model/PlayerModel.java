@@ -18,10 +18,11 @@ public class PlayerModel {
     private PlayerHandModel hand;
     private ArrayList<ActionType> actionHand;
     private int totalScore;
+    // Historique des scores par manche : index 0 = manche 1
+    private final ArrayList<Integer> roundScoreHistory = new ArrayList<>();
 
     private PlayerData playerData;
-    
-    
+
     //constructeur
     public PlayerModel(PlayerData playerData){
         this.playerData = playerData;
@@ -63,6 +64,18 @@ public class PlayerModel {
 
     public void addScore(int score){
         this.totalScore += score;
+    }
+
+    /**
+     * Enregistre le score d'une manche dans l'historique (Tab : scores par manche + total).
+     * Appele par GameRuleModel.applyRoundScores() apres l'addScore.
+     */
+    public void recordRoundScore(int score){
+        this.roundScoreHistory.add(score);
+    }
+
+    public ArrayList<Integer> getRoundScoreHistory(){
+        return this.roundScoreHistory;
     }
 
     /**

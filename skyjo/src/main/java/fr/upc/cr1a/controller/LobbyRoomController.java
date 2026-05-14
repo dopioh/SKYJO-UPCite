@@ -1,6 +1,10 @@
 package fr.upc.cr1a.controller;
 
+import fr.upc.cr1a.controller.network.Client;
+import fr.upc.cr1a.controller.network.Host;
 import fr.upc.cr1a.model.LobbyPlayerModel;
+import fr.upc.cr1a.model.player.PlayerAccount;
+import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.view.DoodleButton;
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.LobbyRoomPanel;
@@ -18,6 +22,10 @@ import java.util.List;
  */
 public class LobbyRoomController {
 
+    private static final String[] BOT_DISPLAY_NAMES = {
+        "Alice", "Bob", "Bili", "Mei", "Hugo", "Nass", "Ian", "Charlie"
+    };
+
     private final Frame frame;
     private final LobbyRoomPanel view;
     private List<LobbyPlayerModel> players;
@@ -25,6 +33,10 @@ public class LobbyRoomController {
     private String lobbyName;
     private boolean isHost;
     private boolean isReady;
+
+    // Références réseau
+    private Host host;
+    private Client client;
 
     public LobbyRoomController(Frame frame, LobbyRoomPanel view) {
         this.frame = frame;
@@ -41,6 +53,28 @@ public class LobbyRoomController {
         view.getMaxPlayersSpinner().addChangeListener(e -> onMaxPlayersChanged());
         view.getActionModeCheckbox().addActionListener(e -> onActionModeChanged());
         view.getAddBotButton().addActionListener(e -> clicAjouterBot());
+    }
+
+    /**
+     * Définit le Host réseau (quand le joueur crée un salon)
+     */
+    public void setNetworkHost(Host host) {
+        this.host = host;
+    }
+
+    public Host getHost() {
+        return this.host;
+    }
+
+    public Client getClient() {
+        return this.client;
+    }
+
+    /**
+     * Définit le Client réseau (quand le joueur rejoint un salon)
+     */
+    public void setNetworkClient(Client client) {
+        this.client = client;
     }
 
     /**
@@ -65,10 +99,44 @@ public class LobbyRoomController {
         view.getMaxPlayersSpinner().setValue(maxPlayers);
         view.getActionModeCheckbox().setSelected(actionMode);
 
-        //ajouter le joueur local
-        String localPlayerId = "player_local"; // MEI ID DU VRAI JOUEUR
-        String localPlayerName = "Vous"; // MEI LE BLAZE DU JOUEUR
+        //ajouter le joueur local avec les vraies infos du compte
+        PlayerData localPlayer = PlayerAccount.actuelAccount;
+        String localPlayerId = localPlayer != null ? localPlayer.getID() : "player_local";
+        String localPlayerName = localPlayer != null ? localPlayer.getUsername() : "Vous";
         addPlayer(new LobbyPlayerModel(localPlayerId, localPlayerName, isHost, false));
+
+        updateLobbyInfo();
+    }
+
+    /**
+     * Appelé par GameClient quand un LOBBY_UPDATE est reçu du serveur.
+     * Remplace la liste de joueurs par celle du réseau.
+     */
+    public void updatePlayersFromNetwork(ArrayList<PlayerData> networkPlayers, ArrayList<Boolean> readyStates, int maxPlayers) {
+        if (networkPlayers == null) return;
+
+        players.clear();
+        view.clearPlayers();
+
+        PlayerData localPlayer = PlayerAccount.actuelAccount;
+        String localId = localPlayer != null ? localPlayer.getID() : null;
+
+        for (int i = 0; i < networkPlayers.size(); i++) {
+            PlayerData pd = networkPlayers.get(i);
+            boolean playerIsHost = isHost && pd.getID() != null && pd.getID().equals(localId);
+            LobbyPlayerModel model = new LobbyPlayerModel(
+                pd.getID(), pd.getUsername(), playerIsHost, pd.isBot()
+            );
+            if (readyStates != null && i < readyStates.size() && !pd.isBot()) {
+                model.setReady(readyStates.get(i));
+            }
+            addPlayer(model);
+        }
+
+        // sync max players dans la UI si different (surtout cote client)
+        if (!isHost) {
+            view.getMaxPlayersSpinner().setValue(maxPlayers);
+        }
 
         updateLobbyInfo();
     }
@@ -128,6 +196,10 @@ public class LobbyRoomController {
         );
 
         if (confirm == JOptionPane.YES_OPTION) {
+            cleanup();
+            if (frame.getLobbyBrowserController() != null) {
+                frame.getLobbyBrowserController().loadLobbies();
+            }
             frame.showPanel("LOBBY_BROWSER");
         }
     }
@@ -143,13 +215,25 @@ public class LobbyRoomController {
             view.getReadyButton().setCouleur(fr.upc.cr1a.model.DoodleButtonModel.ButtonColor.GREEN);
         }
 
-        // statue du joueur
-        // MEI A METTRE EN LIGNE AVEC LE P2P
-        updatePlayerStatus("player_local", isReady);
+        PlayerData localPlayer = PlayerAccount.actuelAccount;
+        String localId = localPlayer != null ? localPlayer.getID() : "player_local";
+        updatePlayerStatus(localId, isReady);
 
+        // Notifier le Host via le reseau pour qu'il broadcast l'etat a tous les clients
+        if (client != null && client.getGameClient() != null) {
+            client.getGameClient().sendReadyRequest(localId, isReady);
+        } else if (host != null && host.getGameHost() != null) {
+            // cote host : mettre a jour directement et broadcast
+            host.getGameHost().setPlayerReady(localId, isReady);
+        }
     }
 
     private void clicStart() {
+        if (!isHost) {
+            JOptionPane.showMessageDialog(frame,"Seul l'hôte peut lancer la partie.","Action non autorisée",JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         //vérifie que tous les joueurs sont prêts
         boolean allReady = true;
         for (LobbyPlayerModel player : players) {
@@ -180,14 +264,17 @@ public class LobbyRoomController {
             return;
         }
 
-        // MEI LANCEMENT DE LA PARTIE AVEC LE GAME MANAGER ET P2P
+        // 2 joueurs minimum sinon on farm les stats trop facilement en ligne
+        long humanCount = players.stream().filter(p -> !p.isBot()).count();
+        if (humanCount < 2) {
+            JOptionPane.showMessageDialog(frame,"Vous ne pouvez pas lancer une partie en ligne tout seul.\n" +"Attendez qu'au moins un autre joueur rejoigne le salon.","Joueur seul",JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-        JOptionPane.showMessageDialog(
-            frame,
-            "Lancement de la partie...\n",
-            "Démarrage",
-            JOptionPane.INFORMATION_MESSAGE
-        );
+        // Lancer la partie via le réseau
+        if (host != null) {
+            host.startGame();
+        }
     }
 
     private void clicKick(String playerId) {
@@ -215,6 +302,16 @@ public class LobbyRoomController {
 
         if (confirm == JOptionPane.YES_OPTION) {
             System.out.println("[LobbyRoomController] Retrait de: " + playerName);
+
+            // Kick via le réseau si on est host
+            if (isHost && host != null) {
+                if (player.isBot()) {
+                    host.removeBot(playerId);
+                } else {
+                    host.kickPlayer(playerId);
+                }
+            }
+
             removePlayer(playerId);
         }
     }
@@ -256,9 +353,41 @@ public class LobbyRoomController {
             }
 
             String botId = "bot_" + System.currentTimeMillis();
-            String botName = botStrategyNames[choiceIndex];
-            LobbyPlayerModel bot = new LobbyPlayerModel(botId, botName, false, true);
-            addPlayer(bot);
+            String botType = botStrategyNames[choiceIndex];
+            String displayName = pickFreeBotDisplayName();
+
+            // Propager au Host pour que la liste cote serveur contienne aussi les bots
+            // (le broadcast rafraichira automatiquement la UI cote host et cote clients)
+            if (host != null) {
+                host.addBot(botId, displayName, botType);
+            } else {
+                // fallback hors reseau
+                LobbyPlayerModel bot = new LobbyPlayerModel(botId, displayName, false, true);
+                addPlayer(bot);
+            }
+        }
+    }
+
+    /**
+     * Choisit un prenom libre dans BOT_DISPLAY_NAMES (non deja utilise par un joueur/bot du lobby).
+     * Si tout est pris,un numéro mais ca ne devrait jamais arriver
+     */
+    private String pickFreeBotDisplayName() {
+        java.util.Set<String> taken = new java.util.HashSet<>();
+        for (LobbyPlayerModel p : players) {
+            if (p.getPlayerName() != null) taken.add(p.getPlayerName());
+        }
+        for (String candidate : BOT_DISPLAY_NAMES) {
+            if (!taken.contains(candidate)) return candidate;
+        }
+        // tous pris : suffixe numerique
+        int i = 2;
+        while (true) {
+            for (String candidate : BOT_DISPLAY_NAMES) {
+                String numbered = candidate + " " + i;
+                if (!taken.contains(numbered)) return numbered;
+            }
+            i++;
         }
     }
 
@@ -279,19 +408,22 @@ public class LobbyRoomController {
 
         view.updatePlayersCount();
         updateLobbyInfo();
+
+        // Propager aux clients
+        if (isHost && host != null) {
+            host.updateMaxPlayers(newMax);
+        }
     }
 
     private void onActionModeChanged() {
-        boolean actionMode = view.getActionModeCheckbox().isSelected();
         updateLobbyInfo();
     }
 
     private void updateLobbyInfo() {
-        boolean actionMode = view.getActionModeCheckbox().isSelected();
-
         long readyCount = players.stream().filter(LobbyPlayerModel::isReady).count();
-        String info = String.format("Mode %s • %d prêts",
-            actionMode ? "Actions" : "Classique",
+        String info = String.format("%d / %d joueurs • %d prêts",
+            players.size(),
+            (Integer) view.getMaxPlayersSpinner().getValue(),
             readyCount
         );
 
@@ -305,5 +437,22 @@ public class LobbyRoomController {
             }
         }
         return null;
+    }
+
+    /**
+     * Nettoyage réseau quand on quitte le lobby
+     */
+    private void cleanup() {
+        if (isHost && host != null) {
+            host.quit();
+            host = null;
+        }
+        if (client != null) {
+            client.disconnect();
+            client = null;
+        }
+
+        players.clear();
+        view.clearPlayers();
     }
 }

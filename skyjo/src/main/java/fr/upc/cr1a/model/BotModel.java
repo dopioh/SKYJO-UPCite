@@ -17,7 +17,7 @@ public class BotModel extends PlayerModel  {
     //constructeur
     public BotModel(PlayerData playerData){
         super(playerData);
-        this.name = playerData.getID();
+        this.name = playerData.getUsername() != null ? playerData.getUsername() : playerData.getID();
         this.hand = new BotHandModel();
         this.strategy = null; // stratégie par défaut
     }
@@ -25,7 +25,7 @@ public class BotModel extends PlayerModel  {
     //constructeur avec stratégie personnalisée
     public BotModel(PlayerData playerData, BotStrategyInterface strategy){
         super(playerData);
-        this.name = playerData.getID();
+        this.name = playerData.getUsername() != null ? playerData.getUsername() : playerData.getID();
         this.hand = new BotHandModel();
         this.strategy = strategy;
     }

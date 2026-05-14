@@ -8,9 +8,9 @@ import java.util.HashMap;
 import fr.upc.cr1a.controller.network.network_protocol.NetworkProtocolServer;
 import fr.upc.cr1a.model.GameManager;
 import fr.upc.cr1a.model.GameSession;
-//import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.model.player.PlayerData;
 import fr.upc.cr1a.view.Frame;
+import fr.upc.cr1a.model.player.PlayerAccount;
 
 /**
  * Sert à heberger un serveur sur le pc d'un joueur
@@ -23,15 +23,31 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     private ServerSocket serverSocket; // permet de se recup des requests
     private boolean isRunning = false;
 
-    private ArrayList<ClientHandler> connectedClient = new ArrayList<>(); // pour garder une trace des joueurs connectés 
+    private ArrayList<ClientHandler> connectedClient = new ArrayList<>(); // pour garder une trace des joueurs connectés
 
     private HashMap<String, String> lobbyPlayers = new HashMap<>(); // key = id, value = name
+    private HashMap<String, Boolean> playerReadyState = new HashMap<>(); // id -> ready
+    private HashMap<String, BotInfo> lobbyBots = new HashMap<>(); // id -> (displayName, botType)
+
+    /**
+     * Represente un bot dans le lobby
+     */
+    public static class BotInfo {
+        public final String displayName;
+        public final String botType;
+        public BotInfo(String displayName, String botType) {
+            this.displayName = displayName;
+            this.botType = botType;
+        }
+    }
+    private int maxPlayers = 8;
 
     private Thread thread;
 
     private boolean modeAction;
     private GameManager gameManager;
     private Frame frame;
+    private long gameSeed; // seed de la partie courante (pour synchro deck host/clients)
 
     public GameHost(int port, boolean modeAction, Frame frame){ // rajouter le nom d'un salon et toutes les infos necessaire egalement
         this.port = port;
@@ -72,7 +88,9 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     public void run(){
 
         try {
-            serverSocket = new ServerSocket(port);
+            serverSocket = new java.net.ServerSocket();
+            serverSocket.setReuseAddress(true);
+            serverSocket.bind(new java.net.InetSocketAddress(port));
             System.out.println("[SERVEUR] Serveur démarré sur le port " + port);
 
             while (isRunning) {
@@ -98,17 +116,68 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
         }
     }
 
-    public void addPlayerToLobby(String id, String username){  
+    public void addPlayerToLobby(String id, String username){
         lobbyPlayers.put(id, username);
+        playerReadyState.put(id, false);
         System.out.println("[LOBBY] " + username + " a rejoint la salle d'attente !");
 
         broadcastUpdateLobby();
+    }
+
+    /**
+     * Ajoute un bot au lobby et propage aux clients (nom d'affichage + type de strategie).
+     */
+    public void addBotToLobby(String id, String displayName, String botType){
+        lobbyBots.put(id, new BotInfo(displayName, botType));
+        System.out.println("[LOBBY] Bot " + displayName + " (" + botType + ") ajouté au lobby.");
+        broadcastUpdateLobby();
+    }
+
+    /**
+     * Ancienne signature conservee pour compat : le "botType" sert aussi de nom d'affichage.
+     */
+    public void addBotToLobby(String id, String botType){
+        addBotToLobby(id, botType, botType);
+    }
+
+    public void removeBotFromLobby(String id){
+        if (lobbyBots.remove(id) != null) {
+            broadcastUpdateLobby();
+        }
+    }
+
+    /**
+     * Met a jour l'etat "pret" d'un joueur et broadcast
+     */
+    public void setPlayerReady(String id, boolean ready){
+        if (lobbyPlayers.containsKey(id)) {
+            playerReadyState.put(id, ready);
+            broadcastUpdateLobby();
+        }
+    }
+
+    public void setMaxPlayers(int max){
+        this.maxPlayers = max;
+        broadcastUpdateLobby();
+    }
+
+    public int getMaxPlayers(){
+        return this.maxPlayers;
+    }
+
+    /**
+     * Renvoie le nombre total de participants au lobby (humains + bots)
+     */
+    public int getCurrentPlayerCount(){
+        return lobbyPlayers.size() + lobbyBots.size();
     }
 
     public void kickPlayer(String id){ // plus sécu avec l'id que l'username
         for ( ClientHandler client : connectedClient ){
             if (client.getID().equals(id)){
                 String username = client.getUsername();
+                // Notifier le client concerne avant de fermer la connexion
+                client.sendMessage(NetworkProtocolServer.UPDATE_KICKED);
                 removeClient(client, id, username);
                 client.closeClient();
 
@@ -134,6 +203,7 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
 
        if (id != null){
         lobbyPlayers.remove(id); // faut mettre la key
+        playerReadyState.remove(id);
         String msg = "[SERVEUR] " + username + " a quitté le salon";
         System.out.println(msg);
         broadcastInfo(msg);
@@ -155,12 +225,20 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
 
     public void startAGame(){
         ArrayList<PlayerData> listPlayers = new ArrayList<>();
-   
+
         for (String key : lobbyPlayers.keySet()){
             PlayerData tmp = new PlayerData(key, lobbyPlayers.get(key));
             listPlayers.add(tmp);
         }
-        this.gameManager = new GameManager(frame, listPlayers, modeAction);
+        // Ajout des bots a la liste des joueurs
+        for (String botId : lobbyBots.keySet()){
+            BotInfo info = lobbyBots.get(botId);
+            PlayerData tmp = new PlayerData(botId, info.displayName, true, info.botType.toLowerCase());
+            listPlayers.add(tmp);
+        }
+        this.gameSeed = new java.util.Random().nextLong();
+        this.gameManager = new GameManager(frame, listPlayers, false, this.gameSeed);
+        this.gameManager.setLocalPlayer(PlayerAccount.actuelAccount);
         frame.setCurrentGame(gameManager);
     }
 
@@ -168,7 +246,8 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
 
     @Override
     public synchronized void broadcastStartGame(){
-        String message = NetworkProtocolServer.UPDATE_START_GAME;
+        // [UPDATE_START_GAME:seed]
+        String message = NetworkProtocolServer.UPDATE_START_GAME + ":" + this.gameSeed;
 
         for (ClientHandler client : connectedClient) {
             client.sendMessage(message.toString());
@@ -177,22 +256,30 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
 
     @Override
     public synchronized void broadcastUpdateLobby(){
+        int totalCount = lobbyPlayers.size() + lobbyBots.size();
+        // Format : [LOBBY_UPDATE]:totalCount:maxPlayers:id:name:isBot(0/1):botType:ready(0/1):...
+        StringBuilder message = new StringBuilder("[LOBBY_UPDATE]:" + totalCount + ":" + maxPlayers);
 
-        String message = "[LOBBY_UPDATE]:" + lobbyPlayers.size() + ":";
-
-        int tmp = 0;
         for (String key : lobbyPlayers.keySet()){
-            if (tmp >= lobbyPlayers.size() - 1){
-                message += key +":"+ lobbyPlayers.get(key);
-            } else {
-                message += key +":"+ lobbyPlayers.get(key)+ ":";
-            }
-
+            boolean ready = playerReadyState.getOrDefault(key, false);
+            message.append(":").append(key)
+                   .append(":").append(lobbyPlayers.get(key))
+                   .append(":").append("0")
+                   .append(":").append("N")
+                   .append(":").append(ready ? "1" : "0");
+        }
+        for (String botId : lobbyBots.keySet()){
+            BotInfo info = lobbyBots.get(botId);
+            message.append(":").append(botId)
+                   .append(":").append(info.displayName)
+                   .append(":").append("1")
+                   .append(":").append(info.botType)
+                   .append(":").append("1"); // bots tjrs prets
         }
 
         // On l'envoie à tous les ClientHandlers
         for (ClientHandler client : connectedClient) {
-            client.sendMessage(message);
+            client.sendMessage(message.toString());
         }
     }
 
@@ -206,8 +293,8 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     }
 
     @Override
-    public synchronized void broadcastTurnChanged(String id){
-        String message = NetworkProtocolServer.UPDATE_TURN_CHANGED + ":" + id;
+    public synchronized void broadcastTurnChanged(String id, String phase){
+        String message = NetworkProtocolServer.UPDATE_TURN_CHANGED + ":" + id + ":" + phase;
 
         for (ClientHandler client : connectedClient) {
             client.sendMessage(message);
@@ -227,6 +314,62 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     public void broadcastUpdatePiocheTaken(String id, int numberCard){
         String message = NetworkProtocolServer.UPDATE_PIOCHE_TAKEN + ":" + id + ":" + numberCard;
 
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message);
+        }
+    }
+
+    @Override
+    public synchronized void broadcastUpdateDiscardDraw(String id, int valeur){
+        String message = NetworkProtocolServer.UPDATE_DISCARD_DRAW + ":" + id + ":" + valeur;
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message);
+        }
+    }
+
+    @Override
+    public synchronized void broadcastGameEnded(String lastRoundPlayerId){
+        // [GAME_ENDED:lastRoundPlayerId]  (vide si null pour conserver le format)
+        String idPart = (lastRoundPlayerId != null) ? lastRoundPlayerId : "";
+        String message = NetworkProtocolServer.UPDATE_GAME_ENDED + ":" + idPart;
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message);
+        }
+    }
+
+    @Override
+    public synchronized void broadcastRoundEnded(String lastRoundPlayerId){
+        // Format : ROUND_ENDED:lastRoundPlayerId  (vide si null pour conserver le format)
+        String idPart = (lastRoundPlayerId != null) ? lastRoundPlayerId : "";
+        String message = NetworkProtocolServer.UPDATE_ROUND_ENDED + ":" + idPart;
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message);
+        }
+    }
+
+    @Override
+    public synchronized void broadcastNewRound(long seed){
+        // Format : NEW_ROUND:seed
+        this.gameSeed = seed;
+        String message = NetworkProtocolServer.UPDATE_NEW_ROUND + ":" + seed;
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message);
+        }
+    }
+
+    @Override
+    public synchronized void broadcastAfkReplaced(String playerId){
+        // Format : AFK_REPLACED:playerId
+        String message = NetworkProtocolServer.UPDATE_AFK_REPLACED + ":" + playerId;
+        for (ClientHandler client : connectedClient) {
+            client.sendMessage(message);
+        }
+    }
+
+    @Override
+    public synchronized void broadcastExchange(String id, int col, int row, int newValue, int discardedValue){
+        String message = NetworkProtocolServer.UPDATE_EXCHANGE + ":" + id + ":" + col + ":" + row
+                + ":" + newValue + ":" + discardedValue;
         for (ClientHandler client : connectedClient) {
             client.sendMessage(message);
         }
