@@ -23,7 +23,7 @@ public class BotModelTest {
     @Test
     public void testBotInitialization() {
         assertNotNull(bot);
-        assertEquals("Bot1", bot.getName());
+        assertEquals("bot1@test.com", bot.getName());
     }
 
     @Test
