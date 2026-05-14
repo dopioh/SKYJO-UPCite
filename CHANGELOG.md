@@ -600,6 +600,11 @@
 
 ## v.0.14: SPRINT 14
 
+### Added
+
+- Skins cartes Action
+- Logo du jeu
+
 ### Fixed 
 
 - Fix API error 500
