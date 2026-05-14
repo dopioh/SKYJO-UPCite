@@ -21,7 +21,7 @@ public class TutorialController {
         //lsteners pour les triangles de navigation du tutoriel
         view.getNextButton().addMouseListener(new MouseAdapter() {
             @Override
-            public void mousePressed(MouseEvent e) {
+            public void mouseClicked(MouseEvent e) {
                 model.nextPage();
                 view.repaint();
             }
@@ -29,7 +29,7 @@ public class TutorialController {
 
         view.getPreviousButton().addMouseListener(new MouseAdapter() {
             @Override
-            public void mousePressed(MouseEvent e) {
+            public void mouseClicked(MouseEvent e) {
                 model.previousPage();
                 view.repaint();
             }
