@@ -403,6 +403,13 @@ public class GameBoardBotController {
             BotStrategyInterface strategy = bot.getStrategy();
             CardModel drawCard = gameManager.getCurrentDrawCard();
 
+            //vérifier que drawCard n'est pas null avant l'échange
+            if (drawCard == null) {
+                mainController.setWaitingNextTurn(false);
+                mainController.requestEndTurnFromBot();
+                return;
+            }
+
             //doit échanger une carte
             int[] position = strategy.CardToExchange(botHand, drawCard);
             if (position[0] != -1 && position[1] != -1) {
@@ -578,8 +585,15 @@ public class GameBoardBotController {
         } while (targetIndex == botIndex);
 
         PlayerModel target = players.get(targetIndex);
-        int myRow = (int) (Math.random() * 3);
-        int myCol = (int) (Math.random() * 4);
+        
+        // Préférer les cartes face down du bot
+        int myRow, myCol;
+        do {
+            myRow = (int) (Math.random() * 3);
+            myCol = (int) (Math.random() * 4);
+        } while (bot.getHand().getCard(myRow, myCol) == null);
+        
+        // Prendre une position aléatoire du joueur adverse
         int opRow = (int) (Math.random() * 3);
         int opCol = (int) (Math.random() * 4);
 
@@ -597,40 +611,10 @@ public class GameBoardBotController {
      * bot joue SPY_ONE_COLUMN
      */
     private void botSpyOneColumn(BotModel bot) {
-        BotHandModel hand = bot.getHand();
-        int targetCol = (int) (Math.random() * 4);
-
-        ArrayList<int[]> hiddenCards = new ArrayList<>();
-        for (int row = 0; row < 3; row++) {
-            CardModel card = hand.getCard(row, targetCol);
-            if (card != null && card.isFaceDown()) {
-                card.returnCard();
-                hiddenCards.add(new int[]{row, targetCol});
-            }
-        }
-
-        gameBoardView.showPlayerCards(bot);
-
-        Timer hideTimer = new Timer(2000, e -> {
-            if (pausedState) return;
-
-            for (int[] pos : hiddenCards) {
-                CardModel card = hand.getCard(pos[0], pos[1]);
-                if (card != null && !card.isFaceDown()) {
-                    card.returnCard();
-                }
-            }
-
-            gameBoardView.showPlayerCards(bot);
-            mainController.updateAllDecksDisplay();
-
-            // fin de tour ici pour la version desynchronisé
-            mainController.setWaitingNextTurn(false);
-            mainController.requestEndTurnFromBot();
-        });
-        hideTimer.setRepeats(false);
-        activeTimers.add(hideTimer);
-        hideTimer.start();
+        // Le bot n'a pas besoin de faire quelque chose avec l'info qu'il regarde
+        // On termine directement le tour
+        mainController.setWaitingNextTurn(false);
+        mainController.requestEndTurnFromBot();
     }
 
     /**

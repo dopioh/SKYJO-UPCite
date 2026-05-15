@@ -8,7 +8,6 @@ import fr.upc.cr1a.model.player.PlayerData;
 /**
  * Modèle représentant un joueur
  * 
- * @author Billy
  */
 
 public class PlayerModel {

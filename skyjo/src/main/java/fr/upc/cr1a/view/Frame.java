@@ -96,7 +96,7 @@ public class Frame extends JFrame{
         connexionPanel = new ConnexionPanel();
         add(connexionPanel, "CONNEXION");
 
-        mainMenuPanel = new MainMenuPanel();
+        mainMenuPanel = new MainMenuPanel(this);
         add(mainMenuPanel, "MENU");
 
         shopPanel = new ShopPanel();
@@ -330,6 +330,14 @@ public class Frame extends JFrame{
 
     public void setHandCardAnimationsEnabled(boolean enabled) {
         this.handCardAnimationsEnabled = enabled;
+    }
+
+    /**
+     * Affiche le panel de connexion directement sur le formulaire de login
+     */
+    public void showLoginForm() {
+        showPanel("CONNEXION");
+        connexionPanel.showLoginForm();
     }
 
     public SettingsOverlay getSettingsOverlay(){

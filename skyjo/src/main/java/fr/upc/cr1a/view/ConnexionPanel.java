@@ -331,4 +331,11 @@ public class ConnexionPanel extends JPanel {
     public DoodleButton getBtnGuest() { 
         return btnGuest; 
     }
+
+    /**
+     * Affiche directement le formulaire de connexion
+     */
+    public void showLoginForm() {
+        cardLayout.show(cardsContainer, "LOGIN");
+    }
 }

@@ -928,13 +928,13 @@ public class GameBoardView extends JPanel {
 
     private String getActionTitle(ActionType actionType) {
         switch (actionType) {
-            case TRADE_CARD_WITH_PLAYER: return "ECHANGE";
-            case REPLACE_CARD_IN_HAND: return "REPLACE";
-            case PLAY_TWO_TURN: return "JOUE 2 FOIS";
-            case DRAW_THREE_CARD: return "DRAW_THREE_CARD"; //jamais utilisé
-            case PLAY_LAST_ACTION_IN_DEFAUSSE: return "REJOUE";
-            case ALL_PLAYERS_DROP_CARD: return "CHAQUE JOUEUR DEFAUSSE";
-            case SPY_ONE_COLUMN: return "REGARDE";
+            case TRADE_CARD_WITH_PLAYER: return "TRADE CARD";
+            case REPLACE_CARD_IN_HAND: return "REPLACE CARD";
+            case PLAY_TWO_TURN: return "PLAY TWO TURN";
+            case DRAW_THREE_CARD: return "DRAW THREE CARD"; //jamais utilisé
+            case PLAY_LAST_ACTION_IN_DEFAUSSE: return "REPLAY LAST ACTION";
+            case ALL_PLAYERS_DROP_CARD: return "DROP CARD";
+            case SPY_ONE_COLUMN: return "SPY";
             default: return "";
         }
     }

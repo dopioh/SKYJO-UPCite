@@ -25,6 +25,7 @@ public class SendAPI {
 
     protected static HttpClient client = HttpClient.newHttpClient();
 
+    @SuppressWarnings("unused")
     private static boolean isHttpSuccess(HttpResponse<String> response, String context) {
         if (response.statusCode() == 200) {
             return true;

@@ -17,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import fr.upc.cr1a.model.DoodleButtonModel.ButtonColor;
@@ -39,10 +40,13 @@ public class AccountStatsOverlayPanel extends JPanel {
     private static final Color INFO_COLOR = new Color(75, 64, 50);
 
     private final DoodleButton closeButton;
+    private final DoodleButton disconnectButton;
+    private final DoodleButton loginBtn;
     private final Font titleFont;
     private final Font labelFont;
     private final Font valueFont;
     private final Font infoFont;
+    private final Frame frame;
 
     public static String getRealRankName(int rankId) {
         switch (rankId) {
@@ -71,7 +75,8 @@ public class AccountStatsOverlayPanel extends JPanel {
         }
     }
 
-    public AccountStatsOverlayPanel() {
+    public AccountStatsOverlayPanel(Frame frame) {
+        this.frame = frame;
         setOpaque(false);
         setLayout(null);
         setVisible(false);
@@ -103,15 +108,60 @@ public class AccountStatsOverlayPanel extends JPanel {
         });
         add(closeButton);
 
+        disconnectButton = new DoodleButton("Déconnexion", ButtonColor.RED, 180, 58);
+        disconnectButton.setFontSize(28f);
+        disconnectButton.setSfxPath("/sfx/back.wav");
+        disconnectButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                disconnectButton.onMouseEnter();
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                disconnectButton.onMouseExit();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                disconnectButton.onMouseExit();
+                handleDisconnect();
+            }
+        });
+        add(disconnectButton);
+
+        loginBtn = new DoodleButton("Se connecter", ButtonColor.GREEN, 180, 58);
+        loginBtn.setFontSize(28f);
+        loginBtn.setSfxPath("/sfx/back.wav");
+        loginBtn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                loginBtn.onMouseEnter();
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                loginBtn.onMouseExit();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                loginBtn.onMouseExit();
+                setVisible(false);
+                frame.showLoginForm();
+            }
+        });
+        add(loginBtn);
+
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                layoutCloseButton();
+                layoutButtons();
             }
 
             @Override
             public void componentShown(ComponentEvent e) {
-                layoutCloseButton();
+                layoutButtons();
             }
         });
     }
@@ -120,7 +170,25 @@ public class AccountStatsOverlayPanel extends JPanel {
         setVisible(true);
         closeButton.setEnabled(true);
         closeButton.onMouseExit();
-        layoutCloseButton();
+        
+        //Afficher le bouton approprié selon le statut
+        boolean isConnected = PlayerAccount.actuelAccount != null;
+        
+        // Si connecté: afficher déconnexion, cacher connexion
+        disconnectButton.setEnabled(isConnected);
+        disconnectButton.setVisible(isConnected);
+        if (isConnected) {
+            disconnectButton.onMouseExit();
+        }
+        
+        // Si invité: afficher connexion, cacher déconnexion
+        loginBtn.setEnabled(!isConnected);
+        loginBtn.setVisible(!isConnected);
+        if (!isConnected) {
+            loginBtn.onMouseExit();
+        }
+        
+        layoutButtons();
         repaint();
     }
 
@@ -248,19 +316,64 @@ public class AccountStatsOverlayPanel extends JPanel {
         return new Rectangle(x, y, cardW, cardH);
     }
 
-    private void layoutCloseButton() {
+    private void layoutButtons() {
         if (getWidth() <= 0 || getHeight() <= 0) {
             return;
         }
 
         Rectangle card = getCardBounds();
-        Dimension buttonSize = closeButton.getPreferredSize();
+        Dimension closeButtonSize = closeButton.getPreferredSize();
+        Dimension disconnectButtonSize = disconnectButton.getPreferredSize();
+        Dimension loginButtonSize = loginBtn.getPreferredSize();
+        
+        //placer le bouton Fermer en haut à droite
         closeButton.setBounds(
-            card.x + card.width - buttonSize.width - 18,
+            card.x + card.width - closeButtonSize.width - 18,
             card.y + 14,
-            buttonSize.width,
-            buttonSize.height
+            closeButtonSize.width,
+            closeButtonSize.height
         );
+        
+        //placer le bouton Déconnexion en bas à droite
+        disconnectButton.setBounds(
+            card.x + card.width - disconnectButtonSize.width - 18,
+            card.y + card.height - disconnectButtonSize.height - 18,
+            disconnectButtonSize.width,
+            disconnectButtonSize.height
+        );
+        
+        //placer le bouton Connexion centré en bas
+        loginBtn.setBounds(
+            card.x + (card.width - loginButtonSize.width) / 2,
+            card.y + card.height - loginButtonSize.height - 18,
+            loginButtonSize.width,
+            loginButtonSize.height
+        );
+    }
+
+    private void handleDisconnect() {
+        int result = JOptionPane.showConfirmDialog(
+            this,
+            "Êtes-vous sûr de vouloir vous déconnecter ?",
+            "Confirmation de déconnexion",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE
+        );
+        
+        if (result == JOptionPane.YES_OPTION) {
+            //déconnecter le joueur
+            PlayerAccount.actuelAccount = null;
+            
+            //fermer l'overlay
+            setVisible(false);
+            
+            //rediriger vers l'écran de connexion
+            if (frame != null) {
+                frame.showPanel("CONNEXION");
+            }
+            
+            repaint();
+        }
     }
 
     private Font loadFont(float size, int style) {
