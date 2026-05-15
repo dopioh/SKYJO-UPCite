@@ -604,6 +604,7 @@
 
 - Skins cartes Action
 - Logo du jeu
+- Bouton de Connexion/Déconnexion en jeu
 
 ### Fixed 
 
