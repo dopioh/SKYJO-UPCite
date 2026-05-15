@@ -16,6 +16,7 @@ public class GameModeSelectionPanel extends JPanel {
     private DoodleButton localBtn;
     private DoodleButton multiBtn;
     private DoodleButton backBtn;
+    private DoodleButton tutorialBtn;
     private Image backgroundImage;
     private BufferedImage cachedBackground;
 
@@ -24,18 +25,7 @@ public class GameModeSelectionPanel extends JPanel {
 
         backgroundImage = ImageCache.get("/background.png");
 
-        //bouton retour
-        JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        topBar.setOpaque(false);
-        topBar.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
-        backBtn = new DoodleButton("Retour", ButtonColor.RED, 220, 60, "/Button/retour.png");
-        backBtn.setSfxPath("/sfx/back.wav");
-        backBtn.setFontSize(32f);
-        backBtn.setIconSide(DoodleButton.IconSide.LEFT);
-        topBar.add(backBtn);
-        add(topBar, BorderLayout.NORTH);
-
-        // police doodle
+        // police doodle - charger en premier
         Font doodle;
         try {
             var stream = getClass().getResourceAsStream("/PatrickHandSC.ttf");
@@ -43,6 +33,22 @@ public class GameModeSelectionPanel extends JPanel {
         } catch (Exception e) {
             doodle = new Font("Arial", Font.PLAIN, 12);
         }
+
+        //bouton retour et tutoriel
+        JPanel topBar = new JPanel(new BorderLayout());
+        topBar.setOpaque(false);
+        topBar.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        backBtn = new DoodleButton("Retour", ButtonColor.RED, 220, 60, "/Button/retour.png");
+        backBtn.setSfxPath("/sfx/back.wav");
+        backBtn.setFontSize(32f);
+        backBtn.setIconSide(DoodleButton.IconSide.LEFT);
+        topBar.add(backBtn, BorderLayout.WEST);
+        tutorialBtn = new DoodleButton("Comment jouer", ButtonColor.BLUE, 280, 60, "/Button/help.png");
+        tutorialBtn.setSfxPath("/sfx/back.wav");
+        tutorialBtn.setFontSize(28f);
+        tutorialBtn.setIconSide(DoodleButton.IconSide.LEFT);
+        topBar.add(tutorialBtn, BorderLayout.EAST);
+        add(topBar, BorderLayout.NORTH);
 
         //contenu centré
         JPanel centre = new JPanel(new GridBagLayout());
@@ -126,5 +132,9 @@ public class GameModeSelectionPanel extends JPanel {
 
     public DoodleButton getBackButton() {
         return backBtn;
+    }
+
+    public DoodleButton getTutorialButton() {
+        return tutorialBtn;
     }
 }

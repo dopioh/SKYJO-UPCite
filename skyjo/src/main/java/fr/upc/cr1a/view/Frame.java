@@ -18,6 +18,7 @@ import fr.upc.cr1a.controller.help_ingame.HelpController;
 import fr.upc.cr1a.model.AudioManager;
 import fr.upc.cr1a.model.GameManager;
 import fr.upc.cr1a.model.GraphicsSettings;
+import fr.upc.cr1a.model.TutorialModel;
 import fr.upc.cr1a.utils.ImageCache;
 import fr.upc.cr1a.view.help_ingame.HelpOverlay;
 
@@ -44,6 +45,10 @@ public class Frame extends JFrame{
     private SettingsOverlay settingsOverlay;
     private Leaderboard leaderboard;
     private ShopPanel shopPanel;
+    private TutorialModel tutorialModel;
+    private TutorialView tutorialView;
+    private TutorialModeSelectionView tutorialModeSelectionView;
+    private fr.upc.cr1a.controller.TutorialController tutorialController;
     private boolean fullscreen = false;
     private Rectangle windowedBounds;
     private final AudioManager audioManager;
@@ -122,6 +127,19 @@ public class Frame extends JFrame{
         leaderboard = new Leaderboard();
         getLayeredPane().add(leaderboard, JLayeredPane.POPUP_LAYER);
 
+        // Overlay tutoriel au niveau de Frame
+        tutorialModel = new TutorialModel();
+        tutorialModeSelectionView = new TutorialModeSelectionView();
+        tutorialModeSelectionView.setVisible(false);
+        getLayeredPane().add(tutorialModeSelectionView, JLayeredPane.DRAG_LAYER);
+        
+        tutorialView = new TutorialView(tutorialModel);
+        tutorialView.setVisible(false);
+        getLayeredPane().add(tutorialView, JLayeredPane.DRAG_LAYER);
+        
+        //initialiser TutorialController
+        tutorialController = new fr.upc.cr1a.controller.TutorialController(tutorialModel, tutorialView, tutorialModeSelectionView);
+
         // Overlay help in game 
         this.helpOverlay = new HelpOverlay();
         //add(playersSetupPanel, "HELP_OVERLAY");
@@ -133,6 +151,8 @@ public class Frame extends JFrame{
             @Override
             public void componentResized(java.awt.event.ComponentEvent e) {
                 leaderboard.setBounds(0, 0, getWidth(), getHeight());
+                tutorialModeSelectionView.setBounds(0, 0, getWidth(), getHeight());
+                tutorialView.setBounds(0, 0, getWidth(), getHeight());
             }
         });
 
@@ -252,6 +272,11 @@ public class Frame extends JFrame{
     }
 
     public Leaderboard getLeaderboard() { return leaderboard; }
+
+    public TutorialView getTutorialView() { return tutorialView; }
+    public TutorialModeSelectionView getTutorialModeSelectionView() { return tutorialModeSelectionView; }
+    public TutorialModel getTutorialModel() { return tutorialModel; }
+    public fr.upc.cr1a.controller.TutorialController getTutorialController() { return tutorialController; }
 
     public void hideSettingsOverlay() {
         settingsOverlay.setVisible(false);
