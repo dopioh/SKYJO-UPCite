@@ -61,7 +61,6 @@ public class GameModeSelectionController {
 
     private void clicTutorial() {
         // Affiche le tutoriel
-        TutorialController tc = new TutorialController(frame.getTutorialModel(), frame.getTutorialView(), frame.getTutorialModeSelectionView());
-        tc.showTutorial();
+        frame.getTutorialController().showTutorial();
     }
 }

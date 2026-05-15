@@ -43,6 +43,7 @@ public class Frame extends JFrame{
     private TutorialModel tutorialModel;
     private TutorialView tutorialView;
     private TutorialModeSelectionView tutorialModeSelectionView;
+    private fr.upc.cr1a.controller.TutorialController tutorialController;
     private boolean fullscreen = false;
     private Rectangle windowedBounds;
     private final AudioManager audioManager;
@@ -110,6 +111,9 @@ public class Frame extends JFrame{
         tutorialView = new TutorialView(tutorialModel);
         tutorialView.setVisible(false);
         getLayeredPane().add(tutorialView, JLayeredPane.DRAG_LAYER);
+        
+        //initialiser TutorialController
+        tutorialController = new fr.upc.cr1a.controller.TutorialController(tutorialModel, tutorialView, tutorialModeSelectionView);
 
         // Overlay help in game 
         this.helpOverlay = new HelpOverlay();
@@ -247,6 +251,7 @@ public class Frame extends JFrame{
     public TutorialView getTutorialView() { return tutorialView; }
     public TutorialModeSelectionView getTutorialModeSelectionView() { return tutorialModeSelectionView; }
     public TutorialModel getTutorialModel() { return tutorialModel; }
+    public fr.upc.cr1a.controller.TutorialController getTutorialController() { return tutorialController; }
 
     public void hideSettingsOverlay() {
         settingsOverlay.setVisible(false);
