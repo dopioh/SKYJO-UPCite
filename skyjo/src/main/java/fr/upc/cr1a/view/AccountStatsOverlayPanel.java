@@ -41,6 +41,7 @@ public class AccountStatsOverlayPanel extends JPanel {
 
     private final DoodleButton closeButton;
     private final DoodleButton disconnectButton;
+    private final DoodleButton loginBtn;
     private final Font titleFont;
     private final Font labelFont;
     private final Font valueFont;
@@ -129,6 +130,29 @@ public class AccountStatsOverlayPanel extends JPanel {
         });
         add(disconnectButton);
 
+        loginBtn = new DoodleButton("Se connecter", ButtonColor.GREEN, 180, 58);
+        loginBtn.setFontSize(28f);
+        loginBtn.setSfxPath("/sfx/back.wav");
+        loginBtn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                loginBtn.onMouseEnter();
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                loginBtn.onMouseExit();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                loginBtn.onMouseExit();
+                setVisible(false);
+                frame.showLoginForm();
+            }
+        });
+        add(loginBtn);
+
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -147,12 +171,21 @@ public class AccountStatsOverlayPanel extends JPanel {
         closeButton.setEnabled(true);
         closeButton.onMouseExit();
         
-        //Afficher le bouton de déconnexion seulement si connecté
+        //Afficher le bouton approprié selon le statut
         boolean isConnected = PlayerAccount.actuelAccount != null;
+        
+        // Si connecté: afficher déconnexion, cacher connexion
         disconnectButton.setEnabled(isConnected);
         disconnectButton.setVisible(isConnected);
         if (isConnected) {
             disconnectButton.onMouseExit();
+        }
+        
+        // Si invité: afficher connexion, cacher déconnexion
+        loginBtn.setEnabled(!isConnected);
+        loginBtn.setVisible(!isConnected);
+        if (!isConnected) {
+            loginBtn.onMouseExit();
         }
         
         layoutButtons();
@@ -291,6 +324,7 @@ public class AccountStatsOverlayPanel extends JPanel {
         Rectangle card = getCardBounds();
         Dimension closeButtonSize = closeButton.getPreferredSize();
         Dimension disconnectButtonSize = disconnectButton.getPreferredSize();
+        Dimension loginButtonSize = loginBtn.getPreferredSize();
         
         //placer le bouton Fermer en haut à droite
         closeButton.setBounds(
@@ -306,6 +340,14 @@ public class AccountStatsOverlayPanel extends JPanel {
             card.y + card.height - disconnectButtonSize.height - 18,
             disconnectButtonSize.width,
             disconnectButtonSize.height
+        );
+        
+        //placer le bouton Connexion centré en bas
+        loginBtn.setBounds(
+            card.x + (card.width - loginButtonSize.width) / 2,
+            card.y + card.height - loginButtonSize.height - 18,
+            loginButtonSize.width,
+            loginButtonSize.height
         );
     }
 

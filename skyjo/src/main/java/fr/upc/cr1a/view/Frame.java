@@ -307,6 +307,14 @@ public class Frame extends JFrame{
         this.handCardAnimationsEnabled = enabled;
     }
 
+    /**
+     * Affiche le panel de connexion directement sur le formulaire de login
+     */
+    public void showLoginForm() {
+        showPanel("CONNEXION");
+        connexionPanel.showLoginForm();
+    }
+
     public SettingsOverlay getSettingsOverlay(){
         return this.settingsOverlay;
     }
