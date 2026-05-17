@@ -616,3 +616,4 @@
     - Crash brutal après que le Host quitte
     - Timer qui s'écoule uniquement sur Host (Si Host est en Pause (press Echap) les autres joueurs ne peuvent plus continuer la partie)
 - Système AFK replace adapté au multi (Remplacé après 2 tours)
+- "Calcul en cours..." en mode invité
