@@ -128,10 +128,18 @@ Si vous ne souhaitez pas avoir un compte, vous pouvez toujours jouer en tant qu'
 
     - **Local** : Vous pouvez configurer le nombres de joueurs *( jusqu'à 8 maximum )*, le noms des ces derniers, dire si se sont des bots ( et choisir le type de bot ) ainsi qu'activer ou non le mode **Skyjo Action**
 
-    - **Multijoueur** : Vous pouvez créer un salon ou bien en rejoindre un déjà existant si il existe un  
-    > Attention, c'est un mode en Peer-To-Peer et donc vous ne pouvez que détecter que les joueurs qui sont sur le même réseau internet que vous.    
-
-    **A FINIR DE REMPLIR LORSQUE MULTIJOUEUR FONCTIONNEL**
+    - **Multijoueur en ligne** : Vous pouvez créer un salon ou bien en rejoindre un déjà existant si il existe un 
+        - **Architecture P2P LAN** : un joueur crée un lobby, les autres le découvrent via UDP broadcast sur le port 1234 et s'y connectent en TCP.
+        - **Limites** : même réseau local uniquement (Possible avec VPN)
+        - **Système de lobby** :
+        - Création de salon : nom, nb max joueurs (2-8)
+        - Découverte automatique des lobbies disponibles (rafraîchissement manuel via le bouton).
+        - **Ajout de bots** dans le salon (l'hôte uniquement) : noms de bots variés (Alice, Bob, Mei, …) et choix du type de stratégie.
+        - Synchronisation deck de cartes : un seed est partagé entre l'hôte et les clients pour que tous les joueurs aient exactement le même deck.
+        - **Tour de jeu** : autoritatif côté hôte, chaque action (pioche, échange, défausse, retournement) passe par le réseau et est diffusée à tous.
+        - **Mode action désactivé en multi**
+        - **Système anti-AFK** : Timer de 20 secondes par tour, après 2 timeouts consécutifs, le joueur AFK est remplacé par un bot pour le reste de la partie
+        - **Scoreboard** : Appuyez sur "Tab" pour montrer les scores de tous les joueurs de la partie
 
 ### Déroulement d'une partie
 
