@@ -133,6 +133,10 @@ public class LobbyBrowserController {
         view.getRefreshButton().setEnabled(false);
         view.getRefreshButton().setText("Recherche...");
 
+        // Vide la liste affichee
+        availableLobbies = new ArrayList<>();
+        view.showNoLobbiesMessage();
+
         final Client localClient = new Client(frame, account);
         discoveryClient = localClient;
 
