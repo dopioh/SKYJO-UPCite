@@ -52,7 +52,6 @@ public class ClientHandler implements Runnable{
             String message;
 
             while ((message = in.readLine()) != null){
-                System.out.println("[SERVEUR a entendu] = " + message);
 
                 if (message.startsWith("JOIN")) {
                     System.out.println("[SYSTEM] message start with \"JOIN\"");
