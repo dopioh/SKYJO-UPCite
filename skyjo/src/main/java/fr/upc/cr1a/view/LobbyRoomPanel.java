@@ -236,6 +236,7 @@ public class LobbyRoomPanel extends JPanel {
 
         readyBtn = new DoodleButton("Prêt", ButtonColor.GREEN, 180, 60);
         startBtn = new DoodleButton("Lancer la partie", ButtonColor.YELLOW, 250, 60);
+        startBtn.setFontSize(28f);
         startBtn.setVisible(false); // Visible seulement pour l'hôte
 
         bottomBar.add(hostNote);

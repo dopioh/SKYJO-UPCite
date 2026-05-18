@@ -13,13 +13,13 @@ public class MainMenuPanelTest {
 
     @BeforeEach
     public void setUp() {
-        panel = new MainMenuPanel();
+        panel = new MainMenuPanel(null);
     }
 
     @Test
     public void testCreation_SansException() {
         boolean executed = false;
-        assertDoesNotThrow(() -> new MainMenuPanel());
+        assertDoesNotThrow(() -> new MainMenuPanel(null));
         executed = true;
         assertTrue(executed, "La creation du MainMenuPanel ne doit pas lancer d'exception");
     }

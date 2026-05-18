@@ -25,7 +25,7 @@ public class MainMenuPanel extends JPanel {
     private Image backgroundImage;
     private BufferedImage cachedBackground;
 
-    public MainMenuPanel() {
+    public MainMenuPanel(Frame frame) {
         setLayout(new BorderLayout());
 
         //fond
@@ -80,7 +80,7 @@ public class MainMenuPanel extends JPanel {
         JLayeredPane overlayStack = new JLayeredPane();
         overlayStack.setOpaque(false);
 
-        accountStatsOverlay = new AccountStatsOverlayPanel();
+        accountStatsOverlay = new AccountStatsOverlayPanel(frame);
         overlayStack.add(centre, Integer.valueOf(JLayeredPane.DEFAULT_LAYER));
         overlayStack.add(topBar, Integer.valueOf(JLayeredPane.DEFAULT_LAYER));
         overlayStack.add(accountStatsOverlay, Integer.valueOf(JLayeredPane.MODAL_LAYER));
