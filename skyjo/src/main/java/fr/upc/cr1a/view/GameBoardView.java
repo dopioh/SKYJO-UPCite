@@ -425,6 +425,15 @@ public class GameBoardView extends JPanel {
         labPiocheAction = new JLabel("Pioche A", SwingConstants.CENTER);
         labDefausseAction = new JLabel("Défausse A", SwingConstants.CENTER);
 
+        Font doodleFont = patrickFont.deriveFont(Font.BOLD, 22f);
+        labPioche.setFont(doodleFont);
+        labPioche.setForeground(Color.WHITE);
+        labDefausse.setFont(doodleFont);
+        labDefausse.setForeground(Color.WHITE);
+        labPiocheAction.setFont(doodleFont);
+        labPiocheAction.setForeground(Color.WHITE);
+        labDefausseAction.setFont(doodleFont);
+        labDefausseAction.setForeground(Color.WHITE);
 
         // premiere ligne -> defausse et pioche 
         gbcRight.gridx = 0;
