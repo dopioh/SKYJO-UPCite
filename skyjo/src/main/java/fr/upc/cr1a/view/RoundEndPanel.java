@@ -110,6 +110,9 @@ public class RoundEndPanel extends JPanel {
             topBar.add(btnRetourMenu, BorderLayout.EAST);
         }
 
+        // Init sortedPlayers tot pour que buildStatsCard puisse l'utiliser (detection multi)
+        sortedPlayers = new ArrayList<>(players);
+
         // Encadré stats sous le titre, uniquement en fin de partie
         if (gameOver) {
             JPanel northBlock = new JPanel();
@@ -138,8 +141,6 @@ public class RoundEndPanel extends JPanel {
         });
 
         // grande boite transparent en bas de topbar
-        sortedPlayers = new ArrayList<>(players);
-
         JPanel bigCard = makeCard();
         bigCard.setLayout(new BoxLayout(bigCard, BoxLayout.Y_AXIS));
         bigCard.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -236,10 +237,9 @@ public class RoundEndPanel extends JPanel {
         statsTitleLabel.setAlignmentX(LEFT_ALIGNMENT);
         statsCard.add(statsTitleLabel);
         statsCard.add(Box.createVerticalStrut(8));
+.
+        boolean isOnline = (GameSession.status == GameSession.STATUS.HOST || GameSession.status == GameSession.STATUS.CLIENT) || multiHintFromGame();
 
-        boolean isOnline = (GameSession.status == GameSession.STATUS.HOST || GameSession.status == GameSession.STATUS.CLIENT);
-
-        // Elo uniquement en multi
         if (isOnline) {
             eloLabel = makeStatLine("ELO", String.valueOf(initialElo), null);
             statsCard.add(eloLabel);
@@ -259,6 +259,15 @@ public class RoundEndPanel extends JPanel {
         wrap.setOpaque(false);
         wrap.add(padded, BorderLayout.CENTER);
         return wrap;
+    }
+
+    private boolean multiHintFromGame() {
+        if (sortedPlayers == null) return false;
+        int humans = 0;
+        for (PlayerModel p : sortedPlayers) {
+            if (p.getPlayerData() != null && !p.getPlayerData().isBot()) humans++;
+        }
+        return humans >= 2;
     }
 
     private JLabel makeStatLine(String name, String value, String delta) {

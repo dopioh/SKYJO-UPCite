@@ -532,18 +532,30 @@ public class GameBoardController {
         final RoundEndPanel panelRef = currentRoundEndPanel;
 
         String dbUuid = PlayerAccount.actuelAccount.getID();
+        final String localName = PlayerAccount.actuelAccount.getUsername();
+        // Logs des inputs API pour debug en console
+        System.out.println("[REWARD] envoi /applyGameResult — joueur=" + localName
+            + " result=" + (wonGame ? "WIN" : "LOSS")
+            + " opponents=" + opponentTypes
+            + " opponentElos=" + opponentElos
+            + " (oldElo=" + oldElo + ", oldMoney=" + oldMoney + ")");
         new Thread(() -> {
             try {
                 PlayerData updated = SendAPI.applyGameResult(dbUuid, wonGame, opponentTypes, opponentElos);
                 if (updated != null) {
                     PlayerAccount.actuelAccount = updated;
-                    System.out.println("Fin de partie: " + (wonGame ? "WIN" : "PERDU"));
                     final int newElo = updated.getElo();
                     final int newXp = updated.getXp();
                     final int newMoney = updated.getMoney();
+                    int dElo = newElo - oldElo;
+                    int dMoney = newMoney - oldMoney;
+                    // Log clair des gains/pertes en console
+                    System.out.println("[REWARD] " + localName + " : " + (wonGame ? "VICTOIRE" : "DEFAITE")
+                        + " | ELO " + oldElo + " -> " + newElo + " (" + (dElo >= 0 ? "+" : "") + dElo + ")"
+                        + " | Pieces " + oldMoney + " -> " + newMoney + " (" + (dMoney >= 0 ? "+" : "") + dMoney + ")");
                     SwingUtilities.invokeLater(() -> {
                         if (panelRef != null) {
-                            panelRef.updateStats(newElo, newXp, newMoney,newElo - oldElo, newXp - oldXp, newMoney - oldMoney);
+                            panelRef.updateStats(newElo, newXp, newMoney, dElo, newXp - oldXp, dMoney);
                         }
                     });
                 } else {
