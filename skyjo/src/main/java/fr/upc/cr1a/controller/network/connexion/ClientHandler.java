@@ -52,22 +52,15 @@ public class ClientHandler implements Runnable{
             String message;
 
             while ((message = in.readLine()) != null){
-                System.out.println("[SERVEUR a entendu] = " + message);
 
                 if (message.startsWith("JOIN")) {
                     System.out.println("[SYSTEM] message start with \"JOIN\"");
                     String[] parts = message.split(":");
-
-                    //for ( int i = 0 ; i < parts.length ; i++){
-                    //    System.out.println("[SYSTEM] parts[" + i + "] = " + parts[i]);
-                    //}
-                
-                    if (parts.length == 3){
-                        System.out.println("[SYSTEM] parts has lenght 3");
+                    if (parts.length >= 3){
                         this.username = parts[1];
                         this.id = parts[2];
-                     
-                        gameHost.addPlayerToLobby(id, username);
+                        String skin = (parts.length >= 4) ? parts[3] : "";
+                        gameHost.addPlayerToLobby(id, username, skin);
                         out.println("[INFO] Tu es bien connecté au serveur !");
                     }
                 }

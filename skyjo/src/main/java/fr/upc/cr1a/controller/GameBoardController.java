@@ -197,9 +197,13 @@ public class GameBoardController {
         }
 
         boolean isGameOver = gameManager.getGameState() == GameManager.GameState.GAME_ENDED;
-        PlayerModel lowestScorePlayer = fr.upc.cr1a.model.ScoreCalculator.getLowestScorePlayer(gameManager.getPlayers());
+        PlayerModel lowestScorePlayer = ScoreCalculator.getLowestScorePlayer(gameManager.getPlayers());
         currentRoundEndPanel = new RoundEndPanel(
-            new ArrayList<>(gameManager.getPlayers()), isGameOver, gameManager.getLastRoundPlayer(), lowestScorePlayer
+            new ArrayList<>(gameManager.getPlayers()),
+            isGameOver,
+            gameManager.getLastRoundPlayer(),
+            lowestScorePlayer,
+            gameManager.withActionCard()
         );
 
         if (isGameOver) {
@@ -457,14 +461,10 @@ public class GameBoardController {
         if (!(opponent instanceof BotModel bot)) {
             return "human";
         }
-
         String strategyName = bot.getStrategy() == null ? "" : bot.getStrategy().getClass().getSimpleName().toLowerCase();
-        if (strategyName.contains("count")) {
-            return "bot_count";
-        }
-        if (strategyName.contains("low")) {
-            return "bot_low";
-        }
+        if (strategyName.contains("count")) return "bot_count";
+        if (strategyName.contains("terminal")) return "bot_terminal";
+        if (strategyName.contains("low")) return "bot_low";
         return "bot_row";
     }
 
@@ -484,7 +484,12 @@ public class GameBoardController {
         if (alreadyReward) {
             return;
         }
+        // Mode invite / pas de compte
         if (PlayerAccount.actuelAccount == null || listPlayerInGame == null || listPlayerInGame.isEmpty()) {
+            if (currentRoundEndPanel != null) {
+                final RoundEndPanel panelRef = currentRoundEndPanel;
+                SwingUtilities.invokeLater(() -> panelRef.showStatsError("Mode invité : pas de récompense"));
+            }
             return;
         }
 
@@ -524,32 +529,53 @@ public class GameBoardController {
         final int oldElo = PlayerAccount.actuelAccount.getElo();
         final int oldXp = PlayerAccount.actuelAccount.getXp();
         final int oldMoney = PlayerAccount.actuelAccount.getMoney();
-        final fr.upc.cr1a.view.RoundEndPanel panelRef = currentRoundEndPanel;
+        final RoundEndPanel panelRef = currentRoundEndPanel;
 
         String dbUuid = PlayerAccount.actuelAccount.getID();
+        final String localName = PlayerAccount.actuelAccount.getUsername();
+        // Logs des inputs API pour debug en console
+        System.out.println("[REWARD] envoi /applyGameResult — joueur=" + localName
+            + " result=" + (wonGame ? "WIN" : "LOSS")
+            + " opponents=" + opponentTypes
+            + " opponentElos=" + opponentElos
+            + " (oldElo=" + oldElo + ", oldMoney=" + oldMoney + ")");
         new Thread(() -> {
-            PlayerData updated = SendAPI.applyGameResult(dbUuid, wonGame, opponentTypes, opponentElos);
-            if (updated != null) {
-                PlayerAccount.actuelAccount = updated;
-                System.out.println("Fin de partie: " + (wonGame ? "WIN" : "PERDU"));
-                final int newElo = updated.getElo();
-                final int newXp = updated.getXp();
-                final int newMoney = updated.getMoney();
-                SwingUtilities.invokeLater(() -> {
-                    if (panelRef != null) {
-                        panelRef.updateStats(newElo, newXp, newMoney,newElo - oldElo, newXp - oldXp, newMoney - oldMoney);
-                    }
-                });
-            } else {
-                System.out.println("Fin de partie: echec applyGameResult");
-                SwingUtilities.invokeLater(() -> {
-                    if (panelRef != null) {
-                        panelRef.showStatsError(
-                            ApiErrorManager.getLastUserMessageOrDefault("Synchronisation des récompenses impossible")
+            try {
+                PlayerData updated = SendAPI.applyGameResult(dbUuid, wonGame, opponentTypes, opponentElos);
+                if (updated != null) {
+                    PlayerAccount.actuelAccount = updated;
+                    final int newElo = updated.getElo();
+                    final int newXp = updated.getXp();
+                    final int newMoney = updated.getMoney();
+                    int dElo = newElo - oldElo;
+                    int dMoney = newMoney - oldMoney;
+                    // Log clair des gains/pertes en console
+                    System.out.println("[REWARD] " + localName + " : " + (wonGame ? "VICTOIRE" : "DEFAITE")
+                        + " | ELO " + oldElo + " -> " + newElo + " (" + (dElo >= 0 ? "+" : "") + dElo + ")"
+                        + " | Pieces " + oldMoney + " -> " + newMoney + " (" + (dMoney >= 0 ? "+" : "") + dMoney + ")");
+                    SwingUtilities.invokeLater(() -> {
+                        if (panelRef != null) {
+                            panelRef.updateStats(newElo, newXp, newMoney, dElo, newXp - oldXp, dMoney);
+                        }
+                    });
+                } else {
+                    System.out.println("Fin de partie: echec applyGameResult");
+                    SwingUtilities.invokeLater(() -> {
+                        if (panelRef != null) {
+                            panelRef.showStatsError(
+                                ApiErrorManager.getLastUserMessageOrDefault("Synchronisation des récompenses impossible")
+                            );
+                        }
+                        ErrorDialog.showError(gameBoardModel.getFrame(),"Resultat de partie",ApiErrorManager.getLastUserMessageOrDefault("Fin de manche ,les récompenses n'ont pas pu etre synchronisées.")
                         );
+                    });
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                SwingUtilities.invokeLater(() -> {
+                    if (panelRef != null) {
+                        panelRef.showStatsError("Erreur inattendue lors du calcul des récompenses");
                     }
-                    ErrorDialog.showError(gameBoardModel.getFrame(),"Resultat de partie",ApiErrorManager.getLastUserMessageOrDefault("Fin de manche ,les récompenses n'ont pas pu etre synchronisées.")
-                    );
                 });
             }
         }, "db-endgame-rewards").start();

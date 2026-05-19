@@ -33,12 +33,12 @@ public class RoundEndPanel extends JPanel {
     private BufferedImage cachedBackground;
     private PlayerModel lastRoundPlayer;
     private PlayerModel lowestScorePlayer;
+    private boolean withActionCard;
 
-    // Encadré stats (uniquement en game over) : ELO / XP / Money + deltas
+    // Encadré stats (uniquement en game over) : ELO / Money + deltas
     private JPanel statsCard;
     private JLabel statsTitleLabel;
     private JLabel eloLabel;
-    private JLabel xpLabel;
     private JLabel moneyLabel;
     private JLabel statusLabel;
 
@@ -47,7 +47,6 @@ public class RoundEndPanel extends JPanel {
     // Pré-remplissage du card stats avec les valeurs locales
     private String localUsername;
     private int initialElo;
-    private int initialXp;
     private int initialMoney;
 
     public RoundEndPanel(List<PlayerModel> players, boolean gameOver) {
@@ -55,19 +54,22 @@ public class RoundEndPanel extends JPanel {
     }
 
     public RoundEndPanel(List<PlayerModel> players, boolean gameOver, PlayerModel lastRoundPlayer) {
-        this(players, gameOver, lastRoundPlayer, null);
+        this(players, gameOver, lastRoundPlayer, null, false);
     }
 
     public RoundEndPanel(List<PlayerModel> players, boolean gameOver, PlayerModel lastRoundPlayer, PlayerModel lowestScorePlayer) {
+        this(players, gameOver, lastRoundPlayer, lowestScorePlayer, false);
+    }
+
+    public RoundEndPanel(List<PlayerModel> players, boolean gameOver, PlayerModel lastRoundPlayer, PlayerModel lowestScorePlayer, boolean withActionCard) {
+        this.withActionCard = withActionCard;
         if (PlayerAccount.actuelAccount != null) {
             this.localUsername  = PlayerAccount.actuelAccount.getUsername();
             this.initialElo     = PlayerAccount.actuelAccount.getElo();
-            this.initialXp      = PlayerAccount.actuelAccount.getXp();
             this.initialMoney   = PlayerAccount.actuelAccount.getMoney();
         } else {
             this.localUsername  = "Invité";
             this.initialElo     = 0;
-            this.initialXp      = 0;
             this.initialMoney   = 0;
         }
         this.gameOver = gameOver;
@@ -108,6 +110,9 @@ public class RoundEndPanel extends JPanel {
             topBar.add(btnRetourMenu, BorderLayout.EAST);
         }
 
+        // Init sortedPlayers tot pour que buildStatsCard puisse l'utiliser (detection multi)
+        sortedPlayers = new ArrayList<>(players);
+
         // Encadré stats sous le titre, uniquement en fin de partie
         if (gameOver) {
             JPanel northBlock = new JPanel();
@@ -136,15 +141,11 @@ public class RoundEndPanel extends JPanel {
         });
 
         // grande boite transparent en bas de topbar
-        sortedPlayers = new ArrayList<>(players);
-
         JPanel bigCard = makeCard();
         bigCard.setLayout(new BoxLayout(bigCard, BoxLayout.Y_AXIS));
         bigCard.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        boolean isOnline = (GameSession.status == GameSession.STATUS.HOST || GameSession.status == GameSession.STATUS.CLIENT);
-
-        String calcText = isOnline ? "Calcul : pts dans la main" : "Calcul : pts dans la main + carte action";
+        String calcText = withActionCard ? "Calcul : pts dans la main + carte action" : "Calcul : pts dans la main";
         JLabel scoreExplanation = new JLabel(calcText);
         scoreExplanation.setFont(font(16f, Font.ITALIC));
         scoreExplanation.setForeground(new Color(255, 255, 255, 200));
@@ -154,9 +155,9 @@ public class RoundEndPanel extends JPanel {
         for (int i = 0; i < sortedPlayers.size(); i++) {
             PlayerModel p = sortedPlayers.get(i);
 
-            //calculer les détails du score
+            // Score de la manche : pts de la main + (en mode action solo) bonus par carte action
             int handScore = p.getHand().getVisibleCardScore();
-            int actionScore = isOnline ? 0 : p.getActionHand().size() * 10;
+            int actionScore = withActionCard ? p.getActionHand().size() * 10 : 0;
             int totalRoundScore = handScore + actionScore;
 
             //vérifier si doublement a été appliqué
@@ -170,10 +171,10 @@ public class RoundEndPanel extends JPanel {
             if (lastRoundPlayer != null && p.equals(lastRoundPlayer)) {
                 text += " (first)";
             }
-            if (isOnline) {
-                text += "   —   " + totalRoundScore + " pts";
-            } else {
+            if (withActionCard) {
                 text += "   —   " + handScore + " + " + actionScore + " = " + totalRoundScore + " pts";
+            } else {
+                text += "   —   " + totalRoundScore + " pts";
             }
 
             //vérifier si doublement appliqué
@@ -181,9 +182,12 @@ public class RoundEndPanel extends JPanel {
                 text += " × 2 = " + appliedRoundScore + " pts";
             }
 
-            // calculer score avant cette manche
             int scoreBefore = scoreTotalAfter - appliedRoundScore;
-            text += "   |   Total : " + scoreBefore + " + " + appliedRoundScore + " = " + scoreTotalAfter + " pts";
+            if (scoreBefore > 0) {
+                text += "   |   Total : " + scoreBefore + " + " + appliedRoundScore + " = " + scoreTotalAfter + " pts";
+            } else {
+                text += "   |   Total : " + scoreTotalAfter + " pts";
+            }
             JLabel pill = makePill(text);
             playerLabels.add(pill);
             bigCard.add(pill);
@@ -233,19 +237,14 @@ public class RoundEndPanel extends JPanel {
         statsTitleLabel.setAlignmentX(LEFT_ALIGNMENT);
         statsCard.add(statsTitleLabel);
         statsCard.add(Box.createVerticalStrut(8));
+        boolean isOnline = (GameSession.status == GameSession.STATUS.HOST || GameSession.status == GameSession.STATUS.CLIENT) || multiHintFromGame();
 
-        boolean isOnline = (GameSession.status == GameSession.STATUS.HOST || GameSession.status == GameSession.STATUS.CLIENT);
-
-        // Elo uniquement en multi (pas de gain/perte ELO en solo, juste XP + money)
         if (isOnline) {
             eloLabel = makeStatLine("ELO", String.valueOf(initialElo), null);
             statsCard.add(eloLabel);
             statsCard.add(Box.createVerticalStrut(4));
         }
-        xpLabel    = makeStatLine("XP",       String.valueOf(initialXp),    null);
         moneyLabel = makeStatLine("Pièces",   String.valueOf(initialMoney), null);
-        statsCard.add(xpLabel);
-        statsCard.add(Box.createVerticalStrut(4));
         statsCard.add(moneyLabel);
 
         statusLabel = new JLabel("Calcul en cours…");
@@ -259,6 +258,15 @@ public class RoundEndPanel extends JPanel {
         wrap.setOpaque(false);
         wrap.add(padded, BorderLayout.CENTER);
         return wrap;
+    }
+
+    private boolean multiHintFromGame() {
+        if (sortedPlayers == null) return false;
+        int humans = 0;
+        for (PlayerModel p : sortedPlayers) {
+            if (p.getPlayerData() != null && !p.getPlayerData().isBot()) humans++;
+        }
+        return humans >= 2;
     }
 
     private JLabel makeStatLine(String name, String value, String delta) {
@@ -287,12 +295,12 @@ public class RoundEndPanel extends JPanel {
     }
 
     public void updateStats(int elo, int xp, int money, int deltaElo, int deltaXp, int deltaMoney) {
-        if (xpLabel == null) return;
+        if (moneyLabel == null) return;
         // ELO uniquement affiche en multi (eloLabel peut etre null en solo)
         if (eloLabel != null) {
             eloLabel.setText(formatStatHtml("ELO", String.valueOf(elo), formatDelta(deltaElo)));
         }
-        xpLabel.setText(formatStatHtml("XP", String.valueOf(xp), formatDelta(deltaXp)));
+        
         moneyLabel.setText(formatStatHtml("Pièces", String.valueOf(money), formatDelta(deltaMoney)));
         if (statusLabel != null) {
             statusLabel.setText("Mis à jour");

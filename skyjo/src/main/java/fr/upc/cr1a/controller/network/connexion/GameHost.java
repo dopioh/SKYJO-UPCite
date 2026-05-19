@@ -28,6 +28,7 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     private HashMap<String, String> lobbyPlayers = new HashMap<>(); // key = id, value = name
     private HashMap<String, Boolean> playerReadyState = new HashMap<>(); // id -> ready
     private HashMap<String, BotInfo> lobbyBots = new HashMap<>(); // id -> (displayName, botType)
+    private HashMap<String, String> playerSkins = new HashMap<>(); // id -> selectedSkinPath
 
     /**
      * Represente un bot dans le lobby
@@ -117,10 +118,19 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     }
 
     public void addPlayerToLobby(String id, String username){
+        addPlayerToLobby(id, username, "");
+    }
+
+    /**
+     * Variante avec skin du joueur (pour que tous les clients voient les skins des autres).
+     */
+    public void addPlayerToLobby(String id, String username, String skinPath){
         lobbyPlayers.put(id, username);
         playerReadyState.put(id, false);
+        if (skinPath != null && !skinPath.isBlank()) {
+            playerSkins.put(id, skinPath);
+        }
         System.out.println("[LOBBY] " + username + " a rejoint la salle d'attente !");
-
         broadcastUpdateLobby();
     }
 
@@ -202,8 +212,9 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
        connectedClient.remove(clientHandler);
 
        if (id != null){
-        lobbyPlayers.remove(id); // faut mettre la key
+        lobbyPlayers.remove(id);
         playerReadyState.remove(id);
+        playerSkins.remove(id);
         String msg = "[SERVEUR] " + username + " a quitté le salon";
         System.out.println(msg);
         broadcastInfo(msg);
@@ -228,6 +239,9 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
 
         for (String key : lobbyPlayers.keySet()){
             PlayerData tmp = new PlayerData(key, lobbyPlayers.get(key));
+            // applique le skin reçu via JOIN pour ce joueur
+            String skin = playerSkins.get(key);
+            if (skin != null && !skin.isBlank()) tmp.setSelectedSkinPath(skin);
             listPlayers.add(tmp);
         }
         // Ajout des bots a la liste des joueurs
@@ -257,16 +271,20 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
     @Override
     public synchronized void broadcastUpdateLobby(){
         int totalCount = lobbyPlayers.size() + lobbyBots.size();
-        // Format : [LOBBY_UPDATE]:totalCount:maxPlayers:id:name:isBot(0/1):botType:ready(0/1):...
+        // Format : [LOBBY_UPDATE]:totalCount:maxPlayers:id:name:isBot:botType:ready:skin:...
+        // 6 champs par joueur (le dernier = skin, "_" si vide pour preserver le decoupage)
         StringBuilder message = new StringBuilder("[LOBBY_UPDATE]:" + totalCount + ":" + maxPlayers);
 
         for (String key : lobbyPlayers.keySet()){
             boolean ready = playerReadyState.getOrDefault(key, false);
+            String skin = playerSkins.getOrDefault(key, "");
+            if (skin.isBlank()) skin = "_";
             message.append(":").append(key)
                    .append(":").append(lobbyPlayers.get(key))
                    .append(":").append("0")
                    .append(":").append("N")
-                   .append(":").append(ready ? "1" : "0");
+                   .append(":").append(ready ? "1" : "0")
+                   .append(":").append(skin);
         }
         for (String botId : lobbyBots.keySet()){
             BotInfo info = lobbyBots.get(botId);
@@ -274,10 +292,10 @@ public class GameHost implements Runnable, NetworkProtocolServer{ // GameServer 
                    .append(":").append(info.displayName)
                    .append(":").append("1")
                    .append(":").append(info.botType)
-                   .append(":").append("1"); // bots tjrs prets
+                   .append(":").append("1")
+                   .append(":").append("_"); // bots : pas de skin custom
         }
 
-        // On l'envoie à tous les ClientHandlers
         for (ClientHandler client : connectedClient) {
             client.sendMessage(message.toString());
         }

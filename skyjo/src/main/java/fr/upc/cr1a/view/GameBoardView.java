@@ -652,11 +652,17 @@ public class GameBoardView extends JPanel {
      */
 
     /**
-     * Retourne le chemin de l'image pour une carte
+     * Retourne le chemin de l'image pour une carte. Pour les cartes face cachee, utilise
+     * le skin du joueur affiche (currentPlayer) afin que chaque joueur voie son propre dos.
      */
     public String getCardImagePath(CardModel card) {
         if (card.isFaceDown()) {
-            return CaseOpeningOverlayPanel.getSelectedSkinPath(); // temporaire
+            // Skin du proprietaire de la main affichee (fallback : skin local)
+            if (currentPlayer != null && currentPlayer.getPlayerData() != null) {
+                String s = currentPlayer.getPlayerData().getSelectedSkinPath();
+                if (s != null && !s.isBlank()) return s;
+            }
+            return CaseOpeningOverlayPanel.getSelectedSkinPath();
         }
 
         if (card instanceof NumberCardModel numberCard && numberCard.isStar()) {

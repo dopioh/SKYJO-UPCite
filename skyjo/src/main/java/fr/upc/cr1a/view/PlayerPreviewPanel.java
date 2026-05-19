@@ -49,7 +49,11 @@ public class PlayerPreviewPanel extends JPanel{
     }
 
 
+    /** Skin du joueur affiche (utilise pour les cartes face cachee dans la preview). */
+    private fr.upc.cr1a.model.PlayerModel currentPreviewPlayer;
+
     public void showOtherPlayerHand(PlayerModel player){
+        this.currentPreviewPlayer = player;
         removeAll(); // TRES IMPORTANT sinon les cartes facedown du debut seront tjr au dessus visuellement
 
         JLabel title = new JLabel("Main de " + player.getName(), JLabel.CENTER);
@@ -105,8 +109,12 @@ public class PlayerPreviewPanel extends JPanel{
      * Retourne le chemin de l'image pour une carte
      */
     private String getCardImagePath(CardModel card) {
-        //System.out.println("getCardImagePath called"); // est called
         if (card.isFaceDown()) {
+            // Skin du proprietaire de la main affichee (chacun voit son propre dos)
+            if (currentPreviewPlayer != null && currentPreviewPlayer.getPlayerData() != null) {
+                String s = currentPreviewPlayer.getPlayerData().getSelectedSkinPath();
+                if (s != null && !s.isBlank()) return s;
+            }
             return CaseOpeningOverlayPanel.getSelectedSkinPath();
         }
         if (card instanceof NumberCardModel numberCard && numberCard.isStar()) {

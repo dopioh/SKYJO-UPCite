@@ -605,7 +605,15 @@
 - Skins cartes Action
 - Logo du jeu
 - Bouton de Connexion/Déconnexion en jeu
+- Scoreboard pendant la partie (recaputulatif de tout les scores de chaque joueur par manche)
+- Récompenses en fin de partie en ligne (Pièces)
 
 ### Fixed 
 
 - Fix API error 500
+- Gameflow Multijoueur entièrement fixed, une partie se déroule normalement :
+    - Synchro des manches/animations/deck(seed)/transitions (Client/Host)
+    - Crash brutal après que le Host quitte
+    - Timer qui s'écoule uniquement sur Host (Si Host est en Pause (press Echap) les autres joueurs ne peuvent plus continuer la partie)
+- Système AFK replace adapté au multi (Remplacé après 2 tours)
+- "Calcul en cours..." en mode invité

@@ -130,6 +130,11 @@ public class PlayerData {
         return this.selectedSkinPath;
     }
 
+    /** Setter pour le skin reçu via le reseau (cote client, broadcast LOBBY_UPDATE). */
+    public void setSelectedSkinPath(String path){
+        this.selectedSkinPath = path;
+    }
+
     public String getUsername(){
         return this.username;
     }

@@ -22,6 +22,7 @@ import fr.upc.cr1a.model.player.PlayerData;
 import java.io.*;
 
 import javax.swing.SwingUtilities;
+import javax.swing.JOptionPane;
 
 import fr.upc.cr1a.view.Frame;
 import fr.upc.cr1a.view.GameBoardView;
@@ -64,7 +65,10 @@ public class GameClient implements NetworkProtocolClient{
             this.out = new PrintWriter(socket.getOutputStream(), true); 
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            out.println("JOIN :" + playerData.getUsername() +":"+ playerData.getID()); // on envoie une requete de connexion
+            // JOIN :username:id:skinPath (skinPath optionnel pour compat)
+            String skin = playerData.getSelectedSkinPath();
+            if (skin == null || skin.isBlank()) skin = "";
+            out.println("JOIN :" + playerData.getUsername() + ":" + playerData.getID() + ":" + skin);
             // System.out.println(); -> print console alors que l'autre est envoyé au receveur
 
             new Thread(this::listenerToServer).start();
@@ -112,9 +116,15 @@ public class GameClient implements NetworkProtocolClient{
                         boolean isBot = "1".equals(parts[index++]);
                         String botType = parts[index++];
                         boolean ready = "1".equals(parts[index++]);
+                        // 6e champ = skin path ("_" si vide), compat si message ancien sans skin
+                        String skin = "";
+                        if (index < parts.length) {
+                            String raw = parts[index++];
+                            if (!"_".equals(raw)) skin = raw;
+                        }
 
-                        // botType en lowercase pour matcher les strats dans GameManager
                         PlayerData tmp = new PlayerData(key, name, isBot, isBot ? botType.toLowerCase() : null);
+                        if (!skin.isBlank()) tmp.setSelectedSkinPath(skin);
                         this.listPlayersData.add(tmp);
                         readyStates.add(ready);
                     }
@@ -325,17 +335,21 @@ public class GameClient implements NetworkProtocolClient{
                     }
                     SwingUtilities.invokeLater(() -> {
                         if (afkPlayerId != null && playerData != null && afkPlayerId.equals(playerData.getID())) {
-                            javax.swing.JOptionPane.showMessageDialog(frame,"AFK : vous êtes remplacé par un bot.","Inactivité",javax.swing.JOptionPane.WARNING_MESSAGE);
+                            JOptionPane.showMessageDialog(frame,"AFK : vous êtes remplacé par un bot.","Inactivité",javax.swing.JOptionPane.WARNING_MESSAGE);
                         }
                     });
                     continue;
                 }
 
                 if (message.startsWith(NetworkProtocolServer.UPDATE_GAME_ENDED)) {
-                    // Format : GAME_ENDED:lastRoundPlayerId (peut etre vide)
+                    // Format : GAME_ENDED:lastRoundPlayerId (vide si quit volontaire du host)
                     gameEndedReceived = true; // pour eviter la popup "host deconnecte"
                     String[] geParts = message.split(":");
                     final String lrpId = (geParts.length >= 2 && !geParts[1].isEmpty()) ? geParts[1] : null;
+                    final boolean hostQuit = (lrpId == null);
+                    if (GameSession.status == GameSession.STATUS.HOST) {
+                        break;
+                    }
                     SwingUtilities.invokeLater(() -> {
                         GameManager game = frame.getCurrentGame();
                         if (game == null|| game.getGameBoardModel() == null|| game.getGameBoardModel().getGameBoardController() == null) {
@@ -344,9 +358,29 @@ public class GameClient implements NetworkProtocolClient{
                             frame.showPanel("MENU");
                             return;
                         }
+                        if (hostQuit) {
+                            // Quit volontaire du host : pas de recompense, popup + retour MENU
+                            try {
+                                JOptionPane.showMessageDialog(
+                                    frame,
+                                    "L'hôte a quitté la partie. Aucune récompense ne sera attribuée.",
+                                    "Partie interrompue",
+                                    JOptionPane.WARNING_MESSAGE
+                                );
+                            } catch (Exception ignored) {}
+                            game.stopGame();
+                            frame.clearCurrentGame();
+                            if (frame.getLobbyRoomController() != null) {
+                                frame.getLobbyRoomController().setNetworkHost(null);
+                                frame.getLobbyRoomController().setNetworkClient(null);
+                            }
+                            GameSession.status = GameSession.STATUS.OFFLINE;
+                            frame.showPanel("MENU");
+                            return;
+                        }
+                        // Fin de partie naturelle : panel + recompenses
                         game.finalizeRoundFromNetwork(lrpId);
                         game.setGameStateNetwork(GameManager.GameState.GAME_ENDED);
-                        // Afficher RoundEndPanel mais fin de partie au lieu de pouvoir continuer
                         game.getGameBoardModel().getGameBoardController().showRoundEndScreenFromLoop();
                     });
                     break;
