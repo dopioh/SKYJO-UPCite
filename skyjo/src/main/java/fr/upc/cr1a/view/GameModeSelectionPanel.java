@@ -35,19 +35,26 @@ public class GameModeSelectionPanel extends JPanel {
         }
 
         //bouton retour et tutoriel
-        JPanel topBar = new JPanel(new BorderLayout());
-        topBar.setOpaque(false);
-        topBar.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        JPanel topBarLeft = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        topBarLeft.setOpaque(false);
+        topBarLeft.setBorder(BorderFactory.createEmptyBorder(12, 12, 0, 12));
         backBtn = new DoodleButton("Retour", ButtonColor.RED, 220, 60, "/Button/retour.png");
         backBtn.setSfxPath("/sfx/back.wav");
         backBtn.setFontSize(32f);
         backBtn.setIconSide(DoodleButton.IconSide.LEFT);
-        topBar.add(backBtn, BorderLayout.WEST);
-        tutorialBtn = new DoodleButton("Comment jouer", ButtonColor.BLUE, 280, 60, "/Button/help.png");
-        tutorialBtn.setSfxPath("/sfx/back.wav");
+        topBarLeft.add(backBtn);
+
+        JPanel topBarRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        topBarRight.setOpaque(false);
+        topBarRight.setBorder(BorderFactory.createEmptyBorder(12, 12, 0, 12));
+        tutorialBtn = new DoodleButton("Comment jouer", ButtonColor.GREEN, 280, 60, null);
         tutorialBtn.setFontSize(28f);
-        tutorialBtn.setIconSide(DoodleButton.IconSide.LEFT);
-        topBar.add(tutorialBtn, BorderLayout.EAST);
+        topBarRight.add(tutorialBtn);
+
+        JPanel topBar = new JPanel(new BorderLayout());
+        topBar.setOpaque(false);
+        topBar.add(topBarLeft, BorderLayout.WEST);
+        topBar.add(topBarRight, BorderLayout.EAST);
         add(topBar, BorderLayout.NORTH);
 
         //contenu centré

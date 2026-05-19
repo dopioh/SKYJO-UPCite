@@ -38,9 +38,9 @@ public class LobbyItemPanel extends JPanel {
             baseFont = new Font("Arial", Font.PLAIN, 12);
         }
         Font fontName = baseFont.deriveFont(Font.BOLD,  29f);
-        Font fontSub = baseFont.deriveFont(Font.PLAIN, 20f);
+        Font fontSub = baseFont.deriveFont(Font.BOLD, 20f);
         Font fontCount = baseFont.deriveFont(Font.BOLD,  34f);
-        Font fontPlayers = baseFont.deriveFont(Font.PLAIN, 18f);
+        Font fontPlayers = baseFont.deriveFont(Font.BOLD, 18f);
 
         //panel gauche, infos du salon
         JPanel infoPanel = new JPanel(new GridBagLayout());

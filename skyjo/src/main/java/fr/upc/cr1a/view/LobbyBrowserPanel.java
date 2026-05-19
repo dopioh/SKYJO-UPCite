@@ -24,10 +24,17 @@ public class LobbyBrowserPanel extends JPanel {
     private Image backgroundImage;
     private BufferedImage cachedBackground;
     private List<LobbyItemPanel> lobbyItems;
+    private Font doodle;
 
     public LobbyBrowserPanel() {
         setLayout(new BorderLayout());
         lobbyItems = new ArrayList<>();
+        try {
+            var stream = getClass().getResourceAsStream("/PatrickHandSC.ttf");
+            doodle = stream != null ? Font.createFont(Font.TRUETYPE_FONT, stream) : new Font("Arial", Font.PLAIN, 12);
+        } catch (Exception e) {
+            doodle = new Font("Arial", Font.PLAIN, 12);
+        }
 
         //fond
         backgroundImage = ImageCache.get("/background.png");
@@ -140,12 +147,12 @@ public class LobbyBrowserPanel extends JPanel {
     public void showNoLobbiesMessage() {
         clearLobbies();
         JLabel noLobbiesLabel = new JLabel("Aucun salon disponible pour le moment");
-        noLobbiesLabel.setFont(new Font("Arial", Font.ITALIC, 24));
+        noLobbiesLabel.setFont(doodle.deriveFont(Font.BOLD, 24f));
         noLobbiesLabel.setForeground(Color.WHITE);
         noLobbiesLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel createLobbyHint = new JLabel("Créez un nouveau salon pour commencer à jouer !");
-        createLobbyHint.setFont(new Font("Arial", Font.PLAIN, 18));
+        createLobbyHint.setFont(doodle.deriveFont(Font.BOLD, 18f));
         createLobbyHint.setForeground(new Color(220, 220, 220));
         createLobbyHint.setAlignmentX(Component.CENTER_ALIGNMENT);
 

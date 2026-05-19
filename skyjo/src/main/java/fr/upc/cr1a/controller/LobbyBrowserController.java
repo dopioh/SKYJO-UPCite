@@ -51,7 +51,7 @@ public class LobbyBrowserController {
         btn.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) { btn.onMouseEnter(); }
             public void mouseExited(MouseEvent e) { btn.onMouseExit(); }
-            public void mouseClicked(MouseEvent e) { action.run(); }
+            public void mousePressed(MouseEvent e) { action.run(); }
         });
     }
 

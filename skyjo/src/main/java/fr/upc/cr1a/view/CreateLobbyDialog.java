@@ -17,9 +17,16 @@ public class CreateLobbyDialog extends JDialog {
     private DoodleButton createBtn;
     private DoodleButton cancelBtn;
     private boolean confirmed = false;
+    private Font doodle;
 
     public CreateLobbyDialog(Frame parent) {
         super(parent, "Créer un salon", true);
+        try {
+            var stream = getClass().getResourceAsStream("/PatrickHandSC.ttf");
+            doodle = stream != null ? Font.createFont(Font.TRUETYPE_FONT, stream) : new Font("Arial", Font.PLAIN, 12);
+        } catch (Exception e) {
+            doodle = new Font("Arial", Font.PLAIN, 12);
+        }
         setSize(600, 450);
         setLocationRelativeTo(parent);
         setResizable(false);
@@ -32,17 +39,17 @@ public class CreateLobbyDialog extends JDialog {
 
         //titre
         JLabel titre = new JLabel("Créer un nouveau salon");
-        titre.setFont(new Font("Arial", Font.BOLD, 24));
+        titre.setFont(doodle.deriveFont(Font.BOLD, 24f));
         titre.setAlignmentX(Component.LEFT_ALIGNMENT);
         mainPanel.add(titre);
         mainPanel.add(Box.createVerticalStrut(20));
 
         //nom du salon
         JLabel nameLabel = new JLabel("Nom du salon:");
-        nameLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        nameLabel.setFont(doodle.deriveFont(Font.BOLD, 14f));
         nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         lobbyNameField = new JTextField("Partie de SKYJO");
-        lobbyNameField.setFont(new Font("Arial", Font.PLAIN, 14));
+        lobbyNameField.setFont(doodle.deriveFont(Font.BOLD, 14f));
         lobbyNameField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         lobbyNameField.setAlignmentX(Component.LEFT_ALIGNMENT);
 
@@ -53,12 +60,12 @@ public class CreateLobbyDialog extends JDialog {
 
         //nombre de joueurs max
         JLabel playersLabel = new JLabel("Nombre maximum de joueurs:");
-        playersLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        playersLabel.setFont(doodle.deriveFont(Font.BOLD, 14f));
         playersLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         SpinnerNumberModel spinnerModel = new SpinnerNumberModel(4, 2, 8, 1);
         maxPlayersSpinner = new JSpinner(spinnerModel);
-        maxPlayersSpinner.setFont(new Font("Arial", Font.PLAIN, 14));
+        maxPlayersSpinner.setFont(doodle.deriveFont(Font.BOLD, 14f));
         maxPlayersSpinner.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         maxPlayersSpinner.setAlignmentX(Component.LEFT_ALIGNMENT);
 

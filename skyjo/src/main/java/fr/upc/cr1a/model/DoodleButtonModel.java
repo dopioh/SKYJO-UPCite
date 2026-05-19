@@ -13,8 +13,7 @@ public class DoodleButtonModel {
     public enum ButtonColor {
         YELLOW(new Color(241, 192, 31)),
         GREEN(new Color(103, 187, 93)),
-        RED(new Color(238, 122, 67)),
-        BLUE(new Color(52, 152, 219));
+        RED(new Color(238, 122, 67));
 
         private final Color color;
         ButtonColor(Color c) { this.color = c; }

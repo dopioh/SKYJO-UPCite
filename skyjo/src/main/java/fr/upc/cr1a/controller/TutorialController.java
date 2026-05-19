@@ -21,7 +21,7 @@ public class TutorialController {
         //lsteners pour les triangles de navigation du tutoriel
         view.getNextButton().addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 model.nextPage();
                 view.repaint();
             }
@@ -29,7 +29,7 @@ public class TutorialController {
 
         view.getPreviousButton().addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 model.previousPage();
                 view.repaint();
             }
@@ -44,6 +44,8 @@ public class TutorialController {
 
         //lsteners pour la sélection du mode
         modeSelectionView.getClassicButton().addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) { modeSelectionView.getClassicButton().onMouseEnter(); }
+            @Override public void mouseExited(MouseEvent e)  { modeSelectionView.getClassicButton().onMouseExit(); }
             @Override
             public void mousePressed(MouseEvent e) {
                 selectMode(TutorialMode.CLASSIC);
@@ -51,6 +53,8 @@ public class TutorialController {
         });
 
         modeSelectionView.getActionButton().addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) { modeSelectionView.getActionButton().onMouseEnter(); }
+            @Override public void mouseExited(MouseEvent e)  { modeSelectionView.getActionButton().onMouseExit(); }
             @Override
             public void mousePressed(MouseEvent e) {
                 selectMode(TutorialMode.ACTION);
