@@ -153,6 +153,26 @@ public class SettingsOverlayController {
             }
         });
 
+        // CONTACT BUTTON
+        overlay.getContactButton().addActionListener(e ->{
+            String state = overlay.getContactButton().getText();
+            if ( state.equals("OFF")){
+                frame.getContactsOverlay().setVisible(true);
+                overlay.getContactButton().setText("ON");
+            } else {
+                frame.getContactsOverlay().setVisible(false);
+                overlay.getContactButton().setText("OFF");
+            }
+        });
+
+        frame.getContactsOverlay().getCloseButton().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                frame.getContactsOverlay().setVisible(false); 
+                overlay.getContactButton().setText("OFF");
+            }
+        });
+
         overlay.getSoundButton().setText(audioManager.isEnabled() ? "ON" : "OFF");
         overlay.getVolumeValueButton().setText(String.valueOf(Math.max(1, audioManager.getVolume() / 10)));
         overlay.getHandCardAnimationsButton().setText(frame.isHandCardAnimationsEnabled() ? "HAUT" : "BAS");
