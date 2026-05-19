@@ -237,7 +237,6 @@ public class RoundEndPanel extends JPanel {
         statsTitleLabel.setAlignmentX(LEFT_ALIGNMENT);
         statsCard.add(statsTitleLabel);
         statsCard.add(Box.createVerticalStrut(8));
-.
         boolean isOnline = (GameSession.status == GameSession.STATUS.HOST || GameSession.status == GameSession.STATUS.CLIENT) || multiHintFromGame();
 
         if (isOnline) {
