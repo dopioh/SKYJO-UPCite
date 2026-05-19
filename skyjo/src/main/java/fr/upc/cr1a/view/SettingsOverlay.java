@@ -45,6 +45,7 @@ public class SettingsOverlay extends JComponent {
     private JPanel tabAutresPanel;
     private JButton fullscreenButton;
     private JButton helpButton;
+    private JButton contactButton;
 
     public SettingsOverlay() {
         setOpaque(false);
@@ -405,6 +406,32 @@ public class SettingsOverlay extends JComponent {
         });
 
         autresPanel.add(helpButtonPanel, gbcA);
+
+        // Label "Contact"
+        gbcA.insets = new Insets(20, 60, 10, 60);
+        gbcA.gridy = 4;
+        JLabel contactLabel = new JLabel("Contacts", SwingConstants.CENTER);
+        contactLabel.setForeground(Color.WHITE);
+        contactLabel.setFont(doodleFont.deriveFont(Font.BOLD, 24f));
+        autresPanel.add(contactLabel, gbcA);
+
+        gbcA.insets = new Insets(0, 60, 0, 60);
+        gbcA.gridy = 5;
+
+        JPanel contactButtonPanel = createHoverRoundedPanel(fsNormal, fsHover, 18, 44);
+        contactButton = createTextButton("OFF", 20f);
+        contactButtonPanel.add(contactButton, gbcA);
+
+        contactButtonPanel.addMouseListener(new MouseAdapter() {
+            @Override public void mousePressed(MouseEvent e) { contactButton.doClick(); }
+        });
+
+        contactButton.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) { contactButtonPanel.setBackground(fsHover);  contactButtonPanel.repaint(); }
+            @Override public void mouseExited(MouseEvent e)  { contactButtonPanel.setBackground(fsNormal); contactButtonPanel.repaint(); }
+        });
+
+        autresPanel.add(contactButtonPanel, gbcA);
         
         return autresPanel;
     }
@@ -527,6 +554,7 @@ public class SettingsOverlay extends JComponent {
     public JButton getVolumeRightButton() { return volumeRightButton;}
     public JButton getHandCardAnimationsButton() { return handCardAnimationsButton;}
     public JButton getHelpButton(){ return helpButton;}
+    public JButton getContactButton() {return contactButton;}
 
     public void setSelectedTabPanel(JComponent tabPanel) {
         selectedTabPanel = (JPanel) tabPanel;

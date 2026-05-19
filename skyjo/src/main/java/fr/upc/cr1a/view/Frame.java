@@ -57,6 +57,7 @@ public class Frame extends JFrame{
     private GameManager currentGame;
     private HelpOverlay helpOverlay;
     private boolean handCardAnimationsEnabled = GraphicsSettings.isHighQuality();
+    private ContactsOverlay contactOverlay;
 
     // Controller
     private AccountController account; // sert a rien pour le moment
@@ -121,7 +122,8 @@ public class Frame extends JFrame{
 
         //Overlay paramètre
         settingsOverlay = new SettingsOverlay();
-        setGlassPane(settingsOverlay);
+        getLayeredPane().add(settingsOverlay, JLayeredPane.MODAL_LAYER); 
+        settingsOverlay.setBounds(0, 0, getWidth(), getHeight());
 
         // Overlay classement
         leaderboard = new Leaderboard();
@@ -145,6 +147,11 @@ public class Frame extends JFrame{
         //add(playersSetupPanel, "HELP_OVERLAY");
         getLayeredPane().add(helpOverlay, JLayeredPane.POPUP_LAYER);
         helpOverlay.setBounds(0, 0, getWidth(), getHeight());
+
+        // Overlay contacts in game
+        this.contactOverlay = new ContactsOverlay();
+        getLayeredPane().add(contactOverlay, JLayeredPane.POPUP_LAYER);
+        contactOverlay.setBounds(0, 0, getWidth(), getHeight());
 
         // redimentionnement
         addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -336,6 +343,9 @@ public class Frame extends JFrame{
     // help in game
     public HelpController getHelpController(){return this.helpController;}
     public HelpOverlay getHelpOverlay(){return this.helpOverlay;}
+    
+    // contacts 
+    public ContactsOverlay getContactsOverlay(){return this.contactOverlay;}
 
     public void setCurrentGame(GameManager game) {
         this.currentGame = game;
