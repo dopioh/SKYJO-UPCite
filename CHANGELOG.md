@@ -607,6 +607,7 @@
 - Bouton de Connexion/Déconnexion en jeu
 - Scoreboard pendant la partie (recaputulatif de tout les scores de chaque joueur par manche)
 - Récompenses en fin de partie en ligne (Pièces)
+- Overlay Contacts
 
 ### Fixed 
 
