@@ -461,14 +461,10 @@ public class GameBoardController {
         if (!(opponent instanceof BotModel bot)) {
             return "human";
         }
-
         String strategyName = bot.getStrategy() == null ? "" : bot.getStrategy().getClass().getSimpleName().toLowerCase();
-        if (strategyName.contains("count")) {
-            return "bot_count";
-        }
-        if (strategyName.contains("low")) {
-            return "bot_low";
-        }
+        if (strategyName.contains("count")) return "bot_count";
+        if (strategyName.contains("terminal")) return "bot_terminal";
+        if (strategyName.contains("low")) return "bot_low";
         return "bot_row";
     }
 

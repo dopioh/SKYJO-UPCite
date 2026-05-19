@@ -59,10 +59,6 @@ public class HumanTurnControllerTest {
         HumanTurnController ctrl = new HumanTurnController(
             mockGameBoardView, mockGameManager, mockMainController, mockGameLoop
         );
-        // Cette methode tente d'iterer sur les listeners — peut throw si view mockee renvoie null,
-        // mais on s'attend a ce qu'elle reste tolerante.
-        // On accepte qu'une NullPointerException puisse arriver (mocks vides) ; le test verifie
-        // surtout que l'initialisation precedente n'a pas casse.
         assertDoesNotThrow(() -> ctrl.resetTurnState());
     }
 }

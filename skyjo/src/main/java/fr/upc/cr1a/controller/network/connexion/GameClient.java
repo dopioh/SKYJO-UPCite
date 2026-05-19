@@ -65,7 +65,10 @@ public class GameClient implements NetworkProtocolClient{
             this.out = new PrintWriter(socket.getOutputStream(), true); 
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            out.println("JOIN :" + playerData.getUsername() +":"+ playerData.getID()); // on envoie une requete de connexion
+            // JOIN :username:id:skinPath (skinPath optionnel pour compat)
+            String skin = playerData.getSelectedSkinPath();
+            if (skin == null || skin.isBlank()) skin = "";
+            out.println("JOIN :" + playerData.getUsername() + ":" + playerData.getID() + ":" + skin);
             // System.out.println(); -> print console alors que l'autre est envoyé au receveur
 
             new Thread(this::listenerToServer).start();
@@ -113,9 +116,15 @@ public class GameClient implements NetworkProtocolClient{
                         boolean isBot = "1".equals(parts[index++]);
                         String botType = parts[index++];
                         boolean ready = "1".equals(parts[index++]);
+                        // 6e champ = skin path ("_" si vide), compat si message ancien sans skin
+                        String skin = "";
+                        if (index < parts.length) {
+                            String raw = parts[index++];
+                            if (!"_".equals(raw)) skin = raw;
+                        }
 
-                        // botType en lowercase pour matcher les strats dans GameManager
                         PlayerData tmp = new PlayerData(key, name, isBot, isBot ? botType.toLowerCase() : null);
+                        if (!skin.isBlank()) tmp.setSelectedSkinPath(skin);
                         this.listPlayersData.add(tmp);
                         readyStates.add(ready);
                     }
