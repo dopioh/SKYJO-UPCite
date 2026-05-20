@@ -237,6 +237,18 @@ public class GameClient implements NetworkProtocolClient{
                         }
                     }
                 }
+                
+                // FIX BUG DEFAUSSE VIDE
+                if (message.startsWith(NetworkProtocolServer.UPDATE_DISCARD)) {
+                    String[] parts = message.split(":");
+                    // String idJoueur = parts[1]; // pas besoind de l'id
+                    int valeur = Integer.parseInt(parts[2]);
+
+                    GameManager game = frame.getCurrentGame();
+                    if (game != null) {
+                        game.forceDiscardFromNetwork(valeur);
+                    }
+                }
 
                 if (message.startsWith(NetworkProtocolServer.UPDATE_EXCHANGE)) {
                     //[EXCHANGE:playerId:col:row:newValue:discardedValue]

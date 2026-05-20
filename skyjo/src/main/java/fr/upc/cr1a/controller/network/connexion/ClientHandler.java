@@ -218,6 +218,39 @@ public class ClientHandler implements Runnable{
                         }
                     }
                 }
+                else if (message.contains(":" + NetworkProtocolClient.REQ_DISCARD + ":")) {
+                    String[] parts = message.split(":");
+                    String playerId = parts[0];
+                    int col = Integer.parseInt(parts[2]);
+                    int row = Integer.parseInt(parts[3]);
+
+                    GameManager game = gameHost.getGameManager();
+                    if (game != null && game.getCurrentPlayer().getPlayerData().getID().equals(playerId)) {
+                        GameManager.TurnPhase phase = game.getTurnPhase();
+
+                        if (phase == GameManager.TurnPhase.CARD_TAKE_FROM_DISCARD
+                                || phase == GameManager.TurnPhase.CARD_DRAW_FROM_DECK) {
+                            int newValue = -1;
+                            int discardedValue = -1;
+                            CardModel drawn = game.getCurrentDrawCard();
+                            if (drawn instanceof NumberCardModel) {
+                                newValue = ((NumberCardModel) drawn).getCardValue();
+                            }
+                            CardModel oldHand = game.getCurrentPlayer().getHand().getCard(row, col);
+                            if (oldHand instanceof NumberCardModel) {
+                                discardedValue = ((NumberCardModel) oldHand).getCardValue();
+                            }
+
+                            game.exchangeCardInHand(col, row);
+
+                            gameHost.broadcastExchange(playerId, col, row, newValue, discardedValue);
+
+                            gameHost.broadcastUpdateDiscard(playerId, discardedValue);
+
+                            triggerProceedAfterAction(game);
+                        }
+                    }
+                }
             }
 
         } catch (Exception e) {

@@ -343,6 +343,22 @@ public class GameManager {
         }
     }
 
+    /**
+     * Force l'ajout d'une carte dans la défausse quand un autre joueur y jette sa pioche
+     */
+    public void forceDiscardFromNetwork(int cardValue) {
+        
+        NumberCardModel discardedCard = new NumberCardModel(false, cardValue);
+
+        this.discardPile.addCardAtTop(discardedCard);
+        
+        this.currentDrawCard = null;
+        
+        if (gameBoardModel != null && gameBoardModel.getGameBoardController() != null) {
+            gameBoardModel.getGameBoardController().updateAllDecksDisplay();
+        }
+    }
+
     public TurnPhase getTurnPhase(){
         return turnPhase;
     }

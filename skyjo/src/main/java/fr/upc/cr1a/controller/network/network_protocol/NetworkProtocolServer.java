@@ -90,6 +90,8 @@ public interface NetworkProtocolServer {
 
     //public abstract void broadcastUpdatePioche(String id, int value);
 
+    public abstract void broadcastUpdateDiscard(String id, int valeur);
+
 
 
 }
