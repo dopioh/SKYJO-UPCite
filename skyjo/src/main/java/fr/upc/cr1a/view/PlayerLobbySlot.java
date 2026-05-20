@@ -22,10 +22,17 @@ public class PlayerLobbySlot extends JPanel {
     public PlayerLobbySlot(LobbyPlayerModel player, boolean isLocalPlayerHost) {
         this.player = player;
         this.isLocalPlayerHost = isLocalPlayerHost;
+        Font doodle;
+        try {
+            var stream = getClass().getResourceAsStream("/PatrickHandSC.ttf");
+            doodle = stream != null ? Font.createFont(Font.TRUETYPE_FONT, stream) : new Font("Arial", Font.PLAIN, 12);
+        } catch (Exception e) {
+            doodle = new Font("Arial", Font.PLAIN, 12);
+        }
 
         setLayout(new BorderLayout(10, 0));
-        setPreferredSize(new Dimension(400, 60));
-        setMaximumSize(new Dimension(900, 60));
+        setPreferredSize(new Dimension(400, 75));
+        setMaximumSize(new Dimension(900, 75));
         setOpaque(true);
 
         //couleur de fond selon le statut
@@ -46,14 +53,14 @@ public class PlayerLobbySlot extends JPanel {
         namePanel.setOpaque(false);
 
         nameLabel = new JLabel(player.getPlayerName());
-        nameLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        nameLabel.setFont(doodle.deriveFont(Font.BOLD, 18f));
         nameLabel.setForeground(new Color(40, 40, 40));
         namePanel.add(nameLabel);
 
         //badge Host
         if (player.isHost()) {
             roleLabel = new JLabel("HOST");
-            roleLabel.setFont(new Font("Arial", Font.BOLD, 10));
+            roleLabel.setFont(doodle.deriveFont(Font.BOLD, 12f));
             roleLabel.setForeground(Color.WHITE);
             roleLabel.setBackground(new Color(255, 152, 0));
             roleLabel.setOpaque(true);
@@ -64,7 +71,7 @@ public class PlayerLobbySlot extends JPanel {
         //badge Bot
         if (player.isBot()) {
             JLabel botLabel = new JLabel("BOT");
-            botLabel.setFont(new Font("Arial", Font.BOLD, 10));
+            botLabel.setFont(doodle.deriveFont(Font.BOLD, 12f));
             botLabel.setForeground(Color.WHITE);
             botLabel.setBackground(new Color(100, 100, 100));
             botLabel.setOpaque(true);
@@ -77,7 +84,7 @@ public class PlayerLobbySlot extends JPanel {
 
         //statut
         statusLabel = new JLabel(getStatusText());
-        statusLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        statusLabel.setFont(doodle.deriveFont(Font.BOLD, 14f));
         statusLabel.setForeground(getStatusColor());
         infoPanel.add(statusLabel);
 

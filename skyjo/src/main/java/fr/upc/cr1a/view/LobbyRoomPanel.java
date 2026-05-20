@@ -35,11 +35,18 @@ public class LobbyRoomPanel extends JPanel {
     private JButton addBotButton;
 
     private boolean isHost;
+    private Font doodle;
 
     public LobbyRoomPanel() {
         setLayout(new BorderLayout());
         playerSlots = new ArrayList<>();
         this.isHost = false;
+        try {
+            var stream = getClass().getResourceAsStream("/PatrickHandSC.ttf");
+            doodle = stream != null ? Font.createFont(Font.TRUETYPE_FONT, stream) : new Font("Arial", Font.PLAIN, 12);
+        } catch (Exception e) {
+            doodle = new Font("Arial", Font.PLAIN, 12);
+        }
 
         //fond
         backgroundImage = ImageCache.get("/background.png");
@@ -74,12 +81,12 @@ public class LobbyRoomPanel extends JPanel {
         centerPanel.setOpaque(false);
 
         lobbyTitleLabel = new JLabel("Salon : Partie de SKYJO");
-        lobbyTitleLabel.setFont(new Font("Arial", Font.BOLD, 32));
+        lobbyTitleLabel.setFont(doodle.deriveFont(Font.BOLD, 32f));
         lobbyTitleLabel.setForeground(Color.WHITE);
         lobbyTitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         lobbyInfoLabel = new JLabel("En attente de joueurs...");
-        lobbyInfoLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        lobbyInfoLabel.setFont(doodle.deriveFont(Font.BOLD, 16f));
         lobbyInfoLabel.setForeground(new Color(230, 230, 230));
         lobbyInfoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -112,7 +119,7 @@ public class LobbyRoomPanel extends JPanel {
         leftPanel.setPreferredSize(new Dimension(500, 400));
 
         playersTitleLabel = new JLabel("Joueurs (" + playerSlots.size() + "/8)");
-        playersTitleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        playersTitleLabel.setFont(doodle.deriveFont(Font.BOLD, 20f));
         playersTitleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
         playersListPanel = new JPanel();
@@ -156,7 +163,7 @@ public class LobbyRoomPanel extends JPanel {
 
         //titre
         JLabel configTitle = new JLabel("Paramètres du salon");
-        configTitle.setFont(new Font("Arial", Font.BOLD, 20));
+        configTitle.setFont(doodle.deriveFont(Font.BOLD, 22f));
         configTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(configTitle);
         panel.add(Box.createVerticalStrut(15));
@@ -167,11 +174,11 @@ public class LobbyRoomPanel extends JPanel {
         maxPlayersPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel maxPlayersLabel = new JLabel("Joueurs max : ");
-        maxPlayersLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        maxPlayersLabel.setFont(doodle.deriveFont(Font.BOLD, 16f));
 
         SpinnerNumberModel spinnerModel = new SpinnerNumberModel(4, 2, 8, 1);
         maxPlayersSpinner = new JSpinner(spinnerModel);
-        maxPlayersSpinner.setFont(new Font("Arial", Font.PLAIN, 14));
+        maxPlayersSpinner.setFont(doodle.deriveFont(Font.BOLD, 16f));
         maxPlayersSpinner.setPreferredSize(new Dimension(60, 30));
 
         maxPlayersPanel.add(maxPlayersLabel);
@@ -188,15 +195,18 @@ public class LobbyRoomPanel extends JPanel {
 
         //section Bots
         JLabel botsLabel = new JLabel("Gérer les bots :");
-        botsLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        botsLabel.setFont(doodle.deriveFont(Font.BOLD, 16f));
         botsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(botsLabel);
         panel.add(Box.createVerticalStrut(10));
 
         addBotButton = new JButton("+ Ajouter un Bot");
-        addBotButton.setFont(new Font("Arial", Font.BOLD, 14));
-        addBotButton.setBackground(new Color(66, 165, 245));
+        addBotButton.setFont(doodle.deriveFont(Font.BOLD, 16f));
+        addBotButton.setBackground(new Color(241, 192, 31));
         addBotButton.setForeground(Color.WHITE);
+        addBotButton.setOpaque(true);
+        addBotButton.setBorderPainted(false);
+        addBotButton.setContentAreaFilled(true);
         addBotButton.setFocusPainted(false);
         addBotButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         addBotButton.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -212,7 +222,7 @@ public class LobbyRoomPanel extends JPanel {
             "• Ajouter des bots\n" +
             "• Retirer des joueurs (bouton ✕)"
         );
-        noteLabel.setFont(new Font("Arial", Font.ITALIC, 11));
+        noteLabel.setFont(doodle.deriveFont(Font.BOLD, 13f));
         noteLabel.setForeground(new Color(100, 100, 100));
         noteLabel.setOpaque(false);
         noteLabel.setEditable(false);
@@ -230,8 +240,8 @@ public class LobbyRoomPanel extends JPanel {
 
         //note pour l'hôte
         JLabel hostNote = new JLabel("En tant qu'hôte, attendez que tous soient prêts puis lancez la partie");
-        hostNote.setFont(new Font("Arial", Font.ITALIC, 14));
-        hostNote.setForeground(new Color(255, 193, 7));
+        hostNote.setFont(doodle.deriveFont(Font.BOLD, 20f));
+        hostNote.setForeground(Color.WHITE);
         hostNote.setVisible(false); // Sera visible seulement pour l'hôte
 
         readyBtn = new DoodleButton("Prêt", ButtonColor.GREEN, 180, 60);
