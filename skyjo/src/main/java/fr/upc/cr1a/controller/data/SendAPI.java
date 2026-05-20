@@ -119,14 +119,17 @@ public class SendAPI {
 
     
     public static PlayerData applyGameResult(String uuid, boolean wonGame, List<String> opponents){
-        return applyGameResult(uuid, wonGame, opponents, null);
+        return applyGameResult(uuid, wonGame, opponents, null, true);
+    }
+
+    public static PlayerData applyGameResult(String uuid, boolean wonGame, List<String> opponents, List<Integer> opponentElos){
+        return applyGameResult(uuid, wonGame, opponents, opponentElos, true);
     }
 
     /**
-     * commande API applyGameResult qui applique recompenses/penalites selon resultat et lobby
-     * @param opponentElos Elo de chaque adversaire
+     * @param eloEnabled true en multi (Elo applique), false en solo (uniquement money).
      */
-    public static PlayerData applyGameResult(String uuid, boolean wonGame, List<String> opponents, List<Integer> opponentElos){
+    public static PlayerData applyGameResult(String uuid, boolean wonGame, List<String> opponents, List<Integer> opponentElos, boolean eloEnabled){
         ApiErrorManager.clear();
         try {
             Map<String, Object> body = new HashMap<>();
@@ -136,6 +139,7 @@ public class SendAPI {
             if (opponentElos != null) {
                 body.put("opponentElos", opponentElos);
             }
+            body.put("eloEnabled", eloEnabled);
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String jsonBody = gson.toJson(body);
