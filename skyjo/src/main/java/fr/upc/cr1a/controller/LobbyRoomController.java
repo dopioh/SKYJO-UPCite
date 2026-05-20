@@ -190,8 +190,8 @@ public class LobbyRoomController {
     private void clicQuitter() {
         int confirm = JOptionPane.showConfirmDialog(
             frame,
-            "Pourquoi tu veux partir, revient?",
-            "Quitter",
+            "Voulez-vous vraiment quitter le salon ?",
+            "Quitter le salon",
             JOptionPane.YES_NO_OPTION
         );
 

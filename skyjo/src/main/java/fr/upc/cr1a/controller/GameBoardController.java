@@ -533,15 +533,18 @@ public class GameBoardController {
 
         String dbUuid = PlayerAccount.actuelAccount.getID();
         final String localName = PlayerAccount.actuelAccount.getUsername();
-        // Logs des inputs API pour debug en console
+        // Elo applique uniquement en multi (status HOST/CLIENT). En solo, money seulement.
+        final boolean eloEnabled = (GameSession.status == GameSession.STATUS.HOST
+                                 || GameSession.status == GameSession.STATUS.CLIENT);
         System.out.println("[REWARD] envoi /applyGameResult — joueur=" + localName
             + " result=" + (wonGame ? "WIN" : "LOSS")
             + " opponents=" + opponentTypes
             + " opponentElos=" + opponentElos
+            + " eloEnabled=" + eloEnabled
             + " (oldElo=" + oldElo + ", oldMoney=" + oldMoney + ")");
         new Thread(() -> {
             try {
-                PlayerData updated = SendAPI.applyGameResult(dbUuid, wonGame, opponentTypes, opponentElos);
+                PlayerData updated = SendAPI.applyGameResult(dbUuid, wonGame, opponentTypes, opponentElos, eloEnabled);
                 if (updated != null) {
                     PlayerAccount.actuelAccount = updated;
                     final int newElo = updated.getElo();

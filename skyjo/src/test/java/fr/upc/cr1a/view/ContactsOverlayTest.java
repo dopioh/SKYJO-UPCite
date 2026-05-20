@@ -65,7 +65,7 @@ class ContactsOverlayTest {
         contactsOverlay.setSize(1280, 720);
         contactsOverlay.paintComponent(g2dMock);
 
-        verify(g2dMock).setColor(new Color(0, 0, 0, 120));
+        verify(g2dMock).setColor(new Color(0, 0, 0, 150));
         verify(g2dMock).fillRect(0, 0, 1280, 720);
         verify(g2dMock).dispose();
     }

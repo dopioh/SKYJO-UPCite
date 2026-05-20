@@ -13,11 +13,18 @@ public class TutorialView extends JPanel {
     private TriangleButton nextBtn;
     private TriangleButton prevBtn;
     private DoodleButton closeBtn;
+    private Font doodle;
 
     public TutorialView(TutorialModel model) {
         this.model = model;
         setOpaque(false);
         setLayout(null);
+        try {
+            var stream = getClass().getResourceAsStream("/PatrickHandSC.ttf");
+            doodle = stream != null ? Font.createFont(Font.TRUETYPE_FONT, stream) : new Font("Arial", Font.PLAIN, 12);
+        } catch (Exception e) {
+            doodle = new Font("Arial", Font.PLAIN, 12);
+        }
         
         // Boutons triangles
         prevBtn = new TriangleButton(false); // flèche gauche
@@ -40,13 +47,6 @@ public class TutorialView extends JPanel {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (!isClickInsideBox(e.getX(), e.getY())) {
-                    e.consume();
-                }
-            }
-
-            @Override
-            public void mouseClicked(MouseEvent e) {
                 if (!isClickInsideBox(e.getX(), e.getY())) {
                     e.consume();
                 }
@@ -132,8 +132,7 @@ public class TutorialView extends JPanel {
 
         // Contenu du tutoriel
         g2d.setColor(Color.WHITE);
-        Font font = new Font("Arial", Font.PLAIN, 18);
-        g2d.setFont(font);
+        g2d.setFont(doodle.deriveFont(Font.BOLD, 22f));
 
         String content = model.getCurrentPageContent();
         String[] lines = content.split("\n");
@@ -145,8 +144,7 @@ public class TutorialView extends JPanel {
 
         // Pagination en bas à droite
         String pagination = model.getCurrentPageNumber() + " / " + model.getTotalPages();
-        Font paginationFont = new Font("Arial", Font.PLAIN, 14);
-        g2d.setFont(paginationFont);
+        g2d.setFont(doodle.deriveFont(Font.PLAIN, 14f));
         FontMetrics fm = g2d.getFontMetrics();
         int paginationWidth = fm.stringWidth(pagination);
         g2d.drawString(pagination, boxX + boxWidth - paginationWidth - 30, boxY + boxHeight - 30);

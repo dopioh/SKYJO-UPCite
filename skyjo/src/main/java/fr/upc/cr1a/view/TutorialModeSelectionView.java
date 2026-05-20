@@ -8,19 +8,24 @@ import java.awt.*;
 public class TutorialModeSelectionView extends JPanel {
     private DoodleButton classicBtn;
     private DoodleButton actionBtn;
+    private Font doodle;
 
     public TutorialModeSelectionView() {
         setOpaque(false);
         setLayout(null);
+        try {
+            var stream = getClass().getResourceAsStream("/PatrickHandSC.ttf");
+            doodle = stream != null ? Font.createFont(Font.TRUETYPE_FONT, stream) : new Font("Arial", Font.PLAIN, 12);
+        } catch (Exception e) {
+            doodle = new Font("Arial", Font.PLAIN, 12);
+        }
 
-        classicBtn = new DoodleButton("Skyjo Classique", ButtonColor.YELLOW, 350, 100, "/Button/Play.png");
+        classicBtn = new DoodleButton("Skyjo Classique", ButtonColor.YELLOW, 350, 120, "/Button/Play.png");
         classicBtn.setFontSize(32f);
-        classicBtn.setIconSide(DoodleButton.IconSide.LEFT);
         add(classicBtn);
 
-        actionBtn = new DoodleButton("Skyjo Action", ButtonColor.GREEN, 350, 100, "/Button/Play_vert.png");
+        actionBtn = new DoodleButton("Skyjo Action", ButtonColor.GREEN, 350, 120, "/Button/Play_vert.png");
         actionBtn.setFontSize(32f);
-        actionBtn.setIconSide(DoodleButton.IconSide.LEFT);
         add(actionBtn);
     }
 
@@ -51,16 +56,15 @@ public class TutorialModeSelectionView extends JPanel {
 
         // Titre
         g2d.setColor(Color.WHITE);
-        Font font = new Font("Arial", Font.BOLD, 32);
-        g2d.setFont(font);
+        g2d.setFont(doodle.deriveFont(Font.BOLD, 32f));
         String titre = "Choisissez votre tutoriel";
         FontMetrics fm = g2d.getFontMetrics();
         int titleX = boxX + (boxWidth - fm.stringWidth(titre)) / 2;
-        g2d.drawString(titre, titleX, boxY + 60);
+        g2d.drawString(titre, titleX, boxY + 110);
 
         // Positionner les boutons
         int btnWidth = 300;
-        int btnHeight = 80;
+        int btnHeight = 100;
         int spacing = 30;
         int totalWidth = (btnWidth * 2) + spacing;
         int startX = boxX + (boxWidth - totalWidth) / 2;
@@ -80,13 +84,6 @@ public class TutorialModeSelectionView extends JPanel {
 
             @Override
             public void mouseReleased(java.awt.event.MouseEvent e) {
-                if (!isClickInsideBox(e.getX(), e.getY())) {
-                    e.consume();
-                }
-            }
-
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
                 if (!isClickInsideBox(e.getX(), e.getY())) {
                     e.consume();
                 }

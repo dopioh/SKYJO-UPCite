@@ -26,7 +26,6 @@ public class SettingsOverlayController {
         MouseInputAdapter block = new MouseInputAdapter() {     
             @Override public void mousePressed(MouseEvent e) { e.consume(); }
             @Override public void mouseReleased(MouseEvent e) { e.consume(); }
-            @Override public void mouseClicked(MouseEvent e) { e.consume(); }
             @Override public void mouseMoved(MouseEvent e) { e.consume(); }
             @Override public void mouseDragged(MouseEvent e) { e.consume(); }
         };
@@ -167,8 +166,8 @@ public class SettingsOverlayController {
 
         frame.getContactsOverlay().getCloseButton().addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                frame.getContactsOverlay().setVisible(false); 
+            public void mousePressed(MouseEvent e) {
+                frame.getContactsOverlay().setVisible(false);
                 overlay.getContactButton().setText("OFF");
             }
         });
