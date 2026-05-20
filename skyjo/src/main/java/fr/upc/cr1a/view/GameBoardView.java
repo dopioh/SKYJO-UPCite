@@ -484,7 +484,8 @@ public class GameBoardView extends JPanel {
         rightPanel.setOpaque(false);
 
         turnTimerLabel = new JLabel("Temps restant : -- s", SwingConstants.CENTER);
-        turnTimerLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        turnTimerLabel.setFont(patrickFont.deriveFont(Font.BOLD, 20f));
+        turnTimerLabel.setForeground(Color.WHITE);
         turnTimerLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         rightPanel.add(turnTimerLabel, BorderLayout.NORTH);

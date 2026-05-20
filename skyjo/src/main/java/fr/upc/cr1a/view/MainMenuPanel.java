@@ -5,8 +5,6 @@ import fr.upc.cr1a.utils.ImageCache;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 
 /**
@@ -23,6 +21,7 @@ public class MainMenuPanel extends JPanel {
     private JButton podiumBtn;
     private AccountStatsOverlayPanel accountStatsOverlay;
     private Image backgroundImage;
+    private Image charactersImage;
     private BufferedImage cachedBackground;
 
     public MainMenuPanel(Frame frame) {
@@ -30,6 +29,7 @@ public class MainMenuPanel extends JPanel {
 
         //fond
         backgroundImage = ImageCache.get("/background.png");
+        charactersImage = ImageCache.get("/main_menu_characters.png");
 
         JPanel topBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 16, 16));
         topBar.setOpaque(false);
@@ -53,7 +53,7 @@ public class MainMenuPanel extends JPanel {
         centre.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.insets = new Insets(20, 20, 20, 20);
+        gbc.insets = new Insets(0, 20, 10, 20);
 
         // Logo
         Image scaledLogo = ImageCache.get("/skyjo_logo.png").getScaledInstance(400, -1, Image.SCALE_SMOOTH);
@@ -77,26 +77,18 @@ public class MainMenuPanel extends JPanel {
         gbc.gridy = 1;
         centre.add(panel, gbc);
 
-        JLayeredPane overlayStack = new JLayeredPane();
+        JLayeredPane overlayStack = new JLayeredPane() {
+            @Override
+            public void doLayout() {
+                fillOverlayStack(this, topBar, centre);
+            }
+        };
         overlayStack.setOpaque(false);
 
         accountStatsOverlay = new AccountStatsOverlayPanel(frame);
         overlayStack.add(centre, Integer.valueOf(JLayeredPane.DEFAULT_LAYER));
         overlayStack.add(topBar, Integer.valueOf(JLayeredPane.DEFAULT_LAYER));
         overlayStack.add(accountStatsOverlay, Integer.valueOf(JLayeredPane.MODAL_LAYER));
-
-        overlayStack.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                fillOverlayStack(overlayStack, topBar, centre);
-            }
-
-            @Override
-            public void componentShown(ComponentEvent e) {
-                fillOverlayStack(overlayStack, topBar, centre);
-            }
-        });
-        fillOverlayStack(overlayStack, topBar, centre);
 
         add(overlayStack, BorderLayout.CENTER);
     }
@@ -105,17 +97,18 @@ public class MainMenuPanel extends JPanel {
         int width = overlayStack.getWidth();
         int height = overlayStack.getHeight();
         int topHeight = topBar.getPreferredSize().height;
+        int charH = height * 30 / 100;
 
         topBar.setBounds(0, 0, width, topHeight);
-        centre.setBounds(0, topHeight, width, Math.max(0, height - topHeight));
+        centre.setBounds(0, topHeight, width, Math.max(0, height - topHeight - charH / 2));
         accountStatsOverlay.setBounds(0, 0, width, height);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        int w = getWidth(), h = getHeight();
         if (backgroundImage != null) {
-            int w = getWidth(), h = getHeight();
             if (cachedBackground == null || cachedBackground.getWidth() != w || cachedBackground.getHeight() != h) {
                 cachedBackground = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D bg = cachedBackground.createGraphics();
@@ -125,6 +118,15 @@ public class MainMenuPanel extends JPanel {
                 bg.dispose();
             }
             g.drawImage(cachedBackground, 0, 0, null);
+        }
+        if (charactersImage != null) {
+            int imgW = charactersImage.getWidth(null);
+            int imgH = charactersImage.getHeight(null);
+            if (imgW > 0 && imgH > 0) {
+                int targetH = h * 30 / 100;
+                int targetW = imgW * targetH / imgH;
+                g.drawImage(charactersImage, (w - targetW) / 2, h - targetH, targetW, targetH, null);
+            }
         }
     }
 
