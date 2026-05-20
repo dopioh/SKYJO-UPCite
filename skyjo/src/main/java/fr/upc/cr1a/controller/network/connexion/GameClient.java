@@ -290,14 +290,12 @@ public class GameClient implements NetworkProtocolClient{
 
                     GameManager game = frame.getCurrentGame();
                     if (game != null) {
-                        // Le host a déjà appliqué l'action
+
                         if (GameSession.status != GameSession.STATUS.HOST) {
-                            // On crée la carte avec la valeur reçue et on force la défausse
-                            // plutôt que d'utiliser discardDrawCard() (car la carte piochée est null pour les clients)
                             if (valeur != -1) {
                                 game.forceDiscardFromNetwork(valeur);
                             } else {
-                                game.discardDrawCard(); // Fallback au cas où
+                                game.discardDrawCard(); 
                             }
                         }
                         if (game.getGameBoardModel() != null) {
