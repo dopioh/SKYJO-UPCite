@@ -133,10 +133,10 @@ public class PlayersSetupPanel extends JPanel {
         helpBtn.addMouseListener(new MouseAdapter() {
             @Override public void mousePressed(MouseEvent e) {
                 JOptionPane.showMessageDialog(PlayersSetupPanel.this,
-                        "bot               : blabla\n" +
-                        "botRow         : abcddddd\n" +
-                        "botLow         : bonjour\n" +
-                        "botCounting : je laisse le fondateur des bots remplir",
+                        "botTerminal        : Le classique\n" +
+                        "botRow         : Joue avec les colonnes\n" +
+                        "botLow         : Joue avec les cartes faibles\n" +
+                        "botCounting : Joue avec les probabilités",
                         "Types de bots", JOptionPane.INFORMATION_MESSAGE);
             }
         });
