@@ -282,12 +282,23 @@ public class GameClient implements NetworkProtocolClient{
                 }
 
                 if (message.startsWith(NetworkProtocolServer.UPDATE_DISCARD_DRAW)) {
-                    // Le joueur actif a jete la carte piochee
+                    String[] parts = message.split(":");
+                    int valeur = -1;
+                    if (parts.length >= 3) {
+                        valeur = Integer.parseInt(parts[2]);
+                    }
+
                     GameManager game = frame.getCurrentGame();
                     if (game != null) {
-                        // Le host a deja applique via ClientHandler
+                        // Le host a déjà appliqué l'action
                         if (GameSession.status != GameSession.STATUS.HOST) {
-                            game.discardDrawCard();
+                            // On crée la carte avec la valeur reçue et on force la défausse
+                            // plutôt que d'utiliser discardDrawCard() (car la carte piochée est null pour les clients)
+                            if (valeur != -1) {
+                                game.forceDiscardFromNetwork(valeur);
+                            } else {
+                                game.discardDrawCard(); // Fallback au cas où
+                            }
                         }
                         if (game.getGameBoardModel() != null) {
                             SwingUtilities.invokeLater(() -> {
