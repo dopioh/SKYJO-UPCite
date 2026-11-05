@@ -177,6 +177,7 @@ mvn clean verify
 Le rapport sera disponible dans `target/site/jacoco/index.html`
 
 ## Documentation
+Projet universitaire réalisé en L2 Informatique (2025-2026) dans le cadre du module Projet Informatique (JAVA) - Université Paris Cité.
 
 - [DESIGN.md](DESIGN.md) : Décisions de conception
 - [CHANGELOG.md](CHANGELOG.md) : Historique des modifications
